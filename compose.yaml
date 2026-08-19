@@ -12,7 +12,7 @@ services:
       API_PROXY_TARGET: http://api_gateway
       SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-alicamnet-session}
     ports:
-      - "${WEB_PORT:-3000}:3000"
+      - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_PORT:-3000}:3000"
     depends_on:
       api_gateway:
         condition: service_started
@@ -25,7 +25,7 @@ services:
       APP_NAME: alicam.net
       APP_ENV: ${APP_ENV:-production}
       APP_DEBUG: ${APP_DEBUG:-false}
-      APP_URL: http://localhost:${API_PORT:-8091}
+      APP_URL: ${APP_URL:-http://localhost:8091}
       APP_KEY: ${APP_KEY:-}
       APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Istanbul}
       APP_LOCALE: tr
@@ -43,10 +43,19 @@ services:
       QUEUE_CONNECTION: redis
       SESSION_DRIVER: redis
       SESSION_COOKIE: ${SESSION_COOKIE_NAME:-alicamnet-session}
+      SESSION_DOMAIN: ${SESSION_DOMAIN:-}
       SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
       SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-localhost:3000,127.0.0.1:3000}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       VERIFICATION_EXPOSE_CODES: ${VERIFICATION_EXPOSE_CODES:-false}
+      MAIL_MAILER: ${MAIL_MAILER:-log}
+      MAIL_SCHEME: ${MAIL_SCHEME:-}
+      MAIL_HOST: ${MAIL_HOST:-127.0.0.1}
+      MAIL_PORT: ${MAIL_PORT:-2525}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-bildirim@alicam.net}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-alıcam.net}
       PAYTR_MERCHANT_ID: ${PAYTR_MERCHANT_ID:-}
       PAYTR_MERCHANT_KEY: ${PAYTR_MERCHANT_KEY:-}
       PAYTR_MERCHANT_SALT: ${PAYTR_MERCHANT_SALT:-}
@@ -95,7 +104,7 @@ services:
     image: nginx:1.27-alpine
     restart: unless-stopped
     ports:
-      - "${API_PORT:-8091}:80"
+      - "${API_BIND_ADDRESS:-127.0.0.1}:${API_PORT:-8091}:80"
     volumes:
       - ./docker/nginx/api.conf:/etc/nginx/conf.d/default.conf:ro
       - ./api/public:/var/www/html/public:ro

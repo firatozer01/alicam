@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // API yalnızca Docker ağı/localhost üzerinden erişilen ters proxy'lerin arkasındadır.
+        $middleware->trustProxies(at: '*');
         $middleware->statefulApi();
         $middleware->alias([
             'contact.verified' => EnsureContactIsVerified::class,
