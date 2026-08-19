@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yeni Talep Oluştur — alıcam.net</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --violet:#7C3AED; --indigo:#4F46E5; --cyan:#06B6D4;
+    --bg:#F6F5FC; --card:#FFFFFF; --ink:#15162D; --muted:#6B7280; --line:#E7E5F5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2{font-family:'Fraunces',serif;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:13px 24px;border-radius:11px;font-weight:700;font-size:14.5px;border:none;cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;}
+  .btn-grad{background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;background-size:180% auto;}
+  .btn-grad:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(124,58,237,0.3);}
+  .btn-line{border:1.5px solid var(--line);color:var(--ink);background:#fff;}
+  .btn-line:hover{border-color:var(--violet);color:var(--violet);}
+
+  .nav{background:#fff;border-bottom:1px solid var(--line);height:68px;display:flex;align-items:center;}
+  .nav-inner{max-width:820px;margin:0 auto;padding:0 28px;width:100%;display:flex;align-items:center;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:600;font-size:19px;}
+  .brand-mark{width:24px;height:24px;}
+  .nav-close{color:var(--muted);font-size:14px;}
+
+  .wizard{max-width:820px;margin:0 auto;padding:48px 28px 100px;}
+
+  .steps{display:flex;align-items:center;margin-bottom:44px;}
+  .step{display:flex;align-items:center;gap:10px;}
+  .step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:700;flex:none;transition:.3s;}
+  .step.done .step-dot{background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;}
+  .step.active .step-dot{background:#fff;border:2.5px solid var(--violet);color:var(--violet);box-shadow:0 0 0 6px rgba(124,58,237,0.12);}
+  .step.todo .step-dot{background:#fff;border:1.5px solid var(--line);color:var(--muted);}
+  .step-label{font-size:13.5px;font-weight:700;color:var(--muted);white-space:nowrap;}
+  .step.active .step-label,.step.done .step-label{color:var(--ink);}
+  .step-line{height:3px;border-radius:2px;background:var(--line);flex:1;margin:0 6px;position:relative;overflow:hidden;}
+  .step-line::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--violet),var(--indigo));transform:translateX(-100%);transition:transform .4s ease;}
+  .step-line.done::after{transform:translateX(0);}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:36px;box-shadow:0 20px 50px rgba(76,60,180,0.08);}
+  .card h2{font-size:22px;font-weight:600;margin-bottom:8px;}
+  .card .sub{color:var(--muted);font-size:14.5px;margin-bottom:28px;}
+  .attr-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--violet);text-transform:uppercase;margin-bottom:6px;display:block;}
+
+  .screen{display:none;animation:slidein .4s ease;}
+  .screen.visible{display:block;}
+  @keyframes slidein{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+
+  .cat-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .cat-opt{border:1.5px solid var(--line);border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;background:#fff;transition:.15s;}
+  .cat-opt.picked{border-color:var(--violet);background:linear-gradient(135deg,#F3ECFE,#ECEFFD);box-shadow:0 8px 20px rgba(124,58,237,0.14);}
+  .cat-opt:hover:not(.picked){border-color:#c9c3e8;transform:translateY(-2px);}
+  .cat-opt .ic{font-size:24px;}
+  .cat-opt span{display:block;font-size:13px;font-weight:700;margin-top:8px;}
+
+  .field{margin-bottom:22px;}
+  .field label{display:block;font-size:13.5px;font-weight:700;margin-bottom:8px;color:#3A3B54;}
+  .field .hint{font-size:12px;color:var(--muted);margin-top:6px;}
+  select,input[type=text],input[type=number]{
+    width:100%;padding:13px 15px;border:1.5px solid var(--line);border-radius:10px;
+    font-family:'Inter',sans-serif;font-size:14.5px;color:var(--ink);background:#FAFAFE;transition:.15s;
+  }
+  select:focus,input:focus{outline:none;border-color:var(--violet);background:#fff;box-shadow:0 0 0 4px rgba(124,58,237,0.08);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .pillbox{display:flex;gap:10px;flex-wrap:wrap;}
+  .pill{border:1.5px solid var(--line);padding:9px 16px;border-radius:20px;font-size:13.5px;font-weight:700;cursor:pointer;background:#fff;transition:.15s;}
+  .pill.picked{background:linear-gradient(100deg,var(--violet),var(--indigo));border-color:transparent;color:#fff;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;}
+  .toggle-row label{margin:0;}
+  .switch{width:42px;height:24px;background:linear-gradient(100deg,var(--violet),var(--indigo));border-radius:20px;position:relative;flex:none;}
+  .switch::after{content:"";position:absolute;top:3px;right:3px;width:18px;height:18px;background:#fff;border-radius:50%;}
+
+  .summary-box{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:22px;}
+  .summary-row{display:flex;justify-content:space-between;padding:14px 18px;font-size:14px;}
+  .summary-row:not(:last-child){border-bottom:1px solid var(--line);}
+  .summary-row span:first-child{color:var(--muted);}
+  .summary-row span:last-child{font-weight:700;text-align:right;}
+  .summary-cta-note{background:linear-gradient(100deg,#EEF7FB,#F3ECFE);color:#3730A3;padding:16px 18px;border-radius:12px;font-size:13.5px;margin-bottom:22px;display:flex;gap:10px;align-items:flex-start;}
+
+  .card-foot{display:flex;justify-content:space-between;margin-top:32px;padding-top:24px;border-top:1px solid var(--line);position:relative;}
+
+  /* success burst on final CTA */
+  .confetti-dot{position:absolute;border-radius:50%;pointer-events:none;opacity:0;}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none"><path d="M4 10 L14 4 L14 10 Z" fill="#7C3AED"/><path d="M26 20 L16 26 L16 20 Z" fill="#06B6D4"/><path d="M14 7 H16 V23 H14 Z" fill="#4F46E5" opacity="0.9"/></svg>
+      alıcam<span style="color:#A5A3BF;font-weight:400;">.net</span>
+    </div>
+    <a href="alicam-net-alici-paneli.html" class="nav-close">Vazgeç ✕</a>
+  </div>
+</div>
+
+<div class="wizard">
+
+  <div class="steps" id="stepper">
+    <div class="step active" data-step="1"><div class="step-dot">01</div><div class="step-label">Kategori</div></div>
+    <div class="step-line" data-line="1"></div>
+    <div class="step todo" data-step="2"><div class="step-dot">02</div><div class="step-label">Detaylar</div></div>
+    <div class="step-line" data-line="2"></div>
+    <div class="step todo" data-step="3"><div class="step-dot">03</div><div class="step-label">Bütçe &amp; Konum</div></div>
+    <div class="step-line" data-line="3"></div>
+    <div class="step todo" data-step="4"><div class="step-dot">04</div><div class="step-label">Özet</div></div>
+  </div>
+
+  <div class="card screen visible" id="screen-1">
+    <span class="attr-eyebrow">Adım 1 / 4</span>
+    <h2>Ne için talep oluşturuyorsun?</h2>
+    <p class="sub">Seçtiğin kategoriye göre bir sonraki adımda farklı sorular karşına çıkar.</p>
+    <div class="cat-picker">
+      <div class="cat-opt picked"><div class="ic">🏠</div><span>Emlak</span></div>
+      <div class="cat-opt"><div class="ic">🚗</div><span>Araç</span></div>
+      <div class="cat-opt"><div class="ic">🛠</div><span>Hizmet</span></div>
+      <div class="cat-opt"><div class="ic">💼</div><span>İş İlanı</span></div>
+      <div class="cat-opt"><div class="ic">📦</div><span>Ürün</span></div>
+      <div class="cat-opt"><div class="ic">🚛</div><span>Nakliye</span></div>
+      <div class="cat-opt"><div class="ic">🏗</div><span>İnşaat</span></div>
+      <div class="cat-opt"><div class="ic">📚</div><span>Eğitim</span></div>
+    </div>
+    <div class="card-foot">
+      <span></span>
+      <button class="btn btn-grad" onclick="goTo(2)">Devam Et — Detaylar →</button>
+    </div>
+  </div>
+
+  <div class="card screen" id="screen-2">
+    <span class="attr-eyebrow">Adım 2 / 4 · Kategori: Emlak</span>
+    <h2>Aradığın evi biraz daha tarif et</h2>
+    <p class="sub">Bu sorular kategoriye özeldir — emlak için oda sayısı ve asansör sorulur, araç seçilseydi marka/model/yıl sorulurdu.</p>
+
+    <div class="field">
+      <label>Oda sayısı</label>
+      <div class="pillbox">
+        <span class="pill">1+1</span><span class="pill">2+1</span>
+        <span class="pill picked">3+1</span><span class="pill">4+1</span><span class="pill">5+ oda</span>
+      </div>
+    </div>
+    <div class="field"><label>Minimum metrekare (m²)</label><input type="number" placeholder="Örn. 120"></div>
+    <div class="field"><div class="toggle-row"><label style="margin:0;">Asansörlü olsun</label><div class="switch"></div></div></div>
+    <div class="field">
+      <label>Eklemek istediğin bir not var mı? <span style="font-weight:400;color:var(--muted);">(opsiyonel)</span></label>
+      <input type="text" placeholder="Örn. Site içinde, güvenlikli olmasını tercih ederim">
+    </div>
+
+    <div class="card-foot">
+      <button class="btn btn-line" onclick="goTo(1)">← Geri</button>
+      <button class="btn btn-grad" onclick="goTo(3)">Devam Et — Bütçe &amp; Konum →</button>
+    </div>
+  </div>
+
+  <div class="card screen" id="screen-3">
+    <span class="attr-eyebrow">Adım 3 / 4</span>
+    <h2>Bütçen ve konumun ne?</h2>
+    <p class="sub">Bu bilgiler, talebini doğru bölgedeki satıcılara ulaştırmamız için gerekli.</p>
+
+    <div class="row2">
+      <div class="field"><label>İl</label><select><option>Ankara</option><option>İstanbul</option><option>İzmir</option></select></div>
+      <div class="field"><label>İlçe</label><select><option>Çankaya</option><option>Yenimahalle</option><option>Keçiören</option></select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Minimum bütçe (₺)</label><input type="number" placeholder="Örn. 6.000.000"></div>
+      <div class="field"><label>Maksimum bütçe (₺)</label><input type="number" placeholder="Örn. 8.000.000"></div>
+    </div>
+    <div class="field">
+      <label>Telefon numaran</label>
+      <input type="text" placeholder="05XX XXX XX XX">
+      <div class="hint">Bu bilgi sadece kontör harcayan satıcılara açılır, herkese görünmez.</div>
+    </div>
+
+    <div class="card-foot">
+      <button class="btn btn-line" onclick="goTo(2)">← Geri</button>
+      <button class="btn btn-grad" onclick="goTo(4)">Devam Et — Özet →</button>
+    </div>
+  </div>
+
+  <div class="card screen" id="screen-4">
+    <span class="attr-eyebrow">Adım 4 / 4</span>
+    <h2>Talebini gözden geçir</h2>
+    <p class="sub">Her şey doğru görünüyorsa talebini yayınla — uygun satıcılara anında düşer.</p>
+
+    <div class="summary-box">
+      <div class="summary-row"><span>Kategori</span><span>🏠 Emlak</span></div>
+      <div class="summary-row"><span>Oda sayısı</span><span>3+1</span></div>
+      <div class="summary-row"><span>Minimum m²</span><span>120 m²</span></div>
+      <div class="summary-row"><span>Asansör</span><span>Evet</span></div>
+      <div class="summary-row"><span>Konum</span><span>Ankara, Çankaya</span></div>
+      <div class="summary-row"><span>Bütçe</span><span>6.000.000 — 8.000.000 ₺</span></div>
+      <div class="summary-row"><span>Telefon</span><span>05XX XXX XX XX</span></div>
+    </div>
+
+    <div class="summary-cta-note">📣 <span>Bu talep, Çankaya bölgesinde emlak kategorisinde hizmet veren <b>~18 satıcıya</b> anında bildirim olarak gidecek.</span></div>
+
+    <div class="card-foot">
+      <button class="btn btn-line" onclick="goTo(3)">← Geri</button>
+      <button class="btn btn-grad" id="publishBtn" onclick="publish(event)">Talebi Yayınla ✓</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function goTo(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('visible'));
+  document.getElementById('screen-'+n).classList.add('visible');
+  document.querySelectorAll('.step').forEach(s=>{
+    const i = parseInt(s.dataset.step);
+    s.classList.remove('active','done','todo');
+    if(i < n) s.classList.add('done'); else if(i === n) s.classList.add('active'); else s.classList.add('todo');
+  });
+  document.querySelectorAll('.step-line').forEach(l=>{ l.classList.toggle('done', parseInt(l.dataset.line) < n); });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function publish(e){
+  const btn = e.currentTarget;
+  const colors = ['#7C3AED','#4F46E5','#06B6D4','#EC4899','#F59E0B'];
+  for(let i=0;i<18;i++){
+    const d = document.createElement('div');
+    d.className='confetti-dot';
+    const size = 4+Math.random()*5;
+    d.style.width=size+'px'; d.style.height=size+'px';
+    d.style.background = colors[i%colors.length];
+    d.style.left = (btn.offsetLeft + btn.offsetWidth/2) + 'px';
+    d.style.top = (btn.offsetTop) + 'px';
+    btn.parentElement.appendChild(d);
+    const angle = Math.random()*Math.PI*2, dist = 40+Math.random()*60;
+    d.animate([
+      {transform:'translate(0,0)', opacity:1},
+      {transform:`translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist - 40}px)`, opacity:0}
+    ], {duration:700+Math.random()*300, easing:'ease-out'});
+    setTimeout(()=>d.remove(), 1100);
+  }
+  setTimeout(()=>{ window.location.href = 'alicam-net-alici-paneli.html'; }, 550);
+}
+</script>
+
+</body>
+</html>

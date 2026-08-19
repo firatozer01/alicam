@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giriş Yap / Üye Ol — alıcam.net</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --violet:#7C3AED; --indigo:#4F46E5; --cyan:#06B6D4; --pink:#EC4899;
+    --orange:#F59E0B; --green:#16A34A; --purple2:#9333EA; --teal:#0D9488;
+    --bg:#F6F5FC; --card:#FFFFFF; --ink:#15162D; --muted:#6B7280; --line:#E7E5F5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;
+    display:flex;align-items:center;justify-content:center;padding:32px 16px;}
+  h1,h2{font-family:'Fraunces',serif;margin:0;letter-spacing:-0.01em;}
+  a{color:inherit;text-decoration:none;}
+  .shell{width:100%;max-width:960px;background:#fff;border-radius:24px;overflow:hidden;display:grid;grid-template-columns:1fr 1.05fr;box-shadow:0 40px 90px rgba(76,60,180,0.22);}
+
+  /* ---------- LEFT: animated gradient panel ---------- */
+  .side{position:relative;overflow:hidden;background:linear-gradient(160deg,#241542,#3B2270 55%,#5B2E9E);color:#fff;padding:44px 40px;display:flex;flex-direction:column;justify-content:space-between;}
+  .side .aurora{position:absolute;inset:0;z-index:0;}
+  .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.55;}
+  .blob-a{width:280px;height:280px;background:var(--cyan);top:-60px;right:-60px;animation:fa 16s ease-in-out infinite;}
+  .blob-b{width:260px;height:260px;background:var(--pink);bottom:-80px;left:-60px;animation:fb 20s ease-in-out infinite;}
+  @keyframes fa{0%,100%{transform:translate(0,0);}50%{transform:translate(-30px,40px);}}
+  @keyframes fb{0%,100%{transform:translate(0,0);}50%{transform:translate(30px,-30px);}}
+
+  .brand{position:relative;z-index:2;display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:600;font-size:20px;}
+  .brand-mark{width:26px;height:26px;}
+
+  .side-chips{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:9px;margin-top:50px;}
+  .side-chip{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.16);padding:8px 14px 8px 8px;border-radius:30px;font-size:12.5px;font-weight:700;backdrop-filter:blur(6px);opacity:0;animation:chipin .6s ease forwards;}
+  .side-chip .ic{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;}
+  .side-chip:nth-child(1){animation-delay:.15s;} .side-chip:nth-child(1) .ic{background:var(--violet);}
+  .side-chip:nth-child(2){animation-delay:.3s;} .side-chip:nth-child(2) .ic{background:var(--cyan);}
+  .side-chip:nth-child(3){animation-delay:.45s;} .side-chip:nth-child(3) .ic{background:var(--pink);}
+  .side-chip:nth-child(4){animation-delay:.6s;} .side-chip:nth-child(4) .ic{background:var(--orange);}
+  .side-chip:nth-child(5){animation-delay:.75s;} .side-chip:nth-child(5) .ic{background:var(--green);}
+  @keyframes chipin{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  .quote{position:relative;z-index:2;font-family:'Fraunces',serif;font-size:25px;line-height:1.35;margin-top:38px;}
+  .quote .grad{background:linear-gradient(100deg,var(--cyan),#fff 60%);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% auto;animation:gs 5s ease-in-out infinite;}
+  @keyframes gs{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+  .foot-note{position:relative;z-index:2;font-size:13px;color:rgba(255,255,255,0.55);margin-top:30px;display:flex;align-items:center;gap:8px;}
+  .foot-note .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+
+  /* ---------- RIGHT: form ---------- */
+  .form-area{padding:44px 44px;}
+  .tabs{display:flex;gap:4px;background:#EFEDF9;border-radius:11px;padding:4px;margin-bottom:26px;}
+  .tab{flex:1;text-align:center;padding:11px;border-radius:8px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;transition:.15s;}
+  .tab.active{background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(76,60,180,0.12);}
+
+  .form-area h2{font-size:22px;font-weight:600;margin-bottom:6px;}
+  .form-area .sub{font-size:13.5px;color:var(--muted);margin-bottom:22px;}
+
+  .role-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
+  .role-opt{border:1.5px solid var(--line);border-radius:13px;padding:15px;cursor:pointer;background:#fff;transition:.15s;}
+  .role-opt.picked{border-color:var(--violet);background:linear-gradient(135deg,#F3ECFE,#ECEFFD);box-shadow:0 8px 20px rgba(124,58,237,0.14);}
+  .role-opt .ic{font-size:19px;}
+  .role-opt b{display:block;font-size:13.5px;margin-top:7px;}
+  .role-opt span{display:block;font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4;}
+
+  .field{margin-bottom:15px;}
+  .field label{display:block;font-size:12.5px;font-weight:700;margin-bottom:7px;color:#3A3B54;}
+  input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;background:#FAFAFE;transition:.15s;}
+  input:focus{outline:none;border-color:var(--violet);background:#fff;box-shadow:0 0 0 4px rgba(124,58,237,0.08);}
+
+  .btn-grad{display:flex;width:100%;align-items:center;justify-content:center;padding:14px;border-radius:11px;font-weight:700;font-size:14.5px;border:none;cursor:pointer;margin-top:8px;
+    background:linear-gradient(100deg,var(--violet),var(--indigo));background-size:180% auto;color:#fff;transition:transform .15s ease, box-shadow .15s ease, background-position .4s;}
+  .btn-grad:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(124,58,237,0.32);background-position:100% 0;}
+  .terms{font-size:11.5px;color:#A5A3BF;text-align:center;margin-top:14px;line-height:1.5;}
+
+  @media(max-width:760px){.shell{grid-template-columns:1fr;}.side{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="side">
+    <div class="aurora"><div class="blob blob-a"></div><div class="blob blob-b"></div></div>
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none"><path d="M4 10 L14 4 L14 10 Z" fill="#06B6D4"/><path d="M26 20 L16 26 L16 20 Z" fill="#EC4899"/><path d="M14 7 H16 V23 H14 Z" fill="#ffffff" opacity="0.9"/></svg>
+      alıcam<span style="color:rgba(255,255,255,0.45);font-weight:400;">.net</span>
+    </div>
+
+    <div class="side-chips">
+      <span class="side-chip"><span class="ic">🏠</span>Emlak</span>
+      <span class="side-chip"><span class="ic">🚗</span>Araç</span>
+      <span class="side-chip"><span class="ic">🛠</span>Hizmet</span>
+      <span class="side-chip"><span class="ic">🏗</span>İnşaat</span>
+      <span class="side-chip"><span class="ic">📦</span>Ürün</span>
+    </div>
+
+    <div>
+      <div class="quote">İlanı sen verme,<br>teklifi <span class="grad">onlar</span> versin.</div>
+      <div class="foot-note"><span class="dot"></span> Müşteriden hiçbir zaman ücret alınmaz</div>
+    </div>
+  </div>
+
+  <div class="form-area">
+    <div class="tabs">
+      <div class="tab active">Üye Ol</div>
+      <div class="tab">Giriş Yap</div>
+    </div>
+
+    <h2>Hesap türünü seç</h2>
+    <p class="sub">Talep mi oluşturacaksın, yoksa taleplere teklif mi vereceksin?</p>
+
+    <div class="role-pick">
+      <div class="role-opt picked">
+        <div class="ic">🙋</div>
+        <b>Müşteriyim</b>
+        <span>Talep oluşturup teklif bekleyeceğim</span>
+      </div>
+      <div class="role-opt">
+        <div class="ic">🏢</div>
+        <b>Hizmet Vereniyim</b>
+        <span>Taleplere teklif vereceğim</span>
+      </div>
+    </div>
+
+    <div class="field"><label>Ad Soyad</label><input type="text" placeholder="Elif Yılmaz"></div>
+    <div class="field"><label>Telefon</label><input type="text" placeholder="05XX XXX XX XX"></div>
+    <div class="field"><label>Şifre</label><input type="password" placeholder="En az 8 karakter"></div>
+
+    <button class="btn-grad">Ücretsiz Hesap Oluştur</button>
+    <div class="terms">Kayıt olarak <a href="#" style="text-decoration:underline;">Kullanım Koşulları</a>'nı kabul etmiş olursun.</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+.env
+.idea/
+.vscode/
+*.log
+api/.env
+api/vendor/
+api/storage/*.key
+api/storage/logs/*.log
+api/database/database.sqlite
+web/.env*
+web/node_modules/
+web/.next/
+

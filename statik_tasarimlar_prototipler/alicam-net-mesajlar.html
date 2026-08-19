@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mesajlarım — alıcam.net</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --violet:#7C3AED; --indigo:#4F46E5; --cyan:#06B6D4;
+    --bg:#F6F5FC; --card:#FFFFFF; --ink:#15162D; --muted:#6B7280; --line:#E7E5F5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1{font-family:'Fraunces',serif;margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .nav{background:#fff;border-bottom:1px solid var(--line);height:68px;display:flex;align-items:center;}
+  .nav-inner{max-width:1320px;margin:0 auto;padding:0 28px;width:100%;display:flex;align-items:center;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:600;font-size:19px;}
+  .brand-mark{width:24px;height:24px;}
+  .nav-mid{display:flex;gap:28px;font-size:14px;color:var(--muted);font-weight:600;}
+  .nav-mid a.active{color:var(--violet);}
+  .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+
+  .layout{max-width:1320px;margin:0 auto;padding:34px 28px 40px;}
+  .msg-shell{display:grid;grid-template-columns:320px 1fr;height:640px;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 20px 50px rgba(76,60,180,0.08);}
+
+  .conv-list{border-right:1px solid var(--line);overflow-y:auto;}
+  .conv-search{padding:16px;border-bottom:1px solid var(--line);}
+  .conv-search input{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:13.5px;background:#FAFAFE;}
+  .conv-item{display:flex;gap:12px;padding:15px 16px;border-bottom:1px solid var(--line);cursor:pointer;transition:.15s;}
+  .conv-item.active{background:linear-gradient(100deg,#F3ECFE,#ECEFFD);}
+  .conv-item:hover:not(.active){background:#FAFAFE;}
+  .conv-logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#F3ECFE,#ECEFFD);color:#6B21A8;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Fraunces',serif;flex:none;}
+  .conv-item.active .conv-logo{background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;}
+  .conv-name{font-size:14px;font-weight:700;}
+  .conv-req{font-size:12px;color:var(--violet);margin:2px 0;font-weight:600;}
+  .conv-preview{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px;}
+  .conv-time{font-size:11px;color:var(--muted);margin-left:auto;flex:none;}
+  .dot-unread{width:8px;height:8px;border-radius:50%;background:var(--violet);flex:none;margin-left:6px;box-shadow:0 0 6px var(--violet);}
+
+  .chat-area{display:flex;flex-direction:column;}
+  .chat-head{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .chat-head h3{font-size:15.5px;font-weight:700;font-family:'Inter',sans-serif;}
+  .chat-head .sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .chat-head .req-pill{font-size:12px;background:linear-gradient(100deg,#F3ECFE,#ECEFFD);color:var(--violet);padding:5px 12px;border-radius:20px;font-weight:700;}
+
+  .chat-body{flex:1;padding:22px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;background:var(--bg);}
+  .bubble-row{display:flex;opacity:0;animation:bubblein .4s ease forwards;}
+  .bubble-row:nth-child(1){animation-delay:.05s;} .bubble-row:nth-child(2){animation-delay:.15s;}
+  .bubble-row:nth-child(3){animation-delay:.25s;} .bubble-row:nth-child(4){animation-delay:.35s;}
+  @keyframes bubblein{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .bubble-row.me{justify-content:flex-end;}
+  .bubble{max-width:62%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.5;}
+  .bubble-row:not(.me) .bubble{background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px;}
+  .bubble-row.me .bubble{background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;border-bottom-right-radius:4px;}
+  .bubble-time{font-size:10.5px;color:var(--muted);margin-top:5px;}
+
+  .system-note{align-self:center;font-size:12px;color:#166534;background:#DEF5E4;padding:6px 14px;border-radius:20px;font-weight:600;}
+
+  .chat-input{border-top:1px solid var(--line);padding:14px 18px;display:flex;gap:10px;}
+  .chat-input input{flex:1;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;background:#FAFAFE;}
+  .chat-input input:focus{outline:none;border-color:var(--violet);background:#fff;}
+  .send-btn{background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;border:none;border-radius:10px;padding:0 20px;font-weight:700;cursor:pointer;font-size:14px;transition:.15s;}
+  .send-btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(124,58,237,0.3);}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none"><path d="M4 10 L14 4 L14 10 Z" fill="#7C3AED"/><path d="M26 20 L16 26 L16 20 Z" fill="#06B6D4"/><path d="M14 7 H16 V23 H14 Z" fill="#4F46E5" opacity="0.9"/></svg>
+      alıcam<span style="color:#A5A3BF;font-weight:400;">.net</span>
+    </div>
+    <div class="nav-mid">
+      <a href="alicam-net-alici-paneli.html">Taleplerim</a>
+      <a href="#" class="active">Mesajlarım</a>
+    </div>
+    <div class="avatar">E</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="msg-shell">
+    <div class="conv-list">
+      <div class="conv-search"><input type="text" placeholder="Konuşmalarda ara..."></div>
+
+      <div class="conv-item active">
+        <div class="conv-logo">AY</div>
+        <div style="flex:1;min-width:0;">
+          <div class="conv-name">Aydın Emlak Ofisi</div>
+          <div class="conv-req">🏠 Çankaya 3+1 daire talebi</div>
+          <div class="conv-preview">Merhaba, dairenin fotoğraflarını da paylaşabilir miyim?</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;"><span class="conv-time">14:22</span></div>
+      </div>
+
+      <div class="conv-item">
+        <div class="conv-logo">MK</div>
+        <div style="flex:1;min-width:0;">
+          <div class="conv-name">Mert Kaya — Bireysel</div>
+          <div class="conv-req">🏠 Çankaya 3+1 daire talebi</div>
+          <div class="conv-preview">Teklifimi 7.800.000 ₺ olarak güncelledim.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;"><span class="conv-time">Dün</span><span class="dot-unread"></span></div>
+      </div>
+
+      <div class="conv-item">
+        <div class="conv-logo">TG</div>
+        <div style="flex:1;min-width:0;">
+          <div class="conv-name">Toyota Galeri İstanbul</div>
+          <div class="conv-req">🚗 Corolla talebi</div>
+          <div class="conv-preview">Aracın km bilgisini iletebilir misiniz?</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;"><span class="conv-time">2 gün</span></div>
+      </div>
+    </div>
+
+    <div class="chat-area">
+      <div class="chat-head">
+        <div><h3>Aydın Emlak Ofisi</h3><div class="sub">★★★★★ · Çankaya bölgesi · 128 teklif</div></div>
+        <span class="req-pill">🏠 Çankaya 3+1 daire talebi</span>
+      </div>
+
+      <div class="chat-body">
+        <div class="system-note">✓ Teklif kabul edildi — 7.450.000 ₺</div>
+        <div class="bubble-row"><div><div class="bubble">Merhaba, talebinizi inceledim. Çankaya'da tam kriterlerinize uyan bir dairemiz var, 3+1 asansörlü, 130 m².</div><div class="bubble-time">14:02</div></div></div>
+        <div class="bubble-row me"><div><div class="bubble">Merhaba, ilgimi çekti. Fotoğraflarını ve kat bilgisini paylaşabilir misiniz?</div><div class="bubble-time" style="text-align:right;">14:10</div></div></div>
+        <div class="bubble-row"><div><div class="bubble">Tabii, 4. kat, güney cephe. Fotoğrafları birazdan iletiyorum. Görmek isterseniz bu hafta içi randevu ayarlayabiliriz.</div><div class="bubble-time">14:14</div></div></div>
+        <div class="bubble-row"><div><div class="bubble">Merhaba, dairenin fotoğraflarını da paylaşabilir miyim?</div><div class="bubble-time">14:22</div></div></div>
+      </div>
+
+      <div class="chat-input">
+        <input type="text" placeholder="Mesajını yaz...">
+        <button class="send-btn">Gönder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

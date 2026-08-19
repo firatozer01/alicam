@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taleplerim — alıcam.net</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --violet:#7C3AED; --indigo:#4F46E5; --cyan:#06B6D4; --pink:#EC4899;
+    --orange:#F59E0B; --green:#16A34A; --red:#DC2626;
+    --bg:#F6F5FC; --card:#FFFFFF; --ink:#15162D; --muted:#6B7280; --line:#E7E5F5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border-radius:9px;font-weight:700;font-size:14px;border:none;cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;}
+  .btn-grad{background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;}
+  .btn-grad:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(124,58,237,0.3);}
+  .btn-line{border:1.5px solid var(--line);color:var(--ink);background:#fff;}
+  .btn-line:hover{border-color:var(--violet);color:var(--violet);}
+  .btn-sm{padding:7px 13px;font-size:12.5px;}
+  .btn-xs{padding:5px 11px;font-size:11.5px;border-radius:7px;}
+
+  /* NAV */
+  .nav{background:#fff;border-bottom:1px solid var(--line);height:66px;display:flex;align-items:center;position:sticky;top:0;z-index:40;}
+  .nav-inner{max-width:1400px;margin:0 auto;padding:0 24px;width:100%;display:flex;align-items:center;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:600;font-size:19px;}
+  .brand-mark{width:24px;height:24px;}
+  .nav-mid{display:flex;gap:24px;font-size:14px;color:var(--muted);font-weight:600;}
+  .nav-mid a.active{color:var(--violet);}
+  .nav-right{display:flex;align-items:center;gap:12px;}
+  .notif{position:relative;width:36px;height:36px;border-radius:10px;background:#F6F5FC;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;}
+  .notif .badge-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px #fff;animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.75);}}
+  .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+
+  .layout{max-width:1400px;margin:0 auto;padding:26px 24px 80px;display:grid;grid-template-columns:230px 1fr;gap:24px;}
+
+  /* SIDEBAR */
+  .side{display:flex;flex-direction:column;gap:3px;position:sticky;top:90px;align-self:start;}
+  .side-label{font-size:10.5px;font-weight:700;color:#A5A3BF;text-transform:uppercase;letter-spacing:.06em;padding:12px 14px 6px;}
+  .side a{padding:10px 14px;border-radius:10px;font-size:14px;font-weight:600;color:#4B4A63;display:flex;align-items:center;gap:10px;transition:.15s;}
+  .side a .cnt{margin-left:auto;font-size:11px;font-weight:700;background:#EFEDF9;color:#6B7280;padding:2px 8px;border-radius:20px;}
+  .side a.active{background:linear-gradient(100deg,#F3ECFE,#ECEFFD);color:var(--violet);}
+  .side a.active .cnt{background:var(--violet);color:#fff;}
+  .side a:hover:not(.active){background:#F1EFFC;}
+
+  /* STAT STRIP (Sahibinden-style dense metrics) */
+  .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+  .stat-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:13px;}
+  .stat-ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;}
+  .stat-box b{font-family:'Fraunces',serif;font-size:22px;font-weight:600;display:block;line-height:1.1;}
+  .stat-box span{font-size:11.5px;color:var(--muted);display:block;margin-top:2px;}
+  .stat-trend{margin-left:auto;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
+  .trend-up{background:#DEF5E4;color:#166534;}
+  .trend-flat{background:#EFEDF9;color:#6B7280;}
+
+  /* TOOLBAR (Sahibinden filter row) */
+  .toolbar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .tb-search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:#FAFAFE;border:1.5px solid var(--line);border-radius:9px;padding:8px 12px;}
+  .tb-search input{border:none;background:transparent;flex:1;font-size:13.5px;font-family:'Inter',sans-serif;outline:none;}
+  .tb-chip{font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:9px;border:1.5px solid var(--line);background:#fff;color:#4B4A63;cursor:pointer;transition:.15s;}
+  .tb-chip.active{background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;border-color:transparent;}
+  .tb-select{font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:9px;border:1.5px solid var(--line);background:#fff;color:#4B4A63;font-family:'Inter',sans-serif;}
+
+  .content-grid{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start;}
+
+  /* REQUEST LIST */
+  .req-list{display:flex;flex-direction:column;gap:10px;}
+  .req-item{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:15px 16px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;}
+  .req-item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:.2s;}
+  .req-item.selected{border-color:var(--violet);background:linear-gradient(135deg,#FAF7FE,#F7F9FE);box-shadow:0 8px 20px rgba(124,58,237,0.1);}
+  .req-item.selected::before{background:linear-gradient(180deg,var(--violet),var(--indigo));}
+  .req-item:hover:not(.selected){border-color:#c9c3e8;transform:translateX(2px);}
+  .req-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+  .req-cat{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;}
+  .req-status{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:5px;}
+  .st-live{background:#DEF5E4;color:#166534;}
+  .st-live .d{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite;}
+  .st-wait{background:#FEF3E2;color:#92400E;}
+  .st-done{background:#EFEDF9;color:#6B7280;}
+  .req-item h3{font-size:14.5px;font-weight:700;margin-bottom:5px;font-family:'Inter',sans-serif;line-height:1.35;}
+  .req-meta{font-size:11.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;}
+  .req-meta span{display:flex;align-items:center;gap:4px;}
+  .req-bottom{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .req-price{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:var(--violet);}
+  .req-offers-mini{display:flex;align-items:center;gap:-6px;}
+  .mini-av{width:22px;height:22px;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;margin-left:-6px;}
+  .mini-av:first-child{margin-left:0;}
+  .mini-more{font-size:11px;color:var(--muted);margin-left:6px;font-weight:600;}
+
+  /* DETAIL PANEL */
+  .panel{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 16px 40px rgba(76,60,180,0.06);}
+  .panel-head{padding:22px 24px;border-bottom:1px solid var(--line);background:linear-gradient(100deg,#FAF7FE,#F7FAFE);}
+  .panel-head-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+  .panel-head h2{font-size:19px;font-weight:600;line-height:1.3;}
+  .panel-head .req-attrs{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;}
+  .attr-chip{font-size:11.5px;background:#fff;border:1px solid var(--line);padding:4px 11px;border-radius:20px;color:#4B4A63;font-weight:600;}
+
+  /* TIMELINE (Armut-style progress) */
+  .timeline{display:flex;align-items:center;padding:18px 24px;background:#FAFAFE;border-bottom:1px solid var(--line);gap:0;}
+  .tl-step{display:flex;align-items:center;gap:8px;flex:none;}
+  .tl-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none;}
+  .tl-done .tl-dot{background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;}
+  .tl-active .tl-dot{background:#fff;border:2.5px solid var(--violet);color:var(--violet);box-shadow:0 0 0 5px rgba(124,58,237,.12);}
+  .tl-todo .tl-dot{background:#fff;border:1.5px solid var(--line);color:#A5A3BF;}
+  .tl-step span{font-size:11.5px;font-weight:700;color:var(--muted);white-space:nowrap;}
+  .tl-done span,.tl-active span{color:var(--ink);}
+  .tl-line{height:2px;flex:1;background:var(--line);margin:0 10px;position:relative;overflow:hidden;border-radius:2px;}
+  .tl-line.done::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--violet),var(--indigo));animation:fillline .8s ease forwards;}
+  @keyframes fillline{from{transform:translateX(-100%);}to{transform:translateX(0);}}
+
+  /* OFFER COMPARISON (Armut-style) */
+  .panel-body{padding:22px 24px;}
+  .cmp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .cmp-head h3{font-size:15.5px;font-weight:700;font-family:'Inter',sans-serif;}
+  .cmp-head .sort{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+
+  .offer-card{border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:11px;transition:.2s;position:relative;}
+  .offer-card:hover{border-color:#c9c3e8;box-shadow:0 12px 26px rgba(76,60,180,0.09);transform:translateY(-2px);}
+  .offer-card.best{border-color:var(--green);background:linear-gradient(135deg,#F6FDF8,#FAFEFB);}
+  .best-tag{position:absolute;top:-9px;left:16px;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
+  .offer-main{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+  .offer-seller{display:flex;gap:12px;align-items:flex-start;flex:1;min-width:0;}
+  .seller-logo{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Fraunces',serif;color:#fff;flex:none;font-size:14px;}
+  .seller-name-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .seller-name{font-weight:700;font-size:14.5px;}
+  .verified{font-size:10px;font-weight:700;background:#E7F0FE;color:#1D4ED8;padding:2px 7px;border-radius:20px;display:flex;align-items:center;gap:3px;}
+  .seller-stats{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap;}
+  .sstat{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:4px;}
+  .sstat b{color:var(--ink);font-weight:700;}
+  .stars{color:var(--orange);font-size:11.5px;letter-spacing:-1px;}
+  .offer-right{text-align:right;flex:none;}
+  .offer-price{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;line-height:1.1;}
+  .offer-diff{font-size:11px;font-weight:700;margin-top:3px;}
+  .diff-low{color:var(--green);} .diff-high{color:var(--red);}
+  .offer-msg{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:13px;color:#4B4A63;line-height:1.5;}
+  .offer-actions{display:flex;gap:7px;margin-top:12px;justify-content:flex-end;}
+
+  /* mini bar chart for offer distribution */
+  .chart-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:16px;}
+  .chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .chart-head h4{font-size:13.5px;font-weight:700;font-family:'Inter',sans-serif;}
+  .chart-head span{font-size:11.5px;color:var(--muted);}
+  .bars{display:flex;align-items:flex-end;gap:10px;height:90px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+  .bar{width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--violet),var(--indigo));height:0;transition:height 1s cubic-bezier(.4,0,.2,1);position:relative;}
+  .bar.hl{background:linear-gradient(180deg,var(--green),#0F9E5E);}
+  .bar-val{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10.5px;font-weight:700;font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+  .bar-lbl{font-size:10.5px;color:var(--muted);font-weight:600;}
+
+  @media(max-width:1200px){.content-grid{grid-template-columns:1fr;}.stat-strip{grid-template-columns:1fr 1fr;}}
+  @media(max-width:900px){.layout{grid-template-columns:1fr;}.side{position:static;flex-direction:row;overflow-x:auto;}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none"><path d="M4 10 L14 4 L14 10 Z" fill="#7C3AED"/><path d="M26 20 L16 26 L16 20 Z" fill="#06B6D4"/><path d="M14 7 H16 V23 H14 Z" fill="#4F46E5" opacity="0.9"/></svg>
+      alıcam<span style="color:#A5A3BF;font-weight:400;">.net</span>
+    </div>
+    <div class="nav-mid">
+      <a href="alicam-net-anasayfa.html">Ana Sayfa</a>
+      <a href="#" class="active">Panelim</a>
+      <a href="alicam-net-mesajlar.html">Mesajlar</a>
+    </div>
+    <div class="nav-right">
+      <a href="alicam-net-talep-olustur.html" class="btn btn-grad btn-sm">+ Yeni Talep</a>
+      <div class="notif">🔔<span class="badge-dot"></span></div>
+      <div class="avatar">EY</div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="side">
+    <div class="side-label">Talep Yönetimi</div>
+    <a href="#" class="active">📋 Taleplerim <span class="cnt">4</span></a>
+    <a href="#">📨 Gelen Teklifler <span class="cnt">21</span></a>
+    <a href="#">⭐ Favori Satıcılar <span class="cnt">7</span></a>
+    <div class="side-label">İletişim</div>
+    <a href="alicam-net-mesajlar.html">💬 Mesajlarım <span class="cnt">3</span></a>
+    <a href="#">🔔 Bildirimler</a>
+    <div class="side-label">Hesap</div>
+    <a href="#">👤 Profilim</a>
+    <a href="#">📝 Değerlendirmelerim</a>
+  </div>
+
+  <div>
+    <!-- STAT STRIP -->
+    <div class="stat-strip">
+      <div class="stat-box">
+        <div class="stat-ic" style="background:#F3ECFE;color:#6B21A8;">📋</div>
+        <div><b>4</b><span>aktif talep</span></div>
+        <span class="stat-trend trend-up">+1</span>
+      </div>
+      <div class="stat-box">
+        <div class="stat-ic" style="background:#ECEDFD;color:#3730A3;">📨</div>
+        <div><b>21</b><span>toplam teklif</span></div>
+        <span class="stat-trend trend-up">+6</span>
+      </div>
+      <div class="stat-box">
+        <div class="stat-ic" style="background:#E7FAFC;color:#0E7490;">👁</div>
+        <div><b>1.284</b><span>görüntülenme</span></div>
+        <span class="stat-trend trend-up">+18%</span>
+      </div>
+      <div class="stat-box">
+        <div class="stat-ic" style="background:#E9F9EE;color:#166534;">⏱</div>
+        <div><b>2,4 sa</b><span>ort. ilk teklif</span></div>
+        <span class="stat-trend trend-flat">—</span>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="tb-search">🔍<input type="text" placeholder="Taleplerimde ara..."></div>
+      <span class="tb-chip active">Tümü (4)</span>
+      <span class="tb-chip">Aktif (3)</span>
+      <span class="tb-chip">Kapandı (1)</span>
+      <select class="tb-select">
+        <option>Sırala: En yeni</option>
+        <option>En çok teklif alan</option>
+        <option>Bütçe (yüksek→düşük)</option>
+      </select>
+    </div>
+
+    <div class="content-grid">
+      <!-- LIST -->
+      <div class="req-list">
+
+        <div class="req-item selected">
+          <div class="req-top">
+            <span class="req-cat" style="background:#F3ECFE;color:#6B21A8;">🏠 Emlak</span>
+            <span class="req-status st-live"><span class="d"></span>Teklif alıyor</span>
+          </div>
+          <h3>Çankaya'da 3+1, asansörlü daire arıyorum</h3>
+          <div class="req-meta"><span>📍 Ankara, Çankaya</span><span>👁 482</span><span>🕐 3 gün önce</span></div>
+          <div class="req-bottom">
+            <span class="req-price">6 teklif · en düşük 7.45M ₺</span>
+            <div class="req-offers-mini">
+              <span class="mini-av" style="background:var(--violet);">AY</span>
+              <span class="mini-av" style="background:var(--cyan);">MK</span>
+              <span class="mini-av" style="background:var(--orange);">İN</span>
+              <span class="mini-more">+3</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="req-item">
+          <div class="req-top">
+            <span class="req-cat" style="background:#ECEDFD;color:#3730A3;">🚗 Araç</span>
+            <span class="req-status st-live"><span class="d"></span>Teklif alıyor</span>
+          </div>
+          <h3>2021-2023 model otomatik beyaz Corolla</h3>
+          <div class="req-meta"><span>📍 İstanbul, Kadıköy</span><span>👁 316</span><span>🕐 5 gün önce</span></div>
+          <div class="req-bottom">
+            <span class="req-price">9 teklif · en düşük 1.18M ₺</span>
+            <div class="req-offers-mini">
+              <span class="mini-av" style="background:var(--indigo);">TG</span>
+              <span class="mini-av" style="background:var(--pink);">OP</span>
+              <span class="mini-more">+7</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="req-item">
+          <div class="req-top">
+            <span class="req-cat" style="background:#E7FAFC;color:#0E7490;">🛠 Hizmet</span>
+            <span class="req-status st-wait">Bekliyor</span>
+          </div>
+          <h3>Kombi bakımı yaptıracağım, hafta içi</h3>
+          <div class="req-meta"><span>📍 İzmir, Bornova</span><span>👁 47</span><span>🕐 6 sa önce</span></div>
+          <div class="req-bottom">
+            <span class="req-price" style="color:var(--muted);">Henüz teklif yok</span>
+            <span class="mini-more">18 satıcıya iletildi</span>
+          </div>
+        </div>
+
+        <div class="req-item">
+          <div class="req-top">
+            <span class="req-cat" style="background:#E6F7F5;color:#115E59;">📚 Eğitim</span>
+            <span class="req-status st-done">Tamamlandı</span>
+          </div>
+          <h3>İngilizce özel ders arıyorum</h3>
+          <div class="req-meta"><span>📍 Uzaktan</span><span>👁 203</span><span>🕐 2 hafta önce</span></div>
+          <div class="req-bottom">
+            <span class="req-price" style="color:var(--muted);">Öğretmen seçildi</span>
+            <span class="mini-more">⭐ Değerlendir</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- DETAIL -->
+      <div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-head-top">
+              <div>
+                <h2>Çankaya'da 3+1, asansörlü daire arıyorum</h2>
+                <div class="req-attrs">
+                  <span class="attr-chip">📍 Ankara, Çankaya</span>
+                  <span class="attr-chip">🚪 3+1</span>
+                  <span class="attr-chip">🛗 Asansörlü</span>
+                  <span class="attr-chip">📐 min. 120 m²</span>
+                  <span class="attr-chip">💰 ≤ 8.000.000 ₺</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:7px;flex:none;">
+                <button class="btn btn-line btn-sm">Düzenle</button>
+                <button class="btn btn-line btn-sm">Kapat</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TIMELINE -->
+          <div class="timeline">
+            <div class="tl-step tl-done"><div class="tl-dot">✓</div><span>Oluşturuldu</span></div>
+            <div class="tl-line done"></div>
+            <div class="tl-step tl-done"><div class="tl-dot">✓</div><span>18 satıcıya iletildi</span></div>
+            <div class="tl-line done"></div>
+            <div class="tl-step tl-active"><div class="tl-dot">3</div><span>6 teklif alındı</span></div>
+            <div class="tl-line"></div>
+            <div class="tl-step tl-todo"><div class="tl-dot">4</div><span>Satıcı seçimi</span></div>
+          </div>
+
+          <div class="panel-body">
+            <!-- CHART -->
+            <div class="chart-card">
+              <div class="chart-head">
+                <h4>📊 Gelen tekliflerin fiyat dağılımı</h4>
+                <span>Bütçen: ≤ 8.000.000 ₺</span>
+              </div>
+              <div class="bars" id="offerBars">
+                <div class="bar-col"><div class="bar hl" data-h="55"><span class="bar-val">7.45M</span></div><span class="bar-lbl">Aydın E.</span></div>
+                <div class="bar-col"><div class="bar" data-h="68"><span class="bar-val">7.80M</span></div><span class="bar-lbl">Mert K.</span></div>
+                <div class="bar-col"><div class="bar" data-h="76"><span class="bar-val">8.10M</span></div><span class="bar-lbl">İncek Y.</span></div>
+                <div class="bar-col"><div class="bar" data-h="82"><span class="bar-val">8.35M</span></div><span class="bar-lbl">Çankaya G.</span></div>
+                <div class="bar-col"><div class="bar" data-h="90"><span class="bar-val">8.60M</span></div><span class="bar-lbl">Başkent E.</span></div>
+                <div class="bar-col"><div class="bar" data-h="97"><span class="bar-val">8.90M</span></div><span class="bar-lbl">Ova Emlak</span></div>
+              </div>
+            </div>
+
+            <div class="cmp-head">
+              <h3>Gelen Teklifler (6)</h3>
+              <div class="sort">Sırala: <select class="tb-select"><option>En düşük fiyat</option><option>En yüksek puan</option><option>En hızlı yanıt</option></select></div>
+            </div>
+
+            <!-- OFFER 1 -->
+            <div class="offer-card best">
+              <span class="best-tag">✓ EN İYİ TEKLİF</span>
+              <div class="offer-main">
+                <div class="offer-seller">
+                  <div class="seller-logo" style="background:linear-gradient(135deg,var(--violet),var(--indigo));">AY</div>
+                  <div style="min-width:0;">
+                    <div class="seller-name-row">
+                      <span class="seller-name">Aydın Emlak Ofisi</span>
+                      <span class="verified">✓ Doğrulanmış</span>
+                    </div>
+                    <div class="seller-stats">
+                      <span class="sstat"><span class="stars">★★★★★</span><b>4.9</b></span>
+                      <span class="sstat">✅ <b>128</b> tamamlanan iş</span>
+                      <span class="sstat">⏱ <b>12 dk</b> yanıt</span>
+                      <span class="sstat">📍 Çankaya</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="offer-right">
+                  <div class="offer-price">7.450.000 ₺</div>
+                  <div class="offer-diff diff-low">↓ 550.000 ₺ bütçe altı</div>
+                </div>
+              </div>
+              <div class="offer-msg">"Çankaya Ayrancı'da 3+1, 130 m², asansörlü, 4. kat güney cephe daire mevcut. Site içinde, kapalı otopark var. Bu hafta içi görebilirsiniz."</div>
+              <div class="offer-actions">
+                <button class="btn btn-line btn-xs">Profili Gör</button>
+                <button class="btn btn-line btn-xs">💬 Mesaj</button>
+                <button class="btn btn-grad btn-xs">Teklifi Kabul Et</button>
+              </div>
+            </div>
+
+            <!-- OFFER 2 -->
+            <div class="offer-card">
+              <div class="offer-main">
+                <div class="offer-seller">
+                  <div class="seller-logo" style="background:linear-gradient(135deg,var(--cyan),var(--indigo));">MK</div>
+                  <div style="min-width:0;">
+                    <div class="seller-name-row">
+                      <span class="seller-name">Mert Kaya</span>
+                      <span class="verified" style="background:#EFEDF9;color:#6B7280;">Bireysel</span>
+                    </div>
+                    <div class="seller-stats">
+                      <span class="sstat"><span class="stars">★★★★☆</span><b>4.2</b></span>
+                      <span class="sstat">✅ <b>12</b> tamamlanan iş</span>
+                      <span class="sstat">⏱ <b>2 sa</b> yanıt</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="offer-right">
+                  <div class="offer-price">7.800.000 ₺</div>
+                  <div class="offer-diff diff-low">↓ 200.000 ₺ bütçe altı</div>
+                </div>
+              </div>
+              <div class="offer-msg">"Kendi dairem, 3+1 125 m². Asansör var, 2018 yapımı. Doğrudan sahibinden, komisyon yok."</div>
+              <div class="offer-actions">
+                <button class="btn btn-line btn-xs">Profili Gör</button>
+                <button class="btn btn-line btn-xs">💬 Mesaj</button>
+                <button class="btn btn-grad btn-xs">Teklifi Kabul Et</button>
+              </div>
+            </div>
+
+            <!-- OFFER 3 -->
+            <div class="offer-card">
+              <div class="offer-main">
+                <div class="offer-seller">
+                  <div class="seller-logo" style="background:linear-gradient(135deg,var(--orange),var(--pink));">İN</div>
+                  <div style="min-width:0;">
+                    <div class="seller-name-row">
+                      <span class="seller-name">İncek Yapı İnşaat</span>
+                      <span class="verified">✓ Doğrulanmış</span>
+                    </div>
+                    <div class="seller-stats">
+                      <span class="sstat"><span class="stars">★★★★★</span><b>4.7</b></span>
+                      <span class="sstat">✅ <b>64</b> tamamlanan iş</span>
+                      <span class="sstat">⏱ <b>45 dk</b> yanıt</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="offer-right">
+                  <div class="offer-price">8.100.000 ₺</div>
+                  <div class="offer-diff diff-high">↑ 100.000 ₺ bütçe üstü</div>
+                </div>
+              </div>
+              <div class="offer-msg">"Yeni teslim projemizde 3+1 140 m² daireler mevcut. Sıfır bina, 2 yıl garantili."</div>
+              <div class="offer-actions">
+                <button class="btn btn-line btn-xs">Profili Gör</button>
+                <button class="btn btn-line btn-xs">💬 Mesaj</button>
+                <button class="btn btn-grad btn-xs">Teklifi Kabul Et</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // animasyonlu bar chart
+  const bars = document.querySelectorAll('.bar');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        document.querySelectorAll('.bar').forEach((b,i)=>{
+          setTimeout(()=>{ b.style.height = b.dataset.h + '%'; }, i*90);
+        });
+        io.disconnect();
+      }
+    });
+  },{threshold:0.3});
+  if(bars.length) io.observe(document.getElementById('offerBars'));
+</script>
+
+</body>
+</html>

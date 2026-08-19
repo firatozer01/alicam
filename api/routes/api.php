@@ -1,0 +1,79 @@
+<?php
+
+use App\Http\Controllers\Api\AdminDashboardController;
+use App\Http\Controllers\Api\AdminSellerApprovalController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BuyerRequestController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CreditPurchaseController;
+use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\OfferController;
+use App\Http\Controllers\Api\SellerCreditController;
+use App\Http\Controllers\Api\SellerProfileController;
+use App\Http\Controllers\Api\SellerRequestController;
+use App\Http\Controllers\Api\VerificationController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/health', fn () => response()->json([
+    'status' => 'ok',
+    'service' => 'alicam-api',
+]));
+
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{category:slug}/attributes', [CategoryController::class, 'attributes']);
+Route::get('/locations', [LocationController::class, 'index']);
+Route::get('/credits/packages', [CreditPurchaseController::class, 'packages']);
+Route::post('/payments/paytr/callback', [CreditPurchaseController::class, 'callback'])
+    ->middleware('throttle:120,1');
+
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::post('/verification/send', [VerificationController::class, 'send'])
+        ->middleware('throttle:5,1');
+    Route::post('/verification/verify', [VerificationController::class, 'verify'])
+        ->middleware('throttle:10,1');
+
+    Route::get('/requests/mine', [BuyerRequestController::class, 'mine']);
+    Route::get('/requests/{buyerRequest}/offers', [OfferController::class, 'buyerIndex']);
+    Route::patch('/requests/{buyerRequest}/cancel', [BuyerRequestController::class, 'cancel']);
+    Route::patch('/offers/{offer}', [OfferController::class, 'decide']);
+    Route::post('/requests', [BuyerRequestController::class, 'store'])
+        ->middleware(['contact.verified', 'throttle:10,1']);
+
+    Route::prefix('seller')->group(function () {
+        Route::get('/profile', [SellerProfileController::class, 'show']);
+        Route::put('/profile', [SellerProfileController::class, 'update']);
+        Route::put('/categories', [SellerProfileController::class, 'updateCategories']);
+        Route::put('/locations', [SellerProfileController::class, 'updateLocations']);
+        Route::post('/submit', [SellerProfileController::class, 'submit'])
+            ->middleware(['contact.verified', 'throttle:5,1']);
+
+        Route::middleware(['role:seller', 'seller.approved'])->group(function () {
+            Route::get('/requests', [SellerRequestController::class, 'index']);
+            Route::get('/requests/{buyerRequest}', [SellerRequestController::class, 'show']);
+            Route::post('/requests/{buyerRequest}/unlock', [SellerRequestController::class, 'unlock'])
+                ->middleware('throttle:15,1');
+            Route::get('/credits', [SellerCreditController::class, 'show']);
+            Route::post('/credits/purchase', [CreditPurchaseController::class, 'store'])
+                ->middleware('throttle:10,1');
+            Route::get('/payments/{merchantOid}', [CreditPurchaseController::class, 'show']);
+            Route::get('/offers', [OfferController::class, 'sellerIndex']);
+            Route::post('/offers', [OfferController::class, 'store'])
+                ->middleware('throttle:15,1');
+            Route::put('/offers/{offer}', [OfferController::class, 'update']);
+        });
+    });
+
+    Route::prefix('admin')->middleware('role:admin')->group(function () {
+        Route::get('/dashboard', AdminDashboardController::class);
+        Route::get('/seller-approvals', [AdminSellerApprovalController::class, 'index']);
+        Route::patch('/seller-approvals/{seller}', [AdminSellerApprovalController::class, 'update']);
+    });
+});

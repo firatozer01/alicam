@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kontör Yükle — alıcam.net</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --violet:#7C3AED; --indigo:#4F46E5; --cyan:#06B6D4;
+    --bg:#F6F5FC; --card:#FFFFFF; --ink:#15162D; --muted:#6B7280; --line:#E7E5F5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2{font-family:'Fraunces',serif;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border-radius:10px;font-weight:700;font-size:14px;border:none;cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;}
+  .btn-grad{background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;width:100%;}
+  .btn-grad:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(124,58,237,0.32);}
+  .btn-line{border:1.5px solid var(--line);color:var(--ink);background:#fff;width:100%;}
+  .btn-line:hover{border-color:var(--violet);color:var(--violet);}
+
+  .nav{background:#fff;border-bottom:1px solid var(--line);height:68px;display:flex;align-items:center;}
+  .nav-inner{max-width:1100px;margin:0 auto;padding:0 28px;width:100%;display:flex;align-items:center;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:600;font-size:19px;}
+  .brand-mark{width:24px;height:24px;}
+  .nav-right{display:flex;align-items:center;gap:16px;}
+  .credit-pill{display:flex;align-items:center;gap:8px;background:linear-gradient(100deg,#F3ECFE,#ECEFFD);color:var(--violet);padding:7px 14px;border-radius:20px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;}
+  .btn-line-sm{border:1.5px solid var(--line);color:var(--ink);background:#fff;padding:10px 16px;border-radius:9px;font-size:13.5px;font-weight:700;}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:56px 28px 100px;}
+  .head{max-width:560px;margin-bottom:44px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--violet);text-transform:uppercase;margin-bottom:10px;}
+  .head h1{font-size:30px;font-weight:600;}
+  .head p{color:var(--muted);margin-top:12px;font-size:15px;line-height:1.6;}
+
+  .pkg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  .pkg{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:26px 22px;display:flex;flex-direction:column;position:relative;transition:.2s;}
+  .pkg:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(76,60,180,0.12);}
+  .pkg.popular{border-color:transparent;background:linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,var(--violet),var(--cyan)) border-box;border-width:2px;box-shadow:0 20px 46px rgba(124,58,237,0.2);position:relative;}
+  .pkg.popular::before{content:"";position:absolute;inset:-2px;border-radius:18px;background:linear-gradient(135deg,var(--violet),var(--cyan));z-index:-1;opacity:0.5;filter:blur(14px);animation:glow 3s ease-in-out infinite;}
+  @keyframes glow{0%,100%{opacity:0.35;}50%{opacity:0.6;}}
+  .pkg-badge{position:absolute;top:-13px;left:22px;background:linear-gradient(100deg,var(--violet),var(--indigo));color:#fff;font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;}
+  .pkg-name{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.02em;}
+  .pkg-amt{font-family:'Fraunces',serif;font-size:36px;font-weight:600;}
+  .pkg-amt span{font-size:15px;font-weight:500;color:var(--muted);}
+  .pkg-bonus{font-size:12.5px;color:#0E7490;background:#DDF6FA;padding:4px 10px;border-radius:20px;display:inline-block;margin:10px 0 18px;width:fit-content;font-weight:700;}
+  .pkg-price{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;margin-bottom:18px;}
+  .pkg-note{font-size:12px;color:var(--muted);margin-top:10px;text-align:center;}
+
+  .table{margin-top:60px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;}
+  .table h3{padding:20px 24px;font-size:16px;font-weight:600;border-bottom:1px solid var(--line);font-family:'Inter',sans-serif;}
+  .trow{display:grid;grid-template-columns:2fr 1fr 1fr;padding:14px 24px;font-size:14px;}
+  .trow:not(:last-child){border-bottom:1px solid var(--line);}
+  .trow.header{color:var(--muted);font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+  .trow b{font-family:'IBM Plex Mono',monospace;}
+
+  @media(max-width:900px){.pkg-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none"><path d="M4 10 L14 4 L14 10 Z" fill="#7C3AED"/><path d="M26 20 L16 26 L16 20 Z" fill="#06B6D4"/><path d="M14 7 H16 V23 H14 Z" fill="#4F46E5" opacity="0.9"/></svg>
+      alıcam<span style="color:#A5A3BF;font-weight:400;">.net</span>
+    </div>
+    <div class="nav-right">
+      <div class="credit-pill">⚡ 42 kontör</div>
+      <a href="alicam-net-satici-paneli.html" class="btn-line-sm">← Panelime Dön</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <div class="eyebrow">Kontör Yükle</div>
+    <h1>İhtiyacın kadar kontör al.</h1>
+    <p>Kontör süresiz — kullanmadığın kontörler hesabında bekler. Sadece görüntülemek istediğin talebin detayını açarken harcanır.</p>
+  </div>
+
+  <div class="pkg-grid">
+    <div class="pkg">
+      <div class="pkg-name">BAŞLANGIÇ</div>
+      <div class="pkg-amt">20 <span>kontör</span></div>
+      <div class="pkg-bonus" style="visibility:hidden;">.</div>
+      <div class="pkg-price">450 ₺</div>
+      <button class="btn btn-line">Satın Al</button>
+      <div class="pkg-note">Kontör başı ~22,5 ₺</div>
+    </div>
+
+    <div class="pkg popular">
+      <div class="pkg-badge">EN ÇOK TERCİH EDİLEN</div>
+      <div class="pkg-name">STANDART</div>
+      <div class="pkg-amt">60 <span>kontör</span></div>
+      <div class="pkg-bonus">+10 bonus kontör</div>
+      <div class="pkg-price">1.200 ₺</div>
+      <button class="btn btn-grad">Satın Al</button>
+      <div class="pkg-note">Kontör başı ~17,1 ₺</div>
+    </div>
+
+    <div class="pkg">
+      <div class="pkg-name">PROFESYONEL</div>
+      <div class="pkg-amt">150 <span>kontör</span></div>
+      <div class="pkg-bonus">+30 bonus kontör</div>
+      <div class="pkg-price">2.700 ₺</div>
+      <button class="btn btn-line">Satın Al</button>
+      <div class="pkg-note">Kontör başı ~15 ₺</div>
+    </div>
+
+    <div class="pkg">
+      <div class="pkg-name">KURUMSAL</div>
+      <div class="pkg-amt">400 <span>kontör</span></div>
+      <div class="pkg-bonus">+100 bonus kontör</div>
+      <div class="pkg-price">6.500 ₺</div>
+      <button class="btn btn-line">Satın Al</button>
+      <div class="pkg-note">Kontör başı ~13 ₺</div>
+    </div>
+  </div>
+
+  <div class="table">
+    <h3>Son işlemlerin</h3>
+    <div class="trow header"><span>Açıklama</span><span>Tarih</span><span>Tutar</span></div>
+    <div class="trow"><span>Çayyolu satılık ev talebi — detay açıldı</span><span>12 Tem 2026</span><b style="color:#C1503F;">-5 kontör</b></div>
+    <div class="trow"><span>Bahçelievler kiralık daire — detay açıldı</span><span>10 Tem 2026</span><b style="color:#C1503F;">-5 kontör</b></div>
+    <div class="trow"><span>Standart paket satın alındı</span><span>3 Tem 2026</span><b style="color:#166534;">+70 kontör</b></div>
+    <div class="trow"><span>Kayıt bonusu</span><span>28 Haz 2026</span><b style="color:#166534;">+10 kontör</b></div>
+  </div>
+</div>
+
+</body>
+</html>

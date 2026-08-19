@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firma Kaydı — alıcam.net</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --violet:#7C3AED; --indigo:#4F46E5; --cyan:#06B6D4;
+    --bg:#F6F5FC; --card:#FFFFFF; --ink:#15162D; --muted:#6B7280; --line:#E7E5F5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:13px 22px;border-radius:11px;font-weight:700;font-size:14.5px;border:none;cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;}
+  .btn-grad{background:linear-gradient(100deg,var(--cyan),var(--indigo));color:#fff;}
+  .btn-grad:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(6,182,212,0.28);}
+  .btn-line{border:1.5px solid var(--line);color:var(--ink);background:#fff;}
+  .btn-line:hover{border-color:var(--cyan);color:#0E7490;}
+
+  .nav{background:#fff;border-bottom:1px solid var(--line);height:68px;display:flex;align-items:center;}
+  .nav-inner{max-width:820px;margin:0 auto;padding:0 28px;width:100%;display:flex;align-items:center;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:600;font-size:19px;}
+  .brand-mark{width:24px;height:24px;}
+  .nav-close{color:var(--muted);font-size:14px;}
+
+  .wizard{max-width:820px;margin:0 auto;padding:48px 28px 100px;}
+  .steps{display:flex;align-items:center;margin-bottom:44px;}
+  .step{display:flex;align-items:center;gap:10px;}
+  .step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:700;flex:none;transition:.3s;}
+  .step.done .step-dot{background:linear-gradient(100deg,var(--cyan),var(--indigo));color:#fff;}
+  .step.active .step-dot{background:#fff;border:2.5px solid var(--cyan);color:#0E7490;box-shadow:0 0 0 6px rgba(6,182,212,0.12);}
+  .step.todo .step-dot{background:#fff;border:1.5px solid var(--line);color:var(--muted);}
+  .step-label{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;}
+  .step.active .step-label,.step.done .step-label{color:var(--ink);}
+  .step-line{height:3px;border-radius:2px;background:var(--line);flex:1;margin:0 6px;position:relative;overflow:hidden;}
+  .step-line::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--cyan),var(--indigo));transform:translateX(-100%);transition:transform .4s ease;}
+  .step-line.done::after{transform:translateX(0);}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:36px;box-shadow:0 20px 50px rgba(76,60,180,0.08);}
+  .card h2{font-size:22px;font-weight:600;margin-bottom:8px;}
+  .card .sub{color:var(--muted);font-size:14.5px;margin-bottom:28px;}
+  .attr-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.06em;color:#0E7490;text-transform:uppercase;margin-bottom:6px;display:block;}
+  .screen{display:none;animation:slidein .4s ease;}
+  .screen.visible{display:block;}
+  @keyframes slidein{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+
+  .field{margin-bottom:20px;}
+  .field label{display:block;font-size:13.5px;font-weight:700;margin-bottom:8px;color:#3A3B54;}
+  select,input[type=text]{width:100%;padding:13px 15px;border:1.5px solid var(--line);border-radius:10px;font-family:'Inter',sans-serif;font-size:14.5px;background:#FAFAFE;transition:.15s;}
+  select:focus,input:focus{outline:none;border-color:var(--cyan);background:#fff;box-shadow:0 0 0 4px rgba(6,182,212,0.08);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+  .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .check-opt{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:13px 16px;cursor:pointer;background:#fff;transition:.15s;}
+  .check-opt.picked{border-color:var(--cyan);background:linear-gradient(135deg,#EEF7FB,#F3ECFE);box-shadow:0 8px 20px rgba(6,182,212,0.12);}
+  .check-box{width:18px;height:18px;border-radius:6px;border:1.5px solid var(--line);flex:none;}
+  .check-opt.picked .check-box{background:linear-gradient(100deg,var(--cyan),var(--indigo));border-color:transparent;}
+
+  .city-block{border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;}
+  .city-block .city-name{font-weight:700;font-size:14.5px;margin-bottom:10px;}
+  .district-tags{display:flex;gap:8px;flex-wrap:wrap;}
+  .dtag{font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:20px;border:1.5px solid var(--line);cursor:pointer;background:#fff;transition:.15s;}
+  .dtag.picked{background:linear-gradient(100deg,var(--cyan),var(--indigo));border-color:transparent;color:#fff;}
+
+  .credit-note{background:linear-gradient(100deg,#EEF7FB,#F3ECFE);border-radius:14px;padding:18px;font-size:14px;color:#0E4E5C;margin-bottom:20px;line-height:1.55;}
+  .card-foot{display:flex;justify-content:space-between;margin-top:32px;padding-top:24px;border-top:1px solid var(--line);}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 30 30" fill="none"><path d="M4 10 L14 4 L14 10 Z" fill="#7C3AED"/><path d="M26 20 L16 26 L16 20 Z" fill="#06B6D4"/><path d="M14 7 H16 V23 H14 Z" fill="#4F46E5" opacity="0.9"/></svg>
+      alıcam<span style="color:#A5A3BF;font-weight:400;">.net</span>
+    </div>
+    <a href="alicam-net-anasayfa.html" class="nav-close">Vazgeç ✕</a>
+  </div>
+</div>
+
+<div class="wizard">
+  <div class="steps">
+    <div class="step active" data-step="1"><div class="step-dot">01</div><div class="step-label">Firma Bilgileri</div></div>
+    <div class="step-line" data-line="1"></div>
+    <div class="step todo" data-step="2"><div class="step-dot">02</div><div class="step-label">Kategoriler</div></div>
+    <div class="step-line" data-line="2"></div>
+    <div class="step todo" data-step="3"><div class="step-dot">03</div><div class="step-label">Bölgeler</div></div>
+    <div class="step-line" data-line="3"></div>
+    <div class="step todo" data-step="4"><div class="step-dot">04</div><div class="step-label">Kontör</div></div>
+  </div>
+
+  <div class="card screen visible" id="screen-1">
+    <span class="attr-eyebrow">Adım 1 / 4</span>
+    <h2>Firmanı tanıt</h2>
+    <p class="sub">Müşteriler ve admin onay ekibi bu bilgileri görecek.</p>
+    <div class="row2">
+      <div class="field"><label>Firma / işletme adı</label><input type="text" placeholder="Aydın Emlak Ofisi"></div>
+      <div class="field"><label>Vergi No <span style="font-weight:400;color:var(--muted);">(opsiyonel)</span></label><input type="text" placeholder="1234567890"></div>
+    </div>
+    <div class="field"><label>Kısa açıklama</label><input type="text" placeholder="Çankaya bölgesinde 12 yıllık emlak deneyimi"></div>
+    <div class="row2">
+      <div class="field"><label>Telefon</label><input type="text" placeholder="05XX XXX XX XX"></div>
+      <div class="field"><label>İletişim e-posta</label><input type="text" placeholder="info@aydinemlak.com"></div>
+    </div>
+    <div class="card-foot"><span></span><button class="btn btn-grad" onclick="goTo(2)">Devam Et — Kategoriler →</button></div>
+  </div>
+
+  <div class="card screen" id="screen-2">
+    <span class="attr-eyebrow">Adım 2 / 4</span>
+    <h2>Hangi kategorilerde hizmet veriyorsun?</h2>
+    <p class="sub">Birden fazla kategori seçebilirsin — her kategorinin kontör maliyeti farklıdır.</p>
+    <div class="check-grid">
+      <div class="check-opt picked"><div class="check-box"></div><span>🏠 Emlak · 5 kontör</span></div>
+      <div class="check-opt"><div class="check-box"></div><span>🚗 Araç · 3 kontör</span></div>
+      <div class="check-opt picked"><div class="check-box"></div><span>🏗 İnşaat · 8 kontör</span></div>
+      <div class="check-opt"><div class="check-box"></div><span>🛠 Hizmet · 1 kontör</span></div>
+      <div class="check-opt"><div class="check-box"></div><span>📦 Ürün · 2 kontör</span></div>
+      <div class="check-opt"><div class="check-box"></div><span>🚛 Nakliye · 3 kontör</span></div>
+    </div>
+    <div class="card-foot">
+      <button class="btn btn-line" onclick="goTo(1)">← Geri</button>
+      <button class="btn btn-grad" onclick="goTo(3)">Devam Et — Bölgeler →</button>
+    </div>
+  </div>
+
+  <div class="card screen" id="screen-3">
+    <span class="attr-eyebrow">Adım 3 / 4</span>
+    <h2>Hangi bölgelerde hizmet veriyorsun?</h2>
+    <p class="sub">Sadece seçtiğin il/ilçelerdeki talepleri görürsün — bu, alakasız bildirim almanı engeller.</p>
+    <div class="city-block">
+      <div class="city-name">Ankara</div>
+      <div class="district-tags">
+        <span class="dtag picked">Çankaya</span><span class="dtag">Yenimahalle</span>
+        <span class="dtag">Keçiören</span><span class="dtag">Mamak</span><span class="dtag">Etimesgut</span>
+      </div>
+    </div>
+    <div class="city-block">
+      <div class="city-name">İstanbul</div>
+      <div class="district-tags">
+        <span class="dtag">Kadıköy</span><span class="dtag">Beşiktaş</span><span class="dtag">Üsküdar</span>
+      </div>
+    </div>
+    <div class="card-foot">
+      <button class="btn btn-line" onclick="goTo(2)">← Geri</button>
+      <button class="btn btn-grad" onclick="goTo(4)">Devam Et — Kontör →</button>
+    </div>
+  </div>
+
+  <div class="card screen" id="screen-4">
+    <span class="attr-eyebrow">Adım 4 / 4</span>
+    <h2>Kontör yükleyerek başla</h2>
+    <p class="sub">Kayıt ve teklif vermek tamamen ücretsiz — kontör sadece talep detayını görüntülemek istediğinde harcanır.</p>
+    <div class="credit-note">🎁 Yeni üyelere özel: ilk kayıt bonusu olarak <b>10 kontör</b> hesabına otomatik tanımlandı, hemen talep görüntülemeye başlayabilirsin.</div>
+    <div class="card-foot">
+      <button class="btn btn-line" onclick="goTo(3)">← Geri</button>
+      <a href="alicam-net-satici-paneli.html" class="btn btn-grad">Panelime Git ✓</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function goTo(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('visible'));
+  document.getElementById('screen-'+n).classList.add('visible');
+  document.querySelectorAll('.step').forEach(s=>{
+    const i = parseInt(s.dataset.step);
+    s.classList.remove('active','done','todo');
+    if(i < n) s.classList.add('done'); else if(i===n) s.classList.add('active'); else s.classList.add('todo');
+  });
+  document.querySelectorAll('.step-line').forEach(l=>{ l.classList.toggle('done', parseInt(l.dataset.line) < n); });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

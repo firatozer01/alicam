@@ -1,0 +1,135 @@
+name: alicam
+
+services:
+  web:
+    build:
+      context: ./web
+      args:
+        API_PROXY_TARGET: http://api_gateway
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      API_PROXY_TARGET: http://api_gateway
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-alicamnet-session}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      api_gateway:
+        condition: service_started
+
+  api:
+    build:
+      context: ./api
+    restart: unless-stopped
+    environment:
+      APP_NAME: alicam.net
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: http://localhost:${API_PORT:-8091}
+      APP_KEY: ${APP_KEY:-}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Istanbul}
+      APP_LOCALE: tr
+      APP_FALLBACK_LOCALE: tr
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-alicam}
+      DB_USERNAME: ${POSTGRES_USER:-alicam}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-change-this-in-production}
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+      SESSION_COOKIE: ${SESSION_COOKIE_NAME:-alicamnet-session}
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-localhost:3000,127.0.0.1:3000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      VERIFICATION_EXPOSE_CODES: ${VERIFICATION_EXPOSE_CODES:-false}
+      PAYTR_MERCHANT_ID: ${PAYTR_MERCHANT_ID:-}
+      PAYTR_MERCHANT_KEY: ${PAYTR_MERCHANT_KEY:-}
+      PAYTR_MERCHANT_SALT: ${PAYTR_MERCHANT_SALT:-}
+      PAYTR_TEST_MODE: ${PAYTR_TEST_MODE:-true}
+      PAYTR_DEBUG_ON: ${PAYTR_DEBUG_ON:-true}
+      PAYTR_TIMEOUT_LIMIT: ${PAYTR_TIMEOUT_LIMIT:-30}
+      PAYTR_NO_INSTALLMENT: ${PAYTR_NO_INSTALLMENT:-0}
+      PAYTR_MAX_INSTALLMENT: ${PAYTR_MAX_INSTALLMENT:-0}
+      FILESYSTEM_DISK: public
+    volumes:
+      - api_storage:/var/www/html/storage/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  queue:
+    build:
+      context: ./api
+    restart: unless-stopped
+    command: php artisan queue:work --sleep=2 --tries=3 --timeout=90
+    environment:
+      APP_NAME: alicam.net
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_KEY: ${APP_KEY:-}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Istanbul}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-alicam}
+      DB_USERNAME: ${POSTGRES_USER:-alicam}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-change-this-in-production}
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      SKIP_MIGRATIONS: "1"
+    volumes:
+      - api_storage:/var/www/html/storage/app
+    depends_on:
+      - api
+
+  api_gateway:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8091}:80"
+    volumes:
+      - ./docker/nginx/api.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./api/public:/var/www/html/public:ro
+    depends_on:
+      - api
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-alicam}
+      POSTGRES_USER: ${POSTGRES_USER:-alicam}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-this-in-production}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-alicam} -d ${POSTGRES_DB:-alicam}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:
+  api_storage:
