@@ -56,4 +56,14 @@ class Category extends Model
         return $this->belongsToMany(User::class, 'seller_categories', 'category_id', 'seller_id')
             ->withTimestamps();
     }
+
+    public function buyerRequests(): HasMany
+    {
+        return $this->hasMany(BuyerRequest::class);
+    }
+
+    public function sellerServices(): HasMany
+    {
+        return $this->hasMany(SellerService::class);
+    }
 }

@@ -1,0 +1,158 @@
+/* Admin surfaces use the same alicam.net visual system as the public product. */
+.admin-page {
+  color: #15162d;
+  background: #f6f5fc;
+}
+
+.admin-sidebar {
+  color: #4b4a63;
+  background: #f6f5fc;
+  border-right: 1px solid #e7e5f5;
+}
+
+.admin-brand {
+  color: #15162d;
+}
+
+.admin-brand span,
+.admin-product span,
+.admin-sidebar nav i,
+.admin-kicker,
+.admin-data-card header span {
+  color: #7c3aed;
+}
+
+.admin-product {
+  border-color: #ddd6fe;
+  background: linear-gradient(135deg, #f5f3ff, #ecfeff);
+}
+
+.admin-product strong,
+.admin-account strong,
+.admin-sidebar nav a:hover,
+.admin-sidebar nav a.active {
+  color: #15162d;
+}
+
+.admin-sidebar nav a {
+  color: #5e5c70;
+}
+
+.admin-sidebar nav a:hover,
+.admin-sidebar nav a.active {
+  background: #ede9fe;
+}
+
+.admin-sidebar nav a.active {
+  box-shadow: inset 3px 0 #7c3aed;
+}
+
+.admin-sidebar nav b {
+  color: #fff;
+  background: #7c3aed;
+}
+
+.admin-account {
+  border-top-color: #e7e5f5;
+}
+
+.admin-account > span,
+.admin-avatar {
+  color: #fff;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+}
+
+.admin-account small,
+.admin-header p,
+.admin-data-empty {
+  color: #6b7280;
+}
+
+.admin-home-button,
+.admin-metric-grid article,
+.admin-data-card,
+.admin-application,
+.admin-access-card {
+  border-color: #e7e5f5;
+}
+
+.admin-home-button {
+  color: #4b4a63;
+}
+
+.admin-toolbar,
+.admin-data-card > header,
+.admin-request-row,
+.admin-payment-row {
+  border-color: #e7e5f5;
+}
+
+.admin-tabs {
+  background: #ede9fe;
+}
+
+.admin-tabs button {
+  color: #6b7280;
+}
+
+.admin-tabs button.active {
+  color: #4f46e5;
+  box-shadow: 0 5px 15px rgb(79 70 229 / 10%);
+}
+
+.admin-metric-grid article.revenue {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.admin-metric-grid article.revenue > span {
+  color: #a5f3fc;
+}
+
+.admin-data-card header > b,
+.admin-request-row > span {
+  color: #6d28d9;
+  background: #ede9fe;
+}
+
+.admin-request-row > em.accepted,
+.admin-payment-row em.paid,
+.admin-status.status-approved,
+.admin-contact-card .verified,
+.admin-notice {
+  color: #15803d;
+  background: #f0fdf4;
+}
+
+.admin-application-head,
+.admin-decision-bar {
+  border-color: #e7e5f5;
+}
+
+.admin-application-head > div:nth-child(2) > span {
+  color: #7c3aed;
+}
+
+.admin-category-tags b,
+.admin-contact-card {
+  border-color: #e7e5f5;
+}
+
+.admin-location-list p,
+.admin-contact-card,
+.admin-decision-bar,
+.admin-empty {
+  background: #faf9ff;
+}
+
+.admin-decision-bar .approve {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+}
+
+.admin-empty {
+  border-color: #c4b5fd;
+}
+
+.admin-empty > span {
+  color: #7c3aed;
+  background: #ede9fe;
+}

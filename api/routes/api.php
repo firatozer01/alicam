@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AdminCategoryAttributeController;
+use App\Http\Controllers\Api\AdminCategoryController;
 use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminSellerApprovalController;
 use App\Http\Controllers\Api\AuthController;
@@ -85,6 +87,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/dashboard', AdminDashboardController::class);
+        Route::get('/categories', [AdminCategoryController::class, 'index']);
+        Route::post('/categories', [AdminCategoryController::class, 'store']);
+        Route::put('/categories/{category}', [AdminCategoryController::class, 'update']);
+        Route::post('/categories/{category}/attributes', [AdminCategoryAttributeController::class, 'store']);
+        Route::put('/category-attributes/{categoryAttribute}', [AdminCategoryAttributeController::class, 'update']);
+        Route::delete('/category-attributes/{categoryAttribute}', [AdminCategoryAttributeController::class, 'destroy']);
         Route::get('/seller-approvals', [AdminSellerApprovalController::class, 'index']);
         Route::patch('/seller-approvals/{seller}', [AdminSellerApprovalController::class, 'update']);
     });

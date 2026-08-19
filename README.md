@@ -64,6 +64,7 @@ alındığında `SESSION_SECURE_COOKIE=true` yapılmalıdır.
 - Responsive hizmet veren paneli: `http://localhost:3000/satici-paneli`
 - PayTR kontör sayfası: `http://localhost:3000/kontor-yukle`
 - Operasyon özetli admin paneli: `http://localhost:3000/admin`
+- Kategori, teklif kontör bedeli ve dinamik talep formu yönetimi: `http://localhost:3000/admin/kategoriler`
 - Kimlikten ödeme ve teklife uzanan API test paketi
 - Sağlayıcı bağımsız Ubuntu/Docker çalışma yapısı
 
