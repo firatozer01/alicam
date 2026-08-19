@@ -8,11 +8,73 @@ use App\Models\CreditTransaction;
 use App\Models\PaymentOrder;
 use App\Models\RequestUnlock;
 use App\Models\SellerCredit;
+use App\Models\SellerPromotion;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class SellerCreditService
 {
+    /** @return array<string, array{label: string, days: int, credits: int}> */
+    public function promotionPackages(): array
+    {
+        return [
+            'week' => ['label' => '7 gün', 'days' => 7, 'credits' => 25],
+            'fortnight' => ['label' => '14 gün', 'days' => 14, 'credits' => 45],
+            'month' => ['label' => '30 gün', 'days' => 30, 'credits' => 80],
+        ];
+    }
+
+    /** @return array{featured_until: Carbon, balance: int, credit_spent: int} */
+    public function promote(User $seller, string $packageKey): array
+    {
+        $package = $this->promotionPackages()[$packageKey];
+
+        return DB::transaction(function () use ($seller, $package, $packageKey): array {
+            SellerCredit::query()->firstOrCreate(['user_id' => $seller->id], ['balance' => 0]);
+            $wallet = SellerCredit::query()->where('user_id', $seller->id)->lockForUpdate()->firstOrFail();
+
+            if ($wallet->balance < $package['credits']) {
+                throw new InsufficientCreditsException($wallet->balance, $package['credits']);
+            }
+
+            $latestExpiry = SellerPromotion::query()
+                ->where('seller_id', $seller->id)
+                ->where('expires_at', '>', now())
+                ->max('expires_at');
+            $startsAt = $latestExpiry ? Carbon::parse($latestExpiry) : now();
+            $expiresAt = $startsAt->copy()->addDays($package['days']);
+            $balance = $wallet->balance - $package['credits'];
+
+            $promotion = SellerPromotion::query()->create([
+                'seller_id' => $seller->id,
+                'credit_cost' => $package['credits'],
+                'starts_at' => $startsAt,
+                'expires_at' => $expiresAt,
+            ]);
+            $wallet->update(['balance' => $balance]);
+            CreditTransaction::query()->create([
+                'user_id' => $seller->id,
+                'type' => 'spend',
+                'amount' => -$package['credits'],
+                'reference_type' => 'seller_promotion',
+                'reference_id' => $promotion->id,
+                'balance_after' => $balance,
+                'metadata' => [
+                    'package' => $packageKey,
+                    'days' => $package['days'],
+                    'featured_until' => $expiresAt->toIso8601String(),
+                ],
+            ]);
+
+            return [
+                'featured_until' => $expiresAt,
+                'balance' => $balance,
+                'credit_spent' => $package['credits'],
+            ];
+        }, 3);
+    }
+
     /**
      * @return array{unlock: RequestUnlock, already_unlocked: bool, balance: int}
      */

@@ -28,6 +28,7 @@ class OfferController extends Controller
             ->where('seller_id', $seller->id)
             ->with([
                 'seller.sellerProfile',
+                'review',
                 'buyerRequest' => fn ($query) => $query
                     ->with(['category.creditCost', 'city', 'district', 'user'])
                     ->withExists([
@@ -55,7 +56,7 @@ class OfferController extends Controller
     {
         abort_unless($buyerRequest->user_id === $request->user()->id, 404);
         $offers = $buyerRequest->offers()
-            ->with('seller.sellerProfile')
+            ->with(['seller.sellerProfile', 'review'])
             ->latest()
             ->get();
 

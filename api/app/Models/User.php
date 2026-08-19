@@ -77,6 +77,33 @@ class User extends Authenticatable
         return $this->hasMany(Offer::class, 'seller_id');
     }
 
+    public function sellerServices(): HasMany
+    {
+        return $this->hasMany(SellerService::class);
+    }
+
+    public function sellerReviews(): HasMany
+    {
+        return $this->hasMany(SellerReview::class, 'seller_id');
+    }
+
+    public function buyerReviews(): HasMany
+    {
+        return $this->hasMany(SellerReview::class, 'buyer_id');
+    }
+
+    public function sellerPromotions(): HasMany
+    {
+        return $this->hasMany(SellerPromotion::class, 'seller_id');
+    }
+
+    public function activeSellerPromotions(): HasMany
+    {
+        return $this->sellerPromotions()
+            ->where('starts_at', '<=', now())
+            ->where('expires_at', '>', now());
+    }
+
     public function hasRole(string $role): bool
     {
         return $this->roles()->where('name', $role)->exists();

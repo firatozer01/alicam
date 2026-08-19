@@ -7,10 +7,14 @@ use App\Http\Controllers\Api\BuyerRequestController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CreditPurchaseController;
 use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\MarketplaceController;
 use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\SellerCreditController;
 use App\Http\Controllers\Api\SellerProfileController;
+use App\Http\Controllers\Api\SellerPromotionController;
 use App\Http\Controllers\Api\SellerRequestController;
+use App\Http\Controllers\Api\SellerReviewController;
+use App\Http\Controllers\Api\SellerServiceController;
 use App\Http\Controllers\Api\VerificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +27,7 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category:slug}/attributes', [CategoryController::class, 'attributes']);
 Route::get('/locations', [LocationController::class, 'index']);
 Route::get('/credits/packages', [CreditPurchaseController::class, 'packages']);
+Route::get('/marketplace', MarketplaceController::class);
 Route::post('/payments/paytr/callback', [CreditPurchaseController::class, 'callback'])
     ->middleware('throttle:120,1');
 
@@ -44,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/requests/{buyerRequest}/offers', [OfferController::class, 'buyerIndex']);
     Route::patch('/requests/{buyerRequest}/cancel', [BuyerRequestController::class, 'cancel']);
     Route::patch('/offers/{offer}', [OfferController::class, 'decide']);
+    Route::post('/offers/{offer}/review', [SellerReviewController::class, 'store']);
     Route::post('/requests', [BuyerRequestController::class, 'store'])
         ->middleware(['contact.verified', 'throttle:10,1']);
 
@@ -68,6 +74,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/offers', [OfferController::class, 'store'])
                 ->middleware('throttle:15,1');
             Route::put('/offers/{offer}', [OfferController::class, 'update']);
+            Route::get('/services', [SellerServiceController::class, 'index']);
+            Route::post('/services', [SellerServiceController::class, 'store']);
+            Route::put('/services/{sellerService}', [SellerServiceController::class, 'update']);
+            Route::delete('/services/{sellerService}', [SellerServiceController::class, 'destroy']);
+            Route::get('/featured', [SellerPromotionController::class, 'show']);
+            Route::post('/featured', [SellerPromotionController::class, 'store']);
         });
     });
 

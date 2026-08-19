@@ -36,6 +36,14 @@ class OfferResource extends JsonResource
             ];
         }
 
+        if ($this->relationLoaded('review')) {
+            $data['review'] = $this->review ? [
+                'rating' => $this->review->rating,
+                'comment' => $this->review->comment,
+                'created_at' => $this->review->created_at->toIso8601String(),
+            ] : null;
+        }
+
         return $data;
     }
 }

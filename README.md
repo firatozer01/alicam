@@ -6,12 +6,11 @@ hizmet verenler kategori bazlı kontör harcayarak talebi açar ve teklif gönde
 ## Proje yapısı
 
 ```text
-web/                 Next.js 16 web uygulaması ve yönetim panelleri
+web/                 Next.js 16 web uygulaması ve kullanıcı panelleri
 api/                 Laravel 13 REST API
 docker/nginx/        API ağ geçidi yapılandırması
 compose.yaml         PostgreSQL ve Redis dahil yerel/Ubuntu çalışma ortamı
-AGENTS.md             Ürün, mimari ve tasarım briefi
-alicam-net-*.html    İlk tasarım referansları
+statik_tasarimlar_prototipler/  Bağlayıcı görsel tasarım referansları
 ```
 
 ## Yerel adresler
@@ -39,7 +38,8 @@ alındığında `SESSION_SECURE_COOKIE=true` yapılmalıdır.
 
 ## Mevcut ürün dilimleri
 
-- Responsive pazarlama ana sayfası
+- Sahibinden benzeri filtreli ve sıralanabilir canlı talep pazaryeri ana sayfası
+- Puanı yüksek ve kontörle sponsorlu hizmet veren vitrini
 - Dört adımlı, dinamik kategori sorulu talep oluşturma deneyimi
 - Laravel Sanctum çerez tabanlı üyelik, giriş ve çıkış akışı
 - Hash saklamalı e-posta/telefon doğrulama kodu altyapısı
@@ -56,13 +56,41 @@ alındığında `SESSION_SECURE_COOKIE=true` yapılmalıdır.
 - Transaction güvenli kontör cüzdanı, hareket defteri ve maliyet snapshot'ı
 - Aynı talebi ikinci kez ücretsiz gösteren benzersiz kilit açma kaydı
 - Kontörlü teklif oluşturma/güncelleme ve alıcı kabul/red yaşam döngüsü
+- Hizmet veren katalog yönetimi: hizmet ekleme, düzenleme, yayından kaldırma
+- Kontörle 7, 14 veya 30 günlük ana sayfa öne çıkarma paketleri
+- Tamamlanan işlerde gerçek alıcı puanı ve değerlendirme akışı
 - Dört paketli PayTR iframe siparişi, imzalı/idempotent callback ve bonus yükleme
-- Responsive alıcı paneli: `http://localhost:3000/panel`
+- Gelişmiş müşteri paneli: `http://localhost:3000/musteri-panel`
 - Responsive hizmet veren paneli: `http://localhost:3000/satici-paneli`
 - PayTR kontör sayfası: `http://localhost:3000/kontor-yukle`
 - Operasyon özetli admin paneli: `http://localhost:3000/admin`
 - Kimlikten ödeme ve teklife uzanan API test paketi
 - Sağlayıcı bağımsız Ubuntu/Docker çalışma yapısı
+
+## Tasarım standardı
+
+`statik_tasarimlar_prototipler/` altındaki ekranlar görsel standarttır. Yeni
+sayfalar bu sistemden sapmamalıdır:
+
+- Ana renkler: violet `#7C3AED`, indigo `#4F46E5`, cyan `#06B6D4`
+- Durum vurguları: pink `#EC4899`, orange `#F59E0B`, green `#16A34A`
+- Zemin `#F6F5FC`, kart `#FFFFFF`, metin `#15162D`, çizgi `#E7E5F5`
+- Başlıklar Fraunces, gövde Inter, metrik ve referanslar IBM Plex Mono
+- Beyaz üst menü, açık lavanta tuval, mor–indigo geçişler ve cyan vurgular
+- 10–18 px yuvarlatılmış, yoğun bilgi taşıyan beyaz kartlar ve hafif mor gölge
+
+Kahverengi, petrol veya genel koyu yeşil bir tema ürün dilinin parçası değildir.
+
+## Demo pazaryeri verisi
+
+Yerel ya da test ortamına örnek müşteri, hizmet veren, hizmet, talep, teklif,
+puan ve öne çıkarma kayıtlarını eklemek için:
+
+```text
+docker compose exec -T api php artisan db:seed --class=DemoMarketplaceSeeder --force
+```
+
+Seeder tekrar çalıştırılabilir; aynı demo referanslarını çoğaltmaz.
 
 ## PayTR yapılandırması
 
