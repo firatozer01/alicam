@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { AccountMenu } from "@/components/account-menu";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import styles from "./marketplace.module.css";
 
-type CurrentUser = { id: number; name: string; roles: string[] };
+type CurrentUser = { id: number; name: string; email: string; roles: string[] };
 type Category = { id: number; name: string; slug: string; icon: string; color: string };
 type PublicRequest = {
   id: number; reference: string; title: string; summary: string; status: string; offer_count: number;
@@ -58,6 +59,7 @@ export function MarketplaceHome() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [feedOffset, setFeedOffset] = useState(0);
+  const [sessionReady, setSessionReady] = useState(false);
   const [counterStarted, setCounterStarted] = useState(false);
   const [counters, setCounters] = useState({ requests: 0, sellers: 0, cities: 0 });
 
@@ -70,7 +72,8 @@ export function MarketplaceHome() {
       .then((response) => { if (active) setUser(response.data); })
       .catch((requestError: unknown) => {
         if (active && !(requestError instanceof ApiError && requestError.status === 401)) setError(firstApiError(requestError));
-      });
+      })
+      .finally(() => { if (active) setSessionReady(true); });
     return () => { active = false; };
   }, []);
 
@@ -175,7 +178,7 @@ export function MarketplaceHome() {
           <a className={styles.navItem} href="#nasil-calisir">Nasıl çalışır</a>
           <a className={styles.navItem} href="#hizmet-veren">Hizmet verenler için</a>
         </div>
-        <div className={styles.navCta}>{user ? <Link className={styles.buttonLine} href={panelHref}>{panelLabel}</Link> : <Link className={styles.buttonLine} href="/giris">Giriş yap</Link>}<Link className={styles.buttonGrad} href={isSeller ? "/satici-paneli" : "/talep-olustur"}>{isSeller ? "Gelen talepler" : "Ücretsiz talep oluştur"}</Link></div>
+        <div className={styles.navCta}>{!sessionReady ? <span className={styles.sessionSkeleton} /> : user ? <AccountMenu user={user} /> : <Link className={styles.buttonLine} href="/giris">Giriş yap</Link>}<Link className={styles.buttonGrad} href={isSeller ? "/satici-paneli" : "/talep-olustur"}>{isSeller ? "Gelen talepler" : "Ücretsiz talep oluştur"}</Link></div>
       </div>
     </nav>
 
@@ -208,7 +211,7 @@ export function MarketplaceHome() {
     <section className={styles.how} id="nasil-calisir"><div className={styles.wrap}><header className={`${styles.sectionHead} ${styles.reveal}`}><span>SÜREÇ</span><h2>Üç adımda teklif almaya başla.</h2></header><div className={styles.howGrid}><article className={styles.reveal}><i>01</i><h3>Talebini oluştur</h3><p>Kategori seç, soruları yanıtla, bütçeni ve konumunu belirt. Tamamen ücretsiz.</p></article><article className={styles.reveal}><i>02</i><h3>Uygun satıcılar görsün</h3><p>Talebin, kategori ve bölgende hizmet veren doğrulanmış satıcılara düşer.</p></article><article className={styles.reveal}><i>03</i><h3>Teklifleri karşılaştır</h3><p>Fiyatı, kapsamı ve hizmet vereni tek ekrandan karşılaştırıp karar ver.</p></article></div></div></section>
 
     <section className={styles.feedSection}><div className={styles.wrap}><header className={`${styles.sectionHead} ${styles.reveal}`}><span>CANLI TALEP AKIŞI</span><h2>Şu anda platformda böyle talepler var.</h2><p>Satıcılar akışı takip eder; müşteriler tek tek hizmet veren aramak zorunda kalmaz.</p></header>
-      <div className={`${styles.feedCard} ${styles.reveal}`}><header><div><i /> <strong>Canlı akış</strong></div><a href="#talepler">Tüm talepleri gör →</a></header><div>{feedItems.map((item, index) => <article className={index === 0 ? styles.feedNew : ""} key={`${feedOffset}-${item.id}`}><span style={{ background: `${item.category.color}15`, color: item.category.color }}>{item.category.icon} {item.category.name}</span><div><strong>{item.title}</strong><small>{item.location.city.name}, {item.location.district.name} · {relativeTime(item.created_at)}</small></div><b>{money(item.budget.min)} – {money(item.budget.max)}</b><em>{item.offer_count} teklif</em></article>)}</div></div>
+      <div className={`${styles.feedCard} ${styles.reveal}`}><header><div><i /> <strong>Canlı akış</strong></div><a href="#talepler">Tüm talepleri gör →</a></header><div>{feedItems.map((item, index) => <article className={`${styles.feedRow} ${index === 0 ? styles.feedNew : ""}`} key={`${feedOffset}-${item.id}`} style={{ animationDelay: `${index * 55}ms` }}><span style={{ background: `${item.category.color}15`, color: item.category.color }}>{item.category.icon} {item.category.name}</span><div><strong>{item.title}</strong><small>{item.location.city.name}, {item.location.district.name} · {relativeTime(item.created_at)}</small></div><b>{money(item.budget.min)} – {money(item.budget.max)}</b><em>{item.offer_count} teklif</em></article>)}</div></div>
     </div></section>
 
     <section className={styles.marketSection} id="talepler"><div className={styles.wrap}><header className={`${styles.marketHead} ${styles.reveal}`}><div><span>PAZARYERİNDE ŞİMDİ</span><h2>Güncel talepler</h2><p><b>{marketplace?.meta.total ?? 0}</b> açık talep bulundu</p></div><label>Sırala <select value={sort} onChange={(event) => { setLoading(true); setSort(event.target.value); setPage(1); }}><option value="latest">En yeni</option><option value="popular">En çok teklif alan</option><option value="budget_high">Bütçe: yüksekten</option><option value="budget_low">Bütçe: düşükten</option></select></label></header>
