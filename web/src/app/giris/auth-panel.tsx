@@ -20,7 +20,14 @@ type AuthResponse = {
 
 type Mode = "login" | "register" | "verify";
 
-export function AuthPanel({ returnTo, forceVerification }: { returnTo: string; forceVerification: boolean }) {
+function destinationFor(user: User, requestedPath: string | null) {
+  if (requestedPath) return requestedPath;
+  if (user.roles.includes("admin")) return "/admin";
+  if (user.roles.includes("seller")) return "/satici-paneli";
+  return "/musteri-panel";
+}
+
+export function AuthPanel({ returnTo, forceVerification }: { returnTo: string | null; forceVerification: boolean }) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>(forceVerification ? "verify" : "login");
   const [user, setUser] = useState<User | null>(null);
@@ -36,7 +43,7 @@ export function AuthPanel({ returnTo, forceVerification }: { returnTo: string; f
     apiRequest<{ data: User }>("/me")
       .then(({ data }) => {
         setUser(data);
-        if (data.verification.complete) router.replace(returnTo);
+        if (data.verification.complete) router.replace(destinationFor(data, returnTo));
       })
       .catch((requestError) => {
         if (requestError instanceof ApiError && requestError.status === 401) setMode("login");
@@ -61,7 +68,7 @@ export function AuthPanel({ returnTo, forceVerification }: { returnTo: string; f
       setUser(response.data);
 
       if (response.data.verification.complete) {
-        router.push(returnTo);
+        router.push(destinationFor(response.data, returnTo));
       } else {
         setMode("verify");
         setNotice("Devam etmek için iletişim bilgilerini doğrula.");
@@ -109,7 +116,7 @@ export function AuthPanel({ returnTo, forceVerification }: { returnTo: string; f
       setNotice(channel === "email" ? "E-posta adresin doğrulandı." : "Telefon numaran doğrulandı.");
 
       if (response.data.verification.complete) {
-        window.setTimeout(() => router.push(returnTo), 450);
+        window.setTimeout(() => router.push(destinationFor(response.data, returnTo)), 450);
       }
     } catch (requestError) {
       setError(firstApiError(requestError));
@@ -182,7 +189,7 @@ export function AuthPanel({ returnTo, forceVerification }: { returnTo: string; f
         })}
 
         {!user && <button className="button button-primary auth-submit" onClick={() => setMode("login")} type="button">Giriş yap</button>}
-        {user?.verification.complete && <button className="button button-primary auth-submit" onClick={() => router.push(returnTo)} type="button">Devam et →</button>}
+        {user?.verification.complete && <button className="button button-primary auth-submit" onClick={() => router.push(destinationFor(user, returnTo))} type="button">Devam et →</button>}
       </div>
     );
   }
@@ -203,7 +210,7 @@ export function AuthPanel({ returnTo, forceVerification }: { returnTo: string; f
         <form className="auth-form" onSubmit={submitLogin}>
           <label>E-posta adresi<input autoComplete="email" name="email" placeholder="ornek@eposta.com" required type="email" /></label>
           <label>Şifre<input autoComplete="current-password" minLength={8} name="password" placeholder="Şifren" required type="password" /></label>
-          <label className="remember-field"><input name="remember" type="checkbox" /><span>Beni hatırla</span><a href="#">Şifremi unuttum</a></label>
+          <label className="remember-field"><input name="remember" type="checkbox" /><span>Beni hatırla</span><a href="mailto:destek@alicam.net?subject=%C5%9Eifre%20s%C4%B1f%C4%B1rlama%20talebi">Şifremi unuttum</a></label>
           <button className="button button-primary auth-submit" disabled={busy} type="submit">{busy ? "Giriş yapılıyor…" : "Giriş yap →"}</button>
         </form>
       ) : (
@@ -215,7 +222,7 @@ export function AuthPanel({ returnTo, forceVerification }: { returnTo: string; f
             <label>Şifre<input autoComplete="new-password" minLength={8} name="password" placeholder="En az 8 karakter" required type="password" /></label>
             <label>Şifre tekrarı<input autoComplete="new-password" minLength={8} name="password_confirmation" placeholder="Şifreni tekrar yaz" required type="password" /></label>
           </div>
-          <label className="terms-field"><input required type="checkbox" /><span><a href="#">Kullanım koşullarını</a> ve <a href="#">gizlilik politikasını</a> kabul ediyorum.</span></label>
+          <label className="terms-field"><input required type="checkbox" /><span><a href="/kullanim-kosullari" target="_blank">Kullanım koşullarını</a> ve <a href="/gizlilik" target="_blank">gizlilik politikasını</a> kabul ediyorum.</span></label>
           <button className="button button-primary auth-submit" disabled={busy} type="submit">{busy ? "Hesap oluşturuluyor…" : "Ücretsiz hesap oluştur →"}</button>
         </form>
       )}

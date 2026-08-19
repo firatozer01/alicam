@@ -378,7 +378,7 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
               <div className="summary-block"><span>TALEP</span><h3>{form.title || "Başlık belirtilmedi"}</h3><p>{form.description || "Açıklama belirtilmedi"}</p></div>
               {categoryAttributes.length > 0 && <div className="attribute-summary">{categoryAttributes.map((attribute) => <div key={attribute.key}><span>{attribute.label}</span><strong>{Array.isArray(form.attributes[attribute.key]) ? (form.attributes[attribute.key] as string[]).join(", ") : String(form.attributes[attribute.key] ?? "—")}</strong></div>)}</div>}
               <div className="summary-grid"><div><span>BÜTÇE</span><strong>₺{form.budgetMin || "0"} – ₺{form.budgetMax || "0"}</strong></div><div><span>KONUM</span><strong>{selectedDistrict?.name ?? "—"}, {selectedCity?.name ?? "—"}</strong></div><div><span>YAYIN SÜRESİ</span><strong>30 gün</strong></div></div>
-              <label className="consent"><input required type="checkbox" /><span>Talebimin ilgili hizmet verenlere anonim özet olarak gösterilmesini ve <a href="#">kullanım koşullarını</a> kabul ediyorum.</span></label>
+              <label className="consent"><input required type="checkbox" /><span>Talebimin ilgili hizmet verenlere anonim özet olarak gösterilmesini ve <a href="/kullanim-kosullari" target="_blank">kullanım koşullarını</a> kabul ediyorum.</span></label>
             </fieldset>
           )}
 

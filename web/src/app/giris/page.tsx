@@ -13,10 +13,10 @@ type LoginPageProps = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const requestedPath = params.devam ?? "/talep-olustur";
-  const returnTo = requestedPath.startsWith("/") && !requestedPath.startsWith("//")
+  const requestedPath = params.devam;
+  const returnTo = requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
     ? requestedPath
-    : "/talep-olustur";
+    : null;
 
   return (
     <main className="auth-page">

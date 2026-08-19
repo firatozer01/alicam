@@ -31,9 +31,15 @@ class SellerCreditController extends Controller
                 'created_at' => $transaction->created_at->toIso8601String(),
             ]);
 
+        $spentThisMonth = abs((int) $seller->creditTransactions()
+            ->where('type', 'spend')
+            ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->sum('amount'));
+
         return response()->json([
             'data' => [
                 'balance' => $wallet->balance,
+                'spent_this_month' => $spentThisMonth,
                 'transactions' => $transactions,
             ],
         ]);

@@ -37,6 +37,7 @@ class SellerRequestApiTest extends TestCase
             ->assertJsonPath('data.0.id', $matching->id)
             ->assertJsonPath('data.0.is_unlocked', false)
             ->assertJsonPath('data.0.unlock_cost', 1)
+            ->assertJsonPath('data.0.offer_count', 0)
             ->assertJsonMissingPath('data.0.details');
 
         $payload = $response->json('data.0');

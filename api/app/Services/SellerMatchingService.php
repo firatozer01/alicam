@@ -28,6 +28,7 @@ class SellerMatchingService
                 ->whereColumn('seller_locations.city_id', 'requests.city_id')
                 ->whereColumn('seller_locations.district_id', 'requests.district_id'))
             ->with(['category.creditCost', 'city', 'district', 'user'])
+            ->withCount('offers')
             ->withExists([
                 'unlocks as unlocked_by_seller' => fn ($query) => $query
                     ->where('seller_id', $seller->id),

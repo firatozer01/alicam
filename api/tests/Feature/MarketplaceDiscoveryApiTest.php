@@ -80,6 +80,11 @@ class MarketplaceDiscoveryApiTest extends TestCase
             'amount' => -25,
             'reference_type' => 'seller_promotion',
         ]);
+
+        $this->actingAs($seller)->getJson('/api/seller/credits')
+            ->assertOk()
+            ->assertJsonPath('data.balance', 75)
+            ->assertJsonPath('data.spent_this_month', 25);
     }
 
     public function test_buyer_can_review_accepted_offer_and_rating_appears_publicly(): void

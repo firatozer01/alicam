@@ -39,6 +39,8 @@ alındığında `SESSION_SECURE_COOKIE=true` yapılmalıdır.
 ## Mevcut ürün dilimleri
 
 - Sahibinden benzeri filtreli ve sıralanabilir canlı talep pazaryeri ana sayfası
+- Statik prototiplerle aynı aurora, kayan kategori, sayaç, grafik ve görünürlük animasyonları
+- Rol bazlı giriş yönlendirmesi: müşteri, hizmet veren ve yönetici kendi çalışma alanına gider
 - Puanı yüksek ve kontörle sponsorlu hizmet veren vitrini
 - Dört adımlı, dinamik kategori sorulu talep oluşturma deneyimi
 - Laravel Sanctum çerez tabanlı üyelik, giriş ve çıkış akışı
@@ -65,6 +67,7 @@ alındığında `SESSION_SECURE_COOKIE=true` yapılmalıdır.
 - PayTR kontör sayfası: `http://localhost:3000/kontor-yukle`
 - Operasyon özetli admin paneli: `http://localhost:3000/admin`
 - Kategori, teklif kontör bedeli ve dinamik talep formu yönetimi: `http://localhost:3000/admin/kategoriler`
+- Kullanım koşulları ve gizlilik bilgilendirme sayfaları
 - Kimlikten ödeme ve teklife uzanan API test paketi
 - Sağlayıcı bağımsız Ubuntu/Docker çalışma yapısı
 
