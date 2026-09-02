@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AccountMenu } from "@/components/account-menu";
+import { NavMenuBar } from "@/components/listing/nav-menu";
+import { Modal } from "@/components/modal/modal";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import styles from "./musteri-panel.module.css";
 
@@ -15,7 +18,7 @@ type BuyerRequest = {
 type Offer = {
   id: number; request_id: number; price: string; message: string; status: string; created_at: string;
   review?: { rating: number; comment: string | null; created_at: string } | null;
-  seller: { name: string; company_name: string | null; profile_type: string | null; description: string | null; contact?: { email: string; phone: string } };
+  seller: { id: number; name: string; company_name: string | null; profile_type: string | null; description: string | null; contact?: { email: string; phone: string } };
 };
 
 const money = (value: string) => new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(Number(value));
@@ -28,7 +31,11 @@ export function CustomerDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [requests, setRequests] = useState<BuyerRequest[]>([]);
   const [offers, setOffers] = useState<Record<number, Offer[]>>({});
-  const [expanded, setExpanded] = useState<number | null>(null);
+  const [compareRequest, setCompareRequest] = useState<BuyerRequest | null>(null);
+  const [section, setSection] = useState("ozet");
+  const jump = (id: string) => { setSection(id); document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
   const [busy, setBusy] = useState<number | null>(null);
   const [reviewOffer, setReviewOffer] = useState<number | null>(null);
@@ -61,15 +68,25 @@ export function CustomerDashboard() {
     return () => { active = false; };
   }, [router]);
 
-  const visibleRequests = useMemo(() => requests.filter((item) => {
-    if (filter === "active") return ["open", "in_negotiation"].includes(item.status);
-    if (filter === "completed") return ["accepted", "cancelled"].includes(item.status);
-    return true;
-  }), [filter, requests]);
+  const visibleRequests = useMemo(() => {
+    const needle = search.trim().toLocaleLowerCase("tr-TR");
+    return requests.filter((item) => {
+      if (filter === "active" && !["open", "in_negotiation"].includes(item.status)) return false;
+      if (filter === "completed" && !["accepted", "cancelled"].includes(item.status)) return false;
+      if (categoryFilter && item.category.name !== categoryFilter) return false;
+      if (!needle) return true;
+      return [item.title, item.reference, item.category.name, item.location.city.name, item.location.district.name]
+        .some((value) => value.toLocaleLowerCase("tr-TR").includes(needle));
+    });
+  }, [categoryFilter, filter, requests, search]);
 
-  const toggleOffers = async (item: BuyerRequest) => {
-    if (expanded === item.id) return setExpanded(null);
-    setExpanded(item.id); setError("");
+  const requestCategories = useMemo(
+    () => Array.from(new Map(requests.map((item) => [item.category.name, item.category])).values()),
+    [requests],
+  );
+
+  const openCompare = async (item: BuyerRequest) => {
+    setCompareRequest(item); setError("");
     try { await loadOffers(item.id); } catch (requestError: unknown) { setError(firstApiError(requestError)); }
   };
 
@@ -110,16 +127,21 @@ export function CustomerDashboard() {
   const totalOffers = requests.reduce((sum, item) => sum + item.offer_count, 0);
 
   return <main className={styles.page}>
-    <aside className={styles.sidebar}>
+    <header className={styles.shellBar}><div className={styles.shellInner}>
       <Link className={styles.brand} href="/">alıcam<span>.net</span></Link>
-      <div className={styles.workspace}><span>MÜŞTERİ ÇALIŞMA ALANI</span><strong>Talep merkezi</strong></div>
-      <nav><a className={styles.active} href="#ozet"><i>⌂</i> Genel bakış</a><a href="#taleplerim"><i>▤</i> Taleplerim <b>{requests.length}</b></a><Link href="/talep-olustur"><i>＋</i> Yeni talep</Link><a href="#hesabim"><i>◎</i> Hesabım</a></nav>
-      <div className={styles.sideHelp}><span>DAHA İYİ TEKLİFLER</span><p>Talebini doğru anlatmak, doğru profesyonellere daha hızlı ulaşmanı sağlar.</p><Link href="/talep-olustur">Yeni talep oluştur →</Link></div>
-      <div className={styles.sideAccount}><span>{user?.name.slice(0, 2).toLocaleUpperCase("tr-TR")}</span><div><strong>{user?.name}</strong><small>{user?.email}</small></div></div>
-    </aside>
+      <nav className={styles.shellNav}>
+        <NavMenuBar activeKey={section} menus={[
+          { key: "panel", label: "Panelim", panelTitle: "Müşteri paneli", panelHint: "Taleplerin, gelen teklifler ve hesabın", items: [
+            { key: "ozet", label: "Genel bakış", icon: "⌂", hint: "Özet ve metrikler", onSelect: () => jump("ozet") },
+            { key: "taleplerim", label: "Taleplerim", icon: "▤", hint: "Tüm taleplerin ve teklifler", count: requests.length, onSelect: () => jump("taleplerim") },
+            { key: "hesabim", label: "Hesabım", icon: "◎", hint: "İletişim doğrulaması ve güvenlik", onSelect: () => jump("hesabim") },
+          ] },
+        ]}><Link href="/">Ana sayfa</Link><Link href="/hizmet-verenler">Hizmet verenler</Link></NavMenuBar>
+      </nav>
+      <div className={styles.shellActions}><Link className={styles.newButton} href="/talep-olustur">＋ Yeni talep</Link>{user && <AccountMenu compact user={user} workspace="buyer" />}</div>
+    </div></header>
 
     <section className={styles.content}>
-      <header className={styles.topbar}><div><span>Güvenli pazar yeri</span><b>•</b><small>İletişim bilgilerin yalnızca kabul ettiğin hizmet verene açılır.</small></div><div><Link href="/">Pazaryerine dön</Link><Link className={styles.newButton} href="/talep-olustur">＋ Yeni talep</Link></div></header>
       <div className={styles.canvas} id="ozet">
         <section className={styles.welcome}><div><span>BUGÜNÜN ÖZETİ</span><h1>Merhaba {user?.name.split(" ")[0]},<br /><em>doğru teklifi birlikte seçelim.</em></h1><p>Taleplerindeki hareketleri, gelen teklifleri ve tamamlanan işleri tek ekrandan yönet.</p></div><aside><span>AKTİF TALEPLER</span><strong>{activeCount}</strong><p>{totalOffers} teklif karşılaştırılmayı bekliyor</p><a href="#taleplerim">Taleplere git ↓</a></aside></section>
 
@@ -134,18 +156,20 @@ export function CustomerDashboard() {
           <div className={styles.requestsArea}>
             <header className={styles.sectionHead}><div><span>TALEP PORTFÖYÜ</span><h2>Taleplerim</h2></div><div>{(["all", "active", "completed"] as const).map((value) => <button key={value} className={filter === value ? styles.selected : ""} onClick={() => setFilter(value)}>{value === "all" ? "Tümü" : value === "active" ? "Aktif" : "Sonuçlanan"}</button>)}</div></header>
             {notice && <p className={styles.notice}>✓ {notice}</p>}{error && <p className={styles.error}>{error}</p>}
-            <div className={styles.requestList}>{visibleRequests.length === 0 ? <div className={styles.empty}><span>◇</span><h3>Bu görünümde talep yok.</h3><Link href="/talep-olustur">Yeni talep oluştur →</Link></div> : visibleRequests.map((item) => <article className={styles.requestCard} key={item.id}>
+            <div className={styles.searchRow}>
+              <label>⌕<input onChange={(event) => setSearch(event.target.value)} placeholder="Talep başlığı, referans veya konum ara…" value={search} /></label>
+              {requestCategories.length > 1 && <select onChange={(event) => setCategoryFilter(event.target.value)} value={categoryFilter}>
+                <option value="">Tüm kategoriler</option>
+                {requestCategories.map((item) => <option key={item.name} value={item.name}>{item.icon} {item.name}</option>)}
+              </select>}
+            </div>
+
+            <div className={styles.requestList}>{visibleRequests.length === 0 ? <div className={styles.empty}><span>◇</span><h3>{requests.length === 0 ? "Henüz talep oluşturmadın." : "Bu filtrede talep yok."}</h3><Link href="/talep-olustur">Yeni talep oluştur →</Link></div> : visibleRequests.map((item) => <article className={styles.requestCard} key={item.id}>
               <header><div><span style={{ color: item.category.color, background: `${item.category.color}12` }}>{item.category.icon}</span><p><small>{item.category.name} · {item.reference}</small><strong>{item.title}</strong></p></div><b className={styles[item.status]}><i />{status[item.status] ?? item.status}</b></header>
               <p>{item.description}</p>
               <div className={styles.requestMeta}><span>⌖ <b>{item.location.district.name}, {item.location.city.name}</b></span><span>₺ <b>{money(item.budget.min)} – {money(item.budget.max)}</b></span><span>◷ <b>{date(item.created_at)}</b></span></div>
               <div className={styles.progress}><span className={styles.done}>Talep yayınlandı</span><i /><span className={item.offer_count ? styles.done : ""}>{item.offer_count} teklif geldi</span><i /><span className={item.status === "accepted" ? styles.done : ""}>Hizmet veren seçildi</span></div>
-              <footer><p><strong>{item.offer_count}</strong><span>gelen teklif</span></p><div><button onClick={() => toggleOffers(item)}>{expanded === item.id ? "Teklifleri kapat" : "Teklifleri karşılaştır"} →</button>{["open", "in_negotiation"].includes(item.status) && <button className={styles.ghost} disabled={busy === -item.id} onClick={() => cancel(item)}>Talebi iptal et</button>}</div></footer>
-              {expanded === item.id && <div className={styles.offers}><header><span>TEKLİF KARŞILAŞTIRMA</span><b>{offers[item.id]?.length ?? 0} profesyonel</b></header>{(offers[item.id] ?? []).length === 0 ? <p className={styles.noOffer}>Henüz teklif gelmedi. Talebin uygun profesyonellere gösteriliyor.</p> : <div className={styles.offerGrid}>{offers[item.id].map((offer) => <article className={`${styles.offer} ${styles[offer.status]}`} key={offer.id}>
-                <header><span>{(offer.seller.company_name || offer.seller.name).slice(0, 2).toLocaleUpperCase("tr-TR")}</span><div><strong>{offer.seller.company_name || offer.seller.name}</strong><small>✓ Doğrulanmış hizmet veren</small></div><b>{offerStatus[offer.status]}</b></header><p>{offer.message}</p><strong className={styles.offerPrice}>{money(offer.price)}</strong>
-                {offer.status === "pending" && <footer><button onClick={() => decide(offer, "rejected")}>Reddet</button><button className={styles.accept} onClick={() => decide(offer, "accepted")}>{busy === offer.id ? "İşleniyor…" : "Kabul et"}</button></footer>}
-                {offer.status === "accepted" && <div className={styles.acceptedInfo}>{offer.seller.contact && <p><a href={`tel:${offer.seller.contact.phone}`}>{offer.seller.contact.phone}</a><a href={`mailto:${offer.seller.contact.email}`}>{offer.seller.contact.email}</a></p>}{offer.review ? <div className={styles.reviewDone}><strong>{"★".repeat(offer.review.rating)}{"☆".repeat(5 - offer.review.rating)}</strong><span>{offer.review.comment || "Değerlendirildi"}</span></div> : <button onClick={() => setReviewOffer(reviewOffer === offer.id ? null : offer.id)}>Hizmeti değerlendir ★</button>}</div>}
-                {reviewOffer === offer.id && !offer.review && <div className={styles.reviewForm}><div>{[1, 2, 3, 4, 5].map((value) => <button className={value <= rating ? styles.starActive : ""} key={value} onClick={() => setRating(value)}>★</button>)}</div><textarea value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Deneyimini kısaca anlat…"/><button onClick={() => submitReview(offer)} disabled={busy === offer.id}>Değerlendirmeyi yayınla</button></div>}
-              </article>)}</div>}</div>}
+              <footer><p><strong>{item.offer_count}</strong><span>gelen teklif</span></p><div><button disabled={item.offer_count === 0} onClick={() => openCompare(item)}>{item.offer_count === 0 ? "Teklif bekleniyor" : "Teklifleri karşılaştır →"}</button>{["open", "in_negotiation"].includes(item.status) && <button className={styles.ghost} disabled={busy === -item.id} onClick={() => cancel(item)}>Talebi iptal et</button>}</div></footer>
             </article>)}</div>
           </div>
           <aside className={styles.rightRail}>
@@ -156,5 +180,63 @@ export function CustomerDashboard() {
         </section>
       </div>
     </section>
+    {compareRequest && <Modal
+      onClose={() => { setCompareRequest(null); setReviewOffer(null); }}
+      open
+      size="xl"
+      subtitle={`${compareRequest.category.name} · ${compareRequest.location.district.name}, ${compareRequest.location.city.name} · bütçe ${money(compareRequest.budget.min)} – ${money(compareRequest.budget.max)}`}
+      title={compareRequest.title}
+    >
+      {(() => {
+        const rows = offers[compareRequest.id] ?? [];
+        if (rows.length === 0) return <p className={styles.noOffer}>Henüz teklif gelmedi. Talebin uygun profesyonellere gösteriliyor.</p>;
+        const prices = rows.map((row) => Number(row.price));
+        const lowest = Math.min(...prices);
+        const highest = Math.max(...prices);
+        const average = prices.reduce((total, value) => total + value, 0) / prices.length;
+        return <>
+          <div className={styles.compareStats}>
+            <div><span>GELEN TEKLİF</span><strong>{rows.length}</strong></div>
+            <div><span>EN DÜŞÜK</span><strong>{money(String(lowest))}</strong></div>
+            <div><span>ORTALAMA</span><strong>{money(String(average))}</strong></div>
+            <div><span>EN YÜKSEK</span><strong>{money(String(highest))}</strong></div>
+          </div>
+
+          <div className={styles.offerGrid}>{rows.map((offer) => {
+            const name = offer.seller.company_name || offer.seller.name;
+            const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR");
+            const isLowest = Number(offer.price) === lowest && rows.length > 1;
+            return <article className={`${styles.offer} ${styles[offer.status]}`} key={offer.id}>
+              <header>
+                <span>{initials}</span>
+                <div><strong>{name}</strong><small>✓ Doğrulanmış hizmet veren</small></div>
+                <b>{offerStatus[offer.status]}</b>
+              </header>
+              <Link className={styles.profileLink} href={`/satici/${offer.seller.id}`} target="_blank">Profili ve geçmiş işlerini gör ↗</Link>
+              <p>{offer.message}</p>
+              <div className={styles.priceRow}>
+                <strong className={styles.offerPrice}>{money(offer.price)}</strong>
+                {isLowest && <em className={styles.bestPrice}>EN DÜŞÜK TEKLİF</em>}
+              </div>
+              {offer.status === "pending" && <footer>
+                <button disabled={busy === offer.id} onClick={() => decide(offer, "rejected")}>Reddet</button>
+                <button className={styles.accept} disabled={busy === offer.id} onClick={() => decide(offer, "accepted")}>{busy === offer.id ? "İşleniyor…" : "Kabul et"}</button>
+              </footer>}
+              {offer.status === "accepted" && <div className={styles.acceptedInfo}>
+                {offer.seller.contact && <p><a href={`tel:${offer.seller.contact.phone}`}>{offer.seller.contact.phone}</a><a href={`mailto:${offer.seller.contact.email}`}>{offer.seller.contact.email}</a></p>}
+                {offer.review
+                  ? <div className={styles.reviewDone}><strong>{"★".repeat(offer.review.rating)}{"☆".repeat(5 - offer.review.rating)}</strong><span>{offer.review.comment || "Değerlendirildi"}</span></div>
+                  : <button onClick={() => setReviewOffer(reviewOffer === offer.id ? null : offer.id)}>Hizmeti değerlendir ★</button>}
+              </div>}
+              {reviewOffer === offer.id && !offer.review && <div className={styles.reviewForm}>
+                <div>{[1, 2, 3, 4, 5].map((value) => <button className={value <= rating ? styles.starActive : ""} key={value} onClick={() => setRating(value)} type="button">★</button>)}</div>
+                <textarea onChange={(event) => setComment(event.target.value)} placeholder="Deneyimini kısaca anlat…" value={comment} />
+                <button disabled={busy === offer.id} onClick={() => submitReview(offer)} type="button">Değerlendirmeyi yayınla</button>
+              </div>}
+            </article>;
+          })}</div>
+        </>;
+      })()}
+    </Modal>}
   </main>;
 }

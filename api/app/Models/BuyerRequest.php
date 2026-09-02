@@ -58,4 +58,9 @@ class BuyerRequest extends Model
     {
         return $this->hasMany(Offer::class, 'request_id');
     }
+
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(RequestFavorite::class, 'request_id');
+    }
 }

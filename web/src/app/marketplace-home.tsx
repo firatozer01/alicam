@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { AccountMenu } from "@/components/account-menu";
+import { NavMenuBar } from "@/components/listing/nav-menu";
+import { ActiveChips, ListSkeleton, Pagination, ResultBar } from "@/components/listing/listing-chrome";
+import list from "@/components/listing/listing.module.css";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import styles from "./marketplace.module.css";
 
@@ -17,15 +20,33 @@ type PublicRequest = {
 type PublicSeller = {
   id: number; name: string; company_name: string | null; description: string; rating: number;
   review_count: number; is_featured: boolean; categories: Omit<Category, "id">[];
-  services: { title: string; price_from: string | null }[];
+  services: { id: number; title: string; price_from: string | null; cover_url: string | null }[];
+  portfolio_count: number;
+};
+type FeaturedService = {
+  id: number; title: string; description: string; price_from: string | null; delivery_time: string | null;
+  cover_url: string | null; is_featured: boolean; category: Omit<Category, "id"> | null; seller: { id: number; name: string };
+};
+type RequestFacets = {
+  categories: { slug: string; name: string; icon: string; color: string; count: number }[];
+  cities: { id: number; name: string; count: number }[];
+  budget: { min: number; max: number };
 };
 type MarketplaceResponse = {
   data: {
-    requests: PublicRequest[]; sellers: PublicSeller[];
+    requests: PublicRequest[]; sellers: PublicSeller[]; featured_services: FeaturedService[];
     stats: { active_requests: number; approved_sellers: number; reviews: number };
   };
+  facets: RequestFacets;
   meta: { current_page: number; last_page: number; total: number };
 };
+
+const sortOptions = [
+  { value: "latest", label: "En yeni" },
+  { value: "popular", label: "En çok teklif alan" },
+  { value: "budget_high", label: "Bütçe: yüksekten" },
+  { value: "budget_low", label: "Bütçe: düşükten" },
+];
 
 const categoryPastels = ["#F3ECFE", "#ECEDFD", "#E7FAFC", "#FDECF4", "#FEF3E2", "#E9F9EE", "#F6EDFD", "#E6F7F5"];
 
@@ -52,10 +73,15 @@ export function MarketplaceHome() {
   const [marketplace, setMarketplace] = useState<MarketplaceResponse | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [category, setCategory] = useState("");
+  const [city, setCity] = useState("");
+  const [budget, setBudget] = useState({ min: "", max: "" });
+  const [appliedBudget, setAppliedBudget] = useState({ min: "", max: "" });
   const [sort, setSort] = useState("latest");
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [railOpen, setRailOpen] = useState(false);
+  const [detailedSearch, setDetailedSearch] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [feedOffset, setFeedOffset] = useState(0);
@@ -81,13 +107,22 @@ export function MarketplaceHome() {
     let active = true;
     const params = new URLSearchParams({ sort, page: String(page) });
     if (category) params.set("category", category);
+    if (city) params.set("city_id", city);
     if (search) params.set("q", search);
+    if (appliedBudget.min) params.set("budget_min", appliedBudget.min);
+    if (appliedBudget.max) params.set("budget_max", appliedBudget.max);
     apiRequest<MarketplaceResponse>(`/marketplace?${params}`)
       .then((response) => { if (active) { setMarketplace(response); setError(""); setFeedOffset(0); } })
       .catch((requestError: unknown) => { if (active) setError(firstApiError(requestError)); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [category, page, search, sort]);
+  }, [appliedBudget, category, city, page, search, sort]);
+
+  // Bütçe alanları her tuşta istek atmasın.
+  useEffect(() => {
+    const timer = setTimeout(() => setAppliedBudget(budget), 450);
+    return () => clearTimeout(timer);
+  }, [budget]);
 
   useEffect(() => {
     const root = pageRef.current;
@@ -162,19 +197,39 @@ export function MarketplaceHome() {
     document.querySelector("#talepler")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const facets = useMemo(() => marketplace?.facets ?? { categories: [], cities: [], budget: { min: 0, max: 0 } }, [marketplace]);
+
+  const activeChips = useMemo(() => {
+    const chips: { key: string; label: string; onClear: () => void }[] = [];
+    if (search) chips.push({ key: "q", label: `“${search}”`, onClear: () => { setLoading(true); setSearch(""); setSearchInput(""); setPage(1); } });
+    if (category) chips.push({ key: "category", label: facets.categories.find((item) => item.slug === category)?.name ?? category, onClear: () => chooseCategory("") });
+    if (city) chips.push({ key: "city", label: facets.cities.find((item) => String(item.id) === city)?.name ?? city, onClear: () => { setLoading(true); setCity(""); setPage(1); } });
+    if (appliedBudget.min || appliedBudget.max) chips.push({ key: "budget", label: `Bütçe ${appliedBudget.min || "0"}–${appliedBudget.max || "∞"} ₺`, onClear: () => setBudget({ min: "", max: "" }) });
+    return chips;
+  }, [appliedBudget, category, city, facets, search]);
+
+  const resetFilters = () => {
+    setLoading(true); setSearch(""); setSearchInput(""); setCategory(""); setCity("");
+    setBudget({ min: "", max: "" }); setSort("latest"); setPage(1);
+  };
+
   return <main className={styles.page} ref={pageRef}>
     <div className={styles.announce}>⚡ Yeni nesil talep pazaryeri — talep oluşturmak tamamen ücretsiz.</div>
     <nav className={styles.nav}>
       <div className={styles.wrap}>
         <Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
         <div className={styles.navLinks}>
-          <div className={`${styles.navItem} ${styles.cats}`}>Kategoriler <span>⌄</span>
-            <div className={styles.mega}>
-              <header><i>🗂</i><div><strong>Kategoriler</strong><small>Talep oluşturabileceğin tüm alanlar</small></div><a href="#kategoriler">Tüm kategoriler →</a></header>
-              <div className={styles.megaGrid}>{categories.slice(0, 8).map((item, index) => <button key={item.id} onClick={() => chooseCategory(item.slug)}><i style={{ background: item.color }}>{item.icon}</i><span><strong>{item.name}</strong><small style={{ background: categoryPastels[index % categoryPastels.length], color: item.color }}>Aktif talepleri gör</small></span></button>)}</div>
-              <footer><a href="#talepler">⌕ Talep ara</a><a href="#nasil-calisir">💬 Nasıl çalışır</a><Link href={sellerHref}>🤝 {sellerLabel}</Link><a href="#one-cikanlar">★ Öne çıkanlar</a></footer>
-            </div>
-          </div>
+          <NavMenuBar activeKey={category} menus={[
+            { key: "categories", label: "Kategoriler", panelTitle: "Kategoriler", panelHint: "Talep oluşturabileceğin tüm alanlar", items: categories.map((item) => ({
+              key: item.slug,
+              label: item.name,
+              icon: item.icon,
+              hint: `${facets.categories.find((facet) => facet.slug === item.slug)?.count ?? 0} açık talep`,
+              onSelect: () => chooseCategory(item.slug),
+            })) },
+          ]}>
+          </NavMenuBar>
+          <Link className={styles.navItem} href="/hizmet-verenler">Hizmet verenler</Link>
           <a className={styles.navItem} href="#nasil-calisir">Nasıl çalışır</a>
           <a className={styles.navItem} href="#hizmet-veren">Hizmet verenler için</a>
         </div>
@@ -202,6 +257,59 @@ export function MarketplaceHome() {
       <div className={styles.wrap}><div><strong>{counters.requests.toLocaleString("tr-TR")}+</strong><span>aktif talep</span></div><div><strong>{counters.sellers.toLocaleString("tr-TR")}+</strong><span>onaylı satıcı</span></div><div><strong>{counters.cities}</strong><span>ilde hizmet</span></div><div><strong>0 ₺</strong><span>müşteriden alınan ücret</span></div></div>
     </section>
 
+    <section className={styles.marketSection} id="talepler"><div className={styles.wrap}><header className={`${styles.marketHead} ${styles.reveal}`}><div><span>PAZARYERİNDE ŞİMDİ</span><h2>Güncel talepler</h2><p>Filtrele, karşılaştır, ilgilendiğin talebi incele.</p></div></header>
+      {error && <p className={styles.error}>{error}</p>}
+      <div className={list.shell}>
+        <div>
+          <button className={list.railToggle} onClick={() => setRailOpen(!railOpen)} type="button">☰ Kategoriler{activeChips.length ? ` (${activeChips.length})` : ""}</button>
+          <div className={railOpen ? "" : list.railHidden}>
+            <aside className={list.rail}>
+              <div className={list.railTop}><strong>KATEGORİLER</strong><button className={list.railReset} disabled={!activeChips.length} onClick={resetFilters} type="button">Temizle</button></div>
+              <div className={list.tree}>
+                <button className={`${list.treeRow} ${!category ? list.treeActive : ""}`} onClick={() => chooseCategory("")} type="button">
+                  <i style={{ background: "#f1eeff", color: "#4f46e5" }}>◎</i><span>Tüm talepler</span><b>{facets.categories.reduce((total, item) => total + item.count, 0)}</b>
+                </button>
+                {facets.categories.map((item) => <button className={`${list.treeRow} ${category === item.slug ? list.treeActive : ""}`} key={item.slug} onClick={() => chooseCategory(item.slug)} type="button">
+                  <i style={{ background: `${item.color}15`, color: item.color }}>{item.icon}</i><span>{item.name}</span><b>{item.count}</b>
+                </button>)}
+              </div>
+              <div className={list.railTop}><strong>ŞEHİR</strong></div>
+              <div className={list.tree}>
+                <button className={`${list.treeRow} ${!city ? list.treeActive : ""}`} onClick={() => { setLoading(true); setCity(""); setPage(1); }} type="button"><i style={{ background: "#f6f5fc" }}>◎</i><span>Tümü</span><b>{facets.cities.reduce((total, item) => total + item.count, 0)}</b></button>
+                {facets.cities.map((item) => <button className={`${list.treeRow} ${city === String(item.id) ? list.treeActive : ""}`} key={item.id} onClick={() => { setLoading(true); setCity(String(item.id)); setPage(1); }} type="button"><i style={{ background: "#f6f5fc" }}>📍</i><span>{item.name}</span><b>{item.count}</b></button>)}
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <div>
+          <form className={styles.marketSearch} onSubmit={submitSearch}>
+            <label>⌕<input onChange={(event) => setSearchInput(event.target.value)} placeholder="Talep başlığı, konum veya kategori ara…" value={searchInput} /></label>
+            <button type="submit">Ara</button>
+            <button className={detailedSearch ? styles.detailedOn : ""} onClick={() => setDetailedSearch(!detailedSearch)} type="button">Detaylı Arama {detailedSearch ? "▴" : "▾"}</button>
+          </form>
+          {detailedSearch && <div className={styles.detailedPanel}>
+            <label>Şehir<select onChange={(event) => { setLoading(true); setCity(event.target.value); setPage(1); }} value={city}><option value="">Tümü</option>{facets.cities.map((item) => <option key={item.id} value={item.id}>{item.name} ({item.count})</option>)}</select></label>
+            <label>En az bütçe<input inputMode="numeric" onChange={(event) => setBudget({ min: event.target.value, max: budget.max })} placeholder={String(facets.budget.min)} value={budget.min} /></label>
+            <label>En çok bütçe<input inputMode="numeric" onChange={(event) => setBudget({ min: budget.min, max: event.target.value })} placeholder={String(facets.budget.max)} value={budget.max} /></label>
+            <button onClick={resetFilters} type="button">Temizle</button>
+          </div>}
+
+          <ResultBar noun="açık talep" onSort={(value) => { setLoading(true); setSort(value); setPage(1); }} sort={sort} sortOptions={sortOptions} total={marketplace?.meta.total ?? 0} />
+          <ActiveChips chips={activeChips} />
+          {loading ? <ListSkeleton /> : (marketplace?.data.requests.length ?? 0) === 0 ? <div className={list.table}><div className={list.empty}>Bu filtrede açık talep bulunmuyor.</div></div> : <div className={list.tiles}>
+            {(marketplace?.data.requests ?? []).map((item, index) => <Link className={list.tile} href={inspectHref} key={item.id} style={{ animationDelay: `${Math.min(index, 12) * 24}ms` }}>
+              <div className={list.tileArt} style={{ background: `${item.category.color}12`, color: item.category.color }}>{item.category.icon}</div>
+              <h3 className={list.tileTitle}>{item.title}</h3>
+              <span className={list.tilePrice}>{money(item.budget.min)} – {money(item.budget.max)}</span>
+              <div className={list.tileMeta}><span>{item.location.district.name}</span><span>{item.offer_count} teklif</span></div>
+            </Link>)}
+          </div>}
+          <Pagination lastPage={marketplace?.meta.last_page ?? 1} onPage={(next) => { setLoading(true); setPage(next); document.querySelector("#talepler")?.scrollIntoView({ behavior: "smooth" }); }} page={marketplace?.meta.current_page ?? 1} />
+        </div>
+      </div>
+    </div></section>
+
     <section className={styles.categorySection} id="kategoriler">
       <div className={styles.wrap}><header className={`${styles.sectionHead} ${styles.reveal}`}><span>KATEGORİLER</span><h2>Aradığın her şey için tek bir talep yeter.</h2><p>Kategori seç, birkaç soruyu cevapla, talebin ilgili satıcı ağına düşsün.</p></header>
         <div className={styles.categoryGrid}>{categories.slice(0, 8).map((item, index) => <button className={styles.reveal} key={item.id} onClick={() => chooseCategory(item.slug)} style={{ background: categoryPastels[index % categoryPastels.length] }}><i style={{ background: item.color }}>{item.icon}</i><strong>{item.name}</strong><p>Uygun ve doğrulanmış hizmet verenlerden teklif al</p><footer><span style={{ color: item.color }}>{category === item.slug ? "Seçili kategori" : "Talepleri keşfet"}</span><b style={{ color: item.color }}>→</b></footer></button>)}</div>
@@ -214,14 +322,45 @@ export function MarketplaceHome() {
       <div className={`${styles.feedCard} ${styles.reveal}`}><header><div><i /> <strong>Canlı akış</strong></div><a href="#talepler">Tüm talepleri gör →</a></header><div>{feedItems.map((item, index) => <article className={`${styles.feedRow} ${index === 0 ? styles.feedNew : ""}`} key={`${feedOffset}-${item.id}`} style={{ animationDelay: `${index * 55}ms` }}><span style={{ background: `${item.category.color}15`, color: item.category.color }}>{item.category.icon} {item.category.name}</span><div><strong>{item.title}</strong><small>{item.location.city.name}, {item.location.district.name} · {relativeTime(item.created_at)}</small></div><b>{money(item.budget.min)} – {money(item.budget.max)}</b><em>{item.offer_count} teklif</em></article>)}</div></div>
     </div></section>
 
-    <section className={styles.marketSection} id="talepler"><div className={styles.wrap}><header className={`${styles.marketHead} ${styles.reveal}`}><div><span>PAZARYERİNDE ŞİMDİ</span><h2>Güncel talepler</h2><p><b>{marketplace?.meta.total ?? 0}</b> açık talep bulundu</p></div><label>Sırala <select value={sort} onChange={(event) => { setLoading(true); setSort(event.target.value); setPage(1); }}><option value="latest">En yeni</option><option value="popular">En çok teklif alan</option><option value="budget_high">Bütçe: yüksekten</option><option value="budget_low">Bütçe: düşükten</option></select></label></header>
-      <form className={styles.marketToolbar} onSubmit={submitSearch}><label>⌕<input value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder="Talep başlığı, konum veya kategori ara…" /></label><button type="submit">Ara</button><button type="button" className={!category ? styles.active : ""} onClick={() => chooseCategory("")}>Tümü</button>{categories.slice(0, 6).map((item) => <button type="button" className={category === item.slug ? styles.active : ""} key={item.id} onClick={() => chooseCategory(item.slug)}>{item.icon} {item.name}</button>)}</form>
-      {error && <p className={styles.error}>{error}</p>}
-      {loading ? <div className={styles.loading}><i /><span>Talepler hazırlanıyor…</span></div> : <div className={styles.requestList}>{(marketplace?.data.requests ?? []).map((item) => <article className={`${styles.requestCard} ${styles.reveal}`} key={item.id}><header><span style={{ background: `${item.category.color}15`, color: item.category.color }}>{item.category.icon} {item.category.name}</span><small><i /> {relativeTime(item.created_at)}</small><em className={item.offer_count > 7 ? styles.competitionHigh : item.offer_count > 3 ? styles.competitionMid : styles.competitionLow}>{item.offer_count > 7 ? "Yoğun" : item.offer_count > 3 ? "Orta" : "Düşük"} rekabet · {item.offer_count} teklif</em></header><h3>{item.title}</h3><p>{item.summary}</p><div className={styles.requestMeta}><span>📍 {item.location.district.name}, {item.location.city.name}</span><span>№ {item.reference}</span></div><footer><div><span>TAHMİNİ BÜTÇE</span><strong>{money(item.budget.min)} – {money(item.budget.max)}</strong></div><Link href={inspectHref}>{isSeller ? "Talebi incele" : user ? "Satıcı olarak katıl" : "Giriş yap ve incele"} →</Link></footer></article>)}{(marketplace?.data.requests.length ?? 0) === 0 && <div className={styles.empty}>Bu filtrede açık talep bulunmuyor.</div>}</div>}
-      {(marketplace?.meta.last_page ?? 1) > 1 && <nav className={styles.pagination}><button disabled={page <= 1} onClick={() => { setLoading(true); setPage((current) => Math.max(1, current - 1)); }}>← Önceki</button><span><b>{marketplace?.meta.current_page}</b> / {marketplace?.meta.last_page}</span><button disabled={page >= (marketplace?.meta.last_page ?? 1)} onClick={() => { setLoading(true); setPage((current) => current + 1); }}>Sonraki →</button></nav>}
-    </div></section>
+    <section className={styles.featured} id="one-cikanlar"><div className={styles.wrap}>
+      <header className={`${styles.marketHead} ${styles.reveal}`}>
+        <div><span>GÜVENLE KARAR VER</span><h2>Öne çıkan hizmet verenler</h2><p>Gerçek müşteri puanları, doğrulanmış profiller ve tamamlanmış işler.</p></div>
+        <Link className={styles.seeAll} href="/hizmet-verenler">Tüm hizmet verenler →</Link>
+      </header>
+      <div className={styles.providerRow}>{(marketplace?.data.sellers ?? []).slice(0, 5).map((seller) => {
+        const name = seller.company_name || seller.name;
+        const initials = name.split(/\\s+/).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR");
+        return <article className={`${styles.provider} ${styles.reveal} ${seller.is_featured ? styles.providerFeatured : ""}`} key={seller.id}>
+          {seller.is_featured && <b className={styles.sellerFlag}>★ ÖNE ÇIKAN</b>}
+          <span className={styles.providerAvatar}>{initials || "A"}<i /></span>
+          <strong>{name}</strong>
+          <small>{seller.categories.slice(0, 2).map((item) => item.name).join(" · ") || "Hizmet veren"}</small>
+          <div className={styles.sellerRating}>{seller.review_count > 0 ? <><em>★</em><b>{seller.rating.toFixed(1)}</b><span>({seller.review_count})</span></> : <span className={styles.sellerNew}>Yeni katıldı</span>}</div>
+          <p className={styles.providerStat}>🖼 <b>{seller.portfolio_count}</b> tamamlanan iş · ▦ <b>{seller.services.length}</b> hizmet</p>
+          <Link className={styles.providerLink} href={`/satici/${seller.id}`}>Profile git</Link>
+        </article>;
+      })}</div>
 
-    <section className={styles.featured} id="one-cikanlar"><div className={styles.wrap}><header className={`${styles.marketHead} ${styles.reveal}`}><div><span>GÜVENLE KARAR VER</span><h2>Öne çıkan profesyoneller</h2><p>Gerçek müşteri puanları, doğrulanmış profiller ve açık hizmet kapsamları.</p></div><Link href={sellerHref}>{isSeller ? "Vitrinini yönet" : "Sen de hizmet ver"} →</Link></header><div className={styles.sellerGrid}>{(marketplace?.data.sellers ?? []).slice(0, 6).map((seller) => <article className={styles.reveal} key={seller.id}><header><i>{(seller.company_name || seller.name).slice(0, 2).toLocaleUpperCase("tr-TR")}</i><div><strong>{seller.company_name || seller.name}</strong><small>✓ Doğrulanmış profesyonel</small></div>{seller.is_featured && <b>ÖNE ÇIKAN</b>}</header><div className={styles.rating}>★★★★★ <strong>{seller.rating || "Yeni"}</strong><span>{seller.review_count} değerlendirme</span></div><p>{seller.description}</p><footer>{seller.categories.slice(0, 3).map((item) => <span key={item.slug}>{item.icon} {item.name}</span>)}</footer></article>)}</div></div></section>
+      <header className={`${styles.marketHead} ${styles.reveal} ${styles.headGap}`}>
+        <div><span>KATALOGDAN SEÇ</span><h2>Öne çıkan hizmetler</h2><p>Hizmet verenlerin kapak görselli kartları; başlangıç fiyatını gör, profile geç, teklif iste.</p></div>
+      </header>
+      <div className={styles.serviceRow}>{(marketplace?.data.featured_services ?? []).map((service) => <Link className={`${styles.serviceTile} ${styles.reveal}`} href={`/satici/${service.seller.id}`} key={service.id}>
+        <div className={styles.serviceTileCover} style={!service.cover_url && service.category ? { background: `linear-gradient(135deg, ${service.category.color}22, ${service.category.color}55)` } : undefined}>
+          {service.cover_url
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img alt={service.title} loading="lazy" src={service.cover_url} />
+            : <span>{service.category?.icon ?? "▦"}</span>}
+          {service.is_featured && <b className={styles.sellerFlag}>★ ÖNE ÇIKAN</b>}
+        </div>
+        <div className={styles.serviceTileBody}>
+          <small>{service.seller.name}{service.category ? ` · ${service.category.name}` : ""}</small>
+          <strong>{service.title}</strong>
+          <p>{service.description}</p>
+          <footer><em>{service.price_from ? `${money(service.price_from)} başlangıç` : "Teklife göre"}</em>{service.delivery_time && <span>◷ {service.delivery_time}</span>}</footer>
+        </div>
+      </Link>)}</div>
+      {(marketplace?.data.featured_services.length ?? 0) === 0 && <p className={styles.emptyNote}>Henüz yayında hizmet yok.</p>}
+    </div></section>
 
     <section className={styles.sellerBand} id="hizmet-veren"><div className={styles.aurora}><i className={styles.blobOne} /><i className={styles.blobTwo} /></div><div className={styles.wrap}><div className={styles.reveal}><span>HİZMET VERENLER İÇİN</span><h2>Müşteriyi arama, gelen talebe teklif ver.</h2><ul><li><i>01</i><div><strong>Ücretsiz üye ol, firmanı tanıt</strong><p>Firma bilgilerini ve hizmet verdiğin kategorileri ekle.</p></div></li><li><i>02</i><div><strong>Şehir ve ilçeni seç</strong><p>Yalnızca hizmet verdiğin bölgelerdeki talepleri gör.</p></div></li><li><i>03</i><div><strong>Uygun talebe teklif ver</strong><p>Kontör yalnızca ilk teklif veya detay açma işleminde düşer.</p></div></li></ul><Link className={styles.buttonGrad} href={sellerHref}>{sellerLabel} →</Link></div><aside className={styles.reveal}><span>KONTÖR MALİYETİ · KATEGORİYE GÖRE</span>{categories.slice(0, 6).map((item, index) => <p key={item.id}><b>{item.icon} {item.name}</b><strong>{index + 1} kontör</strong></p>)}</aside></div></section>
 

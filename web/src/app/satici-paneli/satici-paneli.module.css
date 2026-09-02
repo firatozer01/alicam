@@ -13,3 +13,170 @@
 @keyframes sellerTopIn{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}@keyframes sellerSideIn{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}@keyframes sellerViewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes sellerCardIn{from{opacity:0;transform:translateY(18px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes unlockReveal{from{opacity:0;transform:scaleY(.7) translateY(-8px)}to{opacity:1;transform:scaleY(1) translateY(0)}}@keyframes expandReveal{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}@keyframes buttonFlow{to{background-position:-220% 0}}
 @media(max-width:1050px){.profileHero{grid-template-columns:72px 1fr}.profileHero>aside{grid-column:1/-1}.profileAvatar{width:68px;height:68px;border-radius:19px}.profileGrid{grid-template-columns:1fr 1fr}.profileGrid article:last-child{grid-column:1/-1}}
 @media(max-width:700px){.lockedPreview>div{padding-right:0}.lockedPreview>aside{position:relative;inset:auto;width:auto;margin-top:8px}.profileHero{grid-template-columns:1fr;text-align:center}.profileAvatar{margin:auto}.profileHero>div:nth-child(2)>div{justify-content:center;flex-wrap:wrap}.profileGrid{grid-template-columns:1fr}.profileGrid article:last-child{grid-column:auto}}
+
+/* Liste satırı bağlamı: detay ve teklif formu satırın tam genişliğini kaplar. */
+.rowExtra{grid-column:1/-1}
+.rowExtra .details{margin:13px 0 0;padding:18px;border:1px solid #bdebf0;border-radius:12px;background:#fbfeff}
+.rowExtra .offerForm{margin:13px 0 0;padding:16px;border:1px solid var(--line);border-radius:12px;background:#fafafe}
+.linkButton{border:0;background:none;padding:0;font:inherit;font-size:12px;font-weight:700;color:#4f46e5;cursor:pointer;text-decoration:underline}
+.linkButton:hover{color:#7c3aed}
+
+/* Grid öğesinin varsayılan min-width:auto değeri, yatay menünün kendi
+   overflow-x:auto kaydırmasını engelleyip sayfayı yatay taşırıyordu. */
+@media(max-width:900px){.sidebar{min-width:0}}
+
+/* Gezinme sol menüden üst bardaki açılır menülere taşındı; dar ekranda
+   gizlenirse hiç gezinme kalmaz. */
+@media(max-width:900px){
+  .topbarInner{gap:14px}
+  .topbar nav{display:flex;gap:4px}
+  .topbar nav a{white-space:nowrap}
+  .creditPill{white-space:nowrap}
+}
+/* Dar ekranda üst bar sıkışmasın; ana sayfaya logodan da gidilir. */
+@media(max-width:900px){.topbar nav>a{display:none}}
+
+/* Kart bağlamı: detay ve teklif formu kartın içinde tam genişlikte akar. */
+.details,.offerForm{margin:11px 0 0;border-radius:12px;border:1px solid var(--line);border-top:1px solid var(--line);padding:15px}
+.offerForm{grid-template-columns:1fr;background:#fafafe}
+.details{grid-template-columns:1fr;border-color:#bdebf0;background:#fbfeff}
+
+/* Sol sütundaki kartlar birbirine yapışmasın. */
+.sidebar{display:flex;flex-direction:column;gap:14px}
+
+/* Talep listesi + işlevsel yan panel */
+.listWithRail{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:14px;align-items:start}
+@media(max-width:1240px){.listWithRail{grid-template-columns:1fr}}
+
+.sideRail{display:flex;flex-direction:column;gap:12px;position:sticky;top:90px}
+.widget{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 10px 34px rgba(79,70,229,.06)}
+.widget>header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 14px;border-bottom:1px solid #f0eefb;background:#faf9ff}
+.widget>header strong{font-size:11px;font-weight:800;letter-spacing:.09em;color:#55566d}
+.widget>header button,.widget>header a{border:0;background:none;padding:0;font:inherit;font-size:11.5px;font-weight:700;color:#4f46e5;cursor:pointer;text-decoration:none}
+.widgetBody{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.widgetEmpty{padding:16px 14px;font-size:12.5px;color:#8a89a6;text-align:center}
+
+.miniRow{display:flex;align-items:center;gap:9px;width:100%;border:0;background:none;padding:7px 8px;border-radius:9px;font:inherit;text-align:left;cursor:pointer;transition:background .14s ease}
+.miniRow:hover{background:#f6f5fc}
+.miniRow>i{font-style:normal;width:26px;height:26px;display:grid;place-items:center;border-radius:7px;font-size:12px;flex:none;background:#f1eeff;color:#4f46e5}
+.miniRow>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.miniRow strong{font-size:12.5px;font-weight:650;color:#15162d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.miniRow small{font-size:11px;color:#8a89a6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.miniRow>b{font-family:var(--font-plex),ui-monospace,monospace;font-size:12px;font-weight:700;color:#15162d;flex:none}
+.miniNeg{color:#be185d}
+.miniPos{color:#15803d}
+
+.scopeChips{display:flex;flex-wrap:wrap;gap:5px;padding:2px 2px 4px}
+.scopeChips span{background:#f6f5fc;border:1px solid #eeecf9;border-radius:7px;padding:3px 8px;font-size:11.5px;color:#55566d}
+
+.promoBox{padding:13px 14px;display:flex;flex-direction:column;gap:8px;background:linear-gradient(140deg,#1b1442,#2a1f6b);color:#fff}
+.promoBox span{font-size:10px;font-weight:800;letter-spacing:.1em;color:#c4b5fd}
+.promoBox strong{font-size:14px;font-weight:700}
+.promoBox p{margin:0;font-size:12px;line-height:1.5;color:#c9c6e8}
+.promoBox button{margin-top:2px;border:0;border-radius:9px;padding:8px 12px;font:inherit;font-size:12.5px;font-weight:700;color:#15162d;background:linear-gradient(100deg,#22d3ee,#a78bfa);cursor:pointer}
+
+/* Kart üstündeki favori düğmesi */
+.favButton{margin-left:auto;border:0;background:none;padding:2px 4px;font-size:15px;line-height:1;color:#c9c7dd;cursor:pointer;transition:color .15s ease,transform .15s ease}
+.favButton:hover{color:#f59e0b;transform:scale(1.14)}
+.favOn{color:#f59e0b}
+
+/* Teklif durum sekmeleri */
+.offerTabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.offerTabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font:inherit;font-size:12.5px;font-weight:700;color:#55566d;cursor:pointer;transition:border-color .15s ease,color .15s ease,background .15s ease}
+.offerTabs button:hover{border-color:#7c3aed;color:#4f46e5}
+.offerTabs button b{font-family:var(--font-plex),ui-monospace,monospace;font-size:11px;color:#a8a6c4;margin-left:4px}
+.tabActive{background:#f1eeff!important;border-color:#ddd6fe!important;color:#4f46e5!important}
+.tabActive b{color:#4f46e5!important}
+
+/* Galeri yonetimi */
+.headActions{display:flex;align-items:center;gap:8px}
+.ghostLink{border:1px solid var(--line);border-radius:9px;padding:8px 13px;font-size:12.5px;font-weight:700;color:#4f46e5;background:#fff;text-decoration:none;white-space:nowrap}
+.ghostLink:hover{border-color:#7c3aed}
+
+.portfolioForm{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.portfolioForm label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:800;letter-spacing:.08em;color:#8a89a6}
+.portfolioForm input,.portfolioForm select,.portfolioForm textarea{border:1px solid var(--line);border-radius:9px;padding:9px 11px;font:inherit;font-size:13.5px;font-weight:400;letter-spacing:normal;color:#15162d;background:#fff;outline:none}
+.portfolioForm input:focus,.portfolioForm select:focus,.portfolioForm textarea:focus{border-color:#7c3aed}
+.portfolioForm textarea{min-height:96px;resize:vertical}
+.wide{grid-column:1/-1}
+.portfolioForm>aside{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
+.portfolioForm>aside button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 15px;font:inherit;font-size:13px;font-weight:700;color:#55566d;cursor:pointer}
+.portfolioForm>aside button:last-child{border-color:transparent;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5)}
+.portfolioForm>aside button:disabled{opacity:.6;cursor:default}
+
+.portfolioGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.portfolioCard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 10px 34px rgba(79,70,229,.06)}
+.portfolioImages{display:flex;gap:6px;flex-wrap:wrap;padding:12px 14px 0}
+.thumb{position:relative;width:74px;height:60px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb button{position:absolute;top:3px;right:3px;width:18px;height:18px;border:0;border-radius:50%;background:rgba(21,22,45,.72);color:#fff;font-size:10px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.uploadBox{width:74px;height:60px;display:grid;place-items:center;border:1px dashed #c9c7dd;border-radius:9px;cursor:pointer;transition:border-color .15s ease}
+.uploadBox:hover{border-color:#7c3aed}
+.uploadBox span{font-size:11px;font-weight:700;color:#8a89a6;text-align:center}
+
+.portfolioBody{padding:12px 14px 14px}
+.portfolioTop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.portfolioTop small{font-size:11.5px;color:#8a89a6}
+.portfolioBody h2{margin:0 0 6px;font-size:15px;font-weight:700;line-height:1.35}
+.portfolioBody p{margin:0;font-size:13px;line-height:1.6;color:#55566d;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.portfolioBody footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;padding-top:11px;border-top:1px solid #f0eefb}
+.portfolioBody footer>span{font-size:11.5px;color:#8a89a6}
+.portfolioBody footer>div{display:flex;gap:10px}
+.portfolioBody footer button{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:700;color:#4f46e5;cursor:pointer}
+.dangerLink{color:#be185d}
+
+@media(max-width:640px){.portfolioForm{grid-template-columns:1fr}}
+
+/* Galeri karti: kapak gorseli + detay */
+.coverButton{position:relative;display:block;width:100%;aspect-ratio:16/10;border:0;padding:0;background:#f6f5fc;cursor:pointer;overflow:hidden}
+.coverButton img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
+.coverButton:hover img{transform:scale(1.04)}
+.noCover{display:grid;place-items:center;width:100%;height:100%;font-size:12.5px;color:#a8a6c4}
+.coverCount{position:absolute;left:10px;bottom:10px;font-style:normal;background:rgba(21,22,45,.72);color:#fff;border-radius:99px;padding:3px 9px;font-size:11px;font-weight:700}
+.draftFlag{position:absolute;top:10px;left:10px;background:#fef3c7;color:#b45309;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:800;letter-spacing:.06em}
+.coverHint{position:absolute;inset:0;display:grid;place-items:center;background:rgba(79,70,229,.72);color:#fff;font-size:13px;font-weight:700;opacity:0;transition:opacity .18s ease}
+.coverButton:hover .coverHint{opacity:1}
+.draftCard{border-style:dashed}
+
+.detailButton{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:700;color:#4f46e5;cursor:pointer}
+.detailButton:hover{text-decoration:underline}
+
+/* Modal alt aksiyonlari */
+.modalGhost{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 14px;font:inherit;font-size:13px;font-weight:700;color:#55566d;cursor:pointer;text-decoration:none;white-space:nowrap}
+.modalGhost:hover{border-color:#7c3aed;color:#4f46e5}
+.modalGhost:disabled{opacity:.6;cursor:default}
+.modalPrimary{display:inline-flex;align-items:center;border:1px solid transparent;border-radius:9px;padding:9px 15px;font:inherit;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5);cursor:pointer;text-decoration:none;white-space:nowrap}
+.modalPrimary:disabled{opacity:.6;cursor:default}
+
+/* Modal icindeki gorsel yonetimi */
+.uploadInline{display:inline-flex;align-items:center;border:1px dashed #c9c7dd;border-radius:9px;padding:8px 14px;cursor:pointer;transition:border-color .15s ease}
+.uploadInline:hover{border-color:#7c3aed}
+.uploadInline span{font-size:12.5px;font-weight:700;color:#4f46e5}
+.uploadHint{font-size:11.5px;color:#8a89a6}
+.imageManager{display:flex;gap:7px;flex-wrap:wrap;width:100%;margin-top:4px}
+.imageManager button{position:relative;width:62px;height:50px;padding:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#f6f5fc;cursor:pointer}
+.imageManager img{width:100%;height:100%;object-fit:cover;display:block}
+.imageManager em{position:absolute;inset:0;display:grid;place-items:center;background:rgba(190,24,93,.78);color:#fff;font-style:normal;font-size:13px;opacity:0;transition:opacity .15s ease}
+.imageManager button:hover em{opacity:1}
+
+/* Hizmet kartlari (kapak gorselli) */
+.serviceCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.serviceCard{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 10px 34px rgba(79,70,229,.06);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease;animation:rowIn .32s ease both}
+.serviceCard:hover{border-color:#ddd6fe;box-shadow:0 18px 44px rgba(79,70,229,.12);transform:translateY(-2px)}
+@keyframes rowIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.serviceCover{position:relative;aspect-ratio:16/9;background:#f6f5fc;display:grid;place-items:center;overflow:hidden}
+.serviceCover img{width:100%;height:100%;object-fit:cover;display:block}
+.coverIcon{font-size:42px;opacity:.75}
+.coverAction{position:absolute;left:10px;bottom:10px;background:rgba(21,22,45,.72);color:#fff;border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;transition:background .15s ease}
+.coverAction:hover{background:rgba(79,70,229,.9)}
+.coverRemove{position:absolute;right:10px;bottom:10px;width:26px;height:26px;border:0;border-radius:50%;background:rgba(21,22,45,.72);color:#fff;font-size:11px;cursor:pointer}
+.coverRemove:hover{background:#be185d}
+.serviceBody{display:flex;flex-direction:column;gap:7px;padding:13px 14px 14px;flex:1}
+.serviceBody h2{margin:0;font-size:15px;font-weight:700;line-height:1.35}
+.serviceBody p{margin:0;font-size:12.5px;line-height:1.6;color:#55566d;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.serviceBody footer{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:11px;border-top:1px solid #f0eefb}
+.delivery{font-size:11.5px;color:#8a89a6}
+.serviceActions{display:flex;gap:10px}
+.serviceActions button{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:700;color:#4f46e5;cursor:pointer}
+.toggleRow{flex-direction:row!important;align-items:center;gap:8px;font-size:13px!important;font-weight:650!important;letter-spacing:normal!important;color:#15162d!important}
+.toggleRow input{accent-color:#7c3aed;width:16px;height:16px}

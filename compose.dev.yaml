@@ -1,0 +1,40 @@
+# Web arayüzünde canlı düzenleme (hot reload) için opt-in ek dosya.
+# Kullanım:  docker compose -f compose.yaml -f compose.dev.yaml up -d --build web
+# Portlar compose.yaml'dan devralınır, burada değiştirilmez.
+
+services:
+  web:
+    # Üretim image'ı (alicam-web) ezilmesin diye ayrı ad kullanılır.
+    image: alicam-web-dev
+    build:
+      context: ./web
+      target: dependencies
+    command: npx next dev --webpack -H 0.0.0.0 -p 3000
+    environment:
+      NODE_ENV: development
+      API_PROXY_TARGET: http://api_gateway
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Windows/OneDrive bind mount'ta dosya değişikliği olayları güvenilir
+      # iletilmediği için yoklama (polling) ile izlenir.
+      WATCHPACK_POLLING: "1000"
+    volumes:
+      - ./web:/app
+      # Konteyner içindeki alpine derlemesi node_modules ve .next önbelleği
+      # host tarafından gölgelenmesin diye anonim volume ile korunur.
+      - /app/node_modules
+      - /app/.next
+
+  # PHP'nin derleme adımı yok; kaynak bind mount edilince değişiklikler
+  # yeniden build gerektirmeden anında geçerli olur.
+  api:
+    volumes:
+      - ./api:/var/www/html
+      # vendor image içinde composer ile kuruldu; host tarafından gölgelenmesin.
+      - /var/www/html/vendor
+      - api_storage:/var/www/html/storage/app
+
+  queue:
+    volumes:
+      - ./api:/var/www/html
+      - /var/www/html/vendor
+      - api_storage:/var/www/html/storage/app

@@ -38,6 +38,11 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
+Route::get('/sellers', [App\Http\Controllers\Api\PublicSellerController::class, 'index']);
+Route::get('/sellers/{user}', [App\Http\Controllers\Api\PublicSellerController::class, 'show']);
+Route::get('/portfolio-images/{portfolioImage}', [App\Http\Controllers\Api\SellerPortfolioController::class, 'showImage']);
+Route::get('/service-covers/{sellerService}', [App\Http\Controllers\Api\SellerServiceController::class, 'showCover']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -68,6 +73,20 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/requests/{buyerRequest}', [SellerRequestController::class, 'show']);
             Route::post('/requests/{buyerRequest}/unlock', [SellerRequestController::class, 'unlock'])
                 ->middleware('throttle:15,1');
+            Route::post('/requests/{buyerRequest}/favorite', [SellerRequestController::class, 'toggleFavorite'])
+                ->middleware('throttle:60,1');
+
+            Route::get('/portfolio', [App\Http\Controllers\Api\SellerPortfolioController::class, 'index']);
+            Route::post('/portfolio', [App\Http\Controllers\Api\SellerPortfolioController::class, 'store']);
+            Route::put('/portfolio/{portfolioItem}', [App\Http\Controllers\Api\SellerPortfolioController::class, 'update']);
+            Route::delete('/portfolio/{portfolioItem}', [App\Http\Controllers\Api\SellerPortfolioController::class, 'destroy']);
+            Route::post('/portfolio/{portfolioItem}/images', [App\Http\Controllers\Api\SellerPortfolioController::class, 'uploadImage'])
+                ->middleware('throttle:30,1');
+            Route::delete('/portfolio-images/{portfolioImage}', [App\Http\Controllers\Api\SellerPortfolioController::class, 'destroyImage']);
+
+            Route::post('/services/{sellerService}/cover', [App\Http\Controllers\Api\SellerServiceController::class, 'uploadCover'])
+                ->middleware('throttle:30,1');
+            Route::delete('/services/{sellerService}/cover', [App\Http\Controllers\Api\SellerServiceController::class, 'destroyCover']);
             Route::get('/credits', [SellerCreditController::class, 'show']);
             Route::post('/credits/purchase', [CreditPurchaseController::class, 'store'])
                 ->middleware('throttle:10,1');

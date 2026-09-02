@@ -17,10 +17,35 @@ function accountMeta(user: AccountUser) {
   return { label: "Müşteri", href: "/musteri-panel", action: "Müşteri panelini aç" };
 }
 
-export function AccountMenu({ user, displayName, compact = false }: {
+/**
+ * Bir hesap aynı anda hem müşteri hem hizmet veren olabilir. Talep uçları rol
+ * koruması istemediği için müşteri alanı her oturuma açıktır; satıcı alanı ise
+ * yalnızca seller rolüyle görünür, aksi halde başvuru adımına yönlendirilir.
+ */
+function workspaces(user: AccountUser, current?: "buyer" | "seller" | "admin") {
+  const items: { key: string; href: string; icon: string; title: string; hint: string; active: boolean }[] = [
+    { key: "buyer", href: "/musteri-panel", icon: "◇", title: "Müşteri paneli", hint: "Taleplerin ve gelen teklifler", active: current === "buyer" },
+  ];
+
+  if (user.roles.includes("seller")) {
+    items.push({ key: "seller", href: "/satici-paneli", icon: "⌂", title: "Satıcı paneli", hint: "Eşleşen talepler ve tekliflerin", active: current === "seller" });
+  } else {
+    items.push({ key: "become-seller", href: "/satici-ol", icon: "＋", title: "Hizmet vermeye başla", hint: "Firma bilgilerini ekle, talep almaya başla", active: false });
+  }
+
+  if (user.roles.includes("admin")) {
+    items.push({ key: "admin", href: "/admin", icon: "▦", title: "Yönetim merkezi", hint: "Onaylar, kategoriler ve denetim", active: current === "admin" });
+  }
+
+  return items;
+}
+
+export function AccountMenu({ user, displayName, compact = false, workspace }: {
   user: AccountUser;
   displayName?: string | null;
   compact?: boolean;
+  /** Hangi çalışma alanındayız; menüde işaretlenir. */
+  workspace?: "buyer" | "seller" | "admin";
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -73,10 +98,16 @@ export function AccountMenu({ user, displayName, compact = false }: {
     <div aria-hidden={!open} className={`${styles.menu} ${open ? styles.open : ""}`} role="menu">
       <header><span className={styles.largeAvatar}>{initials || "A"}</span><div><strong>{visibleName}</strong><small>{user.email || meta.label}</small></div></header>
       <p className={styles.session}><i /> Oturum açık · {meta.label}</p>
+      <p className={styles.groupLabel}>ÇALIŞMA ALANLARI</p>
       <nav>
-        <Link href={meta.href} onClick={() => setOpen(false)} role="menuitem"><span>⌂</span><div><strong>{meta.action}</strong><small>Çalışma alanına devam et</small></div><b>→</b></Link>
+        {workspaces(user, workspace).map((item) => <Link className={item.active ? styles.current : ""} href={item.href} key={item.key} onClick={() => setOpen(false)} role="menuitem">
+          <span>{item.icon}</span><div><strong>{item.title}</strong><small>{item.hint}</small></div><b>{item.active ? "•" : "→"}</b>
+        </Link>)}
+      </nav>
+      <p className={styles.groupLabel}>KISAYOLLAR</p>
+      <nav>
+        <Link href="/talep-olustur" onClick={() => setOpen(false)} role="menuitem"><span>＋</span><div><strong>Yeni talep oluştur</strong><small>Ücretsiz teklif almaya başla</small></div><b>→</b></Link>
         {user.roles.includes("seller") && <Link href="/kontor-yukle" onClick={() => setOpen(false)} role="menuitem"><span>⚡</span><div><strong>Kontör işlemleri</strong><small>Bakiye ve paketleri görüntüle</small></div><b>→</b></Link>}
-        {user.roles.includes("buyer") && <Link href="/talep-olustur" onClick={() => setOpen(false)} role="menuitem"><span>＋</span><div><strong>Yeni talep oluştur</strong><small>Ücretsiz teklif almaya başla</small></div><b>→</b></Link>}
         {user.roles.includes("admin") && <Link href="/admin/kategoriler" onClick={() => setOpen(false)} role="menuitem"><span>▦</span><div><strong>Kategori yönetimi</strong><small>Form alanları ve kontör bedelleri</small></div><b>→</b></Link>}
       </nav>
       {error && <p className={styles.error}>{error}</p>}

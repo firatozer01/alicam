@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 
@@ -32,6 +32,9 @@ export function AuthPanel({ returnTo, forceVerification }: { returnTo: string | 
   const [mode, setMode] = useState<Mode>(forceVerification ? "verify" : "login");
   const [user, setUser] = useState<User | null>(null);
   const [busy, setBusy] = useState(false);
+  // Sunucuda false, istemcide hydration sonrası true. Efekt içinde setState
+  // gerektirmediği için cascading render oluşturmaz.
+  const hydrated = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [codes, setCodes] = useState({ email: "", phone: "" });
@@ -207,14 +210,14 @@ export function AuthPanel({ returnTo, forceVerification }: { returnTo: string | 
       {error && <p className="form-error" role="alert">{error}</p>}
 
       {mode === "login" ? (
-        <form className="auth-form" onSubmit={submitLogin}>
+        <form className="auth-form" method="post" onSubmit={submitLogin}>
           <label>E-posta adresi<input autoComplete="email" name="email" placeholder="ornek@eposta.com" required type="email" /></label>
           <label>Şifre<input autoComplete="current-password" minLength={8} name="password" placeholder="Şifren" required type="password" /></label>
           <label className="remember-field"><input name="remember" type="checkbox" /><span>Beni hatırla</span><a href="mailto:destek@alicam.net?subject=%C5%9Eifre%20s%C4%B1f%C4%B1rlama%20talebi">Şifremi unuttum</a></label>
-          <button className="button button-primary auth-submit" disabled={busy} type="submit">{busy ? "Giriş yapılıyor…" : "Giriş yap →"}</button>
+          <button className="button button-primary auth-submit" disabled={busy || !hydrated} type="submit">{busy ? "Giriş yapılıyor…" : "Giriş yap →"}</button>
         </form>
       ) : (
-        <form className="auth-form" onSubmit={submitRegister}>
+        <form className="auth-form" method="post" onSubmit={submitRegister}>
           <label>Ad soyad<input autoComplete="name" minLength={2} name="name" placeholder="Adın ve soyadın" required /></label>
           <label>E-posta adresi<input autoComplete="email" name="email" placeholder="ornek@eposta.com" required type="email" /></label>
           <label>Telefon<input autoComplete="tel" name="phone" placeholder="+90 555 111 22 33" required type="tel" /><small>+90 ile başlayan cep telefonu numarası</small></label>
@@ -223,7 +226,7 @@ export function AuthPanel({ returnTo, forceVerification }: { returnTo: string | 
             <label>Şifre tekrarı<input autoComplete="new-password" minLength={8} name="password_confirmation" placeholder="Şifreni tekrar yaz" required type="password" /></label>
           </div>
           <label className="terms-field"><input required type="checkbox" /><span><a href="/kullanim-kosullari" target="_blank">Kullanım koşullarını</a> ve <a href="/gizlilik" target="_blank">gizlilik politikasını</a> kabul ediyorum.</span></label>
-          <button className="button button-primary auth-submit" disabled={busy} type="submit">{busy ? "Hesap oluşturuluyor…" : "Ücretsiz hesap oluştur →"}</button>
+          <button className="button button-primary auth-submit" disabled={busy || !hydrated} type="submit">{busy ? "Hesap oluşturuluyor…" : "Ücretsiz hesap oluştur →"}</button>
         </form>
       )}
     </div>

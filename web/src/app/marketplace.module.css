@@ -12,3 +12,119 @@
 /* Visible entrance motion and an explicit session-loading state. */
 .announce{animation:homeSlideDown .55s cubic-bezier(.2,.8,.2,1) both}.nav{animation:homeSlideDown .65s .08s cubic-bezier(.2,.8,.2,1) both}.eyebrow{animation:homeHeroIn .65s .16s cubic-bezier(.2,.8,.2,1) both}.hero h1{animation:homeHeroIn .75s .24s cubic-bezier(.2,.8,.2,1) both}.hero>.wrap>p{animation:homeHeroIn .75s .34s cubic-bezier(.2,.8,.2,1) both}.quickbar{animation:homeHeroIn .8s .44s cubic-bezier(.2,.8,.2,1) both}.liveActivity{animation:homeHeroIn .8s .54s cubic-bezier(.2,.8,.2,1) both}.sessionSkeleton{width:152px;height:46px;display:block;border:1px solid var(--line);border-radius:14px;background:linear-gradient(100deg,#f4f1fb 20%,#fff 45%,#f4f1fb 70%);background-size:220% 100%;animation:sessionShimmer 1.25s linear infinite}.feedRow{animation:feedSwap .5s cubic-bezier(.2,.8,.2,1) both}.marketToolbar button,.pagination button,.requestCard footer a,.sellerGrid article,.cta a{transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s ease,border-color .22s ease,background .22s ease}.marketToolbar button:hover,.pagination button:not(:disabled):hover,.requestCard footer a:hover,.cta a:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgb(76 60 180/.15)}.sellerGrid article:hover{transform:translateY(-5px);box-shadow:0 20px 46px rgb(76 60 180/.15)}
 @keyframes homeSlideDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}@keyframes homeHeroIn{from{opacity:0;transform:translateY(22px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes sessionShimmer{to{background-position:-220% 0}}@keyframes feedSwap{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+/* Liste satırı: özet metni ve incele bağlantısı. */
+.rowAction{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;text-decoration:none;transition:filter .16s ease,transform .16s ease}
+.rowAction:hover{filter:brightness(1.07);transform:translateY(-1px)}
+
+/* Sahibinden tarzı arama çubuğu ve detaylı arama paneli. */
+.marketSearch{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e7e5f5;border-radius:12px;padding:8px 10px;margin-bottom:10px;box-shadow:0 8px 26px rgba(79,70,229,.05)}
+.marketSearch label{flex:1;min-width:0;display:flex;align-items:center;gap:8px;color:#a8a6c4;font-size:15px}
+.marketSearch input{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:14px;color:#15162d;outline:none}
+.marketSearch button{border:1px solid #e7e5f5;background:#fff;border-radius:9px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;color:#4f46e5;cursor:pointer;white-space:nowrap;transition:border-color .15s ease}
+.marketSearch button:hover{border-color:#7c3aed}
+.marketSearch button[type=submit]{background:linear-gradient(135deg,#7c3aed,#4f46e5);border-color:transparent;color:#fff}
+.detailedOn{background:#f1eeff;border-color:#ddd6fe}
+
+.detailedPanel{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid #e7e5f5;border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.detailedPanel label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:800;letter-spacing:.08em;color:#8a89a6}
+.detailedPanel select,.detailedPanel input{border:1px solid #e7e5f5;border-radius:9px;padding:7px 10px;font:inherit;font-size:13px;color:#15162d;background:#fff;outline:none;min-width:150px}
+.detailedPanel select:focus,.detailedPanel input:focus{border-color:#7c3aed}
+.detailedPanel>button{border:1px solid #e7e5f5;background:#fff;border-radius:9px;padding:8px 13px;font:inherit;font-size:13px;font-weight:700;color:#4f46e5;cursor:pointer}
+
+/* ---- Tutarl\u0131l\u0131k uyumlamas\u0131 ----
+   Talep listesi bölümü yeni ölçekle geldi; sayfanın geri kalanı 16-18px köşe
+   ve farklı gölge kullanıyordu. Yüzeyler, ritim ve rozetler tek ölçeğe alınır. */
+
+/* Bölüm ritmi: hepsi aynı dikey nefes */
+.marketSection{padding:44px 0}
+.categorySection{padding:44px 0}
+.how{padding:44px 0;background:#fff}
+.feedSection{padding-top:44px;padding-bottom:44px}
+.featured{padding:44px 0}
+.sectionHead{margin-bottom:26px}
+.marketHead{margin-bottom:18px}
+
+/* Bölüm başlıkları: liste başlığıyla aynı ağırlıkta */
+.sectionHead h2,.marketHead h2{font-size:clamp(22px,2.2vw,28px)}
+.sectionHead p,.marketHead p{margin-top:8px;font-size:14px}
+
+/* Kart yüzeyleri: 14px köşe, aynı kenarlık ve gölge */
+.categoryGrid>button,.feedCard,.sellerGrid>article,.cta,.sellerBand aside{border-radius:14px}
+.categoryGrid>button{padding:16px 16px;border:1px solid #e7e5f5;box-shadow:0 10px 34px rgba(79,70,229,.06)}
+.feedCard,.sellerGrid>article{border-color:#e7e5f5;box-shadow:0 10px 34px rgba(79,70,229,.06)}
+.sellerGrid>article{padding:16px}
+.feedCard>header{padding:12px 16px}
+
+/* Kart içi tipografi: liste kartlarıyla aynı */
+.categoryGrid>button strong{font-size:15px}
+.categoryGrid>button p{font-size:12.5px;line-height:1.55}
+.sellerGrid>article p{font-size:12.5px;line-height:1.55}
+.sellerGrid>article footer span{font-size:11px;font-weight:800}
+
+/* Talep listesi bölümü sayfanın geri kalanından daha geniş bir kapsayıcı
+   kullanır; 1220px içinde sol ray + ızgara dar kalıyordu. */
+.marketSection>.wrap{width:min(1560px,calc(100% - 40px))}
+
+/* Satici kartlari artik vitrin sayfasina baglanti */
+.sellerGrid>a{display:block;color:inherit;text-decoration:none}
+.sellerGrid>a:hover{border-color:#ddd6fe;box-shadow:0 16px 40px rgba(79,70,229,.11);transform:translateY(-2px)}
+
+/* Ana sayfa: one cikan hizmet veren kartlari */
+.seeAll{flex:none;border:1px solid #e7e5f5;background:#fff;border-radius:10px;padding:9px 15px;font-size:13px;font-weight:700;color:#4f46e5;text-decoration:none;white-space:nowrap}
+.seeAll:hover{border-color:#7c3aed}
+
+.sellerCard{position:relative;display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid #e7e5f5;border-radius:14px;padding:16px;text-decoration:none;color:inherit;box-shadow:0 10px 34px rgba(79,70,229,.06);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.sellerCard:hover{border-color:#ddd6fe;box-shadow:0 18px 44px rgba(79,70,229,.12);transform:translateY(-2px)}
+.sellerFeatured{border-color:#fde68a;background:linear-gradient(180deg,#fffdf5,#fff)}
+.sellerFlag{position:absolute;top:14px;right:14px;background:#fef3c7;color:#b45309;border-radius:7px;padding:3px 8px;font-size:9.5px;font-weight:800;letter-spacing:.06em}
+
+.sellerCard>header{display:flex;align-items:center;gap:11px;min-width:0}
+.sellerCard>header>i{width:44px;height:44px;flex:none;display:grid;place-items:center;border-radius:13px;font-style:normal;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(135deg,#7c3aed,#06b6d4)}
+.sellerCard>header strong{display:block;font-size:15px;font-weight:700;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:62px}
+.sellerCard>header small{font-size:11.5px;color:#15803d;font-weight:700}
+
+.sellerRating{display:flex;align-items:center;gap:6px;font-size:12.5px}
+.sellerRating em{font-style:normal;color:#f59e0b;letter-spacing:1px}
+.sellerRating b{font-family:var(--font-plex),ui-monospace,monospace;font-size:13px;color:#15162d}
+.sellerRating span{color:#8a89a6}
+.sellerNew{background:#eef7fb;color:#0e7490;border-radius:7px;padding:3px 9px;font-size:11.5px;font-weight:700}
+
+.sellerCard>p{margin:0;font-size:12.5px;line-height:1.6;color:#67677f;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sellerChips{display:flex;gap:6px;flex-wrap:wrap}
+.sellerChips span{border-radius:7px;padding:3px 8px;font-size:11.5px;font-weight:700}
+.sellerCard>footer{margin-top:auto;display:flex;align-items:center;gap:10px;padding-top:11px;border-top:1px solid #f0eefb;font-size:11.5px;color:#8a89a6}
+.sellerCard>footer em{margin-left:auto;font-style:normal;font-weight:700;color:#4f46e5}
+
+/* Hizmet veren kartlari: yuvarlak avatar, puan, is sayisi, Profile git */
+.providerRow{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.provider{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;background:#fff;border:1px solid #e7e5f5;border-radius:14px;padding:22px 16px 16px;box-shadow:0 10px 34px rgba(79,70,229,.06);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.provider:hover{border-color:#ddd6fe;box-shadow:0 18px 44px rgba(79,70,229,.12);transform:translateY(-2px)}
+.providerFeatured{border-color:#fde68a;background:linear-gradient(180deg,#fffdf5,#fff)}
+.providerAvatar{position:relative;width:72px;height:72px;display:grid;place-items:center;border-radius:50%;font-size:22px;font-weight:800;color:#fff;background:linear-gradient(135deg,#7c3aed,#06b6d4);box-shadow:0 8px 22px rgba(124,58,237,.28)}
+.providerAvatar i{position:absolute;right:3px;bottom:3px;width:13px;height:13px;border-radius:50%;background:#16a34a;border:2px solid #fff}
+.provider strong{margin-top:6px;font-size:15px;font-weight:700;line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.provider small{font-size:11.5px;color:#8a89a6;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.providerStat{margin:4px 0 0;font-size:11.5px;color:#67677f}
+.providerStat b{font-family:var(--font-plex),ui-monospace,monospace;color:#15162d}
+.providerLink{margin-top:10px;width:100%;display:inline-flex;align-items:center;justify-content:center;border:1px solid #e7e5f5;border-radius:9px;padding:8px 12px;font-size:12.5px;font-weight:700;color:#4f46e5;text-decoration:none;transition:border-color .15s ease,background .15s ease}
+.providerLink:hover{border-color:#7c3aed;background:#f1eeff}
+
+/* One cikan hizmet kartlari (kapak gorselli) */
+.headGap{margin-top:34px}
+.serviceRow{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.serviceTile{display:flex;flex-direction:column;background:#fff;border:1px solid #e7e5f5;border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 10px 34px rgba(79,70,229,.06);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.serviceTile:hover{border-color:#ddd6fe;box-shadow:0 18px 44px rgba(79,70,229,.12);transform:translateY(-2px)}
+.serviceTileCover{position:relative;aspect-ratio:16/9;background:#f6f5fc;display:grid;place-items:center;overflow:hidden}
+.serviceTileCover img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
+.serviceTile:hover .serviceTileCover img{transform:scale(1.04)}
+.serviceTileCover>span{font-size:38px;opacity:.75}
+.serviceTileCover .sellerFlag{top:10px;right:10px}
+.serviceTileBody{display:flex;flex-direction:column;gap:5px;padding:12px 14px 13px;flex:1}
+.serviceTileBody small{font-size:11.5px;color:#8a89a6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.serviceTileBody strong{font-size:14.5px;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.serviceTileBody p{margin:0;font-size:12px;line-height:1.55;color:#67677f;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.serviceTileBody footer{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:9px;border-top:1px solid #f0eefb}
+.serviceTileBody footer em{font-style:normal;font-family:var(--font-plex),ui-monospace,monospace;font-size:13px;font-weight:700;color:#4f46e5}
+.serviceTileBody footer span{font-size:11px;color:#8a89a6}
+.emptyNote{margin:8px 0 0;font-size:13px;color:#8a89a6}

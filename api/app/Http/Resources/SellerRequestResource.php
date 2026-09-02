@@ -50,6 +50,7 @@ class SellerRequestResource extends JsonResource
             'summary_attributes' => $summaryAttributes,
             'offer_count' => (int) ($this->offers_count ?? 0),
             'is_unlocked' => $isUnlocked,
+            'is_favorite' => (bool) $this->getAttribute('favorited_by_seller'),
             'unlock_cost' => $isUnlocked ? null : (int) ($this->category->creditCost?->unlock_cost ?? 0),
             'expires_at' => $this->expires_at?->toIso8601String(),
             'created_at' => $this->created_at->toIso8601String(),

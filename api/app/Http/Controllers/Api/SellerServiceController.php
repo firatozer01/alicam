@@ -6,9 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\SellerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SellerServiceController extends Controller
 {
+    private const DISK = 'local';
+
     public function index(Request $request): JsonResponse
     {
         return response()->json([
@@ -47,9 +51,63 @@ class SellerServiceController extends Controller
     public function destroy(Request $request, SellerService $sellerService): JsonResponse
     {
         $this->ensureOwner($request, $sellerService);
+
+        if ($sellerService->cover_path) {
+            Storage::disk(self::DISK)->delete($sellerService->cover_path);
+        }
+
         $sellerService->delete();
 
         return response()->json(['message' => 'Hizmet katalogdan kaldırıldı.']);
+    }
+
+    /** Kapak görselini yükler; eskisi varsa diskten silinir. */
+    public function uploadCover(Request $request, SellerService $sellerService): JsonResponse
+    {
+        $this->ensureOwner($request, $sellerService);
+
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
+        ]);
+
+        if ($sellerService->cover_path) {
+            Storage::disk(self::DISK)->delete($sellerService->cover_path);
+        }
+
+        $path = $request->file('image')->store("service-covers/{$sellerService->user_id}", self::DISK);
+        $sellerService->update(['cover_path' => $path]);
+
+        return response()->json([
+            'message' => 'Kapak görseli güncellendi.',
+            'data' => $sellerService->fresh('category:id,name,slug,icon,color'),
+        ]);
+    }
+
+    public function destroyCover(Request $request, SellerService $sellerService): JsonResponse
+    {
+        $this->ensureOwner($request, $sellerService);
+
+        if ($sellerService->cover_path) {
+            Storage::disk(self::DISK)->delete($sellerService->cover_path);
+            $sellerService->update(['cover_path' => null]);
+        }
+
+        return response()->json([
+            'message' => 'Kapak görseli kaldırıldı.',
+            'data' => $sellerService->fresh('category:id,name,slug,icon,color'),
+        ]);
+    }
+
+    /** Kapağı uygulama üzerinden akıtır; herkese açık. */
+    public function showCover(SellerService $sellerService): StreamedResponse
+    {
+        abort_unless($sellerService->cover_path && Storage::disk(self::DISK)->exists($sellerService->cover_path), 404);
+
+        return Storage::disk(self::DISK)->response(
+            $sellerService->cover_path,
+            null,
+            ['Cache-Control' => 'public, max-age=604800'],
+        );
     }
 
     private function validated(Request $request): array

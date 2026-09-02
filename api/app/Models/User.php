@@ -82,6 +82,11 @@ class User extends Authenticatable
         return $this->hasMany(SellerService::class);
     }
 
+    public function portfolioItems(): HasMany
+    {
+        return $this->hasMany(SellerPortfolioItem::class);
+    }
+
     public function sellerReviews(): HasMany
     {
         return $this->hasMany(SellerReview::class, 'seller_id');
