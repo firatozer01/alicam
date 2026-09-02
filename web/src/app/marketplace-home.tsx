@@ -220,15 +220,41 @@ export function MarketplaceHome() {
         <Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
         <div className={styles.navLinks}>
           <NavMenuBar activeKey={category} menus={[
-            { key: "categories", label: "Kategoriler", panelTitle: "Kategoriler", panelHint: "Talep oluşturabileceğin tüm alanlar", items: categories.map((item) => ({
-              key: item.slug,
-              label: item.name,
-              icon: item.icon,
-              hint: `${facets.categories.find((facet) => facet.slug === item.slug)?.count ?? 0} açık talep`,
-              onSelect: () => chooseCategory(item.slug),
-            })) },
-          ]}>
-          </NavMenuBar>
+            {
+              key: "categories", label: "Kategoriler",
+              panelIcon: "🗂", panelTitle: "Kategoriler", panelHint: "Talep oluşturabileceğin tüm alanlar tek çatı altında",
+              meta: `${facets.categories.length} kategori · ${marketplace?.meta.total ?? 0} açık talep`,
+              allLink: { label: "Tüm talepler", href: "/#talepler" },
+              sections: categories.slice(0, 4).map((category, index) => {
+                const facet = facets.categories.find((row) => row.slug === category.slug);
+                const cityRows = facets.cities.slice(0, 3);
+                return {
+                  key: category.slug,
+                  title: category.name.toLocaleUpperCase("tr-TR"),
+                  icon: category.icon,
+                  color: category.color,
+                  description: `${facet?.count ?? 0} açık talep teklif bekliyor.`,
+                  accent: index === 0,
+                  items: [
+                    { key: category.slug, label: `Tüm ${category.name} talepleri`, icon: category.icon, hint: "Filtrele ve incele", count: facet?.count ?? 0, onSelect: () => chooseCategory(category.slug) },
+                    ...cityRows.map((city) => ({
+                      key: `${category.slug}-${city.id}`,
+                      label: city.name,
+                      icon: "📍",
+                      hint: `${city.name} bölgesindeki talepler`,
+                      onSelect: () => { chooseCategory(category.slug); setLoading(true); setCity(String(city.id)); setPage(1); },
+                    })),
+                  ],
+                  footer: { label: `${category.name} talepleri`, onSelect: () => chooseCategory(category.slug) },
+                };
+              }),
+              quickLinks: [
+                { key: "all", label: "Tüm talepler", icon: "▤", onSelect: () => chooseCategory("") },
+                { key: "sellers", label: "Hizmet verenler", icon: "🏬", href: "/hizmet-verenler" },
+                { key: "new", label: "Ücretsiz talep oluştur", icon: "＋", href: "/talep-olustur", primary: true },
+              ],
+            },
+          ]}></NavMenuBar>
           <Link className={styles.navItem} href="/hizmet-verenler">Hizmet verenler</Link>
           <a className={styles.navItem} href="#nasil-calisir">Nasıl çalışır</a>
           <a className={styles.navItem} href="#hizmet-veren">Hizmet verenler için</a>

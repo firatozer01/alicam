@@ -131,11 +131,26 @@ export function CustomerDashboard() {
       <Link className={styles.brand} href="/">alıcam<span>.net</span></Link>
       <nav className={styles.shellNav}>
         <NavMenuBar activeKey={section} menus={[
-          { key: "panel", label: "Panelim", panelTitle: "Müşteri paneli", panelHint: "Taleplerin, gelen teklifler ve hesabın", items: [
-            { key: "ozet", label: "Genel bakış", icon: "⌂", hint: "Özet ve metrikler", onSelect: () => jump("ozet") },
-            { key: "taleplerim", label: "Taleplerim", icon: "▤", hint: "Tüm taleplerin ve teklifler", count: requests.length, onSelect: () => jump("taleplerim") },
-            { key: "hesabim", label: "Hesabım", icon: "◎", hint: "İletişim doğrulaması ve güvenlik", onSelect: () => jump("hesabim") },
-          ] },
+          {
+            key: "panel", label: "Panelim",
+            panelIcon: "◇", panelTitle: "Müşteri panelin", panelHint: "Taleplerin, gelen teklifler ve hesabın",
+            meta: `${requests.length} talep · ${totalOffers} teklif`,
+            sections: [
+              { key: "flow", title: "TALEPLERİM", icon: "▤", color: "#7C3AED", description: "Yayınladığın talepler ve gelen teklifler.", items: [
+                { key: "ozet", label: "Genel bakış", icon: "⌂", hint: "Özet ve metrikler", onSelect: () => jump("ozet") },
+                { key: "taleplerim", label: "Taleplerim", icon: "▤", hint: `${activeCount} aktif talep`, count: requests.length, onSelect: () => jump("taleplerim") },
+                { key: "yeni", label: "Yeni talep oluştur", icon: "＋", hint: "Ücretsiz teklif almaya başla", badge: "Ücretsiz", tone: "free", href: "/talep-olustur" },
+              ], footer: { label: "Taleplere git", onSelect: () => jump("taleplerim") } },
+              { key: "discover", title: "KEŞFET", icon: "🏬", color: "#06B6D4", description: "Hizmet verenleri incele, hesabını yönet.", items: [
+                { key: "hizmet-verenler", label: "Hizmet verenler", icon: "🏬", hint: "Vitrin, galeri ve puanlar", badge: "Yeni", tone: "new", href: "/hizmet-verenler" },
+                { key: "hesabim", label: "Hesabım", icon: "◎", hint: "İletişim doğrulaması ve güvenlik", onSelect: () => jump("hesabim") },
+              ], footer: { label: "Hizmet verenleri gör", href: "/hizmet-verenler" } },
+            ],
+            quickLinks: [
+              { key: "market", label: "Pazaryeri", icon: "🛒", href: "/" },
+              { key: "new", label: "Yeni talep oluştur", icon: "＋", href: "/talep-olustur", primary: true },
+            ],
+          },
         ]}><Link href="/">Ana sayfa</Link><Link href="/hizmet-verenler">Hizmet verenler</Link></NavMenuBar>
       </nav>
       <div className={styles.shellActions}><Link className={styles.newButton} href="/talep-olustur">＋ Yeni talep</Link>{user && <AccountMenu compact user={user} workspace="buyer" />}</div>

@@ -1,43 +1,99 @@
-/* Tek panelli üst gezinme. Panel çubuğa sabitlenir; tetikleyiciler arasında
-   geçerken yerinde kalır, yalnızca içeriği tazelenir. */
+/* Cok sutunlu ust gezinme paneli.
+   Panel cubuga sabit; tetikleyiciler arasinda gecerken yerinde kalir,
+   yalnizca icerigi kademeli bir gecisle tazelenir. */
 
 .bar{position:relative;display:flex;align-items:center;gap:4px}
 
-.trigger.trigger{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:8px 12px;border-radius:9px;font:inherit;font-size:14.5px;font-weight:650;color:#15162d;cursor:pointer;transition:background .15s ease,color .15s ease}
-.trigger.trigger:hover{background:#f1effc;color:#4f46e5}
-.trigger.trigger i{font-style:normal;font-size:10px;color:#a8a6c4;transition:transform .18s ease}
-.trigger.trigger i[data-open="true"]{transform:rotate(180deg)}
+.trigger.trigger{position:relative;display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:9px 13px;border-radius:10px;font:inherit;font-size:14.5px;font-weight:650;color:#15162d;cursor:pointer;transition:color .18s ease,background .18s ease}
+.trigger.trigger::after{content:"";position:absolute;left:13px;right:13px;bottom:2px;height:2px;border-radius:2px;background:linear-gradient(90deg,#7c3aed,#06b6d4);transform:scaleX(0);transform-origin:left;transition:transform .24s cubic-bezier(.2,.8,.2,1)}
+.trigger.trigger:hover{color:#4f46e5}
+.trigger.trigger:hover::after,.trigger.triggerOpen::after{transform:scaleX(1)}
 .trigger.triggerActive{color:#4f46e5}
-.trigger.triggerOpen{background:#f1effc;color:#4f46e5}
+.trigger.triggerOpen{background:#f4f1ff;color:#4f46e5}
+.chevron{font-style:normal;font-size:11px;line-height:1;color:#a8a6c4;transition:transform .26s cubic-bezier(.2,.8,.2,1),color .18s ease}
+.chevron[data-open="true"]{transform:rotate(180deg);color:#4f46e5}
 
-/* Sarmalayıcının üst dolgusu tetikleyiciye kadar uzanır: ölü boşluk kalmaz. */
-.panelWrap{position:absolute;top:100%;left:0;z-index:70;width:min(680px,92vw);padding-top:10px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-6px);transition:opacity .18s ease,transform .18s ease,visibility .18s}
+/* Sarmalayicinin ust dolgusu tetikleyiciye kadar uzanir: olu bosluk kalmaz. */
+.panelWrap{position:absolute;top:100%;left:0;z-index:70;width:min(560px,92vw);padding-top:11px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-8px) scale(.985);transform-origin:top left;transition:opacity .2s ease,transform .26s cubic-bezier(.2,.8,.2,1),visibility .26s}
+.panelWide{width:min(1180px,94vw)}
 .panelOpen{opacity:1;visibility:visible;pointer-events:auto;transform:none}
 
-.panel{background:#fff;border:1px solid #e7e5f5;border-radius:16px;box-shadow:0 26px 64px rgba(76,60,180,.18);overflow:hidden}
+.panel{background:#fff;border:1px solid #e7e5f5;border-radius:18px;box-shadow:0 32px 74px rgba(76,60,180,.2);overflow:hidden}
 
-.panelHead{display:flex;flex-direction:column;gap:2px;padding:14px 18px;background:linear-gradient(90deg,#f3effe,#eef7fb);border-bottom:1px solid #eceafa}
-.panelHead strong{font-size:14px;font-weight:800;color:#15162d}
-.panelHead small{font-size:12px;color:#67677f}
+/* ---- Panel basligi ---- */
+.panelHead{display:flex;align-items:center;gap:13px;padding:16px 20px;background:linear-gradient(100deg,#f5f1ff,#eef8fb);border-bottom:1px solid #eceafa;animation:headIn .3s ease both}
+.panelIcon{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:12px;font-size:18px;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 8px 20px rgba(124,58,237,.3)}
+.panelTitle{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.panelTitle strong{font-family:var(--font-fraunces),Georgia,serif;font-size:18px;font-weight:700;color:#15162d;line-height:1.2}
+.panelTitle small{font-size:12.5px;color:#67677f}
+.panelMeta{display:flex;align-items:center;gap:12px;flex:none}
+.panelMeta a{font-size:12.5px;font-weight:700;color:#4f46e5;text-decoration:none;white-space:nowrap}
+.panelMeta a:hover{text-decoration:underline}
+.panelMeta span{font-size:11.5px;color:#8a89a6;white-space:nowrap}
+@keyframes headIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 
-/* İçerik değişiminde satırlar kısa bir geçişle tazelenir */
-.grid{padding:10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;animation:swap .18s ease both}
-@keyframes swap{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.grid{animation:none}}
+/* ---- Sutunlar ---- */
+.columns{display:grid;grid-template-columns:repeat(var(--cols,1),minmax(0,1fr));gap:0;padding:6px}
+.column{position:relative;display:flex;flex-direction:column;padding:14px 13px;border-radius:14px;animation:colIn .34s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--c,0) * 45ms)}
+.column + .column::before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:1px;background:#f0eefb}
+.columnAccent{background:linear-gradient(180deg,#faf7ff,#fff);box-shadow:inset 0 0 0 1px #e9defd}
+.columnAccent + .column::before,.column + .columnAccent::before{display:none}
+@keyframes colIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
-.item{display:flex;align-items:center;gap:11px;width:100%;padding:10px 11px;border:0;border-radius:10px;background:none;font:inherit;color:#4b4a63;cursor:pointer;text-align:left;transition:background .14s ease,color .14s ease}
-.item:hover{background:#f1effc;color:#4f46e5}
-.item>i{font-style:normal;font-size:16px;flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:#f6f5fc}
-.item>span{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
-.item>span>strong{font-size:14px;font-weight:650;line-height:1.25}
-.item>span>small{font-size:11.5px;color:#8a89a6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.item>b{font-family:var(--font-plex),ui-monospace,monospace;font-size:11px;font-weight:700;color:#8a89a6;background:#f6f5fc;border-radius:6px;padding:2px 7px;flex:none}
-.itemActive{color:#4f46e5;background:#f1eeff}
-.itemActive>i{background:#fff}
-.itemActive>b{color:#4f46e5;background:#fff}
+.columnHead{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.columnIcon{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:9px;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--tint,#7c3aed),color-mix(in srgb,var(--tint,#7c3aed) 55%,#06b6d4));box-shadow:0 6px 14px color-mix(in srgb,var(--tint,#7c3aed) 32%,transparent)}
+.columnHead strong{font-size:11.5px;font-weight:800;letter-spacing:.09em;color:#15162d;text-transform:uppercase;line-height:1.25}
+.columnDesc{margin:0 0 10px;font-size:12px;line-height:1.55;color:#8a89a6}
 
+.items{display:flex;flex-direction:column;gap:1px}
+
+.item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 9px;border:0;border-radius:10px;background:none;font:inherit;color:#4b4a63;cursor:pointer;text-align:left;text-decoration:none;transition:background .16s ease,transform .16s ease;animation:itemIn .3s ease both;animation-delay:calc(var(--i,0) * 26ms + 90ms)}
+.item:hover{background:#f4f1ff;transform:translateX(2px)}
+.item:hover .itemIcon{transform:scale(1.08);border-color:#ddd6fe}
+@keyframes itemIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){
+  .item,.column,.panelHead{animation:none}
+  .item:hover{transform:none}
+  .panelWrap{transition:opacity .12s ease,visibility .12s}
+}
+
+.itemIcon{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:9px;font-style:normal;font-size:14px;background:#f6f5fc;border:1px solid #eeecf9;transition:transform .18s cubic-bezier(.2,.8,.2,1),border-color .18s ease}
+.itemText{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.itemText strong{display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:650;color:#15162d;line-height:1.3}
+.itemText small{font-size:11.5px;color:#8a89a6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.itemCount{font-family:var(--font-plex),ui-monospace,monospace;font-size:11px;font-weight:700;color:#8a89a6;background:#f6f5fc;border-radius:6px;padding:2px 7px;flex:none}
+.itemActive{background:#f1eeff}
+.itemActive .itemIcon{background:#fff;border-color:#ddd6fe}
+.itemActive .itemText strong{color:#4f46e5}
+.itemActive .itemCount{color:#4f46e5;background:#fff}
+
+/* Rozetler */
+.badge{font-style:normal;flex:none;border-radius:5px;padding:1px 6px;font-size:9.5px;font-weight:800;letter-spacing:.04em;background:#f1eeff;color:#4f46e5}
+.new{background:#e0f7fb;color:#0e7490}
+.hot{background:#fef3c7;color:#b45309}
+.free{background:#dcfce7;color:#15803d}
+
+.columnFooter{margin-top:11px;display:inline-flex;align-items:center;align-self:flex-start;gap:5px;border:1px solid #e7e5f5;border-radius:9px;padding:7px 12px;background:#fff;font:inherit;font-size:12px;font-weight:700;color:#4f46e5;cursor:pointer;text-decoration:none;transition:border-color .16s ease,background .16s ease,transform .16s ease}
+.columnFooter:hover{border-color:#7c3aed;background:#f4f1ff;transform:translateX(2px)}
+
+/* ---- Alt kisayol seridi ---- */
+.quickBar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid #f0eefb;background:#faf9ff;animation:headIn .3s .1s ease both}
+.quickHint{font-size:12px;color:#8a89a6;flex:1;min-width:180px}
+.quickLinks{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.quickLink{display:inline-flex;align-items:center;gap:6px;border:1px solid #e7e5f5;border-radius:9px;padding:7px 12px;background:#fff;font:inherit;font-size:12.5px;font-weight:700;color:#55566d;cursor:pointer;text-decoration:none;white-space:nowrap;transition:border-color .16s ease,color .16s ease,transform .16s ease}
+.quickLink:hover{border-color:#7c3aed;color:#4f46e5;transform:translateY(-1px)}
+.quickPrimary{border-color:transparent;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5)}
+.quickPrimary:hover{color:#fff;filter:brightness(1.07)}
+
+@media(max-width:1180px){
+  .panelWide{width:min(94vw,900px)}
+  .columns{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+  .column::before{display:none}
+}
 @media(max-width:760px){
   .trigger.trigger{padding:7px 9px;font-size:13.5px}
-  .panelWrap{width:min(420px,88vw)}
-  .grid{grid-template-columns:1fr}
+  .panelWrap,.panelWide{width:min(420px,90vw)}
+  .columns{grid-template-columns:1fr}
+  .panelHead{padding:13px 15px}
+  .quickBar{padding:11px 14px}
 }
