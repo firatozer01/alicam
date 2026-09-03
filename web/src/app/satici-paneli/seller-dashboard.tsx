@@ -434,7 +434,8 @@ export function SellerDashboard() {
     finally { setBusy(false); }
   };
 
-  if (loading && !user) return <main className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></main>;
+  // Yukleme ekraninda da ortak ust cubuk durur; sayfa gecisinde zipla olmaz.
+  if (loading && !user) return <main className={styles.page}><SiteHeader workspace="seller" /><div className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></div></main>;
 
   // Modal onizlemeleri icin turetilen degerler.
   const workCategory = profile.categories.find((item) => String(item.id) === portfolioForm.category_id);

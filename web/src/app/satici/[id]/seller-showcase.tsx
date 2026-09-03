@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/modal/modal";
 import { SiteHeader } from "@/components/shell/site-header";
 import { WorkViewer, workSpecs } from "@/components/portfolio/work-viewer";
-import { apiRequest, firstApiError } from "@/lib/api";
+import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import styles from "./showcase.module.css";
 
 type MiniCategory = { name: string; slug?: string; icon: string; color: string };
@@ -44,13 +44,19 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
     let active = true;
     apiRequest<{ data: Seller }>(`/sellers/${sellerId}`)
       .then((response) => { if (active) setSeller(response.data); })
-      .catch((requestError: unknown) => { if (active) setError(firstApiError(requestError)); })
+      // 404 govdesi Laravel ic mesaji tasiyabilir; kullaniciya sade metin gosterilir.
+      .catch((requestError: unknown) => {
+        if (!active) return;
+        const status = requestError instanceof ApiError ? requestError.status : 0;
+        setError(status === 404 ? "Hizmet veren bulunamadı." : firstApiError(requestError));
+      })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [sellerId]);
 
-  if (loading) return <main className={styles.state}><i /><p>Vitrin hazırlanıyor…</p></main>;
-  if (error || !seller) return <main className={styles.state}><p>{error || "Hizmet veren bulunamadı."}</p><Link href="/hizmet-verenler">Hizmet verenlere dön →</Link></main>;
+  // Yukleme ve hata durumlarinda da ortak ust cubuk korunur.
+  if (loading) return <main className={styles.page}><SiteHeader activeKey="rehber" /><div className={styles.state}><i /><p>Vitrin hazırlanıyor…</p></div></main>;
+  if (error || !seller) return <main className={styles.page}><SiteHeader activeKey="rehber" /><div className={styles.state}><p>{error || "Hizmet veren bulunamadı."}</p><Link href="/hizmet-verenler">Hizmet verenlere dön →</Link></div></main>;
 
   const title = seller.company_name || seller.name;
   const initials = title.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR");

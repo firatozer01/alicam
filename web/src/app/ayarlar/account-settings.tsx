@@ -77,8 +77,9 @@ export function AccountSettings() {
     finally { setBusy(false); }
   };
 
-  if (loading) return <main className={styles.state}><i /><p>Ayarlar yükleniyor…</p></main>;
-  if (!user) return <main className={styles.state}><p>{error || "Hesap bulunamadı."}</p><Link href="/giris">Giriş yap →</Link></main>;
+  // Yukleme ve hata durumlarinda da ortak ust cubuk korunur.
+  if (loading) return <main className={styles.page}><SiteHeader /><div className={styles.state}><i /><p>Ayarlar yükleniyor…</p></div></main>;
+  if (!user) return <main className={styles.page}><SiteHeader user={null} sessionReady /><div className={styles.state}><p>{error || "Hesap bulunamadı."}</p><Link href="/giris">Giriş yap →</Link></div></main>;
 
   const initials = user.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR");
   const isSeller = user.roles.includes("seller");

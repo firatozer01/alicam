@@ -119,7 +119,8 @@ export function CustomerDashboard() {
     finally { setBusy(null); }
   };
 
-  if (loading) return <main className={styles.loading}><i /><p>Müşteri çalışma alanın hazırlanıyor…</p></main>;
+  // Yukleme ekraninda da ortak ust cubuk durur; sayfa gecisinde zipla olmaz.
+  if (loading) return <main className={styles.page}><SiteHeader workspace="buyer" /><div className={styles.loading}><i /><p>Müşteri çalışma alanın hazırlanıyor…</p></div></main>;
 
   const activeCount = requests.filter((item) => ["open", "in_negotiation"].includes(item.status)).length;
   const acceptedCount = requests.filter((item) => item.status === "accepted").length;

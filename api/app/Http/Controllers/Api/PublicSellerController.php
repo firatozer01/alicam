@@ -79,7 +79,7 @@ class PublicSellerController extends Controller
     {
         $user->loadMissing(['sellerProfile', 'sellerCategories:id,name,slug,icon,color']);
 
-        abort_unless($user->sellerProfile?->approval_status === 'approved', 404);
+        abort_unless($user->sellerProfile?->approval_status === 'approved', 404, 'Hizmet veren bulunamadı.');
 
         $portfolio = SellerPortfolioItem::query()
             ->where('user_id', $user->id)
