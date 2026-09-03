@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
@@ -104,6 +105,55 @@ class AuthController extends Controller
         return response()->json([
             'data' => new UserResource($request->user()->load('roles')),
         ]);
+    }
+
+    /** Ad ve telefon guncellemesi. Telefon degisirse dogrulama sifirlanir. */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $data = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:120'],
+            'phone' => ['required', 'string', 'max:32'],
+        ]);
+
+        $phone = $this->normalizePhone($data['phone']);
+
+        if ($phone !== $user->phone && User::query()->where('phone', $phone)->whereKeyNot($user->id)->exists()) {
+            throw ValidationException::withMessages(['phone' => 'Bu telefon numarasi baska bir hesapta kayitli.']);
+        }
+
+        $phoneChanged = $phone !== $user->phone;
+        $user->forceFill([
+            'name' => $data['name'],
+            'phone' => $phone,
+            'phone_verified_at' => $phoneChanged ? null : $user->phone_verified_at,
+        ])->save();
+
+        return response()->json([
+            'message' => $phoneChanged
+                ? 'Bilgilerin güncellendi. Yeni numaranı doğrulaman gerekiyor.'
+                : 'Bilgilerin güncellendi.',
+            'phone_verification_required' => $phoneChanged,
+            'data' => new UserResource($user->fresh()->load('roles')),
+        ]);
+    }
+
+    /** Mevcut parola dogrulanarak yeni parola belirlenir. */
+    public function updatePassword(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $data = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
+        ]);
+
+        if (! Hash::check($data['current_password'], $user->password)) {
+            throw ValidationException::withMessages(['current_password' => 'Mevcut parolan doğru değil.']);
+        }
+
+        $user->forceFill(['password' => Hash::make($data['password'])])->save();
+
+        return response()->json(['message' => 'Parolan güncellendi.']);
     }
 
     private function normalizePhone(string $phone): string

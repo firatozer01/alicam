@@ -6,6 +6,7 @@ import { FilterRail } from "@/components/listing/filter-rail";
 import { ActiveChips, ListSkeleton, Pagination, ResultBar } from "@/components/listing/listing-chrome";
 import list from "@/components/listing/listing.module.css";
 import { apiRequest, firstApiError } from "@/lib/api";
+import { SiteHeader } from "@/components/shell/site-header";
 import styles from "./directory.module.css";
 
 type MiniCategory = { name: string; slug: string; icon: string; color: string };
@@ -84,7 +85,7 @@ export function SellerDirectory() {
   };
 
   return <main className={styles.page}>
-    <nav className={styles.nav}><div className={styles.wrap}><Link className={styles.brand} href="/">alıcam<span>.net</span></Link><Link className={styles.back} href="/">← Pazaryerine dön</Link></div></nav>
+    <SiteHeader activeKey="rehber" />
 
     <header className={styles.hero}><div className={styles.wrap}>
       <span className={styles.kicker}>DOĞRULANMIŞ HİZMET VERENLER</span>

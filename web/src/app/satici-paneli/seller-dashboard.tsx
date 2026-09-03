@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AccountMenu } from "@/components/account-menu";
 import { FilterRail } from "@/components/listing/filter-rail";
-import { NavMenuBar } from "@/components/listing/nav-menu";
+import { SiteHeader } from "@/components/shell/site-header";
 import { Modal } from "@/components/modal/modal";
 import { WorkViewer } from "@/components/portfolio/work-viewer";
 import { ActiveChips, ListSkeleton, Pagination, ResultBar } from "@/components/listing/listing-chrome";
@@ -47,7 +46,9 @@ type ListMeta = { current_page: number; last_page: number; per_page: number; tot
 type PortfolioImage = { id: number; url: string };
 type PortfolioItem = {
   id: number; title: string; description: string; location: string | null;
-  completed_at: string | null; is_published: boolean; category: Category | null; images: PortfolioImage[];
+  duration: string | null; area: string | null; budget: string | null; client_type: string | null;
+  highlights: string[]; completed_at: string | null; is_published: boolean;
+  category: Category | null; images: PortfolioImage[];
 };
 type Scope = "all" | "unlocked" | "favorite";
 type View = "requests" | "performance" | "offers" | "services" | "visibility" | "profile" | "portfolio";
@@ -79,10 +80,6 @@ function attributeValue(attribute: RequestAttribute) {
   return `${attribute.value}${attribute.unit ? ` ${attribute.unit}` : ""}`;
 }
 
-function BrandMark() {
-  return <svg aria-hidden="true" className={styles.brandMark} viewBox="0 0 30 30" fill="none"><path d="M4 10 L14 4 L14 10 Z" fill="#7C3AED" /><path d="M26 20 L16 26 L16 20 Z" fill="#06B6D4" /><path d="M14 7 H16 V23 H14 Z" fill="#4F46E5" opacity=".9" /></svg>;
-}
-
 export function SellerDashboard() {
   const router = useRouter();
   const chartRef = useRef<HTMLElement>(null);
@@ -110,7 +107,7 @@ export function SellerDashboard() {
   const [reloadToken, setReloadToken] = useState(0);
   const [railOpen, setRailOpen] = useState(false);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
-  const [portfolioForm, setPortfolioForm] = useState({ id: 0, title: "", description: "", location: "", completed_at: "", category_id: "" });
+  const [portfolioForm, setPortfolioForm] = useState({ id: 0, title: "", description: "", location: "", completed_at: "", category_id: "", duration: "", area: "", budget: "", client_type: "", highlights: "" });
   const [showPortfolioForm, setShowPortfolioForm] = useState(false);
   const [uploadingFor, setUploadingFor] = useState<number | null>(null);
   const [openWork, setOpenWork] = useState<PortfolioItem | null>(null);
@@ -342,8 +339,8 @@ export function SellerDashboard() {
 
   const openPortfolioForm = (item?: PortfolioItem) => {
     setPortfolioForm(item
-      ? { id: item.id, title: item.title, description: item.description, location: item.location ?? "", completed_at: item.completed_at ?? "", category_id: item.category ? String(item.category.id) : "" }
-      : { id: 0, title: "", description: "", location: "", completed_at: "", category_id: "" });
+      ? { id: item.id, title: item.title, description: item.description, location: item.location ?? "", completed_at: item.completed_at ?? "", category_id: item.category ? String(item.category.id) : "", duration: item.duration ?? "", area: item.area ?? "", budget: item.budget ?? "", client_type: item.client_type ?? "", highlights: (item.highlights ?? []).join("\n") }
+      : { id: 0, title: "", description: "", location: "", completed_at: "", category_id: "", duration: "", area: "", budget: "", client_type: "", highlights: "" });
     setShowPortfolioForm(true); setError(""); setNotice("");
   };
 
@@ -355,6 +352,11 @@ export function SellerDashboard() {
       location: portfolioForm.location || null,
       completed_at: portfolioForm.completed_at || null,
       category_id: portfolioForm.category_id ? Number(portfolioForm.category_id) : null,
+      duration: portfolioForm.duration || null,
+      area: portfolioForm.area || null,
+      budget: portfolioForm.budget ? Number(portfolioForm.budget) : null,
+      client_type: portfolioForm.client_type || null,
+      highlights: portfolioForm.highlights.split("\n").map((line) => line.trim()).filter(Boolean).slice(0, 8),
     };
     try {
       const response = portfolioForm.id
@@ -387,24 +389,31 @@ export function SellerDashboard() {
   };
 
   // Gorsel yuklemesi cok parcali govde ister; JSON gonderen apiRequest kullanilmaz.
-  const uploadPortfolioImage = async (item: PortfolioItem, file: File) => {
+  const uploadPortfolioImages = async (item: PortfolioItem, files: File[]) => {
     setUploadingFor(item.id); setError(""); setNotice("");
-    const body = new FormData();
-    body.append("image", file);
-    const token = document.cookie.split("; ").find((row) => row.startsWith("XSRF-TOKEN="))?.split("=")[1];
+    const room = Math.max(0, 8 - item.images.length);
+    const queue = files.slice(0, room);
+    if (queue.length === 0) { setError("Bir çalışmaya en fazla 8 görsel eklenebilir."); setUploadingFor(null); return; }
     try {
-      const response = await fetch(`/api/seller/portfolio/${item.id}/images`, {
-        method: "POST", body, credentials: "include",
-        headers: { Accept: "application/json", ...(token ? { "X-XSRF-TOKEN": decodeURIComponent(token) } : {}) },
-      });
-      const payload = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(payload?.message ?? "Görsel yüklenemedi.");
-      setNotice(payload?.message ?? "Görsel yüklendi.");
+      for (const file of queue) await sendPortfolioImage(item, file);
+      setNotice(`${queue.length} görsel yüklendi.`);
       const fresh = await apiRequest<{ data: PortfolioItem[] }>("/seller/portfolio");
       setPortfolio(fresh.data);
       setOpenWork((current) => current ? fresh.data.find((row) => row.id === current.id) ?? null : null);
     } catch (requestError: unknown) { setError(requestError instanceof Error ? requestError.message : "Görsel yüklenemedi."); }
     finally { setUploadingFor(null); }
+  };
+
+  const sendPortfolioImage = async (item: PortfolioItem, file: File) => {
+    const body = new FormData();
+    body.append("image", file);
+    const token = document.cookie.split("; ").find((row) => row.startsWith("XSRF-TOKEN="))?.split("=")[1];
+    const response = await fetch(`/api/seller/portfolio/${item.id}/images`, {
+      method: "POST", body, credentials: "include",
+      headers: { Accept: "application/json", ...(token ? { "X-XSRF-TOKEN": decodeURIComponent(token) } : {}) },
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(payload?.message ?? "Görsel yüklenemedi.");
   };
 
   const deletePortfolioImage = async (image: PortfolioImage) => {
@@ -427,10 +436,23 @@ export function SellerDashboard() {
 
   if (loading && !user) return <main className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></main>;
 
+  // Modal onizlemeleri icin turetilen degerler.
+  const workCategory = profile.categories.find((item) => String(item.id) === portfolioForm.category_id);
+  const workHighlights = portfolioForm.highlights.split("\n").map((line) => line.trim()).filter(Boolean);
+  const serviceCategory = profile.categories.find((item) => String(item.id) === serviceForm.category_id);
+
   return <main className={styles.page}>
-    <header className={styles.topbar}><div className={styles.topbarInner}><Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
-      <nav>
-        <NavMenuBar activeKey={view === "requests" ? (filter === "all" ? "requests" : filter) : view} menus={[
+    <SiteHeader
+      activeKey={view === "requests" ? (filter === "all" ? "requests" : filter) : view}
+      credits={credits.balance}
+      links={[{ label: "Ana sayfa", href: "/" }, { label: "Hizmet verenler", href: "/hizmet-verenler" }]}
+      cta={{ label: "Vitrinim", href: user ? `/satici/${user.id}` : "/satici-paneli" }}
+      displayName={profile.profile?.company_name}
+      onBell={() => { changeScope("all"); selectView("requests"); }}
+      sessionReady={!loading}
+      user={user}
+      workspace="seller"
+      menus={[
           {
             key: "requests", label: "Talepler",
             panelIcon: "📥", panelTitle: "Talep akışın", panelHint: "Sana düşen talepler ve teklif portföyün tek yerde",
@@ -473,9 +495,8 @@ export function SellerDashboard() {
               { key: "public", label: "Vitrinimi gör", icon: "↗", href: user ? `/satici/${user.id}` : "/satici-paneli", primary: true },
             ],
           },
-        ]}><Link href="/">Ana sayfa</Link><Link href="/hizmet-verenler">Hizmet verenler</Link></NavMenuBar>
-      </nav>
-      <div><Link className={styles.creditPill} href="/kontor-yukle">⚡ {credits.balance} kontör</Link><button aria-label="Yeni eşleşen talepleri göster" className={styles.notification} onClick={() => { changeScope("all"); selectView("requests"); }} type="button">🔔<i /></button>{user && <AccountMenu compact displayName={profile.profile?.company_name} user={user} workspace="seller" />}</div></div></header>
+      ]}
+    />
     <div className={styles.layout}>
       <aside className={styles.sidebar}>
         <div className={styles.creditCard}><i /><span>KONTÖR BAKİYEN</span><strong>{credits.balance}</strong><p>Bu ay {monthSpend} kontör harcandı</p><div><i style={{ width: `${Math.min(100, monthSpend)}%` }} /></div><Link href="/kontor-yukle">Kontör yükle</Link></div>
@@ -730,16 +751,68 @@ export function SellerDashboard() {
         {view === "visibility" && <section className={`${styles.workspaceView} ${styles.viewEnter}`}><header><div><span>VİTRİN VE GÖRÜNÜRLÜK</span><h1>Öne çıkanlarda yer al</h1><p>Profilini ana sayfadaki öne çıkan profesyoneller bölümüne taşı.</p></div>{featured.is_featured && <b className={styles.featuredBadge}>★ {featured.featured_until ? new Date(featured.featured_until).toLocaleDateString("tr-TR") : "Aktif"} tarihine kadar</b>}</header><div className={styles.visibilityHero}><div><span>KONTÖRLE GÖRÜNÜRLÜK</span><h2>Daha çok müşteri tarafından keşfedil.</h2><p>Öne çıkarılan profiller ana sayfa vitrininde sponsorlu etiketiyle gösterilir.</p><ul><li>✓ Ana sayfa profesyonel vitrini</li><li>✓ Şeffaf sponsorlu ibaresi</li><li>✓ Puan ve hizmet görünürlüğü</li></ul></div><aside><small>MEVCUT BAKİYE</small><strong>⚡ {credits.balance}</strong><Link href="/kontor-yukle">Kontör yükle →</Link></aside></div><div className={styles.packageGrid}>{Object.entries(featured.packages).map(([key, item], index) => <article className={index === 1 ? styles.popular : ""} key={key}>{index === 1 && <b>EN AVANTAJLI</b>}<span>{item.label.toUpperCase()}</span><strong>{item.credits}<small> kontör</small></strong><p>{item.days} gün boyunca vitrin görünürlüğü</p><button disabled={busy || credits.balance < item.credits} onClick={() => buyPromotion(key)}>{credits.balance < item.credits ? "Bakiye yetersiz" : "Paketi etkinleştir"}</button></article>)}</div><section className={styles.ledger}><header><div><span>HESAP HAREKETLERİ</span><h2>Kontör geçmişi</h2></div><Link href="/kontor-yukle">Kontör yükle →</Link></header>{credits.transactions.length === 0 ? <p>Henüz kontör hareketi bulunmuyor.</p> : credits.transactions.map((transaction) => <div key={transaction.id}><i className={transaction.amount < 0 ? styles.spend : ""}>{transaction.amount < 0 ? "−" : "+"}</i><p><strong>{transaction.reference_type === "seller_promotion" ? "Vitrinde öne çıkarma" : transaction.type === "spend" ? "Teklif / detay bedeli" : transaction.type === "bonus" ? "Paket bonusu" : "Kontör yükleme"}</strong><small>{transaction.metadata?.public_reference ?? transaction.metadata?.merchant_oid ?? (transaction.metadata?.days ? `${transaction.metadata.days} gün` : "Hesap hareketi")} · {date(transaction.created_at)}</small></p><b>{transaction.amount > 0 ? "+" : ""}{transaction.amount}<small>kalan {transaction.balance_after}</small></b></div>)}</section></section>}
       </section>
     </div>
-    <Modal onClose={() => setShowPortfolioForm(false)} open={showPortfolioForm} size="lg" subtitle="Müşteriler bu bilgileri vitrininde görür." title={portfolioForm.id ? "Çalışmayı düzenle" : "Yeni çalışma ekle"} footer={<>
+    <Modal onClose={() => setShowPortfolioForm(false)} open={showPortfolioForm} size="xl" subtitle="Müşteriler bu bilgileri vitrininde görür." title={portfolioForm.id ? "Çalışmayı düzenle" : "Yeni çalışma ekle"} footer={<>
       <button className={styles.modalGhost} onClick={() => setShowPortfolioForm(false)} type="button">Vazgeç</button>
       <button className={styles.modalPrimary} disabled={busy || !portfolioForm.title.trim() || !portfolioForm.description.trim()} onClick={savePortfolio} type="button">{busy ? "Kaydediliyor…" : portfolioForm.id ? "Güncelle" : "Çalışmayı ekle"}</button>
     </>}>
-      <div className={styles.portfolioForm}>
-        <label>Başlık<input data-autofocus maxLength={140} onChange={(event) => setPortfolioForm({ ...portfolioForm, title: event.target.value })} placeholder="Örn. Kadıköy 3+1 komple daire boyası" value={portfolioForm.title} /></label>
-        <label>Kategori<select onChange={(event) => setPortfolioForm({ ...portfolioForm, category_id: event.target.value })} value={portfolioForm.category_id}><option value="">Seçilmedi</option>{profile.categories.map((item) => <option key={item.id} value={item.id}>{item.icon} {item.name}</option>)}</select></label>
-        <label>Konum<input maxLength={120} onChange={(event) => setPortfolioForm({ ...portfolioForm, location: event.target.value })} placeholder="İstanbul, Kadıköy" value={portfolioForm.location} /></label>
-        <label>Tamamlanma<input onChange={(event) => setPortfolioForm({ ...portfolioForm, completed_at: event.target.value })} type="date" value={portfolioForm.completed_at} /></label>
-        <label className={styles.wide}>Açıklama<textarea maxLength={2000} onChange={(event) => setPortfolioForm({ ...portfolioForm, description: event.target.value })} placeholder="Kapsamı, kullanılan malzemeleri ve süreyi anlat…" value={portfolioForm.description} /><small>{portfolioForm.description.length} / 2000</small></label>
+      <div className={styles.builder}>
+        <div className={styles.builderMain}>
+          <section className={styles.formBlock}>
+            <header><i>1</i><div><strong>Temel bilgiler</strong><small>Vitrin kartının üst kısmında görünür.</small></div></header>
+            <div className={styles.formGrid}>
+              <label className={styles.wide}>Başlık<input data-autofocus maxLength={140} onChange={(event) => setPortfolioForm({ ...portfolioForm, title: event.target.value })} placeholder="Örn. Kadıköy 3+1 komple daire boyası" value={portfolioForm.title} /><small>{portfolioForm.title.length} / 140</small></label>
+              <label>Kategori<select onChange={(event) => setPortfolioForm({ ...portfolioForm, category_id: event.target.value })} value={portfolioForm.category_id}><option value="">Seçilmedi</option>{profile.categories.map((item) => <option key={item.id} value={item.id}>{item.icon} {item.name}</option>)}</select></label>
+              <label>Konum<input maxLength={120} onChange={(event) => setPortfolioForm({ ...portfolioForm, location: event.target.value })} placeholder="İstanbul, Kadıköy" value={portfolioForm.location} /></label>
+              <label>Tamamlanma<input onChange={(event) => setPortfolioForm({ ...portfolioForm, completed_at: event.target.value })} type="date" value={portfolioForm.completed_at} /></label>
+            </div>
+          </section>
+
+          <section className={styles.formBlock}>
+            <header><i>2</i><div><strong>İş künyesi</strong><small>Müşteri kapsamı tek bakışta anlasın.</small></div></header>
+            <div className={styles.formGrid}>
+              <label>Süre<input maxLength={60} onChange={(event) => setPortfolioForm({ ...portfolioForm, duration: event.target.value })} placeholder="Örn. 4 gün" value={portfolioForm.duration} /></label>
+              <label>Alan / ölçü<input maxLength={60} onChange={(event) => setPortfolioForm({ ...portfolioForm, area: event.target.value })} placeholder="Örn. 120 m²" value={portfolioForm.area} /></label>
+              <label>İş bedeli (₺)<input inputMode="decimal" onChange={(event) => setPortfolioForm({ ...portfolioForm, budget: event.target.value })} placeholder="Örn. 38000" value={portfolioForm.budget} /><small>Boş bırakabilirsin.</small></label>
+              <label>Müşteri tipi<input maxLength={60} onChange={(event) => setPortfolioForm({ ...portfolioForm, client_type: event.target.value })} placeholder="Örn. Konut / Ofis" value={portfolioForm.client_type} /></label>
+            </div>
+          </section>
+
+          <section className={styles.formBlock}>
+            <header><i>3</i><div><strong>Anlatım</strong><small>Kapsam ve yapılan işlerin listesi.</small></div></header>
+            <div className={styles.formGrid}>
+              <label className={styles.wide}>Açıklama<textarea maxLength={2000} onChange={(event) => setPortfolioForm({ ...portfolioForm, description: event.target.value })} placeholder="Kapsamı, kullanılan malzemeleri ve süreyi anlat…" value={portfolioForm.description} /><small>{portfolioForm.description.length} / 2000</small></label>
+              <label className={styles.wide}>Yapılan işler<textarea onChange={(event) => setPortfolioForm({ ...portfolioForm, highlights: event.target.value })} placeholder={"Her satıra bir madde yaz\nÖrn. Duvar hazırlığı ve astar\nÖrn. İki kat silikonlu boya"} rows={4} value={portfolioForm.highlights} /><small>{workHighlights.length} / 8 madde · her satır ayrı madde olur.</small></label>
+            </div>
+          </section>
+        </div>
+
+        <aside className={styles.builderSide}>
+          <span className={styles.previewTag}>CANLI ÖNİZLEME</span>
+          <article className={styles.previewCard}>
+            <div className={styles.previewCover} style={workCategory ? { background: `linear-gradient(135deg, ${workCategory.color}, #4f46e5)` } : undefined}><span>{workCategory?.icon ?? "🖼"}</span></div>
+            <div className={styles.previewBody}>
+              <div className={styles.previewTop}>
+                {workCategory && <b style={{ background: `${workCategory.color}18`, color: workCategory.color }}>{workCategory.icon} {workCategory.name}</b>}
+                {portfolioForm.completed_at && <small>{new Date(portfolioForm.completed_at).toLocaleDateString("tr-TR", { month: "long", year: "numeric" })}</small>}
+              </div>
+              <h4>{portfolioForm.title || "Çalışma başlığı"}</h4>
+              {portfolioForm.location && <small className={styles.previewPlace}>📍 {portfolioForm.location}</small>}
+              <p>{portfolioForm.description || "Açıklaman burada görünecek."}</p>
+              {(portfolioForm.duration || portfolioForm.area || portfolioForm.budget || portfolioForm.client_type) && <ul className={styles.previewSpecs}>
+                {portfolioForm.duration && <li>⏱ {portfolioForm.duration}</li>}
+                {portfolioForm.area && <li>◱ {portfolioForm.area}</li>}
+                {portfolioForm.budget && <li>◆ ₺{portfolioForm.budget}</li>}
+                {portfolioForm.client_type && <li>◇ {portfolioForm.client_type}</li>}
+              </ul>}
+              {workHighlights.length > 0 && <ul className={styles.previewDone}>{workHighlights.slice(0, 3).map((line, position) => <li key={position}>{line}</li>)}</ul>}
+            </div>
+          </article>
+          <ul className={styles.previewTips}>
+            <li>Kaydettikten sonra çalışmayı açıp <b>8 adede kadar fotoğraf</b> yükleyebilirsin.</li>
+            <li>Künye alanlarını doldurmak vitrindeki kartı zenginleştirir.</li>
+            <li>Yapılan işler listesi müşterinin kapsamı anlamasını kolaylaştırır.</li>
+          </ul>
+        </aside>
       </div>
     </Modal>
 
@@ -750,8 +823,8 @@ export function SellerDashboard() {
     </>}>
       <WorkViewer work={openWork} actions={<>
         <label className={styles.uploadInline}>
-          <input accept="image/jpeg,image/png,image/webp" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) uploadPortfolioImage(openWork, file); event.target.value = ""; }} type="file" />
-          <span>{uploadingFor === openWork.id ? "Yükleniyor…" : "＋ Görsel ekle"}</span>
+          <input accept="image/jpeg,image/png,image/webp" hidden multiple onChange={(event) => { const files = Array.from(event.target.files ?? []); if (files.length) uploadPortfolioImages(openWork, files); event.target.value = ""; }} type="file" />
+          <span>{uploadingFor === openWork.id ? "Yükleniyor…" : "＋ Görsel ekle (çoklu seçebilirsin)"}</span>
         </label>
         <span className={styles.uploadHint}>{openWork.images.length} / 8 görsel · JPEG, PNG veya WebP · en fazla 4 MB</span>
         {openWork.images.length > 0 && <div className={styles.imageManager}>{openWork.images.map((image) => <button key={image.id} onClick={() => deletePortfolioImage(image)} type="button">
@@ -760,17 +833,54 @@ export function SellerDashboard() {
         </button>)}</div>}
       </>} />
     </Modal>}
-    <Modal onClose={() => setShowServiceForm(false)} open={showServiceForm} size="lg" subtitle="Kapak görselini kaydettikten sonra kart üzerinden ekleyebilirsin." title={serviceForm.id ? "Hizmeti düzenle" : "Yeni hizmet ekle"} footer={<>
+    <Modal onClose={() => setShowServiceForm(false)} open={showServiceForm} size="xl" subtitle="Kapak görselini kaydettikten sonra kart üzerinden ekleyebilirsin." title={serviceForm.id ? "Hizmeti düzenle" : "Yeni hizmet ekle"} footer={<>
       <button className={styles.modalGhost} onClick={() => setShowServiceForm(false)} type="button">Vazgeç</button>
       <button className={styles.modalPrimary} disabled={busy} onClick={submitService} type="button">{busy ? "Kaydediliyor…" : "Hizmeti kaydet"}</button>
     </>}>
-      <div className={styles.portfolioForm}>
-        <label>Kategori<select onChange={(event) => setServiceForm({ ...serviceForm, category_id: event.target.value })} value={serviceForm.category_id}>{profile.categories.map((item) => <option key={item.id} value={item.id}>{item.icon} {item.name}</option>)}</select></label>
-        <label>Hizmet başlığı<input data-autofocus onChange={(event) => setServiceForm({ ...serviceForm, title: event.target.value })} placeholder="Örn. Anahtar teslim banyo yenileme" value={serviceForm.title} /></label>
-        <label className={styles.wide}>Açıklama<textarea onChange={(event) => setServiceForm({ ...serviceForm, description: event.target.value })} placeholder="Hizmet kapsamını ve çalışma biçimini anlat…" value={serviceForm.description} /><small>{serviceForm.description.length} / 2000 · en az 30 karakter</small></label>
-        <label>Başlangıç fiyatı (₺)<input inputMode="decimal" onChange={(event) => setServiceForm({ ...serviceForm, price_from: event.target.value })} placeholder="Örn. 5000" value={serviceForm.price_from} /></label>
-        <label>Teslim süresi<input onChange={(event) => setServiceForm({ ...serviceForm, delivery_time: event.target.value })} placeholder="Örn. 3–5 gün" value={serviceForm.delivery_time} /></label>
-        <label className={`${styles.wide} ${styles.toggleRow}`}><input checked={serviceForm.is_active} onChange={(event) => setServiceForm({ ...serviceForm, is_active: event.target.checked })} type="checkbox" /> Vitrinde yayında</label>
+      <div className={styles.builder}>
+        <div className={styles.builderMain}>
+          <section className={styles.formBlock}>
+            <header><i>1</i><div><strong>Hizmet tanımı</strong><small>Mağaza kartında görünen başlık ve kapsam.</small></div></header>
+            <div className={styles.formGrid}>
+              <label>Kategori<select onChange={(event) => setServiceForm({ ...serviceForm, category_id: event.target.value })} value={serviceForm.category_id}>{profile.categories.map((item) => <option key={item.id} value={item.id}>{item.icon} {item.name}</option>)}</select></label>
+              <label>Hizmet başlığı<input data-autofocus onChange={(event) => setServiceForm({ ...serviceForm, title: event.target.value })} placeholder="Örn. Anahtar teslim banyo yenileme" value={serviceForm.title} /></label>
+              <label className={styles.wide}>Açıklama<textarea onChange={(event) => setServiceForm({ ...serviceForm, description: event.target.value })} placeholder="Hizmet kapsamını ve çalışma biçimini anlat…" value={serviceForm.description} /><small>{serviceForm.description.length} / 2000 · en az 30 karakter</small></label>
+            </div>
+          </section>
+
+          <section className={styles.formBlock}>
+            <header><i>2</i><div><strong>Fiyat ve teslim</strong><small>Müşteri beklentisini baştan netleştirir.</small></div></header>
+            <div className={styles.formGrid}>
+              <label>Başlangıç fiyatı (₺)<input inputMode="decimal" onChange={(event) => setServiceForm({ ...serviceForm, price_from: event.target.value })} placeholder="Örn. 5000" value={serviceForm.price_from} /><small>Kartta &quot;başlangıç&quot; olarak gösterilir.</small></label>
+              <label>Teslim süresi<input onChange={(event) => setServiceForm({ ...serviceForm, delivery_time: event.target.value })} placeholder="Örn. 3–5 gün" value={serviceForm.delivery_time} /></label>
+              <label className={`${styles.wide} ${styles.toggleRow}`}><input checked={serviceForm.is_active} onChange={(event) => setServiceForm({ ...serviceForm, is_active: event.target.checked })} type="checkbox" /> Vitrinde yayında</label>
+            </div>
+          </section>
+        </div>
+
+        <aside className={styles.builderSide}>
+          <span className={styles.previewTag}>CANLI ÖNİZLEME</span>
+          <article className={styles.previewCard}>
+            <div className={styles.previewCover} style={serviceCategory ? { background: `linear-gradient(135deg, ${serviceCategory.color}, #06b6d4)` } : undefined}><span>{serviceCategory?.icon ?? "▦"}</span></div>
+            <div className={styles.previewBody}>
+              <div className={styles.previewTop}>
+                {serviceCategory && <b style={{ background: `${serviceCategory.color}18`, color: serviceCategory.color }}>{serviceCategory.icon} {serviceCategory.name}</b>}
+                {!serviceForm.is_active && <small>Taslak</small>}
+              </div>
+              <h4>{serviceForm.title || "Hizmet başlığı"}</h4>
+              <p>{serviceForm.description || "Hizmet kapsamın burada görünecek."}</p>
+              {(serviceForm.price_from || serviceForm.delivery_time) && <ul className={styles.previewSpecs}>
+                {serviceForm.price_from && <li>BAŞLANGIÇ ₺{serviceForm.price_from}</li>}
+                {serviceForm.delivery_time && <li>◷ {serviceForm.delivery_time}</li>}
+              </ul>}
+            </div>
+          </article>
+          <ul className={styles.previewTips}>
+            <li>Kaydettikten sonra hizmet kartına <b>kapak görseli</b> ekleyebilirsin.</li>
+            <li>Başlangıç fiyatı yazan kartlar mağaza sıralamasında daha çok tıklanır.</li>
+            <li>Yayından kaldırdığın hizmet vitrinde görünmez, panelde durur.</li>
+          </ul>
+        </aside>
       </div>
     </Modal>
   </main>;

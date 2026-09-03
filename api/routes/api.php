@@ -45,6 +45,8 @@ Route::get('/service-covers/{sellerService}', [App\Http\Controllers\Api\SellerSe
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/me', [AuthController::class, 'updateProfile'])->middleware('throttle:20,1');
+    Route::put('/me/password', [AuthController::class, 'updatePassword'])->middleware('throttle:10,1');
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::post('/verification/send', [VerificationController::class, 'send'])

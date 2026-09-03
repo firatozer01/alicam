@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AccountMenu } from "@/components/account-menu";
-import { NavMenuBar } from "@/components/listing/nav-menu";
+import { SiteHeader } from "@/components/shell/site-header";
 import { Modal } from "@/components/modal/modal";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import styles from "./musteri-panel.module.css";
@@ -127,10 +126,14 @@ export function CustomerDashboard() {
   const totalOffers = requests.reduce((sum, item) => sum + item.offer_count, 0);
 
   return <main className={styles.page}>
-    <header className={styles.shellBar}><div className={styles.shellInner}>
-      <Link className={styles.brand} href="/">alıcam<span>.net</span></Link>
-      <nav className={styles.shellNav}>
-        <NavMenuBar activeKey={section} menus={[
+    <SiteHeader
+      activeKey={section}
+      cta={{ label: "＋ Yeni talep", href: "/talep-olustur" }}
+      links={[{ label: "Ana sayfa", href: "/" }, { label: "Hizmet verenler", href: "/hizmet-verenler" }]}
+      sessionReady={!!user}
+      user={user}
+      workspace="buyer"
+      menus={[
           {
             key: "panel", label: "Panelim",
             panelIcon: "◇", panelTitle: "Müşteri panelin", panelHint: "Taleplerin, gelen teklifler ve hesabın",
@@ -151,10 +154,8 @@ export function CustomerDashboard() {
               { key: "new", label: "Yeni talep oluştur", icon: "＋", href: "/talep-olustur", primary: true },
             ],
           },
-        ]}><Link href="/">Ana sayfa</Link><Link href="/hizmet-verenler">Hizmet verenler</Link></NavMenuBar>
-      </nav>
-      <div className={styles.shellActions}><Link className={styles.newButton} href="/talep-olustur">＋ Yeni talep</Link>{user && <AccountMenu compact user={user} workspace="buyer" />}</div>
-    </div></header>
+      ]}
+    />
 
     <section className={styles.content}>
       <div className={styles.canvas} id="ozet">

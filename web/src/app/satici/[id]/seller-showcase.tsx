@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Modal } from "@/components/modal/modal";
-import { WorkViewer } from "@/components/portfolio/work-viewer";
+import { SiteHeader } from "@/components/shell/site-header";
+import { WorkViewer, workSpecs } from "@/components/portfolio/work-viewer";
 import { apiRequest, firstApiError } from "@/lib/api";
 import styles from "./showcase.module.css";
 
@@ -11,6 +12,8 @@ type MiniCategory = { name: string; slug?: string; icon: string; color: string }
 type PortfolioImage = { id: number; url: string };
 type PortfolioItem = {
   id: number; title: string; description: string; location: string | null;
+  duration: string | null; area: string | null; budget: string | null;
+  client_type: string | null; highlights: string[];
   completed_at: string | null; category: MiniCategory | null; images: PortfolioImage[];
 };
 type Review = { id: number; rating: number; comment: string | null; buyer_name: string; created_at: string };
@@ -65,10 +68,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
   };
 
   return <main className={styles.page}>
-    <nav className={styles.nav}><div className={styles.wrap}>
-      <Link className={styles.brand} href="/">alıcam<span>.net</span></Link>
-      <div className={styles.navLinks}><Link href="/hizmet-verenler">Hizmet verenler</Link><Link href="/#talepler">Talepler</Link></div>
-    </div></nav>
+    <SiteHeader activeKey="rehber" />
 
     {/* Mağaza kapağı */}
     <header className={styles.storeCover} style={{ "--accent": accent } as React.CSSProperties}>
@@ -173,7 +173,11 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
               <h3>{item.title}</h3>
               {item.location && <small className={styles.workPlace}>📍 {item.location}</small>}
               <p>{item.description}</p>
-              <button className={styles.workMore} onClick={() => setOpenWork(item)} type="button">Fotoğrafları incele →</button>
+              {workSpecs(item).length > 0 && <ul className={styles.workSpecs}>
+                {workSpecs(item).slice(0, 3).map((spec) => <li key={spec.key}><i>{spec.icon}</i>{spec.value}</li>)}
+              </ul>}
+              {item.highlights.length > 0 && <small className={styles.workDone}>✓ {item.highlights.slice(0, 2).join(" · ")}{item.highlights.length > 2 && ` +${item.highlights.length - 2} madde`}</small>}
+              <button className={styles.workMore} onClick={() => setOpenWork(item)} type="button">Detayları ve fotoğrafları incele →</button>
             </div>
           </article>)}
         </div>}

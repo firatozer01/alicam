@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { AccountMenu } from "@/components/account-menu";
-import { NavMenuBar } from "@/components/listing/nav-menu";
+import { SiteHeader } from "@/components/shell/site-header";
 import { ActiveChips, ListSkeleton, Pagination, ResultBar } from "@/components/listing/listing-chrome";
 import list from "@/components/listing/listing.module.css";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
@@ -214,12 +213,18 @@ export function MarketplaceHome() {
   };
 
   return <main className={styles.page} ref={pageRef}>
-    <div className={styles.announce}>⚡ Yeni nesil talep pazaryeri — talep oluşturmak tamamen ücretsiz.</div>
-    <nav className={styles.nav}>
-      <div className={styles.wrap}>
-        <Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
-        <div className={styles.navLinks}>
-          <NavMenuBar activeKey={category} menus={[
+    <SiteHeader
+      activeKey={category}
+      announce="⚡ Yeni nesil talep pazaryeri — talep oluşturmak tamamen ücretsiz."
+      cta={isSeller ? { label: "Gelen talepler", href: "/satici-paneli" } : { label: "Ücretsiz talep oluştur", href: "/talep-olustur" }}
+      links={[
+        { label: "Hizmet verenler", href: "/hizmet-verenler" },
+        { label: "Nasıl çalışır", href: "/#nasil-calisir" },
+        { label: "Hizmet verenler için", href: "/#hizmet-veren" },
+      ]}
+      sessionReady={sessionReady}
+      user={user}
+      menus={[
             {
               key: "categories", label: "Kategoriler",
               panelIcon: "🗂", panelTitle: "Kategoriler", panelHint: "Talep oluşturabileceğin tüm alanlar tek çatı altında",
@@ -254,14 +259,8 @@ export function MarketplaceHome() {
                 { key: "new", label: "Ücretsiz talep oluştur", icon: "＋", href: "/talep-olustur", primary: true },
               ],
             },
-          ]}></NavMenuBar>
-          <Link className={styles.navItem} href="/hizmet-verenler">Hizmet verenler</Link>
-          <a className={styles.navItem} href="#nasil-calisir">Nasıl çalışır</a>
-          <a className={styles.navItem} href="#hizmet-veren">Hizmet verenler için</a>
-        </div>
-        <div className={styles.navCta}>{!sessionReady ? <span className={styles.sessionSkeleton} /> : user ? <AccountMenu user={user} /> : <Link className={styles.buttonLine} href="/giris">Giriş yap</Link>}<Link className={styles.buttonGrad} href={isSeller ? "/satici-paneli" : "/talep-olustur"}>{isSeller ? "Gelen talepler" : "Ücretsiz talep oluştur"}</Link></div>
-      </div>
-    </nav>
+      ]}
+    />
 
     <header className={styles.hero}>
       <div className={styles.aurora}><i className={styles.blobOne} /><i className={styles.blobTwo} /></div>

@@ -14,6 +14,11 @@ class SellerPortfolioItem extends Model
         'title',
         'description',
         'location',
+        'duration',
+        'area',
+        'budget',
+        'client_type',
+        'highlights',
         'completed_at',
         'is_published',
         'sort_order',
@@ -23,6 +28,7 @@ class SellerPortfolioItem extends Model
     {
         return [
             'completed_at' => 'date',
+            'highlights' => 'array',
             'is_published' => 'boolean',
         ];
     }

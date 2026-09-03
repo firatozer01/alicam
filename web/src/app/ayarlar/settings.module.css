@@ -1,0 +1,86 @@
+/* Hesap ayarları: bilgiler, güvenlik ve çalışma alanları. */
+
+.page{min-height:100vh;background:#f6f5fc;color:#15162d;padding-bottom:70px}
+.wrap{width:min(1080px,calc(100% - 40px));margin:0 auto}
+
+.state{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#67677f;font-size:14px}
+.state i{width:26px;height:26px;border-radius:50%;border:3px solid #e7e5f5;border-top-color:#7c3aed;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.state a{color:#4f46e5;font-weight:700;text-decoration:none}
+
+.bar{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e7e5f5;position:sticky;top:0;z-index:30}
+.bar .wrap{height:66px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{font-family:var(--font-fraunces),Georgia,serif;font-size:22px;font-weight:800;color:#15162d;text-decoration:none}
+.brand span{color:#7c3aed}
+.navLinks{display:flex;gap:4px;flex:1;margin-left:10px}
+.navLinks a{padding:8px 12px;border-radius:9px;font-size:14px;font-weight:650;color:#15162d;text-decoration:none;transition:background .16s ease,color .16s ease}
+.navLinks a:hover{background:#f1effc;color:#4f46e5}
+
+/* ---- Başlık ---- */
+.head{display:grid;grid-template-columns:auto minmax(0,1fr) 236px;gap:18px;align-items:center;background:#fff;border:1px solid #e7e5f5;border-radius:18px;padding:20px 22px;margin-top:22px;box-shadow:0 10px 34px rgba(79,70,229,.06)}
+.avatar{width:72px;height:72px;flex:none;display:grid;place-items:center;border-radius:22px;font-size:24px;font-weight:800;color:#fff;background:linear-gradient(135deg,#7c3aed,#06b6d4);box-shadow:0 12px 28px rgba(124,58,237,.28)}
+.head h1{margin:0;font-family:var(--font-fraunces),Georgia,serif;font-size:26px;font-weight:700;line-height:1.2}
+.head p{margin:5px 0 0;font-size:13px;color:#67677f}
+.roleChips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.roleChips span{border-radius:7px;padding:4px 10px;font-size:11.5px;font-weight:700}
+.roleBuyer{background:#f1eeff;color:#4f46e5}
+.roleSeller{background:#e0f7fb;color:#0e7490}
+.roleAdmin{background:#fef3c7;color:#b45309}
+
+.verifyBox{background:#faf9ff;border:1px solid #e7e5f5;border-radius:14px;padding:13px 15px;display:flex;flex-direction:column;gap:5px}
+.verifyBox p{margin:0;font-size:12.5px;font-weight:650}
+.verifyBox a{margin-top:5px;font-size:12px;font-weight:700;color:#4f46e5;text-decoration:none}
+.ok{color:#15803d}
+.pending{color:#b45309}
+
+/* ---- Sekmeler ---- */
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:20px 0 14px}
+.tabs button{border:1px solid #e7e5f5;background:#fff;border-radius:999px;padding:9px 18px;font:inherit;font-size:13.5px;font-weight:700;color:#55566d;cursor:pointer;transition:border-color .16s ease,color .16s ease,background .16s ease,transform .16s ease}
+.tabs button:hover{border-color:#7c3aed;color:#4f46e5;transform:translateY(-1px)}
+.tabOn{background:#f1eeff!important;border-color:#ddd6fe!important;color:#4f46e5!important}
+
+.notice{margin:0 0 12px;background:#dcfce7;color:#15803d;border-radius:11px;padding:11px 15px;font-size:13.5px;font-weight:650}
+.error{margin:0 0 12px;background:#fee2e2;color:#b91c1c;border-radius:11px;padding:11px 15px;font-size:13.5px}
+
+/* ---- Kartlar ---- */
+.card{background:#fff;border:1px solid #e7e5f5;border-radius:18px;overflow:hidden;box-shadow:0 10px 34px rgba(79,70,229,.06);animation:cardIn .32s cubic-bezier(.2,.8,.2,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.card{animation:none}}
+.card>header{padding:18px 22px;border-bottom:1px solid #f0eefb;background:linear-gradient(100deg,#f8f6ff,#f4fbfd)}
+.card>header h2{margin:0;font-family:var(--font-fraunces),Georgia,serif;font-size:19px;font-weight:700}
+.card>header p{margin:5px 0 0;font-size:13px;color:#67677f}
+
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:20px 22px}
+.form label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:800;letter-spacing:.08em;color:#8a89a6}
+.form input{border:1px solid #e7e5f5;border-radius:10px;padding:11px 13px;font:inherit;font-size:14px;font-weight:400;letter-spacing:normal;color:#15162d;background:#fff;outline:none;transition:border-color .16s ease,box-shadow .16s ease}
+.form input:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.form input:disabled{background:#faf9ff;color:#8a89a6}
+.form small{font-size:11.5px;font-weight:400;letter-spacing:normal;color:#8a89a6}
+.wide{grid-column:1/-1}
+.readonly{grid-column:1/-1}
+
+.card>footer{display:flex;justify-content:flex-end;padding:14px 22px;border-top:1px solid #f0eefb;background:#faf9ff}
+.card>footer button{border:0;border-radius:10px;padding:11px 20px;font:inherit;font-size:13.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5);cursor:pointer;transition:filter .16s ease,transform .16s ease}
+.card>footer button:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px)}
+.card>footer button:disabled{opacity:.55;cursor:default}
+
+/* ---- Çalışma alanları ---- */
+.spaces{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.spaceBody{padding:20px 22px;display:flex;flex-direction:column;gap:11px}
+.spaceIcon{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;font-size:19px;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5)}
+.spaceBody p{margin:0;font-size:13.5px;line-height:1.6;color:#55566d}
+.muted{color:#8a89a6!important;font-size:12.5px!important}
+.miniChips{display:flex;gap:6px;flex-wrap:wrap}
+.miniChips span{border-radius:7px;padding:3px 9px;font-size:11.5px;font-weight:700}
+.spaceActions{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}
+.spaceActions a{display:inline-flex;align-items:center;border-radius:10px;padding:9px 15px;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5);text-decoration:none;transition:filter .16s ease,transform .16s ease}
+.spaceActions a:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.ghost{color:#4f46e5!important;background:#fff!important;border:1px solid #e7e5f5}
+.ghost:hover{border-color:#7c3aed}
+
+@media(max-width:860px){
+  .head{grid-template-columns:auto minmax(0,1fr)}
+  .verifyBox{grid-column:1/-1}
+  .form{grid-template-columns:1fr}
+  .navLinks a{display:none}
+}
