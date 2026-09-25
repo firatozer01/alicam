@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import "./admin/admin-standard.css";
+import { AssistantWidget } from "@/components/assistant/assistant-widget";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter" });
 const fraunces = Fraunces({ subsets: ["latin", "latin-ext"], variable: "--font-fraunces" });
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="tr" className={`${inter.variable} ${fraunces.variable} ${plexMono.variable}`} data-scroll-behavior="smooth">
-      <body>{children}</body>
+      <body>{children}<AssistantWidget /></body>
     </html>
   );
 }

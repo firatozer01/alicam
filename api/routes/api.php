@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminCategoryController;
 use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminSellerApprovalController;
 use App\Http\Controllers\Api\AdminSettingsController;
+use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BuyerRequestController;
 use App\Http\Controllers\Api\CategoryController;
@@ -31,6 +32,10 @@ Route::get('/categories/{category:slug}/attributes', [CategoryController::class,
 Route::get('/locations', [LocationController::class, 'index']);
 Route::get('/credits/packages', [CreditPurchaseController::class, 'packages']);
 Route::get('/marketplace', MarketplaceController::class);
+
+// Asistan: oturum zorunlu degil, varsa kullaniciya ozel konular acilir.
+Route::get('/assistant', [AssistantController::class, 'intro']);
+Route::post('/assistant/ask', [AssistantController::class, 'ask'])->middleware('throttle:30,1');
 Route::post('/payments/paytr/callback', [CreditPurchaseController::class, 'callback'])
     ->middleware('throttle:120,1');
 

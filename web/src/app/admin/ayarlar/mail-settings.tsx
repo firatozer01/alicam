@@ -17,9 +17,12 @@ type Settings = {
   "mail.password_set"?: boolean;
   "mail.from_address": string;
   "mail.from_name": string;
+  "assistant.gemini_key": string;
+  "assistant.gemini_key_set"?: boolean;
+  "assistant.model": string;
 };
 
-type Meta = { active_mailer: string; sms_ready: boolean };
+type Meta = { active_mailer: string; sms_ready: boolean; assistant_mode: "ai" | "knowledge" };
 
 const empty: Settings = {
   "mail.enabled": "0",
@@ -30,12 +33,15 @@ const empty: Settings = {
   "mail.password": "",
   "mail.from_address": "",
   "mail.from_name": "alıcam.net",
+  "assistant.gemini_key": "",
+  "assistant.model": "gemini-3-flash",
 };
 
 export function MailSettings() {
   const router = useRouter();
   const [form, setForm] = useState<Settings>(empty);
   const [passwordSet, setPasswordSet] = useState(false);
+  const [geminiSet, setGeminiSet] = useState(false);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -48,8 +54,9 @@ export function MailSettings() {
     apiRequest<{ data: Settings; meta: Meta }>("/admin/settings")
       .then((response) => {
         if (!active) return;
-        setForm({ ...empty, ...response.data, "mail.password": "" });
+        setForm({ ...empty, ...response.data, "mail.password": "", "assistant.gemini_key": "" });
         setPasswordSet(Boolean(response.data["mail.password_set"]));
+        setGeminiSet(Boolean(response.data["assistant.gemini_key_set"]));
         setMeta(response.meta);
       })
       .catch((requestError: unknown) => {
@@ -82,11 +89,16 @@ export function MailSettings() {
             from_address: form["mail.from_address"],
             from_name: form["mail.from_name"],
           },
+          assistant: {
+            gemini_key: form["assistant.gemini_key"],
+            model: form["assistant.model"],
+          },
         }),
       });
       setNotice(response.message);
       setPasswordSet(Boolean(response.data["mail.password_set"]) || Boolean(form["mail.password"]));
-      setForm((current) => ({ ...current, "mail.password": "" }));
+      setGeminiSet((current) => current || Boolean(form["assistant.gemini_key"]));
+      setForm((current) => ({ ...current, "mail.password": "", "assistant.gemini_key": "" }));
     } catch (requestError: unknown) {
       setError(firstApiError(requestError));
     } finally {
@@ -186,6 +198,32 @@ export function MailSettings() {
             <input onChange={(event) => setTestTo(event.target.value)} placeholder="deneme@adresin.com" type="email" value={testTo} />
             <button disabled={busy || !testTo.includes("@")} onClick={sendTest} type="button">Deneme gönder</button>
           </div>
+        </section>
+
+        <section className={styles.card}>
+          <header>
+            <div>
+              <strong>alıcam asistanı</strong>
+              <small>Şu anki mod: <b>{meta?.assistant_mode === "ai" ? "Yapay zekâ bağlı" : "Hazır cevap modu"}</b></small>
+            </div>
+          </header>
+          <div className={styles.grid}>
+            <label className={styles.wide}>
+              Gemini API anahtarı
+              <input
+                autoComplete="off"
+                onChange={(event) => set("assistant.gemini_key", event.target.value)}
+                placeholder={geminiSet ? "•••••••• (kayıtlı)" : "Boş bırakırsan hazır cevap modunda çalışır"}
+                type="password"
+                value={form["assistant.gemini_key"]}
+              />
+              <small>{geminiSet ? "Anahtar kayıtlı. Değiştirmek istemiyorsan boş bırak." : "Şifrelenerek saklanır. Anahtar girilene kadar asistan yalnızca Bilgi Bankası'ndaki kayıtlı cevapları verir."}</small>
+            </label>
+            <label>Model<input onChange={(event) => set("assistant.model", event.target.value)} placeholder="gemini-3-flash" value={form["assistant.model"]} /><small>Gemini 3 Flash ailesi kullanılır. Google model kimliğini değiştirirse güncelini buraya yazman yeterli.</small></label>
+          </div>
+          <footer>
+            <button disabled={busy} onClick={save} type="button">{busy ? "Kaydediliyor…" : "Asistan ayarlarını kaydet"}</button>
+          </footer>
         </section>
 
         <section className={`${styles.card} ${styles.soon}`}>

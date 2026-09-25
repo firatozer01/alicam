@@ -23,6 +23,8 @@ class AdminSettingsController extends Controller
                 // Panelde "su an hangi surucu kullaniliyor" bilgisi gosterilir.
                 'active_mailer' => config('mail.default'),
                 'sms_ready' => false,
+                // Anahtar girilmediyse asistan hazir cevap modunda calisir.
+                'assistant_mode' => AppSettings::get('assistant.gemini_key') ? 'ai' : 'knowledge',
             ],
         ]);
     }
@@ -38,11 +40,15 @@ class AdminSettingsController extends Controller
             'mail.password' => ['sometimes', 'nullable', 'string', 'max:190'],
             'mail.from_address' => ['sometimes', 'nullable', 'email', 'max:190'],
             'mail.from_name' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'assistant.gemini_key' => ['sometimes', 'nullable', 'string', 'max:200'],
+            'assistant.model' => ['sometimes', 'nullable', 'string', 'max:60'],
         ]);
 
         $flat = [];
-        foreach ($data['mail'] ?? [] as $key => $value) {
-            $flat['mail.'.$key] = is_bool($value) ? ($value ? '1' : '0') : (string) ($value ?? '');
+        foreach (['mail', 'assistant'] as $group) {
+            foreach ($data[$group] ?? [] as $key => $value) {
+                $flat[$group.'.'.$key] = is_bool($value) ? ($value ? '1' : '0') : (string) ($value ?? '');
+            }
         }
 
         // Baglanti acilacaksa asgari alanlar dolu olmali.

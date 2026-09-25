@@ -21,7 +21,7 @@ class AppSettings
     private const CACHE_TTL = 300;
 
     /** Gizli alanlar sifrelenerek saklanir ve panele maskelenmis doner. */
-    public const SECRET_KEYS = ['mail.password', 'sms.api_key', 'sms.password'];
+    public const SECRET_KEYS = ['mail.password', 'sms.api_key', 'sms.password', 'assistant.gemini_key'];
 
     /** Panelden yonetilebilen alanlar ve varsayilanlari. */
     public const EDITABLE = [
@@ -33,6 +33,9 @@ class AppSettings
         'mail.password' => '',
         'mail.from_address' => '',
         'mail.from_name' => 'alıcam.net',
+        // Bos birakilirsa asistan hazir cevap modunda calisir.
+        'assistant.gemini_key' => '',
+        'assistant.model' => 'gemini-3-flash',
     ];
 
     /**
