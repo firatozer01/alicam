@@ -14,7 +14,7 @@ export type AccountUser = {
 function accountMeta(user: AccountUser) {
   if (user.roles.includes("admin")) return { label: "Yönetici", href: "/admin", action: "Yönetim merkezini aç" };
   if (user.roles.includes("seller")) return { label: "Hizmet veren", href: "/satici-paneli", action: "Satıcı panelini aç" };
-  return { label: "Müşteri", href: "/musteri-panel", action: "Müşteri panelini aç" };
+  return { label: "Alıcı", href: "/musteri-panel", action: "Alıcı panelini aç" };
 }
 
 /**
@@ -24,7 +24,7 @@ function accountMeta(user: AccountUser) {
  */
 function workspaces(user: AccountUser, current?: "buyer" | "seller" | "admin") {
   const items: { key: string; href: string; icon: string; title: string; hint: string; active: boolean }[] = [
-    { key: "buyer", href: "/musteri-panel", icon: "◇", title: "Müşteri paneli", hint: "Taleplerin ve gelen teklifler", active: current === "buyer" },
+    { key: "buyer", href: "/musteri-panel", icon: "◇", title: "Alıcı paneli", hint: "Taleplerin ve gelen teklifler", active: current === "buyer" },
   ];
 
   if (user.roles.includes("seller")) {

@@ -270,3 +270,25 @@ h1, h2, h3, p { margin-top: 0; }
 @media (max-width: 700px) {
   .buyer-topbar>div,.buyer-hero,.buyer-dashboard,.credit-topbar,.credit-hero,.credit-content { width: min(100% - 28px,1180px); }.buyer-topbar nav,.buyer-user b { display: none; }.buyer-hero { align-items: stretch; flex-direction: column; padding-top: 35px; }.buyer-hero h1,.credit-hero h1 { font-size: 35px; }.buyer-hero>a { min-width: 0; }.buyer-stats { grid-template-columns: 1fr; }.buyer-stats article { border-right: 0; border-bottom: 1px solid #ebe4d9; }.buyer-section-head { align-items: flex-start; flex-direction: column; }.buyer-request-main { grid-template-columns: 1fr; }.buyer-request-main aside { border-top: 1px solid #ebe3d8; border-left: 0; }.buyer-offers>div { grid-template-columns: 1fr; }.buyer-offer-foot { align-items: flex-start; flex-direction: column; }.buyer-request-card>footer { flex-wrap: wrap; }.credit-topbar>div>span { display: none; }.credit-hero { padding-top: 38px; }.credit-packages { grid-template-columns: 1fr; }.credit-package { min-height: 230px; }.credit-checkout { align-items: stretch; flex-direction: column; }.credit-checkout>div:last-child { align-items: stretch; flex-direction: column; }.credit-trust { grid-template-columns: 1fr; }.credit-iframe-wrap iframe { min-height: 600px; }.payment-result-card { padding: 38px 21px; }.admin-metric-grid { grid-template-columns: 1fr; }.admin-metric-grid article.revenue { grid-column: auto; }.admin-request-row { grid-template-columns: 34px 1fr auto; }.admin-request-row>p { display: none; }.provider-offer-form,.provider-offer-form.compact { grid-template-columns: 1fr; }.provider-offer-form>div:first-child { grid-column: auto; }.provider-offer-summary { grid-template-columns: 1fr; }.provider-offer-card>header { align-items: flex-start; }.provider-offer-card>header>div { align-items: flex-start; flex-direction: column; }
 }
+
+/* Kategori agaci secici: tur sekmesi, kirinti ve dal secimi */
+.cat-kinds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.cat-kinds button { padding: 12px 14px; border: 1px solid #d9e0dc; border-radius: 11px; background: #fbfcfb; text-align: left; cursor: pointer; transition: border-color .2s, background .2s, transform .2s; }
+.cat-kinds button:hover { border-color: #83a89e; transform: translateY(-1px); }
+.cat-kinds button[data-on="true"] { border-color: #1f6f64; background: #f2f8f5; box-shadow: inset 3px 0 #1f6f64; }
+.cat-kinds strong, .cat-kinds small { display: block; }
+.cat-kinds strong { font-family: var(--font-fraunces); font-size: 14px; color: #142238; }
+.cat-kinds small { margin-top: 3px; color: #7d8782; font-size: 9px; }
+.cat-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 12px; }
+.cat-crumbs button { border: 0; padding: 5px 10px; border-radius: 7px; background: #f1f6f3; color: #1f6f64; font-size: 9px; font-weight: 800; cursor: pointer; }
+.cat-crumbs button:hover { background: #e3efe9; }
+.cat-crumbs button + button::before { content: "› "; color: #9bb0a8; }
+.cat-self { display: grid; grid-template-columns: 1fr 22px; align-items: center; gap: 15px; margin-bottom: 10px; padding: 14px 15px; border: 1px dashed #b9cec6; border-radius: 11px; cursor: pointer; transition: border-color .2s, background .2s; }
+.cat-self:hover { border-color: #1f6f64; background: #f7fbf9; }
+.cat-self.selected { border-style: solid; border-color: #1f6f64; background: #f2f8f5; }
+.cat-self input { position: absolute; opacity: 0; pointer-events: none; }
+.cat-self strong, .cat-self small { display: block; }
+.cat-self strong { font-family: var(--font-fraunces); font-size: 14px; }
+.cat-self small { margin-top: 3px; color: #7d8782; font-size: 9px; }
+.cat-self > b { width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid #d3dcd7; border-radius: 50%; color: transparent; font-size: 9px; }
+.cat-self.selected > b { border-color: #1f6f64; color: #fff; background: #1f6f64; }

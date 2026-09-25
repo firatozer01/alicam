@@ -175,7 +175,7 @@ export function MarketplaceHome() {
   const isSeller = user?.roles.includes("seller") ?? false;
   const isAdmin = user?.roles.includes("admin") ?? false;
   const panelHref = isAdmin ? "/admin" : isSeller ? "/satici-paneli" : "/musteri-panel";
-  const panelLabel = isAdmin ? "Admin paneli" : isSeller ? "Satıcı paneli" : "Müşteri paneli";
+  const panelLabel = isAdmin ? "Admin paneli" : isSeller ? "Satıcı paneli" : "Alıcı paneli";
   const sellerHref = isSeller ? "/satici-paneli" : "/satici-ol";
   const sellerLabel = isSeller ? "Gelen taleplere git" : "Hizmet veren ol";
   const inspectHref = isSeller ? "/satici-paneli" : user ? "/satici-ol" : "/giris?devam=%2Fsatici-paneli";

@@ -80,7 +80,7 @@ class AdminCategoryAttributeController extends Controller
                     ->ignore($attribute?->id),
             ],
             'label' => ['required', 'string', 'min:2', 'max:120'],
-            'type' => ['required', Rule::in(['text', 'select', 'multiselect', 'number', 'range', 'boolean', 'date'])],
+            'type' => ['required', Rule::in(['text', 'textarea', 'select', 'multiselect', 'number', 'range', 'boolean', 'date'])],
             'options' => [$selectType ? 'required' : 'nullable', 'array', 'max:50'],
             'options.*' => ['string', 'min:1', 'max:80', 'distinct'],
             'unit' => ['nullable', 'string', 'max:24'],

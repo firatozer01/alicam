@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\BuyerRequest;
 use App\Models\User;
+use App\Support\CategoryTree;
 use Illuminate\Database\Eloquent\Builder;
 
 class SellerMatchingService
@@ -20,17 +21,38 @@ class SellerMatchingService
             ->where(fn (Builder $query) => $query
                 ->whereNull('requests.expires_at')
                 ->orWhere('requests.expires_at', '>', now()))
-            ->whereExists(fn ($query) => $query
-                ->selectRaw('1')
-                ->from('seller_categories')
-                ->where('seller_categories.seller_id', $seller->id)
-                ->whereColumn('seller_categories.category_id', 'requests.category_id'))
+            ->whereIn('requests.category_id', $this->reachableCategoryIds($seller))
             ->whereExists(fn ($query) => $query
                 ->selectRaw('1')
                 ->from('seller_locations')
                 ->where('seller_locations.seller_id', $seller->id)
                 ->whereColumn('seller_locations.city_id', 'requests.city_id')
                 ->whereColumn('seller_locations.district_id', 'requests.district_id'));
+    }
+
+    /**
+     * Saticinin gorebilecegi kategori id'leri: sectigi kategoriler, onlarin
+     * alt kategorileri ve ust kategorileri. Boylece kok kategoriye abone bir
+     * satici yaprak talepleri, uzman bir satici da genel talepleri gorur.
+     *
+     * @return array<int, int>
+     */
+    private function reachableCategoryIds(User $seller): array
+    {
+        $own = $seller->sellerCategories()->pluck('categories.id')->all();
+
+        $reachable = [];
+        foreach ($own as $categoryId) {
+            foreach (CategoryTree::descendants((int) $categoryId) as $id) {
+                $reachable[$id] = true;
+            }
+            foreach (CategoryTree::ancestors((int) $categoryId) as $id) {
+                $reachable[$id] = true;
+            }
+        }
+
+        // Bos kalirsa whereIn hicbir satir dondurmez; istenen davranis budur.
+        return array_keys($reachable);
     }
 
     public function query(User $seller): Builder

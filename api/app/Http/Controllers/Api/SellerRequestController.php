@@ -9,6 +9,7 @@ use App\Models\RequestFavorite;
 use App\Models\User;
 use App\Services\SellerCreditService;
 use App\Services\SellerMatchingService;
+use App\Support\CategoryTree;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -101,7 +102,8 @@ class SellerRequestController extends Controller
         }
 
         if ($skip !== 'category' && ($category = $filters['category'] ?? null)) {
-            $query->whereHas('category', fn (Builder $inner) => $inner->where('slug', $category));
+            // Ust kategori secildiginde altindaki tum basliklar da listelenir.
+            $query->whereIn('requests.category_id', CategoryTree::descendantsOfSlug($category));
         }
 
         if ($skip !== 'city' && ($cityId = $filters['city_id'] ?? null)) {

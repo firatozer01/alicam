@@ -86,7 +86,7 @@ export function AccountSettings() {
 
   return <main className={styles.page}>
     <SiteHeader
-      cta={isSeller ? { label: "Satıcı paneli", href: "/satici-paneli" } : { label: "Müşteri paneli", href: "/musteri-panel" }}
+      cta={isSeller ? { label: "Satıcı paneli", href: "/satici-paneli" } : { label: "Alıcı paneli", href: "/musteri-panel" }}
       sessionReady
       user={user}
     />
@@ -98,7 +98,7 @@ export function AccountSettings() {
           <h1>{user.name}</h1>
           <p>{user.email} · {user.phone}</p>
           <div className={styles.roleChips}>
-            <span className={styles.roleBuyer}>◇ Müşteri</span>
+            <span className={styles.roleBuyer}>◇ Alıcı</span>
             {isSeller && <span className={styles.roleSeller}>⌂ Hizmet veren</span>}
             {user.roles.includes("admin") && <span className={styles.roleAdmin}>▦ Yönetici</span>}
           </div>
@@ -140,11 +140,11 @@ export function AccountSettings() {
 
       {tab === "alanlar" && <div className={styles.spaces}>
         <section className={styles.card}>
-          <header><h2>Müşteri alanı</h2><p>Talep oluştur, gelen teklifleri karşılaştır.</p></header>
+          <header><h2>Alıcı alanı</h2><p>Talep oluştur, gelen teklifleri karşılaştır.</p></header>
           <div className={styles.spaceBody}>
             <span className={styles.spaceIcon}>◇</span>
             <p>Her hesap müşteri alanını kullanabilir. Talep yayınlamak ücretsizdir.</p>
-            <div className={styles.spaceActions}><Link href="/musteri-panel">Müşteri paneli →</Link><Link className={styles.ghost} href="/talep-olustur">Yeni talep</Link></div>
+            <div className={styles.spaceActions}><Link href="/musteri-panel">Alıcı paneli →</Link><Link className={styles.ghost} href="/talep-olustur">Yeni talep</Link></div>
           </div>
         </section>
 

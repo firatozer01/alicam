@@ -74,6 +74,9 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // Armut ve sahibinden yapisindan cikarilan tam kategori agaci.
+        $this->call(CategoryTreeSeeder::class);
+
         foreach ([
             ['name' => 'Başlangıç', 'credit_amount' => 20, 'bonus_credit' => 0, 'price' => 450],
             ['name' => 'Standart', 'credit_amount' => 60, 'bonus_credit' => 10, 'price' => 1200],

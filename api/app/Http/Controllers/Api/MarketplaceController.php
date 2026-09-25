@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\CategoryTree;
 use App\Models\BuyerRequest;
 use App\Models\SellerReview;
 use App\Models\User;
@@ -178,7 +179,8 @@ class MarketplaceController extends Controller
         }
 
         if ($skip !== 'category' && ($category = $filters['category'] ?? null)) {
-            $query->whereHas('category', fn (Builder $inner) => $inner->where('slug', $category));
+            // Ust kategori secildiginde altindaki tum basliklar da listelenir.
+            $query->whereIn('requests.category_id', CategoryTree::descendantsOfSlug($category));
         }
 
         if ($skip !== 'city' && ($cityId = $filters['city_id'] ?? null)) {

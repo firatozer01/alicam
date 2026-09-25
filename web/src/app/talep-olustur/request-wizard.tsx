@@ -12,13 +12,16 @@ type Category = {
   name: string;
   color: string;
   schema_version: number;
+  /** Hizmet talebi mi, urun/ilan talebi mi. */
+  kind?: "service" | "listing";
+  children?: Category[];
 };
 
 type CategoryAttribute = {
   id: number;
   key: string;
   label: string;
-  type: "text" | "select" | "multiselect" | "number" | "range" | "boolean" | "date";
+  type: "text" | "textarea" | "select" | "multiselect" | "number" | "range" | "boolean" | "date";
   options: string[] | null;
   unit: string | null;
   help_text: string | null;
@@ -50,11 +53,8 @@ const categoryDescriptions: Record<string, string> = {
   tadilat: "Boya, dekorasyon ve yenileme işleri",
 };
 
-const fallbackCategories: Category[] = [
-  { id: 1, slug: "hizmet", icon: "✦", name: "Hizmet", color: "#06B6D4", schema_version: 1 },
-  { id: 2, slug: "nakliye", icon: "↗", name: "Nakliye", color: "#16A34A", schema_version: 1 },
-  { id: 3, slug: "tadilat", icon: "⌂", name: "Tadilat", color: "#7C3AED", schema_version: 1 },
-];
+// Kategori agaci veritabanindan gelir; ilk boyamada liste bos, API yanitiyla dolar.
+const fallbackCategories: Category[] = [];
 
 const initialForm: FormData = {
   category: "",
@@ -69,24 +69,45 @@ const initialForm: FormData = {
 
 const DRAFT_KEY = "alicam-request-draft";
 
+/** Agacta slug'a gore dugumu ve ona giden yolu bulur. */
+function findPath(nodes: Category[], slug: string, trail: Category[] = []): Category[] | null {
+  for (const node of nodes) {
+    if (node.slug === slug) return trail;
+    const deeper = findPath(node.children ?? [], slug, [...trail, node]);
+    if (deeper) return deeper;
+  }
+  return null;
+}
+
+function findNode(nodes: Category[], slug: string): Category | undefined {
+  for (const node of nodes) {
+    if (node.slug === slug) return node;
+    const deeper = findNode(node.children ?? [], slug);
+    if (deeper) return deeper;
+  }
+  return undefined;
+}
+
 export function RequestWizard({ initialCategory }: { initialCategory?: string }) {
   const router = useRouter();
-  const normalizedCategory = fallbackCategories.some((item) => item.slug === initialCategory)
-    ? initialCategory ?? ""
-    : "";
+  // Derin baglanti herhangi bir kategori slug'i tasiyabilir; gecerliligini API dogrular.
+  const normalizedCategory = (initialCategory ?? "").trim();
   const [step, setStep] = useState(normalizedCategory ? 2 : 1);
   const [form, setForm] = useState<FormData>({ ...initialForm, category: normalizedCategory });
   const [categories, setCategories] = useState<Category[]>(fallbackCategories);
   const [categoryAttributes, setCategoryAttributes] = useState<CategoryAttribute[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loadingSchema, setLoadingSchema] = useState(Boolean(normalizedCategory));
+  // Agacta hangi dalin icindeyiz; bos dizi kok seviyesidir.
+  const [branch, setBranch] = useState<Category[]>([]);
+  const [kind, setKind] = useState<"service" | "listing">("service");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successReference, setSuccessReference] = useState("");
 
   useEffect(() => {
     Promise.all([
-      apiRequest<{ data: Category[] }>("/categories"),
+      apiRequest<{ data: Category[] }>("/categories?tree=1"),
       apiRequest<{ data: City[] }>("/locations"),
     ])
       .then(([categoryResponse, locationResponse]) => {
@@ -114,9 +135,10 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
     if (!form.category) return;
 
     let active = true;
-    apiRequest<{ data: Category & { attributes: CategoryAttribute[] } }>(`/categories/${form.category}/attributes`)
-      .then(({ data }) => {
-        if (active) setCategoryAttributes(data.attributes);
+    // effective_attributes ust kategorilerden miras alinanlari da icerir.
+    apiRequest<{ data: Category & { attributes: CategoryAttribute[] }; effective_attributes?: CategoryAttribute[] }>(`/categories/${form.category}/attributes`)
+      .then((response) => {
+        if (active) setCategoryAttributes(response.effective_attributes ?? response.data.attributes);
       })
       .catch(() => {
         if (active) setError("Kategori soruları alınamadı. Lütfen tekrar deneyin.");
@@ -131,9 +153,39 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
   }, [form.category]);
 
   const selectedCategory = useMemo(
-    () => categories.find((item) => item.slug === form.category),
+    () => findNode(categories, form.category),
     [categories, form.category],
   );
+
+  const roots = useMemo(
+    () => categories.filter((item) => (item.kind ?? "service") === kind),
+    [categories, kind],
+  );
+  const current = branch.length > 0 ? branch[branch.length - 1] : null;
+  const shown = current ? (current.children ?? []) : roots;
+
+  // Taslaktan veya linkten gelen derin bir kategori icin kirinti yolu geri kurulur.
+  // Efekt yerine render sirasinda ayarlanir; fazladan bir tur olusmaz.
+  const [resolvedFor, setResolvedFor] = useState("");
+  if (form.category && categories.length > 0 && resolvedFor !== form.category) {
+    setResolvedFor(form.category);
+    const trail = findPath(categories, form.category);
+    if (trail) {
+      setBranch(trail);
+      const rootKind = (trail[0] ?? findNode(categories, form.category))?.kind;
+      if (rootKind) setKind(rootKind);
+    }
+  }
+
+  const chooseNode = (node: Category) => {
+    if ((node.children ?? []).length > 0) {
+      setBranch((path) => [...path, node]);
+      return;
+    }
+    setLoadingSchema(true);
+    update("category", node.slug);
+    update("attributes", {});
+  };
   const selectedCity = useMemo(
     () => cities.find((item) => String(item.id) === form.cityId),
     [cities, form.cityId],
@@ -259,6 +311,23 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
       );
     }
 
+    if (attribute.type === "textarea") {
+      return (
+        <label className="field-label" key={attribute.key}>
+          {attribute.label}{suffix}
+          <textarea
+            maxLength={2000}
+            onChange={(event) => updateAttribute(attribute.key, event.target.value)}
+            placeholder={attribute.help_text ?? ""}
+            required={attribute.is_required}
+            rows={4}
+            value={String(value ?? "")}
+          />
+          {attribute.help_text && <small>{attribute.help_text}</small>}
+        </label>
+      );
+    }
+
     if (attribute.type === "boolean") {
       return (
         <label className="field-label" key={attribute.key}>
@@ -333,13 +402,49 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
             <fieldset className="wizard-fields">
               <legend>Hangi konuda teklif almak istiyorsun?</legend>
               <p className="field-help">Kategoriye göre sana özel birkaç kısa soru hazırlayacağız.</p>
-              <div className="wizard-categories">
-                {categories.map((category) => (
-                  <label className={form.category === category.slug ? "selected" : ""} key={category.slug}>
-                    <input checked={form.category === category.slug} name="category" onChange={() => { setLoadingSchema(true); update("category", category.slug); update("attributes", {}); }} type="radio" />
-                    <i style={{ background: category.color }}>{category.icon}</i><span><strong>{category.name}</strong><small>{categoryDescriptions[category.slug] ?? "Yeni talebin için teklif al"}</small></span><b>✓</b>
-                  </label>
+              <div className="cat-kinds">
+                {([["service", "Hizmet arıyorum", "Usta, nakliye, ders, bakım"], ["listing", "Ürün / ilan arıyorum", "Emlak, vasıta, ikinci el"]] as const).map(([value, label, hint]) => (
+                  <button
+                    data-on={kind === value}
+                    key={value}
+                    onClick={() => { setKind(value); setBranch([]); update("category", ""); update("attributes", {}); }}
+                    type="button"
+                  ><strong>{label}</strong><small>{hint}</small></button>
                 ))}
+              </div>
+
+              {branch.length > 0 && (
+                <nav className="cat-crumbs">
+                  <button onClick={() => { setBranch([]); update("category", ""); }} type="button">Tüm kategoriler</button>
+                  {branch.map((node, index) => (
+                    <button key={node.slug} onClick={() => setBranch(branch.slice(0, index + 1))} type="button">{node.name}</button>
+                  ))}
+                </nav>
+              )}
+
+              {current && (
+                <label className={`cat-self ${form.category === current.slug ? "selected" : ""}`}>
+                  <input checked={form.category === current.slug} name="category" onChange={() => { setLoadingSchema(true); update("category", current.slug); update("attributes", {}); }} type="radio" />
+                  <span><strong>{current.name} genelinde devam et</strong><small>Alt başlık seçmeden bu kategoride talep aç</small></span><b>✓</b>
+                </label>
+              )}
+
+              <div className="wizard-categories">
+                {shown.map((category) => {
+                  const childCount = (category.children ?? []).length;
+                  return (
+                    <label className={form.category === category.slug ? "selected" : ""} key={category.slug}>
+                      <input checked={form.category === category.slug} name="category" onChange={() => chooseNode(category)} type="radio" />
+                      <i style={{ background: category.color }}>{category.icon}</i>
+                      <span>
+                        <strong>{category.name}</strong>
+                        <small>{categoryDescriptions[category.slug] ?? (childCount > 0 ? `${childCount} alt başlık` : "Bu kategoride talep aç")}</small>
+                      </span>
+                      <b>{childCount > 0 ? "›" : "✓"}</b>
+                    </label>
+                  );
+                })}
+                {shown.length === 0 && <p className="field-help">{categories.length === 0 ? "Kategoriler yükleniyor…" : "Bu başlıkta alt kategori yok."}</p>}
               </div>
             </fieldset>
           )}

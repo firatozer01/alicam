@@ -120,7 +120,7 @@ export function CustomerDashboard() {
   };
 
   // Yukleme ekraninda da ortak ust cubuk durur; sayfa gecisinde zipla olmaz.
-  if (loading) return <main className={styles.page}><SiteHeader workspace="buyer" /><div className={styles.loading}><i /><p>Müşteri çalışma alanın hazırlanıyor…</p></div></main>;
+  if (loading) return <main className={styles.page}><SiteHeader workspace="buyer" /><div className={styles.loading}><i /><p>Alıcı çalışma alanın hazırlanıyor…</p></div></main>;
 
   const activeCount = requests.filter((item) => ["open", "in_negotiation"].includes(item.status)).length;
   const acceptedCount = requests.filter((item) => item.status === "accepted").length;
@@ -137,7 +137,7 @@ export function CustomerDashboard() {
       menus={[
           {
             key: "panel", label: "Panelim",
-            panelIcon: "◇", panelTitle: "Müşteri panelin", panelHint: "Taleplerin, gelen teklifler ve hesabın",
+            panelIcon: "◇", panelTitle: "Alıcı panelin", panelHint: "Taleplerin, gelen teklifler ve hesabın",
             meta: `${requests.length} talep · ${totalOffers} teklif`,
             sections: [
               { key: "flow", title: "TALEPLERİM", icon: "▤", color: "#7C3AED", description: "Yayınladığın talepler ve gelen teklifler.", items: [

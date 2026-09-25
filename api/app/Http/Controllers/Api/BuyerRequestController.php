@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Support\CategoryTree;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -48,13 +49,25 @@ class BuyerRequestController extends Controller
             ['district_id.accepted' => 'Seçilen ilçe seçilen şehre ait değil.'],
         )->validate();
 
-        $attributeRules = [];
-        $allowedKeys = $category->attributes->pluck('key')->all();
-        $attributeRules['attributes'] = ['array:'.implode(',', $allowedKeys)];
+        // Alan seti kalitimlidir: yaprak kategoride sorulanlar ust kategorilerin
+        // alanlarini da icerir, yoksa derin agacta hicbir alan dogrulanmaz.
+        $effectiveAttributes = CategoryTree::effectiveAttributes($category);
 
-        foreach ($category->attributes as $attribute) {
+        $attributeRules = [];
+        $allowedKeys = $effectiveAttributes->pluck('key')->all();
+        $attributeRules['attributes'] = $allowedKeys === []
+            ? ['array']
+            : ['array:'.implode(',', $allowedKeys)];
+
+        foreach ($effectiveAttributes as $attribute) {
             $key = 'attributes.'.$attribute->key;
-            $rules = [$attribute->is_required ? 'required' : 'nullable'];
+
+            // Zorunlu bir boolean alanda "Hayir" (false) cevabi da gecerlidir;
+            // Laravel'de required false'u bos sayip reddettigi icin present kullanilir.
+            $presence = $attribute->is_required
+                ? ($attribute->type === 'boolean' ? 'present' : 'required')
+                : 'nullable';
+            $rules = [$presence];
 
             match ($attribute->type) {
                 'number', 'range' => $rules[] = 'numeric',
@@ -62,11 +75,16 @@ class BuyerRequestController extends Controller
                 'date' => $rules[] = 'date',
                 'select' => $rules[] = Rule::in($attribute->options ?? []),
                 'multiselect' => $rules[] = 'array',
+                'textarea' => $rules[] = 'string',
                 default => $rules[] = 'string',
             };
 
             if (in_array($attribute->type, ['text', 'select'], true)) {
                 $rules[] = 'max:500';
+            }
+
+            if ($attribute->type === 'textarea') {
+                $rules[] = 'max:2000';
             }
 
             $attributeRules[$key] = $rules;
@@ -81,7 +99,7 @@ class BuyerRequestController extends Controller
             $attributeRules,
         )->validate()['attributes'];
 
-        $snapshot = $category->attributes->map(fn ($attribute) => [
+        $snapshot = $effectiveAttributes->map(fn ($attribute) => [
             'key' => $attribute->key,
             'label' => $attribute->label,
             'type' => $attribute->type,
