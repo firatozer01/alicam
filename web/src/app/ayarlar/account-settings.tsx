@@ -119,7 +119,7 @@ export function AccountSettings() {
       {error && <p className={styles.error}>{error}</p>}
 
       {tab === "hesap" && <section className={styles.card}>
-        <header><h2>Hesap bilgileri</h2><p>Adın ve telefon numaran teklif kabul edildiğinde karşı tarafa gösterilir.</p></header>
+        <header><span className={styles.kicker}>PROFİL</span><h2>Hesap bilgileri</h2><p>Adın ve telefon numaran teklif kabul edildiğinde karşı tarafa gösterilir.</p></header>
         <div className={styles.form}>
           <label>Ad soyad<input onChange={(event) => setForm({ ...form, name: event.target.value })} value={form.name} /></label>
           <label>Telefon<input onChange={(event) => setForm({ ...form, phone: event.target.value })} placeholder="+90 555 111 22 33" value={form.phone} /><small>Numaranı değiştirirsen yeniden doğrulaman gerekir.</small></label>
@@ -129,7 +129,7 @@ export function AccountSettings() {
       </section>}
 
       {tab === "guvenlik" && <section className={styles.card}>
-        <header><h2>Parola değiştir</h2><p>En az 8 karakter, harf ve rakam içermeli.</p></header>
+        <header><span className={styles.kicker}>GÜVENLİK</span><h2>Parola değiştir</h2><p>En az 8 karakter, harf ve rakam içermeli.</p></header>
         <div className={styles.form}>
           <label className={styles.wide}>Mevcut parolan<input autoComplete="current-password" onChange={(event) => setPasswords({ ...passwords, current_password: event.target.value })} type="password" value={passwords.current_password} /></label>
           <label>Yeni parola<input autoComplete="new-password" onChange={(event) => setPasswords({ ...passwords, password: event.target.value })} type="password" value={passwords.password} /></label>
@@ -140,7 +140,7 @@ export function AccountSettings() {
 
       {tab === "alanlar" && <div className={styles.spaces}>
         <section className={styles.card}>
-          <header><h2>Alıcı alanı</h2><p>Talep oluştur, gelen teklifleri karşılaştır.</p></header>
+          <header><span className={styles.kicker}>ÇALIŞMA ALANI</span><h2>Alıcı alanı</h2><p>Talep oluştur, gelen teklifleri karşılaştır.</p></header>
           <div className={styles.spaceBody}>
             <span className={styles.spaceIcon}>◇</span>
             <p>Her hesap müşteri alanını kullanabilir. Talep yayınlamak ücretsizdir.</p>
@@ -149,7 +149,7 @@ export function AccountSettings() {
         </section>
 
         <section className={styles.card}>
-          <header><h2>Hizmet veren alanı</h2><p>Talepleri gör, teklif ver, vitrinini yönet.</p></header>
+          <header><span className={styles.kicker}>ÇALIŞMA ALANI</span><h2>Hizmet veren alanı</h2><p>Talepleri gör, teklif ver, vitrinini yönet.</p></header>
           <div className={styles.spaceBody}>
             <span className={styles.spaceIcon}>⌂</span>
             {isSeller ? <>

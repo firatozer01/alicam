@@ -1,16 +1,53 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f7f6fc;
+  /* Yuzeyler */
+  --bg: #f6f5fc;
   --card: #ffffff;
   --ink: #15162d;
-  --muted: #66677d;
-  --line: #e7e4f0;
+  --muted: #67677f;
+  --line: #e7e5f5;
+  --line-soft: #f0eefb;
+  --surface: #faf9ff;
+  /* Metin gri rampasi: koyudan acige tek sira */
+  --ink-2: #4b4a63;
+  --muted-2: #8a89a6;
+  --faint: #a8a6c4;
+  --cyan-fg: #0e7490;
+
+  /* Marka renkleri - paletin tamami */
   --violet: #7c3aed;
   --indigo: #4f46e5;
   --cyan: #06b6d4;
-  --petrol: #7c3aed;
+  --pink: #ec4899;
   --amber: #f59e0b;
+  --green: #16a34a;
+  --red: #dc2626;
+  --sky: #0ea5e9;
+  --petrol: #7c3aed;
+
+  /* Mor olcegi: zemin, kenarlik, vurgu */
+  --violet-50: #faf9ff;
+  --violet-100: #f1eeff;
+  --violet-200: #ddd6fe;
+  --violet-300: #c4b5fd;
+
+  /* Durum tonlari: her durum icin tek zemin, tek koyu ton.
+     Ayni yesilin sekiz farkli tonu yerine bunlar kullanilir. */
+  --ok-bg: #e9f9ef;
+  --ok-fg: #15803d;
+  --warn-bg: #fef3c7;
+  --warn-fg: #b45309;
+  --danger-bg: #fee2e2;
+  --danger-fg: #b91c1c;
+
+  /* Yukseklik ve yaricap */
+  --shadow-sm: 0 8px 26px rgba(79, 70, 229, .05);
+  --shadow-md: 0 14px 34px rgba(79, 70, 229, .08);
+  --shadow-lg: 0 28px 60px rgba(76, 60, 180, .16);
+  --r-sm: 9px;
+  --r-md: 13px;
+  --r-lg: 18px;
 }
 
 * { box-sizing: border-box; }
