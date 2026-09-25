@@ -538,7 +538,7 @@ export function SellerDashboard() {
             </ResultBar>
             <ActiveChips chips={activeChips} />
 
-            {listLoading ? <ListSkeleton /> : requests.length === 0 ? <div className={list.table}><div className={list.empty}>Bu filtrede eşleşen talep bulunmuyor.</div></div> : <div className={list.cards}>
+            {listLoading ? <ListSkeleton /> : requests.length === 0 ? <div className={list.table}><div className={list.empty}>Bu filtrede eşleşen talep bulunmuyor.</div></div> : <div className={list.cards} key={`${categoryFilter.join("-")}|${cityFilter}|${filter}|${search}|${sort}|${page}`}>
               {requests.map((item, index) => {
                 const existingOffer = offerByRequest.get(item.id);
                 const competition = item.offer_count > 7 ? "compHigh" : item.offer_count > 3 ? "compMid" : "compLow";

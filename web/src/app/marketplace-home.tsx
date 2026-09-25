@@ -333,7 +333,7 @@ export function MarketplaceHome() {
 
           <ResultBar noun="açık talep" onSort={(value) => { setLoading(true); setSort(value); setPage(1); }} sort={sort} sortOptions={sortOptions} total={marketplace?.meta.total ?? 0} />
           <ActiveChips chips={activeChips} />
-          {loading ? <ListSkeleton /> : (marketplace?.data.requests.length ?? 0) === 0 ? <div className={list.table}><div className={list.empty}>Bu filtrede açık talep bulunmuyor.</div></div> : <div className={list.tiles}>
+          {loading ? <ListSkeleton /> : (marketplace?.data.requests.length ?? 0) === 0 ? <div className={list.table}><div className={list.empty}>Bu filtrede açık talep bulunmuyor.</div></div> : <div className={list.tiles} key={`${categorySlugs.join("-")}|${city}|${search}|${sort}|${page}`}>
             {(marketplace?.data.requests ?? []).map((item, index) => <Link className={list.tile} href={inspectHref} key={item.id} style={{ animationDelay: `${Math.min(index, 12) * 24}ms` }}>
               <div className={list.tileArt} style={{ background: `${item.category.color}12`, color: item.category.color }}>{item.category.icon}</div>
               <h3 className={list.tileTitle}>{item.title}</h3>
