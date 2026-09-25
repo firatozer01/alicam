@@ -50,6 +50,25 @@ class NotifyUnreadMessage implements ShouldQueue
             return;
         }
 
+        // Ayni gonderici bu konusmada az once haber verdiyse tekrar yazmayiz:
+        // uzaktaki kisi don donup 5 mesaj yazinca 5 e-posta almamali. Mesaj
+        // yine de islenmis sayilir ki kuyruk tekrar denemesin.
+        $cooldown = (int) config('messaging.email_cooldown_minutes', 30);
+
+        $recentlyNotified = Message::query()
+            ->where('conversation_id', $message->conversation_id)
+            ->where('sender_id', $message->sender_id)
+            ->whereKeyNot($message->id)
+            ->whereNotNull('notified_at')
+            ->where('notified_at', '>=', now()->subMinutes($cooldown))
+            ->exists();
+
+        if ($recentlyNotified) {
+            $message->forceFill(['notified_at' => now()])->save();
+
+            return;
+        }
+
         $sender = $message->sender->name;
         $preview = mb_substr(trim($message->body), 0, 160);
 
