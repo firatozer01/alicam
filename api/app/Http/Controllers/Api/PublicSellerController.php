@@ -77,7 +77,13 @@ class PublicSellerController extends Controller
     /** Tek bir hizmet verenin herkese açık vitrini: profil, galeri, yorumlar. */
     public function show(User $user): JsonResponse
     {
-        $user->loadMissing(['sellerProfile', 'sellerCategories:id,name,slug,icon,color']);
+        // Modal icin iki seviye alt kategori de yuklenir.
+        $user->loadMissing([
+            'sellerProfile',
+            'sellerCategories:id,name,slug,icon,color,parent_id,is_active',
+            'sellerCategories.children:id,parent_id,name,slug,icon,is_active',
+            'sellerCategories.children.children:id,parent_id,name,slug,icon,is_active',
+        ]);
 
         abort_unless($user->sellerProfile?->approval_status === 'approved', 404, 'Hizmet veren bulunamadı.');
 
@@ -118,11 +124,32 @@ class PublicSellerController extends Controller
                 'description' => $user->sellerProfile?->description,
                 'is_featured' => $user->activeSellerPromotions()->exists(),
                 'member_since' => $user->created_at?->toIso8601String(),
-                'categories' => $user->sellerCategories->map(fn ($category) => [
+                // Vitrindeki teklif modali bu agaci gosterir: saticinin
+                // calistigi kategoriler ve altindaki basliklar.
+                'categories' => $user->sellerCategories->where('is_active', true)->map(fn ($category) => [
+                    'id' => $category->id,
                     'name' => $category->name,
                     'slug' => $category->slug,
                     'icon' => $category->icon,
                     'color' => $category->color,
+                    'children' => $category->children
+                        ->where('is_active', true)
+                        ->map(fn ($child) => [
+                            'id' => $child->id,
+                            'name' => $child->name,
+                            'slug' => $child->slug,
+                            'icon' => $child->icon ?? $category->icon,
+                            'color' => $category->color,
+                            'children' => $child->children
+                                ->where('is_active', true)
+                                ->map(fn ($leaf) => [
+                                    'id' => $leaf->id,
+                                    'name' => $leaf->name,
+                                    'slug' => $leaf->slug,
+                                    'icon' => $leaf->icon ?? $category->icon,
+                                    'color' => $category->color,
+                                ])->values(),
+                        ])->values(),
                 ])->values(),
                 'locations' => $locations->map(fn ($location) => [
                     'city' => $location->city?->name,

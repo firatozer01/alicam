@@ -1,0 +1,77 @@
+/* Vitrin icindeki teklif isteme modali. Renkler paletin token'larindan gelir. */
+
+.hint { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+
+/* ---- Kategori secimi ---- */
+.picker { display: flex; flex-direction: column; gap: 12px; }
+
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.crumbs button { border: 0; padding: 5px 11px; border-radius: 8px; background: var(--violet-100); color: var(--indigo); font: inherit; font-size: 11.5px; font-weight: 800; cursor: pointer; }
+.crumbs button:hover { background: var(--violet-200); }
+.crumbs button + button::before { content: "› "; color: var(--faint); }
+
+.selfPick { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px dashed var(--violet-200); border-radius: var(--r-md); background: var(--violet-50); cursor: pointer; text-align: left; transition: border-color .16s ease, background .16s ease; }
+.selfPick:hover { border-color: var(--violet); background: var(--violet-100); }
+.selfPick strong { display: block; font-family: var(--font-fraunces), Georgia, serif; font-size: 14.5px; color: var(--ink); }
+.selfPick small { display: block; margin-top: 2px; color: var(--muted); font-size: 11.5px; }
+.selfPick b { margin-left: auto; color: var(--indigo); font-size: 15px; }
+
+.rows { display: grid; gap: 8px; max-height: 46vh; overflow-y: auto; padding-right: 4px; }
+.row { display: grid; grid-template-columns: 40px minmax(0, 1fr) 20px; align-items: center; gap: 12px; padding: 11px 13px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card); cursor: pointer; text-align: left; transition: border-color .16s ease, transform .16s ease, box-shadow .16s ease; animation: rowIn .3s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 28ms); }
+.row:hover { border-color: var(--violet-200); transform: translateX(3px); box-shadow: var(--shadow-sm); }
+.row i { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 11px; font-style: normal; font-size: 17px; }
+.row strong { display: block; font-size: 14px; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row small { display: block; margin-top: 2px; color: var(--muted); font-size: 11.5px; }
+.row b { color: var(--faint); font-size: 15px; text-align: right; }
+@keyframes rowIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .row { animation: none; } }
+
+/* ---- Brief ---- */
+.brief { display: flex; flex-direction: column; gap: 14px; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.wide { grid-column: 1 / -1; }
+.grid label, .qField { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.grid span, .qField span { font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--muted-2); }
+.grid input, .grid select, .grid textarea, .qField input, .qField select {
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 13.5px;
+  color: var(--ink); background: var(--card); outline: none;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+.grid input:focus, .grid select:focus, .grid textarea:focus, .qField input:focus, .qField select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 58, 237, .12); }
+.grid textarea { resize: vertical; line-height: 1.6; }
+
+.questions { display: flex; flex-direction: column; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+.qHead { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .05em; color: var(--indigo); }
+
+.chips { margin: 0; padding: 0; border: 0; }
+.chips legend { margin-bottom: 7px; font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--muted-2); }
+.chips > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--card); color: var(--ink-2); font: inherit; font-size: 11.5px; font-weight: 650; cursor: pointer; transition: border-color .16s ease, color .16s ease, background .16s ease; }
+.chips button:hover { border-color: var(--violet-300); color: var(--indigo); }
+.chipOn { border-color: var(--violet) !important; color: var(--indigo) !important; background: var(--violet-100) !important; box-shadow: 0 0 0 3px rgba(124, 58, 237, .10); }
+
+.note { margin: 0; color: var(--muted); font-size: 11.5px; line-height: 1.6; }
+.login { margin: 0; padding: 11px 13px; border-radius: var(--r-sm); background: var(--warn-bg); color: var(--warn-fg); font-size: 12.5px; }
+.login a { color: var(--warn-fg); font-weight: 800; text-decoration: underline; }
+.error { margin: 0; padding: 11px 13px; border-radius: var(--r-sm); background: var(--danger-bg); color: var(--danger-fg); font-size: 12.5px; }
+
+/* ---- Aksiyonlar ---- */
+.primary { display: inline-flex; align-items: center; border: 0; border-radius: 10px; padding: 10px 17px; font: inherit; font-size: 13.5px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); text-decoration: none; cursor: pointer; transition: filter .16s ease, transform .16s ease; }
+.primary:hover:not(:disabled) { filter: brightness(1.07); transform: translateY(-1px); }
+.primary:disabled { opacity: .5; cursor: default; }
+.ghost { border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; background: var(--card); color: var(--indigo); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: border-color .16s ease; }
+.ghost:hover { border-color: var(--violet); }
+
+/* ---- Basarili ---- */
+.done { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 8px 0; }
+.doneIcon { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); font-size: 22px; box-shadow: 0 0 0 8px var(--violet-100); }
+.done p { margin: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.65; }
+.ref { display: grid; gap: 4px; padding: 11px 18px; border-radius: var(--r-md); background: var(--violet-100); }
+.ref span { font-size: 9.5px; font-weight: 800; letter-spacing: .1em; color: var(--indigo); }
+.ref strong { font-family: var(--font-plex), ui-monospace, monospace; font-size: 15px; color: var(--ink); }
+.doneActions { display: flex; gap: 9px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+}

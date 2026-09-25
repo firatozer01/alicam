@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Modal } from "@/components/modal/modal";
 import { SiteHeader } from "@/components/shell/site-header";
+import { QuoteModal, type QuoteCategory } from "./quote-modal";
 import { WorkViewer, workSpecs } from "@/components/portfolio/work-viewer";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import styles from "./showcase.module.css";
 
 type MiniCategory = { name: string; slug?: string; icon: string; color: string };
+type SellerCategory = QuoteCategory;
 type PortfolioImage = { id: number; url: string };
 type PortfolioItem = {
   id: number; title: string; description: string; location: string | null;
@@ -21,7 +23,7 @@ type Service = { id: number; title: string; description: string; price_from: str
 type Seller = {
   id: number; name: string; company_name: string | null; profile_type: string | null;
   description: string | null; is_featured: boolean; member_since: string | null;
-  categories: MiniCategory[];
+  categories: SellerCategory[];
   locations: { city: string | null; district: string | null }[];
   rating: { average: number; count: number; breakdown: Record<string, number> };
   services: Service[]; portfolio: PortfolioItem[]; reviews: Review[];
@@ -36,6 +38,8 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [openWork, setOpenWork] = useState<PortfolioItem | null>(null);
+  // undefined: modal kapali. Bos metin: genel istek. Dolu: o kategoriden.
+  const [quoteFor, setQuoteFor] = useState<string | undefined>(undefined);
   const [workFilter, setWorkFilter] = useState("");
   const [reviewFilter, setReviewFilter] = useState(0);
   const [tab, setTab] = useState<"hizmetler" | "isler" | "yorumlar">("hizmetler");
@@ -68,13 +72,8 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
   const accent = seller.categories[0]?.color ?? "#7C3AED";
   const cheapest = seller.services.filter((item) => item.price_from).map((item) => Number(item.price_from));
 
-  /** Teklif istegi bu magazaya yonlendirilir; kategori varsa on secili gelir. */
-  const quoteHref = (categorySlug?: string) => {
-    const params = new URLSearchParams({ satici: String(seller.id) });
-    if (categorySlug) params.set("kategori", categorySlug);
-
-    return `/talep-olustur?${params.toString()}`;
-  };
+  /** Teklif istegi magazadan cikmadan modalda alinir. */
+  const openQuote = (categorySlug?: string) => setQuoteFor(categorySlug ?? "");
 
   const goto = (next: typeof tab) => {
     setTab(next);
@@ -124,7 +123,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
             <p className={styles.fromPrice}><span>BAŞLANGIÇ</span><strong>{money(String(Math.min(...cheapest)))}</strong></p>
           )}
 
-          <Link className={styles.primaryCta} href={quoteHref()}>Teklif iste →</Link>
+          <button className={styles.primaryCta} onClick={() => openQuote()} type="button">Teklif iste →</button>
           <button className={styles.ghostCta} onClick={() => goto("hizmetler")} type="button">Hizmetleri gör</button>
         </aside>
       </div>
@@ -137,7 +136,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
         {([["hizmetler", "Hizmetler", seller.services.length], ["isler", "İşler", seller.portfolio.length], ["yorumlar", "Yorumlar", seller.reviews.length]] as const).map(([key, label, count]) =>
           <button className={tab === key ? styles.tabOn : ""} key={key} onClick={() => goto(key)} type="button">{label} <b>{count}</b></button>)}
       </div>
-      <Link className={styles.barCta} href={quoteHref()}>Teklif iste →</Link>
+      <button className={styles.barCta} onClick={() => openQuote()} type="button">Teklif iste →</button>
     </div></div>
 
     <div className={styles.wrap}>
@@ -161,7 +160,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
                 {/* Fiyati olan hizmette rozet kapakta; burada yalnizca teklife acik olanlar yazilir. */}
                 {!service.price_from && <div className={styles.priceBox}><small>FİYAT</small><strong>Teklife göre</strong></div>}
                 {service.delivery_time && <span className={styles.delivery}>◷ {service.delivery_time}</span>}
-                <Link className={styles.serviceCta} href={quoteHref(service.category?.slug)}>Teklif iste →</Link>
+                <button className={styles.serviceCta} onClick={() => openQuote(service.category?.slug)} type="button">Teklif iste →</button>
               </footer>
             </div>
           </article>)}
@@ -241,9 +240,18 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
 
       <section className={styles.cta}>
         <div><strong>Benzer bir iş mi yaptıracaksın?</strong><p>Talebini ücretsiz yayınla; {title} ve alanındaki diğer profesyoneller sana teklif göndersin.</p></div>
-        <Link href={quoteHref()}>Bu mağazadan teklif iste →</Link>
+        <button className={styles.ctaButton} onClick={() => openQuote()} type="button">Bu mağazadan teklif iste →</button>
       </section>
     </div>
+
+    <QuoteModal
+      categories={seller.categories}
+      initialCategorySlug={quoteFor || undefined}
+      onClose={() => setQuoteFor(undefined)}
+      open={quoteFor !== undefined}
+      sellerId={seller.id}
+      sellerName={title}
+    />
 
     {openWork && <Modal
       onClose={() => setOpenWork(null)}
@@ -253,7 +261,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
       title={openWork.title}
       footer={<>
         <span className={styles.modalNote}>Bu işi {title} tamamladı.</span>
-        <Link className={styles.modalPrimary} href={quoteHref(openWork.category?.slug)}>Benzer iş için teklif al →</Link>
+        <button className={styles.modalPrimary} onClick={() => { setOpenWork(null); openQuote(openWork.category?.slug); }} type="button">Benzer iş için teklif al →</button>
       </>}
     >
       <WorkViewer work={openWork} />
