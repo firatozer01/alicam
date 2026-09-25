@@ -393,3 +393,11 @@ h1, h2, h3, p { margin-top: 0; }
 .extra-cats button:hover:not(:disabled) { border-color: #c4b5fd; color: #4f46e5; transform: translateY(-1px); }
 .extra-cats button.selected { border-color: #7c3aed; color: #4f46e5; background: #f1eeff; box-shadow: 0 0 0 3px rgba(124,58,237,.10); }
 .extra-cats button:disabled { opacity: .45; cursor: default; }
+
+/* Vitrinden gelen dogrudan teklif istegi rozeti */
+.invited-seller { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding: 13px 15px; border: 1px solid var(--violet-200); border-radius: var(--r-md); background: var(--violet-100); }
+.invited-seller i { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 10px; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); font-style: normal; font-size: 14px; }
+.invited-seller strong { display: block; font-family: var(--font-fraunces); font-size: 14px; color: var(--ink); }
+.invited-seller small { display: block; margin-top: 3px; color: var(--muted); font-size: 9.5px; line-height: 1.5; }
+.invited-seller button { margin-left: auto; flex: none; border: 1px solid var(--violet-200); border-radius: var(--r-sm); padding: 7px 12px; background: var(--card); color: var(--indigo); font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
+.invited-seller button:hover { border-color: var(--violet); }

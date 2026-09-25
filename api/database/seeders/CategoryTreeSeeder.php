@@ -43,13 +43,20 @@ class CategoryTreeSeeder extends Seeder
         // Konteyner her acilista db:seed calistiriyor. Agac 5.600 satir oldugu
         // icin bu her seferinde dakikalar suruyor ve es zamanli iki seeder
         // birbirini kilitleyebiliyor. Dosya degismediyse is atlanir.
+        $verticals = json_decode($raw, true, flags: JSON_THROW_ON_ERROR);
+        $definedRoots = array_column(array_column($verticals, 'main'), 'slug');
+
         if (Cache::get(self::FINGERPRINT_KEY) === $fingerprint && Category::query()->count() > 100) {
-            $this->command?->info('Kategori agaci guncel, atlandi.');
+            // DatabaseSeeder her acilista ilk surumun uc kategorisini
+            // updateOrCreate ile yeniden aktif ediyor. Agaci kurmayi atlasak
+            // bile emekliye ayirma adimi her calismada yenilenmeli.
+            $this->retireLegacyRoots($definedRoots);
+            CategoryTree::forget();
+
+            $this->command?->info('Kategori agaci guncel; eski kategoriler pasif tutuldu.');
 
             return;
         }
-
-        $verticals = json_decode($raw, true, flags: JSON_THROW_ON_ERROR);
 
         DB::transaction(function () use ($verticals): void {
             foreach ($verticals as $order => $vertical) {
@@ -57,7 +64,7 @@ class CategoryTreeSeeder extends Seeder
             }
         });
 
-        $this->retireLegacyRoots();
+        $this->retireLegacyRoots($definedRoots);
 
         Cache::forever(self::FINGERPRINT_KEY, $fingerprint);
 
@@ -76,14 +83,17 @@ class CategoryTreeSeeder extends Seeder
      * ayni listede iki kez gorunmesin diye pasife alinir. Satir silinmez:
      * mevcut talepler ve satici abonelikleri bu id'lere bagli.
      */
-    private function retireLegacyRoots(): void
+    /**
+     * @param  array<int, string>  $definedRoots  categories.json'un tanimladigi kok slug'lar
+     */
+    private function retireLegacyRoots(array $definedRoots): void
     {
-        if (count($this->created) < 10) {
-            return; // Agac kurulmadiysa eskisi tek secenek olarak kalmali.
+        if (count($definedRoots) < 5) {
+            return; // Agac tanimli degilse eskisi tek secenek olarak kalmali.
         }
 
         foreach (['hizmet', 'nakliye', 'tadilat'] as $slug) {
-            if (isset($this->created[$slug])) {
+            if (in_array($slug, $definedRoots, true)) {
                 continue; // Yeni agac ayni slug'i kullaniyorsa dokunma.
             }
 

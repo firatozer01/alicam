@@ -41,6 +41,14 @@ class BuyerRequest extends Model
         return $this->belongsTo(Category::class);
     }
 
+    /** Vitrinden dogrudan teklif istenen saticilar. */
+    public function invitedSellers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'request_invites', 'request_id', 'seller_id')
+            ->withPivot('source')
+            ->withTimestamps();
+    }
+
     /** Talebin yer aldigi tum kategoriler (birincil dahil). */
     public function categories(): BelongsToMany
     {

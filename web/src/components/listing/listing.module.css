@@ -214,3 +214,7 @@
 .summaryItem small{font-size:11px;color:var(--muted-2)}
 .summaryLink{border:0;font:inherit;text-align:left;cursor:pointer}
 .summaryLink:hover strong{color:var(--indigo)}
+
+/* Vitrinden dogrudan gelen teklif istegi */
+.invited{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:3px 9px;font-size:10.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--violet),var(--indigo));box-shadow:0 4px 12px rgba(124,58,237,.26);flex:none}
+.cardInvited{border-color:var(--violet-200);box-shadow:0 0 0 3px rgba(124,58,237,.08),0 8px 26px rgba(79,70,229,.08)}

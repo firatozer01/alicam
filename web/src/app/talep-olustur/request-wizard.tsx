@@ -94,7 +94,7 @@ function findNode(nodes: Category[], slug: string): Category | undefined {
   return undefined;
 }
 
-export function RequestWizard({ initialCategory }: { initialCategory?: string }) {
+export function RequestWizard({ initialCategory, initialSellerId }: { initialCategory?: string; initialSellerId?: string }) {
   const router = useRouter();
   // Derin baglanti herhangi bir kategori slug'i tasiyabilir; gecerliligini API dogrular.
   const normalizedCategory = (initialCategory ?? "").trim();
@@ -110,6 +110,8 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
   const [categoryPage, setCategoryPage] = useState(1);
   const [showOptional, setShowOptional] = useState(false);
   const [expandedOptions, setExpandedOptions] = useState<Record<string, boolean>>({});
+  // Vitrinden gelindiyse talep dogrudan o saticiya yonlendirilir.
+  const [invitedSeller, setInvitedSeller] = useState<{ id: number; name: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successReference, setSuccessReference] = useState("");
@@ -125,6 +127,12 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
       })
       .catch(() => setError("Form verileri alınamadı. Sayfayı yenileyerek tekrar deneyin."));
 
+    if (initialSellerId) {
+      apiRequest<{ data: { id: number; company_name: string | null; name: string } }>(`/sellers/${initialSellerId}`)
+        .then(({ data }) => setInvitedSeller({ id: data.id, name: data.company_name || data.name }))
+        .catch(() => undefined);
+    }
+
     const savedDraft = window.sessionStorage.getItem(DRAFT_KEY);
     if (savedDraft) {
       try {
@@ -138,7 +146,7 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
         window.sessionStorage.removeItem(DRAFT_KEY);
       }
     }
-  }, []);
+  }, [initialSellerId]);
 
   useEffect(() => {
     if (!form.category) return;
@@ -297,6 +305,7 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
         body: JSON.stringify({
           category_slug: form.category,
           extra_category_slugs: form.extraCategories,
+          invited_seller_ids: invitedSeller ? [invitedSeller.id] : [],
           title: form.title,
           description: form.description,
           attributes: form.attributes,
@@ -527,6 +536,17 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
             <fieldset className="wizard-fields">
               <legend>Hangi konuda teklif almak istiyorsun?</legend>
               <p className="field-help">Kategoriye göre sana özel birkaç kısa soru hazırlayacağız.</p>
+
+              {invitedSeller && (
+                <div className="invited-seller">
+                  <i>◈</i>
+                  <div>
+                    <strong>{invitedSeller.name} için teklif isteği</strong>
+                    <small>Talebin doğrudan bu mağazaya iletilir. Diğer uygun hizmet verenler de görebilir.</small>
+                  </div>
+                  <button onClick={() => setInvitedSeller(null)} type="button">Kaldır</button>
+                </div>
+              )}
               <div className="cat-kinds">
                 {([["service", "Hizmet arıyorum", "Usta, nakliye, ders, bakım"], ["listing", "Ürün / ilan arıyorum", "Emlak, vasıta, ikinci el"]] as const).map(([value, label, hint]) => (
                   <button

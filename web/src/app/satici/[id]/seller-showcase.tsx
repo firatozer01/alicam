@@ -68,6 +68,14 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
   const accent = seller.categories[0]?.color ?? "#7C3AED";
   const cheapest = seller.services.filter((item) => item.price_from).map((item) => Number(item.price_from));
 
+  /** Teklif istegi bu magazaya yonlendirilir; kategori varsa on secili gelir. */
+  const quoteHref = (categorySlug?: string) => {
+    const params = new URLSearchParams({ satici: String(seller.id) });
+    if (categorySlug) params.set("kategori", categorySlug);
+
+    return `/talep-olustur?${params.toString()}`;
+  };
+
   const goto = (next: typeof tab) => {
     setTab(next);
     document.getElementById(next)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -116,7 +124,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
             <p className={styles.fromPrice}><span>BAŞLANGIÇ</span><strong>{money(String(Math.min(...cheapest)))}</strong></p>
           )}
 
-          <Link className={styles.primaryCta} href="/talep-olustur">Teklif iste →</Link>
+          <Link className={styles.primaryCta} href={quoteHref()}>Teklif iste →</Link>
           <button className={styles.ghostCta} onClick={() => goto("hizmetler")} type="button">Hizmetleri gör</button>
         </aside>
       </div>
@@ -129,7 +137,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
         {([["hizmetler", "Hizmetler", seller.services.length], ["isler", "İşler", seller.portfolio.length], ["yorumlar", "Yorumlar", seller.reviews.length]] as const).map(([key, label, count]) =>
           <button className={tab === key ? styles.tabOn : ""} key={key} onClick={() => goto(key)} type="button">{label} <b>{count}</b></button>)}
       </div>
-      <Link className={styles.barCta} href="/talep-olustur">Teklif iste →</Link>
+      <Link className={styles.barCta} href={quoteHref()}>Teklif iste →</Link>
     </div></div>
 
     <div className={styles.wrap}>
@@ -153,7 +161,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
                 {/* Fiyati olan hizmette rozet kapakta; burada yalnizca teklife acik olanlar yazilir. */}
                 {!service.price_from && <div className={styles.priceBox}><small>FİYAT</small><strong>Teklife göre</strong></div>}
                 {service.delivery_time && <span className={styles.delivery}>◷ {service.delivery_time}</span>}
-                <Link className={styles.serviceCta} href="/talep-olustur">Teklif iste →</Link>
+                <Link className={styles.serviceCta} href={quoteHref(service.category?.slug)}>Teklif iste →</Link>
               </footer>
             </div>
           </article>)}
@@ -233,7 +241,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
 
       <section className={styles.cta}>
         <div><strong>Benzer bir iş mi yaptıracaksın?</strong><p>Talebini ücretsiz yayınla; {title} ve alanındaki diğer profesyoneller sana teklif göndersin.</p></div>
-        <Link href="/talep-olustur">Ücretsiz talep oluştur →</Link>
+        <Link href={quoteHref()}>Bu mağazadan teklif iste →</Link>
       </section>
     </div>
 
@@ -245,7 +253,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
       title={openWork.title}
       footer={<>
         <span className={styles.modalNote}>Bu işi {title} tamamladı.</span>
-        <Link className={styles.modalPrimary} href="/talep-olustur">Benzer iş için teklif al →</Link>
+        <Link className={styles.modalPrimary} href={quoteHref(openWork.category?.slug)}>Benzer iş için teklif al →</Link>
       </>}
     >
       <WorkViewer work={openWork} />

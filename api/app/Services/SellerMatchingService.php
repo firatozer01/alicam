@@ -21,19 +21,26 @@ class SellerMatchingService
             ->where(fn (Builder $query) => $query
                 ->whereNull('requests.expires_at')
                 ->orWhere('requests.expires_at', '>', now()))
-            // Talep birden fazla kategoride olabilir; herhangi biri saticinin
-            // erisim kumesine giriyorsa eslesme kurulur.
-            ->whereExists(fn ($query) => $query
-                ->selectRaw('1')
-                ->from('request_categories')
-                ->whereColumn('request_categories.request_id', 'requests.id')
-                ->whereIn('request_categories.category_id', $this->reachableCategoryIds($seller)))
-            ->whereExists(fn ($query) => $query
-                ->selectRaw('1')
-                ->from('seller_locations')
-                ->where('seller_locations.seller_id', $seller->id)
-                ->whereColumn('seller_locations.city_id', 'requests.city_id')
-                ->whereColumn('seller_locations.district_id', 'requests.district_id'));
+            // Iki yoldan biri yeterli: normal eslesme (kategori + bolge) ya da
+            // aliciin vitrinden dogrudan bu saticiya yonelttigi davet.
+            ->where(fn (Builder $outer) => $outer
+                ->where(fn (Builder $matched) => $matched
+                    ->whereExists(fn ($query) => $query
+                        ->selectRaw('1')
+                        ->from('request_categories')
+                        ->whereColumn('request_categories.request_id', 'requests.id')
+                        ->whereIn('request_categories.category_id', $this->reachableCategoryIds($seller)))
+                    ->whereExists(fn ($query) => $query
+                        ->selectRaw('1')
+                        ->from('seller_locations')
+                        ->where('seller_locations.seller_id', $seller->id)
+                        ->whereColumn('seller_locations.city_id', 'requests.city_id')
+                        ->whereColumn('seller_locations.district_id', 'requests.district_id')))
+                ->orWhereExists(fn ($query) => $query
+                    ->selectRaw('1')
+                    ->from('request_invites')
+                    ->where('request_invites.seller_id', $seller->id)
+                    ->whereColumn('request_invites.request_id', 'requests.id')));
     }
 
     /**
@@ -64,6 +71,8 @@ class SellerMatchingService
     public function query(User $seller): Builder
     {
         return $this->baseQuery($seller)
+            ->withExists(['invitedSellers as invited_for_seller' => fn ($query) => $query
+                ->where('users.id', $seller->id)])
             ->with(['category.creditCost', 'city', 'district', 'user'])
             ->withCount('offers')
             ->withExists([

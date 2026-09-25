@@ -7,11 +7,11 @@ export const metadata: Metadata = {
 };
 
 type RequestPageProps = {
-  searchParams: Promise<{ kategori?: string }>;
+  searchParams: Promise<{ kategori?: string; satici?: string }>;
 };
 
 export default async function RequestPage({ searchParams }: RequestPageProps) {
-  const { kategori } = await searchParams;
+  const { kategori, satici } = await searchParams;
 
-  return <RequestWizard initialCategory={kategori} />;
+  return <RequestWizard initialCategory={kategori} initialSellerId={satici} />;
 }

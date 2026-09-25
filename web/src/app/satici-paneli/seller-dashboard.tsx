@@ -19,7 +19,7 @@ type SellerRequest = {
   id: number; reference: string; title: string; summary: string; status: string; offer_count: number;
   budget: { min: string; max: string }; category: Category;
   location: { city: { id: number; name: string }; district: { id: number; name: string } };
-  summary_attributes: RequestAttribute[]; is_unlocked: boolean; is_favorite: boolean; unlock_cost: number | null;
+  summary_attributes: RequestAttribute[]; is_unlocked: boolean; is_favorite: boolean; is_invited: boolean; unlock_cost: number | null;
   expires_at: string | null; created_at: string;
   details?: { description: string; full_address: string | null; attributes: RequestAttribute[]; contact: { name: string; email: string; phone: string } };
 };
@@ -543,9 +543,10 @@ export function SellerDashboard() {
                 const existingOffer = offerByRequest.get(item.id);
                 const competition = item.offer_count > 7 ? "compHigh" : item.offer_count > 3 ? "compMid" : "compLow";
                 const open = expanded === item.id || (offerRequest === item.id && !existingOffer);
-                return <article className={`${list.card} ${item.is_unlocked ? list.cardOpen : ""} ${open ? list.cardExtra : ""}`} key={item.id} style={{ animationDelay: `${Math.min(index, 10) * 30}ms` }}>
+                return <article className={`${list.card} ${item.is_invited ? list.cardInvited : ""} ${item.is_unlocked ? list.cardOpen : ""} ${open ? list.cardExtra : ""}`} key={item.id} style={{ animationDelay: `${Math.min(index, 10) * 30}ms` }}>
                   <div className={list.cardTop}>
                     <span className={list.cat} style={{ color: item.category.color, background: `${item.category.color}15` }}>{item.category.icon} {item.category.name}</span>
+                    {item.is_invited && <span className={list.invited}>◈ Sana özel</span>}
                     <span className={`${list.competition} ${list[competition]}`}>{competition === "compHigh" ? "Yoğun" : competition === "compMid" ? "Orta" : "Düşük"} rekabet</span>
                     <button aria-label={item.is_favorite ? "Favorilerden çıkar" : "Favorilere ekle"} aria-pressed={item.is_favorite} className={`${styles.favButton} ${item.is_favorite ? styles.favOn : ""}`} onClick={() => toggleFavorite(item)} type="button">{item.is_favorite ? "★" : "☆"}</button>
                   </div>

@@ -7,6 +7,7 @@ use App\Http\Resources\BuyerRequestResource;
 use App\Models\BuyerRequest;
 use App\Models\Category;
 use App\Models\District;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,9 @@ class BuyerRequestController extends Controller
             // bedeli her zaman birincil kategoriden gelir.
             'extra_category_slugs' => ['sometimes', 'array', 'max:4'],
             'extra_category_slugs.*' => ['string', 'distinct', 'exists:categories,slug'],
+            // Vitrinden gelen dogrudan teklif istegi: talep bu saticilara yonlendirilir.
+            'invited_seller_ids' => ['sometimes', 'array', 'max:5'],
+            'invited_seller_ids.*' => ['integer', 'distinct', 'exists:users,id'],
             'title' => ['required', 'string', 'min:10', 'max:120'],
             'description' => ['required', 'string', 'min:20', 'max:3000'],
             'budget_min' => ['required', 'numeric', 'min:0', 'max:9999999999'],
@@ -113,13 +117,21 @@ class BuyerRequestController extends Controller
             'show_in_summary' => $attribute->show_in_summary,
         ])->values()->all();
 
+        // Yalnizca onayli hizmet verenler davet edilebilir.
+        $invitedSellers = empty($base['invited_seller_ids']) ? [] : User::query()
+            ->whereIn('id', $base['invited_seller_ids'])
+            ->where('id', '!=', $request->user()->id)
+            ->whereHas('sellerProfile', fn ($query) => $query->where('approval_status', 'approved'))
+            ->pluck('id')
+            ->all();
+
         $extraCategories = Category::query()
             ->whereIn('slug', array_diff($base['extra_category_slugs'] ?? [], [$category->slug]))
             ->where('is_active', true)
             ->pluck('id')
             ->all();
 
-        $buyerRequest = DB::transaction(function () use ($request, $base, $category, $extraCategories, $validatedAttributes, $snapshot) {
+        $buyerRequest = DB::transaction(function () use ($request, $base, $category, $extraCategories, $invitedSellers, $validatedAttributes, $snapshot) {
             $created = BuyerRequest::query()->create([
             'public_reference' => $this->newReference(),
             'user_id' => $request->user()->id,
@@ -143,11 +155,15 @@ class BuyerRequestController extends Controller
             }
             $created->categories()->sync($pivot);
 
+            if ($invitedSellers !== []) {
+                $created->invitedSellers()->sync(array_fill_keys($invitedSellers, ['source' => 'storefront']));
+            }
+
             return $created;
         });
 
         return response()->json([
-            'data' => new BuyerRequestResource($buyerRequest->load(['category', 'categories', 'city', 'district'])),
+            'data' => new BuyerRequestResource($buyerRequest->load(['category', 'categories', 'invitedSellers', 'city', 'district'])),
         ], 201);
     }
 
