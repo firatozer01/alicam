@@ -35,6 +35,10 @@ return [
         ],
     ],
 
+    // Web arayuzunun adresi. Kuyruktan gonderilen bildirim baglantilari
+    // API degil, kullanicinin gordugu siteyi gostermeli.
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+
     'paytr' => [
         'merchant_id' => env('PAYTR_MERCHANT_ID'),
         'merchant_key' => env('PAYTR_MERCHANT_KEY'),

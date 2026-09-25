@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BuyerRequestController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\CreditPurchaseController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\MarketplaceController;
@@ -54,6 +55,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/me', [AuthController::class, 'updateProfile'])->middleware('throttle:20,1');
     Route::put('/me/password', [AuthController::class, 'updatePassword'])->middleware('throttle:10,1');
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Mesajlasma. Canli tasiyici baglanana kadar arayuz /poll ucunu kullanir.
+    Route::get('/conversations', [ConversationController::class, 'index']);
+    Route::post('/conversations', [ConversationController::class, 'store'])->middleware('throttle:20,1');
+    Route::get('/conversations/{conversation}', [ConversationController::class, 'show']);
+    Route::get('/conversations/{conversation}/poll', [ConversationController::class, 'poll']);
+    Route::post('/conversations/{conversation}/messages', [ConversationController::class, 'send'])
+        ->middleware('throttle:60,1');
 
     Route::post('/verification/send', [VerificationController::class, 'send'])
         ->middleware('throttle:5,1');

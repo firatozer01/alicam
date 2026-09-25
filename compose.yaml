@@ -77,13 +77,16 @@ services:
     build:
       context: ./api
     restart: unless-stopped
-    command: php artisan queue:work --sleep=2 --tries=3 --timeout=90
+    command: php artisan queue:work --sleep=2 --tries=3 --timeout=90 --max-time=3600
     environment:
       APP_NAME: alicam.net
       APP_ENV: ${APP_ENV:-production}
       APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${APP_URL:-http://localhost:8091}
       APP_KEY: ${APP_KEY:-}
       APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Istanbul}
+      APP_LOCALE: tr
+      APP_FALLBACK_LOCALE: tr
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432
@@ -92,8 +95,19 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-change-this-in-production}
       REDIS_CLIENT: phpredis
       REDIS_HOST: redis
+      REDIS_PORT: 6379
       CACHE_STORE: redis
       QUEUE_CONNECTION: redis
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      MAIL_MAILER: ${MAIL_MAILER:-log}
+      MAIL_SCHEME: ${MAIL_SCHEME:-}
+      MAIL_HOST: ${MAIL_HOST:-127.0.0.1}
+      MAIL_PORT: ${MAIL_PORT:-2525}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-bildirim@alicam.net}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-alıcam.net}
+      FILESYSTEM_DISK: public
       SKIP_MIGRATIONS: "1"
     volumes:
       - api_storage:/var/www/html/storage/app
