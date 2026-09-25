@@ -93,7 +93,8 @@ export function SellerDashboard() {
   const [view, setView] = useState<View>("requests");
   const [filter, setFilter] = useState<Scope>("all");
   const [offerFilter, setOfferFilter] = useState<"all" | "pending" | "accepted" | "rejected">("all");
-  const [categoryFilter, setCategoryFilter] = useState("");
+  // Talep birden fazla kategoride olabildigi icin filtre coklu secimli.
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [cityFilter, setCityFilter] = useState("");
   const [sort, setSort] = useState("latest");
   const [search, setSearch] = useState("");
@@ -132,7 +133,7 @@ export function SellerDashboard() {
     if (filter === "unlocked") params.set("unlocked", "1");
     if (filter === "favorite") params.set("favorite", "1");
     if (search) params.set("q", search);
-    if (categoryFilter) params.set("category", categoryFilter);
+    if (categoryFilter.length) params.set("category", categoryFilter.join(","));
     if (cityFilter) params.set("city_id", cityFilter);
     if (appliedBudget.min) params.set("budget_min", appliedBudget.min);
     if (appliedBudget.max) params.set("budget_max", appliedBudget.max);
@@ -212,7 +213,12 @@ export function SellerDashboard() {
   }, [loading, view]);
 
   // Filtre degisimleri her zaman ilk sayfaya doner.
-  const selectCategory = (value: string) => { setCategoryFilter(value); setPage(1); };
+  const selectCategory = (value: string) => {
+    setCategoryFilter((current) => value === ""
+      ? []
+      : current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
+    setPage(1);
+  };
   const selectCity = (value: string) => { setCityFilter(value); setPage(1); };
   const applySearch = () => { setSearch(searchInput.trim()); setPage(1); };
   const changeSort = (value: string) => { setSort(value); setPage(1); };
@@ -220,14 +226,16 @@ export function SellerDashboard() {
   const clearSearch = () => { setSearch(""); setSearchInput(""); setPage(1); };
 
   const resetFilters = () => {
-    setSearch(""); setSearchInput(""); setCategoryFilter(""); setCityFilter("");
+    setSearch(""); setSearchInput(""); setCategoryFilter([]); setCityFilter("");
     setBudget({ min: "", max: "" }); setFilter("all"); setSort("latest"); setPage(1);
   };
 
   const activeChips = useMemo(() => {
     const chips: { key: string; label: string; onClear: () => void }[] = [];
     if (search) chips.push({ key: "q", label: `“${search}”`, onClear: clearSearch });
-    if (categoryFilter) chips.push({ key: "category", label: facets.categories.find((item) => item.slug === categoryFilter)?.name ?? categoryFilter, onClear: () => selectCategory("") });
+    for (const slug of categoryFilter) {
+      chips.push({ key: `category-${slug}`, label: facets.categories.find((item) => item.slug === slug)?.name ?? slug, onClear: () => selectCategory(slug) });
+    }
     if (cityFilter) chips.push({ key: "city", label: facets.cities.find((item) => String(item.id) === cityFilter)?.name ?? cityFilter, onClear: () => selectCity("") });
     if (appliedBudget.min || appliedBudget.max) chips.push({ key: "budget", label: `Bütçe ${appliedBudget.min || "0"}–${appliedBudget.max || "∞"} ₺`, onClear: () => setBudget({ min: "", max: "" }) });
     if (filter === "unlocked") chips.push({ key: "unlocked", label: "Sadece açtıklarım", onClear: () => changeScope("all") });
@@ -509,7 +517,7 @@ export function SellerDashboard() {
               activeCount={activeChips.length}
               budget={{ min: budget.min, max: budget.max, bounds: facets.budget, onChange: setBudget }}
               groups={[
-                { key: "category", title: "KATEGORİ", selected: categoryFilter, onSelect: selectCategory, options: facets.categories.map((item) => ({ value: item.slug, label: item.name, count: item.count, color: item.color, icon: item.icon })) },
+                { key: "category", title: "KATEGORİ", multiple: true, selected: categoryFilter, onSelect: selectCategory, options: facets.categories.map((item) => ({ value: item.slug, label: item.name, count: item.count, color: item.color, icon: item.icon })) },
                 { key: "city", title: "ŞEHİR", selected: cityFilter, onSelect: selectCity, options: facets.cities.map((item) => ({ value: String(item.id), label: item.name, count: item.count })) },
               ]}
               onReset={resetFilters}

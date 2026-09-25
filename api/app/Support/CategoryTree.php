@@ -101,6 +101,31 @@ class CategoryTree
     }
 
     /**
+     * Filtreden gelen slug listesini (dizi ya da virgullu metin) kendisi ve
+     * alt kategorileriyle birlikte id kumesine cevirir.
+     *
+     * @return array<int, int>
+     */
+    public static function idsForSlugs(mixed $value): array
+    {
+        $slugs = is_array($value)
+            ? $value
+            : array_filter(array_map('trim', explode(',', (string) $value)));
+
+        $ids = [];
+        foreach (array_slice(array_unique($slugs), 0, 12) as $slug) {
+            if ($slug === '') {
+                continue;
+            }
+            foreach (self::descendantsOfSlug((string) $slug) as $id) {
+                $ids[$id] = true;
+            }
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
      * Iki kategori ayni soy hattinda mi: biri digerinin ustu ya da kendisi mi.
      */
     public static function related(int $a, int $b): bool

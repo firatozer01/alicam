@@ -21,6 +21,10 @@ class BuyerRequestController extends Controller
     {
         $base = $request->validate([
             'category_slug' => ['required', 'string', 'exists:categories,slug'],
+            // Ek kategoriler talebin erisimini genisletir; form ve kontor
+            // bedeli her zaman birincil kategoriden gelir.
+            'extra_category_slugs' => ['sometimes', 'array', 'max:4'],
+            'extra_category_slugs.*' => ['string', 'distinct', 'exists:categories,slug'],
             'title' => ['required', 'string', 'min:10', 'max:120'],
             'description' => ['required', 'string', 'min:20', 'max:3000'],
             'budget_min' => ['required', 'numeric', 'min:0', 'max:9999999999'],
@@ -109,7 +113,14 @@ class BuyerRequestController extends Controller
             'show_in_summary' => $attribute->show_in_summary,
         ])->values()->all();
 
-        $buyerRequest = DB::transaction(fn () => BuyerRequest::query()->create([
+        $extraCategories = Category::query()
+            ->whereIn('slug', array_diff($base['extra_category_slugs'] ?? [], [$category->slug]))
+            ->where('is_active', true)
+            ->pluck('id')
+            ->all();
+
+        $buyerRequest = DB::transaction(function () use ($request, $base, $category, $extraCategories, $validatedAttributes, $snapshot) {
+            $created = BuyerRequest::query()->create([
             'public_reference' => $this->newReference(),
             'user_id' => $request->user()->id,
             'category_id' => $category->id,
@@ -124,10 +135,19 @@ class BuyerRequestController extends Controller
             'attribute_schema_snapshot' => $snapshot,
             'status' => 'open',
             'expires_at' => now()->addDays(30),
-        ]));
+            ]);
+
+            $pivot = [$category->id => ['is_primary' => true, 'sort_order' => 0]];
+            foreach (array_values($extraCategories) as $index => $categoryId) {
+                $pivot[$categoryId] = ['is_primary' => false, 'sort_order' => $index + 1];
+            }
+            $created->categories()->sync($pivot);
+
+            return $created;
+        });
 
         return response()->json([
-            'data' => new BuyerRequestResource($buyerRequest->load(['category', 'city', 'district'])),
+            'data' => new BuyerRequestResource($buyerRequest->load(['category', 'categories', 'city', 'district'])),
         ], 201);
     }
 

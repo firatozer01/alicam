@@ -19,6 +19,14 @@ class BuyerRequestResource extends JsonResource
                 'min' => $this->budget_min,
                 'max' => $this->budget_max,
             ],
+            'extra_categories' => $this->whenLoaded('categories', fn () => $this->categories
+                ->where('id', '!=', $this->category_id)
+                ->map(fn ($category) => [
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                    'icon' => $category->icon,
+                    'color' => $category->color,
+                ])->values()),
             'category' => [
                 'id' => $this->category->id,
                 'name' => $this->category->name,

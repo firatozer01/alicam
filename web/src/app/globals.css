@@ -344,3 +344,13 @@ h1, h2, h3, p { margin-top: 0; }
 .fl-head { display: block; }
 .option-more { padding: 9px 13px; border: 1px dashed #c4b5fd; border-radius: 9px; background: none; color: #4f46e5; font: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; transition: background .16s ease, border-color .16s ease; }
 .option-more:hover { border-color: #7c3aed; background: #f4f1ff; }
+
+/* Ek kategori onerileri */
+.extra-cats { margin-top: 14px; padding: 14px 15px; border: 1px dashed #ddd6fe; border-radius: 13px; background: #faf9ff; animation: catIn .3s cubic-bezier(.2,.8,.2,1) both; }
+.extra-cats header strong { display: block; font-family: var(--font-fraunces); font-size: 14px; color: #15162d; }
+.extra-cats header small { display: block; margin-top: 3px; color: #75748f; font-size: 9px; }
+.extra-cats > div { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
+.extra-cats button { padding: 8px 12px; border: 1px solid #e1deea; border-radius: 9px; background: #fff; color: #55566d; font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; transition: border-color .16s ease, color .16s ease, background .16s ease, transform .16s ease; }
+.extra-cats button:hover:not(:disabled) { border-color: #c4b5fd; color: #4f46e5; transform: translateY(-1px); }
+.extra-cats button.selected { border-color: #7c3aed; color: #4f46e5; background: #f1eeff; box-shadow: 0 0 0 3px rgba(124,58,237,.10); }
+.extra-cats button:disabled { opacity: .45; cursor: default; }

@@ -71,7 +71,8 @@ export function MarketplaceHome() {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [marketplace, setMarketplace] = useState<MarketplaceResponse | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [category, setCategory] = useState("");
+  // Bir talep birden fazla kategoride olabildigi icin filtre de coklu secimli.
+  const [categorySlugs, setCategorySlugs] = useState<string[]>([]);
   const [city, setCity] = useState("");
   const [budget, setBudget] = useState({ min: "", max: "" });
   const [appliedBudget, setAppliedBudget] = useState({ min: "", max: "" });
@@ -105,7 +106,7 @@ export function MarketplaceHome() {
   useEffect(() => {
     let active = true;
     const params = new URLSearchParams({ sort, page: String(page) });
-    if (category) params.set("category", category);
+    if (categorySlugs.length) params.set("category", categorySlugs.join(","));
     if (city) params.set("city_id", city);
     if (search) params.set("q", search);
     if (appliedBudget.min) params.set("budget_min", appliedBudget.min);
@@ -115,7 +116,7 @@ export function MarketplaceHome() {
       .catch((requestError: unknown) => { if (active) setError(firstApiError(requestError)); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [appliedBudget, category, city, page, search, sort]);
+  }, [appliedBudget, categorySlugs, city, page, search, sort]);
 
   // Bütçe alanları her tuşta istek atmasın.
   useEffect(() => {
@@ -186,8 +187,13 @@ export function MarketplaceHome() {
     return Array.from({ length: Math.min(5, items.length) }, (_, index) => items[(feedOffset + index) % items.length]);
   }, [feedOffset, marketplace?.data.requests]);
 
+  /** Bos slug tum secimi temizler; dolu slug secime eklenir ya da cikarilir. */
   const chooseCategory = (slug: string) => {
-    setLoading(true); setCategory(slug); setPage(1);
+    setLoading(true);
+    setCategorySlugs((current) => slug === ""
+      ? []
+      : current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug]);
+    setPage(1);
     document.querySelector("#talepler")?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -201,20 +207,22 @@ export function MarketplaceHome() {
   const activeChips = useMemo(() => {
     const chips: { key: string; label: string; onClear: () => void }[] = [];
     if (search) chips.push({ key: "q", label: `“${search}”`, onClear: () => { setLoading(true); setSearch(""); setSearchInput(""); setPage(1); } });
-    if (category) chips.push({ key: "category", label: facets.categories.find((item) => item.slug === category)?.name ?? category, onClear: () => chooseCategory("") });
+    for (const slug of categorySlugs) {
+      chips.push({ key: `category-${slug}`, label: facets.categories.find((item) => item.slug === slug)?.name ?? slug, onClear: () => chooseCategory(slug) });
+    }
     if (city) chips.push({ key: "city", label: facets.cities.find((item) => String(item.id) === city)?.name ?? city, onClear: () => { setLoading(true); setCity(""); setPage(1); } });
     if (appliedBudget.min || appliedBudget.max) chips.push({ key: "budget", label: `Bütçe ${appliedBudget.min || "0"}–${appliedBudget.max || "∞"} ₺`, onClear: () => setBudget({ min: "", max: "" }) });
     return chips;
-  }, [appliedBudget, category, city, facets, search]);
+  }, [appliedBudget, categorySlugs, city, facets, search]);
 
   const resetFilters = () => {
-    setLoading(true); setSearch(""); setSearchInput(""); setCategory(""); setCity("");
+    setLoading(true); setSearch(""); setSearchInput(""); setCategorySlugs([]); setCity("");
     setBudget({ min: "", max: "" }); setSort("latest"); setPage(1);
   };
 
   return <main className={styles.page} ref={pageRef}>
     <SiteHeader
-      activeKey={category}
+      activeKey={categorySlugs[0] ?? ""}
       announce="⚡ Yeni nesil talep pazaryeri — talep oluşturmak tamamen ücretsiz."
       cta={isSeller ? { label: "Gelen talepler", href: "/satici-paneli" } : { label: "Ücretsiz talep oluştur", href: "/talep-olustur" }}
       links={[
@@ -270,7 +278,7 @@ export function MarketplaceHome() {
         <h1>İlanı sen verme,<br /><em>teklifi onlar versin.</em></h1>
         <p>Ne aradığını söyle; uygun galeriler, emlakçılar, ustalar ve firmalar sana teklif göndersin. Aramak yok, beklemek yok.</p>
         <form className={styles.quickbar} onSubmit={submitSearch}>
-          <select aria-label="Kategori" value={category} onChange={(event) => setCategory(event.target.value)}><option value="">Tüm kategoriler</option>{categories.map((item) => <option key={item.id} value={item.slug}>{item.icon} {item.name}</option>)}</select>
+          <select aria-label="Kategori" value={categorySlugs[0] ?? ""} onChange={(event) => { setLoading(true); setCategorySlugs(event.target.value ? [event.target.value] : []); setPage(1); }}><option value="">Tüm kategoriler</option>{categories.map((item) => <option key={item.id} value={item.slug}>{item.icon} {item.name}</option>)}</select>
           <input value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder="Örn. Çankaya’da 3+1 asansörlü daire arıyorum…" />
           <button className={styles.buttonGrad}>Talep ara →</button>
         </form>
@@ -291,12 +299,15 @@ export function MarketplaceHome() {
             <aside className={list.rail}>
               <div className={list.railTop}><strong>KATEGORİLER</strong><button className={list.railReset} disabled={!activeChips.length} onClick={resetFilters} type="button">Temizle</button></div>
               <div className={list.tree}>
-                <button className={`${list.treeRow} ${!category ? list.treeActive : ""}`} onClick={() => chooseCategory("")} type="button">
+                <button className={`${list.treeRow} ${categorySlugs.length === 0 ? list.treeActive : ""}`} onClick={() => chooseCategory("")} type="button">
                   <i style={{ background: "#f1eeff", color: "#4f46e5" }}>◎</i><span>Tüm talepler</span><b>{facets.categories.reduce((total, item) => total + item.count, 0)}</b>
                 </button>
-                {facets.categories.map((item) => <button className={`${list.treeRow} ${category === item.slug ? list.treeActive : ""}`} key={item.slug} onClick={() => chooseCategory(item.slug)} type="button">
-                  <i style={{ background: `${item.color}15`, color: item.color }}>{item.icon}</i><span>{item.name}</span><b>{item.count}</b>
-                </button>)}
+                {facets.categories.map((item) => {
+                  const picked = categorySlugs.includes(item.slug);
+                  return <button aria-pressed={picked} className={`${list.treeRow} ${picked ? list.treeActive : ""}`} key={item.slug} onClick={() => chooseCategory(item.slug)} type="button">
+                    <i style={{ background: `${item.color}15`, color: item.color }}>{item.icon}</i><span>{item.name}</span><b>{picked ? "✓" : item.count}</b>
+                  </button>;
+                })}
               </div>
               <div className={list.railTop}><strong>ŞEHİR</strong></div>
               <div className={list.tree}>
@@ -337,7 +348,7 @@ export function MarketplaceHome() {
 
     <section className={styles.categorySection} id="kategoriler">
       <div className={styles.wrap}><header className={`${styles.sectionHead} ${styles.reveal}`}><span>KATEGORİLER</span><h2>Aradığın her şey için tek bir talep yeter.</h2><p>Kategori seç, birkaç soruyu cevapla, talebin ilgili satıcı ağına düşsün.</p></header>
-        <div className={styles.categoryGrid}>{categories.slice(0, 8).map((item, index) => <button className={styles.reveal} key={item.id} onClick={() => chooseCategory(item.slug)} style={{ background: categoryPastels[index % categoryPastels.length] }}><i style={{ background: item.color }}>{item.icon}</i><strong>{item.name}</strong><p>Uygun ve doğrulanmış hizmet verenlerden teklif al</p><footer><span style={{ color: item.color }}>{category === item.slug ? "Seçili kategori" : "Talepleri keşfet"}</span><b style={{ color: item.color }}>→</b></footer></button>)}</div>
+        <div className={styles.categoryGrid}>{categories.slice(0, 8).map((item, index) => <button className={styles.reveal} key={item.id} onClick={() => chooseCategory(item.slug)} style={{ background: categoryPastels[index % categoryPastels.length] }}><i style={{ background: item.color }}>{item.icon}</i><strong>{item.name}</strong><p>Uygun ve doğrulanmış hizmet verenlerden teklif al</p><footer><span style={{ color: item.color }}>{categorySlugs.includes(item.slug) ? "Seçili kategori" : "Talepleri keşfet"}</span><b style={{ color: item.color }}>→</b></footer></button>)}</div>
       </div>
     </section>
 

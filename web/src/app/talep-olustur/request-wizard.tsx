@@ -38,6 +38,8 @@ type AttributeValue = string | string[] | boolean;
 
 type FormData = {
   category: string;
+  /** Birincil disinda talebin listeleneceği kategoriler. */
+  extraCategories: string[];
   title: string;
   description: string;
   attributes: Record<string, AttributeValue>;
@@ -58,6 +60,7 @@ const fallbackCategories: Category[] = [];
 
 const initialForm: FormData = {
   category: "",
+  extraCategories: [],
   title: "",
   description: "",
   attributes: {},
@@ -188,6 +191,35 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
     }
   }
 
+  /**
+   * Ek kategori onerileri: secilen basligin kardesleri. Talep bu basliklarda
+   * da listelenir, o alanlardaki saticilar da gorur.
+   */
+  const extraSuggestions = useMemo(() => {
+    if (!form.category || categories.length === 0) return [];
+
+    const trail = findPath(categories, form.category);
+    const parent = trail && trail.length > 0 ? trail[trail.length - 1] : null;
+    const pool = parent ? (parent.children ?? []) : categories.filter((item) => (item.kind ?? "service") === kind);
+
+    return pool.filter((item) => item.slug !== form.category).slice(0, 8);
+  }, [categories, form.category, kind]);
+
+  const toggleExtra = (slug: string) => {
+    setForm((current) => {
+      const picked = current.extraCategories.includes(slug);
+      if (!picked && current.extraCategories.length >= 4) return current;
+
+      return {
+        ...current,
+        extraCategories: picked
+          ? current.extraCategories.filter((item) => item !== slug)
+          : [...current.extraCategories, slug],
+      };
+    });
+    setError("");
+  };
+
   const chooseNode = (node: Category) => {
     if ((node.children ?? []).length > 0) {
       setBranch((path) => [...path, node]);
@@ -197,6 +229,7 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
     setLoadingSchema(true);
     setShowOptional(false);
     update("category", node.slug);
+    update("extraCategories", []);
     update("attributes", {});
   };
   const selectedCity = useMemo(
@@ -263,6 +296,7 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
         method: "POST",
         body: JSON.stringify({
           category_slug: form.category,
+          extra_category_slugs: form.extraCategories,
           title: form.title,
           description: form.description,
           attributes: form.attributes,
@@ -541,6 +575,30 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
                 })}
                 {shown.length === 0 && <p className="field-help">{categories.length === 0 ? "Kategoriler yükleniyor…" : "Bu başlıkta alt kategori yok."}</p>}
               </div>
+
+              {form.category && extraSuggestions.length > 0 && (
+                <section className="extra-cats">
+                  <header>
+                    <strong>Başka kategorilerde de listelensin mi?</strong>
+                    <small>Seçtiğin her başlıktaki hizmet verenler de talebini görür. En fazla 4 tane.</small>
+                  </header>
+                  <div>
+                    {extraSuggestions.map((item) => {
+                      const on = form.extraCategories.includes(item.slug);
+                      return (
+                        <button
+                          aria-pressed={on}
+                          className={on ? "selected" : ""}
+                          disabled={!on && form.extraCategories.length >= 4}
+                          key={item.slug}
+                          onClick={() => toggleExtra(item.slug)}
+                          type="button"
+                        >{on ? "✓ " : "＋ "}{item.name}</button>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
 
               {pageCount > 1 && (
                 <nav className="cat-pager">

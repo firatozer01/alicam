@@ -12,6 +12,7 @@ use App\Services\SellerMatchingService;
 use App\Support\CategoryTree;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -28,7 +29,7 @@ class SellerRequestController extends Controller
             'unlocked' => ['sometimes', 'boolean'],
             'favorite' => ['sometimes', 'boolean'],
             'q' => ['sometimes', 'nullable', 'string', 'max:100'],
-            'category' => ['sometimes', 'nullable', 'string', 'exists:categories,slug'],
+            'category' => ['sometimes', 'nullable'],
             'city_id' => ['sometimes', 'nullable', 'integer', 'exists:cities,id'],
             'budget_min' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'budget_max' => ['sometimes', 'nullable', 'numeric', 'min:0'],
@@ -101,9 +102,16 @@ class SellerRequestController extends Controller
                 ->orWhere('requests.public_reference', 'ilike', "%{$search}%"));
         }
 
-        if ($skip !== 'category' && ($category = $filters['category'] ?? null)) {
-            // Ust kategori secildiginde altindaki tum basliklar da listelenir.
-            $query->whereIn('requests.category_id', CategoryTree::descendantsOfSlug($category));
+        if ($skip !== 'category') {
+            $categoryIds = CategoryTree::idsForSlugs($filters['category'] ?? null);
+
+            if ($categoryIds !== []) {
+                $query->whereExists(fn ($inner) => $inner
+                    ->selectRaw('1')
+                    ->from('request_categories')
+                    ->whereColumn('request_categories.request_id', 'requests.id')
+                    ->whereIn('request_categories.category_id', $categoryIds));
+            }
         }
 
         if ($skip !== 'city' && ($cityId = $filters['city_id'] ?? null)) {
@@ -130,10 +138,15 @@ class SellerRequestController extends Controller
     private function categoryFacets(User $seller, array $filters): array
     {
         return $this->applyFilters($this->matching->baseQuery($seller), $seller, $filters, 'category')
-            ->join('categories', 'categories.id', '=', 'requests.category_id')
-            ->groupBy('categories.id', 'categories.name', 'categories.slug', 'categories.icon', 'categories.color')
+            ->join('request_categories', 'request_categories.request_id', '=', 'requests.id')
+            ->join('categories as rc0', 'rc0.id', '=', 'request_categories.category_id')
+            ->leftJoin('categories as rc1', 'rc1.id', '=', 'rc0.parent_id')
+            ->leftJoin('categories as rc2', 'rc2.id', '=', 'rc1.parent_id')
+            ->join(DB::raw('categories as root'), fn ($join) => $join
+                ->on(DB::raw('root.id'), '=', DB::raw('coalesce(rc2.id, rc1.id, rc0.id)')))
+            ->groupBy('root.id', 'root.name', 'root.slug', 'root.icon', 'root.color')
             ->orderByDesc('total')
-            ->selectRaw('categories.slug, categories.name, categories.icon, categories.color, count(*) as total')
+            ->selectRaw('root.slug, root.name, root.icon, root.color, count(distinct requests.id) as total')
             ->toBase()
             ->get()
             ->map(fn ($row) => [

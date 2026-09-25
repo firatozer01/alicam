@@ -21,7 +21,13 @@ class SellerMatchingService
             ->where(fn (Builder $query) => $query
                 ->whereNull('requests.expires_at')
                 ->orWhere('requests.expires_at', '>', now()))
-            ->whereIn('requests.category_id', $this->reachableCategoryIds($seller))
+            // Talep birden fazla kategoride olabilir; herhangi biri saticinin
+            // erisim kumesine giriyorsa eslesme kurulur.
+            ->whereExists(fn ($query) => $query
+                ->selectRaw('1')
+                ->from('request_categories')
+                ->whereColumn('request_categories.request_id', 'requests.id')
+                ->whereIn('request_categories.category_id', $this->reachableCategoryIds($seller)))
             ->whereExists(fn ($query) => $query
                 ->selectRaw('1')
                 ->from('seller_locations')

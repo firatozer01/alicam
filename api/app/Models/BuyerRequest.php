@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BuyerRequest extends Model
@@ -34,9 +35,18 @@ class BuyerRequest extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** Birincil kategori: form alanlari ve kontor bedeli buradan gelir. */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /** Talebin yer aldigi tum kategoriler (birincil dahil). */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'request_categories', 'request_id', 'category_id')
+            ->withPivot(['is_primary', 'sort_order'])
+            ->orderByPivot('sort_order');
     }
 
     public function city(): BelongsTo
