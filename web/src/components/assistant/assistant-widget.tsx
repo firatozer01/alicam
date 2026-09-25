@@ -93,7 +93,7 @@ export function AssistantWidget() {
       onClick={() => setOpen((current) => !current)}
       type="button"
     >
-      <Image alt="" height={92} priority={false} src="/asistan.gif" unoptimized width={92} />
+      <Image alt="" height={132} priority={false} src="/asistan.gif" unoptimized width={132} />
       {!open && <span className={styles.ping} />}
     </button>
 

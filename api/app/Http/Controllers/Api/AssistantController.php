@@ -36,7 +36,7 @@ class AssistantController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'mode' => $this->mode(),
+            'mode' => $this->mode($user),
             'greeting' => $user
                 ? config('assistant.greeting')
                 : config('assistant.guest_greeting'),
@@ -62,7 +62,7 @@ class AssistantController extends Controller
 
             if ($match) {
                 return response()->json([
-                    'mode' => $this->mode(),
+                    'mode' => $this->mode($user),
                     'answer' => $match['answer'],
                     'topic' => $match['key'],
                     'suggestions' => $this->related($topics, $match['key']),
@@ -74,7 +74,7 @@ class AssistantController extends Controller
         $match = $this->search($topics, $question);
 
         return response()->json([
-            'mode' => $this->mode(),
+            'mode' => $this->mode($user),
             'answer' => $match['answer'] ?? config('assistant.fallback'),
             'topic' => $match['key'] ?? null,
             'matched' => $match !== null,
@@ -131,9 +131,17 @@ class AssistantController extends Controller
             ->all();
     }
 
-    /** Yapay zekâ anahtari girilmediyse hazir cevap modundayiz. */
-    private function mode(): string
+    /**
+     * Yapay zeka yalnizca giris yapmis kullanicilar icin acilir; misafirler
+     * her zaman hazir cevap modunda kalir. Anahtar girilmemisse herkes icin
+     * hazir cevap modu gecerlidir.
+     */
+    private function mode(?object $user = null): string
     {
+        if ($user === null) {
+            return 'knowledge';
+        }
+
         return AppSettings::get('assistant.gemini_key') ? 'ai' : 'knowledge';
     }
 }

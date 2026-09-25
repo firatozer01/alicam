@@ -3,7 +3,7 @@
 
 .launcher {
   position: fixed; right: 20px; bottom: 20px; z-index: 80;
-  width: 92px; height: 92px; padding: 0; border: 0;
+  width: 132px; height: 132px; padding: 0; border: 0;
   background: none; cursor: pointer; line-height: 0;
   filter: drop-shadow(0 14px 28px rgba(76, 60, 180, .28));
   transition: transform .22s cubic-bezier(.2, .8, .2, 1);
@@ -14,7 +14,7 @@
 @keyframes floatIn { from { opacity: 0; transform: translateY(20px) scale(.9); } to { opacity: 1; transform: none; } }
 
 /* Dikkat çeken nabız; açıkken görünmez. */
-.ping { position: absolute; right: 12px; top: 10px; width: 11px; height: 11px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px #fff; }
+.ping { position: absolute; right: 20px; top: 16px; width: 13px; height: 13px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px #fff; }
 .ping::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--green); opacity: .7; animation: ping 1.8s ease-out infinite; }
 @keyframes ping { to { transform: scale(1.7); opacity: 0; } }
 
@@ -25,7 +25,7 @@
 
 /* ---- Panel ---- */
 .panel {
-  position: fixed; right: 20px; bottom: 122px; z-index: 81;
+  position: fixed; right: 20px; bottom: 156px; z-index: 81;
   width: min(384px, calc(100vw - 32px)); max-height: min(620px, calc(100vh - 160px));
   display: flex; flex-direction: column; overflow: hidden;
   border: 1px solid var(--line); border-radius: var(--r-lg);
@@ -108,6 +108,6 @@
 .composer button:disabled { opacity: .45; cursor: default; }
 
 @media (max-width: 520px) {
-  .launcher { width: 74px; height: 74px; right: 14px; bottom: 14px; }
-  .panel { right: 12px; bottom: 96px; max-height: calc(100vh - 128px); }
+  .launcher { width: 96px; height: 96px; right: 12px; bottom: 12px; }
+  .panel { right: 12px; bottom: 112px; max-height: calc(100vh - 144px); }
 }
