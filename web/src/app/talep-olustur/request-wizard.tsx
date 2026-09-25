@@ -69,6 +69,9 @@ const initialForm: FormData = {
 
 const DRAFT_KEY = "alicam-request-draft";
 
+/** Kategori listesi bu sayidan uzunsa sayfalanir. */
+const CATEGORY_PAGE_SIZE = 5;
+
 /** Agacta slug'a gore dugumu ve ona giden yolu bulur. */
 function findPath(nodes: Category[], slug: string, trail: Category[] = []): Category[] | null {
   for (const node of nodes) {
@@ -101,6 +104,7 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
   // Agacta hangi dalin icindeyiz; bos dizi kok seviyesidir.
   const [branch, setBranch] = useState<Category[]>([]);
   const [kind, setKind] = useState<"service" | "listing">("service");
+  const [categoryPage, setCategoryPage] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successReference, setSuccessReference] = useState("");
@@ -163,6 +167,11 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
   );
   const current = branch.length > 0 ? branch[branch.length - 1] : null;
   const shown = current ? (current.children ?? []) : roots;
+  const pageCount = Math.max(1, Math.ceil(shown.length / CATEGORY_PAGE_SIZE));
+  const safePage = Math.min(categoryPage, pageCount);
+  const visible = shown.slice((safePage - 1) * CATEGORY_PAGE_SIZE, safePage * CATEGORY_PAGE_SIZE);
+  // Dal veya sayfa degisince liste yeniden baglanir; giris animasyonu tekrar oynar.
+  const listKey = `${current?.slug ?? kind}-${safePage}`;
 
   // Taslaktan veya linkten gelen derin bir kategori icin kirinti yolu geri kurulur.
   // Efekt yerine render sirasinda ayarlanir; fazladan bir tur olusmaz.
@@ -180,6 +189,7 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
   const chooseNode = (node: Category) => {
     if ((node.children ?? []).length > 0) {
       setBranch((path) => [...path, node]);
+      setCategoryPage(1);
       return;
     }
     setLoadingSchema(true);
@@ -407,7 +417,7 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
                   <button
                     data-on={kind === value}
                     key={value}
-                    onClick={() => { setKind(value); setBranch([]); update("category", ""); update("attributes", {}); }}
+                    onClick={() => { setKind(value); setBranch([]); setCategoryPage(1); update("category", ""); update("attributes", {}); }}
                     type="button"
                   ><strong>{label}</strong><small>{hint}</small></button>
                 ))}
@@ -415,9 +425,9 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
 
               {branch.length > 0 && (
                 <nav className="cat-crumbs">
-                  <button onClick={() => { setBranch([]); update("category", ""); }} type="button">Tüm kategoriler</button>
+                  <button onClick={() => { setBranch([]); setCategoryPage(1); update("category", ""); }} type="button">Tüm kategoriler</button>
                   {branch.map((node, index) => (
-                    <button key={node.slug} onClick={() => setBranch(branch.slice(0, index + 1))} type="button">{node.name}</button>
+                    <button key={node.slug} onClick={() => { setBranch(branch.slice(0, index + 1)); setCategoryPage(1); }} type="button">{node.name}</button>
                   ))}
                 </nav>
               )}
@@ -429,11 +439,15 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
                 </label>
               )}
 
-              <div className="wizard-categories">
-                {shown.map((category) => {
+              <div className="wizard-categories" key={listKey}>
+                {visible.map((category, index) => {
                   const childCount = (category.children ?? []).length;
                   return (
-                    <label className={form.category === category.slug ? "selected" : ""} key={category.slug}>
+                    <label
+                      className={form.category === category.slug ? "selected" : ""}
+                      key={category.slug}
+                      style={{ "--i": index } as React.CSSProperties}
+                    >
                       <input checked={form.category === category.slug} name="category" onChange={() => chooseNode(category)} type="radio" />
                       <i style={{ background: category.color }}>{category.icon}</i>
                       <span>
@@ -446,6 +460,38 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
                 })}
                 {shown.length === 0 && <p className="field-help">{categories.length === 0 ? "Kategoriler yükleniyor…" : "Bu başlıkta alt kategori yok."}</p>}
               </div>
+
+              {pageCount > 1 && (
+                <nav className="cat-pager">
+                  <button
+                    aria-label="Önceki sayfa"
+                    disabled={safePage === 1}
+                    onClick={() => setCategoryPage(safePage - 1)}
+                    type="button"
+                  >‹</button>
+                  <div className="cat-pager-pages">
+                    {Array.from({ length: pageCount }, (_, index) => index + 1)
+                      .filter((number) => number === 1 || number === pageCount || Math.abs(number - safePage) <= 1)
+                      .map((number, index, list) => (
+                        <span key={number}>
+                          {index > 0 && list[index - 1] !== number - 1 && <em>…</em>}
+                          <button
+                            data-on={number === safePage}
+                            onClick={() => setCategoryPage(number)}
+                            type="button"
+                          >{number}</button>
+                        </span>
+                      ))}
+                  </div>
+                  <button
+                    aria-label="Sonraki sayfa"
+                    disabled={safePage === pageCount}
+                    onClick={() => setCategoryPage(safePage + 1)}
+                    type="button"
+                  >›</button>
+                  <small>{shown.length} başlık · sayfa {safePage} / {pageCount}</small>
+                </nav>
+              )}
             </fieldset>
           )}
 
