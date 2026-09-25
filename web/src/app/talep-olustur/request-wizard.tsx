@@ -105,6 +105,8 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
   const [branch, setBranch] = useState<Category[]>([]);
   const [kind, setKind] = useState<"service" | "listing">("service");
   const [categoryPage, setCategoryPage] = useState(1);
+  const [showOptional, setShowOptional] = useState(false);
+  const [expandedOptions, setExpandedOptions] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successReference, setSuccessReference] = useState("");
@@ -193,6 +195,7 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
       return;
     }
     setLoadingSchema(true);
+    setShowOptional(false);
     update("category", node.slug);
     update("attributes", {});
   };
@@ -217,6 +220,9 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
     }));
     setError("");
   };
+
+  const requiredAttributes = categoryAttributes.filter((attribute) => attribute.is_required);
+  const optionalAttributes = categoryAttributes.filter((attribute) => !attribute.is_required);
 
   const requiredAttributesComplete = categoryAttributes
     .filter((attribute) => attribute.is_required)
@@ -283,14 +289,99 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
     }
   };
 
+  /**
+   * Alan genisligi icerige gore secilir: serbest metin ve coklu secim tam
+   * satir; cip gruplari yalnizca secenek metinleri uzunsa tam satir kaplar,
+   * kisa olanlar yan yana iki sutuna sigar.
+   */
+  const attributeWidth = (attribute: CategoryAttribute) => {
+    if (attribute.type === "textarea" || attribute.type === "multiselect") return " attr-wide";
+
+    const options = attribute.options ?? [];
+    const rendersAsChips = attribute.type === "boolean"
+      || (attribute.type === "select" && options.length > 0 && options.length <= 6);
+
+    if (!rendersAsChips) return "";
+
+    const weight = options.reduce((total, option) => total + option.length, 0) + attribute.label.length;
+
+    return weight > 46 ? " attr-wide" : "";
+  };
+
+  /** Sekizden uzun secenek listeleri katlanir; sayfa gereksiz uzamaz. */
+  const OPTION_LIMIT = 8;
+
+  const visibleOptions = (attribute: CategoryAttribute, options: string[]) =>
+    options.length > OPTION_LIMIT && !expandedOptions[attribute.key]
+      ? options.slice(0, OPTION_LIMIT)
+      : options;
+
+  const optionToggle = (attribute: CategoryAttribute, options: string[]) =>
+    options.length > OPTION_LIMIT ? (
+      <button
+        className="option-more"
+        onClick={() => setExpandedOptions((current) => ({ ...current, [attribute.key]: !current[attribute.key] }))}
+        type="button"
+      >{expandedOptions[attribute.key] ? "Daha az göster" : `+${options.length - OPTION_LIMIT} seçenek`}</button>
+    ) : null;
+
   const renderAttribute = (attribute: CategoryAttribute) => {
     const value = form.attributes[attribute.key];
     const suffix = attribute.unit ? ` (${attribute.unit})` : "";
+    const wide = attributeWidth(attribute);
+    const options = attribute.options ?? [];
+
+    // Az secenekli sorular acilir menu yerine cip olarak gosterilir:
+    // tek tikla secilir ve form gozle taranabilir kalir.
+    if (attribute.type === "select" && options.length > 0 && options.length <= 6) {
+      return (
+        <fieldset className={`attribute-options${wide}`} key={attribute.key}>
+          <legend><span className="fl-head">{attribute.label}{suffix}{attribute.is_required && <em className="req">*</em>}</span></legend>
+          <div>
+            {visibleOptions(attribute, options).map((option) => (
+              <label className={value === option ? "selected" : ""} key={option}>
+                <input
+                  checked={value === option}
+                  name={attribute.key}
+                  onChange={() => updateAttribute(attribute.key, option)}
+                  type="radio"
+                />
+                <span>{option}</span>
+              </label>
+            ))}
+            {optionToggle(attribute, options)}
+          </div>
+          {attribute.help_text && <small className="attr-hint">{attribute.help_text}</small>}
+        </fieldset>
+      );
+    }
+
+    if (attribute.type === "boolean") {
+      return (
+        <fieldset className="attribute-options" key={attribute.key}>
+          <legend>{attribute.label}{attribute.is_required && <em className="req">*</em>}</legend>
+          <div>
+            {([["true", "Evet"], ["false", "Hayır"]] as const).map(([raw, text]) => (
+              <label className={String(value) === raw ? "selected" : ""} key={raw}>
+                <input
+                  checked={String(value) === raw}
+                  name={attribute.key}
+                  onChange={() => updateAttribute(attribute.key, raw === "true")}
+                  type="radio"
+                />
+                <span>{text}</span>
+              </label>
+            ))}
+          </div>
+          {attribute.help_text && <small className="attr-hint">{attribute.help_text}</small>}
+        </fieldset>
+      );
+    }
 
     if (attribute.type === "select") {
       return (
-        <label className="field-label" key={attribute.key}>
-          {attribute.label}{suffix}
+        <label className={`field-label${wide}`} key={attribute.key}>
+          <span className="fl-head">{attribute.label}{suffix}</span>
           <select onChange={(event) => updateAttribute(attribute.key, event.target.value)} required={attribute.is_required} value={String(value ?? "")}>
             <option value="">Seç</option>
             {(attribute.options ?? []).map((option) => <option key={option}>{option}</option>)}
@@ -303,10 +394,10 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
     if (attribute.type === "multiselect") {
       const values = Array.isArray(value) ? value : [];
       return (
-        <fieldset className="attribute-options" key={attribute.key}>
+        <fieldset className={`attribute-options${wide}`} key={attribute.key}>
           <legend>{attribute.label}{suffix}</legend>
           <div>
-            {(attribute.options ?? []).map((option) => (
+            {visibleOptions(attribute, attribute.options ?? []).map((option) => (
               <label className={values.includes(option) ? "selected" : ""} key={option}>
                 <input
                   checked={values.includes(option)}
@@ -316,6 +407,7 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
                 <span>{option}</span>
               </label>
             ))}
+            {optionToggle(attribute, attribute.options ?? [])}
           </div>
         </fieldset>
       );
@@ -323,8 +415,8 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
 
     if (attribute.type === "textarea") {
       return (
-        <label className="field-label" key={attribute.key}>
-          {attribute.label}{suffix}
+        <label className={`field-label${wide}`} key={attribute.key}>
+          <span className="fl-head">{attribute.label}{suffix}</span>
           <textarea
             maxLength={2000}
             onChange={(event) => updateAttribute(attribute.key, event.target.value)}
@@ -338,20 +430,9 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
       );
     }
 
-    if (attribute.type === "boolean") {
-      return (
-        <label className="field-label" key={attribute.key}>
-          {attribute.label}
-          <select onChange={(event) => updateAttribute(attribute.key, event.target.value === "true")} required={attribute.is_required} value={value === undefined ? "" : String(value)}>
-            <option value="">Seç</option><option value="true">Evet</option><option value="false">Hayır</option>
-          </select>
-        </label>
-      );
-    }
-
     return (
-      <label className="field-label" key={attribute.key}>
-        {attribute.label}{suffix}
+      <label className={`field-label${wide}`} key={attribute.key}>
+        <span className="fl-head">{attribute.label}{suffix}{attribute.is_required && <em className="req">*</em>}</span>
         <input
           onChange={(event) => updateAttribute(attribute.key, event.target.value)}
           placeholder={attribute.help_text ?? attribute.label}
@@ -499,9 +580,33 @@ export function RequestWizard({ initialCategory }: { initialCategory?: string })
             <fieldset className="wizard-fields">
               <legend>{selectedCategory?.name ?? "Talep"} detaylarını paylaş</legend>
               <p className="field-help">Kişisel iletişim bilgilerini açıklama alanına yazma.</p>
-              <label className="field-label">Talep başlığı<input maxLength={120} minLength={10} onChange={(event) => update("title", event.target.value)} placeholder="Örn. 2+1 daire için boya ustası arıyorum" required type="text" value={form.title} /></label>
-              <label className="field-label">Açıklama<textarea maxLength={3000} minLength={20} onChange={(event) => update("description", event.target.value)} placeholder="İşin kapsamını, beklentilerini ve varsa önemli detayları anlat." required rows={5} value={form.description} /></label>
-              {loadingSchema ? <p className="schema-loading">Kategori soruları hazırlanıyor…</p> : categoryAttributes.map(renderAttribute)}
+              <section className="form-section">
+                <header><i>1</i><div><strong>Talebini tanımla</strong><small>Başlık ve kapsam</small></div></header>
+                <div className="attr-grid">
+                  <label className="field-label attr-wide"><span className="fl-head">Talep başlığı<em className="req">*</em></span><input maxLength={120} minLength={10} onChange={(event) => update("title", event.target.value)} placeholder="Örn. 2+1 daire için boya ustası arıyorum" required type="text" value={form.title} /><small>{form.title.length} / 120</small></label>
+                  <label className="field-label attr-wide"><span className="fl-head">Açıklama<em className="req">*</em></span><textarea maxLength={3000} minLength={20} onChange={(event) => update("description", event.target.value)} placeholder="İşin kapsamını, beklentilerini ve varsa önemli detayları anlat." required rows={5} value={form.description} /><small>{form.description.length} / 3000 · en az 20 karakter</small></label>
+                </div>
+              </section>
+
+              {loadingSchema ? <p className="schema-loading">Kategori soruları hazırlanıyor…</p> : <>
+                {requiredAttributes.length > 0 && (
+                  <section className="form-section">
+                    <header><i>2</i><div><strong>Gerekli bilgiler</strong><small>Satıcıların isabetli teklif verebilmesi için</small></div></header>
+                    <div className="attr-grid">{requiredAttributes.map(renderAttribute)}</div>
+                  </section>
+                )}
+
+                {optionalAttributes.length > 0 && (
+                  <section className="form-section" data-open={showOptional}>
+                    <button className="form-section-toggle" onClick={() => setShowOptional((open) => !open)} type="button">
+                      <i>{showOptional ? "−" : "＋"}</i>
+                      <div><strong>İsteğe bağlı detaylar</strong><small>{optionalAttributes.length} alan · doldurdukça teklifler netleşir</small></div>
+                      <b>{showOptional ? "Gizle" : "Göster"}</b>
+                    </button>
+                    {showOptional && <div className="attr-grid">{optionalAttributes.map(renderAttribute)}</div>}
+                  </section>
+                )}
+              </>}
             </fieldset>
           )}
 
