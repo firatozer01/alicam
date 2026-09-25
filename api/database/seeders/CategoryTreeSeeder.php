@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Support\CategoryTree;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\DB;
  */
 class CategoryTreeSeeder extends Seeder
 {
+    private const FINGERPRINT_KEY = 'category-tree:fingerprint';
+
     /** @var array<string, int> slug => id */
     private array $created = [];
 
@@ -34,7 +37,19 @@ class CategoryTreeSeeder extends Seeder
             return;
         }
 
-        $verticals = json_decode(file_get_contents($path), true, flags: JSON_THROW_ON_ERROR);
+        $raw = file_get_contents($path);
+        $fingerprint = md5($raw);
+
+        // Konteyner her acilista db:seed calistiriyor. Agac 5.600 satir oldugu
+        // icin bu her seferinde dakikalar suruyor ve es zamanli iki seeder
+        // birbirini kilitleyebiliyor. Dosya degismediyse is atlanir.
+        if (Cache::get(self::FINGERPRINT_KEY) === $fingerprint && Category::query()->count() > 100) {
+            $this->command?->info('Kategori agaci guncel, atlandi.');
+
+            return;
+        }
+
+        $verticals = json_decode($raw, true, flags: JSON_THROW_ON_ERROR);
 
         DB::transaction(function () use ($verticals): void {
             foreach ($verticals as $order => $vertical) {
@@ -43,6 +58,8 @@ class CategoryTreeSeeder extends Seeder
         });
 
         $this->retireLegacyRoots();
+
+        Cache::forever(self::FINGERPRINT_KEY, $fingerprint);
 
         // Soy zinciri onbellegi agac degistigi icin bosaltilir.
         CategoryTree::forget();
