@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AdminCategoryAttributeController;
 use App\Http\Controllers\Api\AdminCategoryController;
 use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminSellerApprovalController;
+use App\Http\Controllers\Api\AdminSettingsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BuyerRequestController;
 use App\Http\Controllers\Api\CategoryController;
@@ -114,6 +115,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/categories/{category}/attributes', [AdminCategoryAttributeController::class, 'store']);
         Route::put('/category-attributes/{categoryAttribute}', [AdminCategoryAttributeController::class, 'update']);
         Route::delete('/category-attributes/{categoryAttribute}', [AdminCategoryAttributeController::class, 'destroy']);
+        Route::get('/settings', [AdminSettingsController::class, 'show']);
+        Route::put('/settings', [AdminSettingsController::class, 'update']);
+        Route::post('/settings/mail-test', [AdminSettingsController::class, 'test'])
+            ->middleware('throttle:5,1');
         Route::get('/seller-approvals', [AdminSellerApprovalController::class, 'index']);
         Route::patch('/seller-approvals/{seller}', [AdminSellerApprovalController::class, 'update']);
     });

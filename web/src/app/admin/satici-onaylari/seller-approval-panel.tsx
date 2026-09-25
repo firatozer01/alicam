@@ -178,7 +178,7 @@ export function SellerApprovalPanel() {
         <nav>
           <Link href="/admin"><i>◇</i> Genel bakış</Link>
           <Link href="/admin/kategoriler"><i>▦</i> Kategoriler</Link>
-          <Link className="active" href="/admin/satici-onaylari"><i>✓</i> Satıcı onayları <b>{status === "pending" ? total : ""}</b></Link>
+          <Link className="active" href="/admin/satici-onaylari"><i>✓</i> Satıcı onayları <b>{status === "pending" ? total : ""}</b></Link><Link href="/admin/ayarlar"><i>✉</i> Bildirim ayarları</Link>
         </nav>
         <div className="admin-account"><span>{admin?.name.slice(0, 2).toLocaleUpperCase("tr-TR") ?? "AD"}</span><p><strong>{admin?.name ?? "Yönetici"}</strong><small>{admin?.email ?? "Oturum doğrulanıyor"}</small></p></div>
       </aside>
