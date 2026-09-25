@@ -17,7 +17,7 @@
 .navLinks a:hover{background:var(--violet-100);color:var(--indigo)}
 
 /* ---- Mağaza kapağı ---- */
-.storeCover{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--violet-100) 0%,#eaf8fc 55%,#fdf0f8 100%);border-bottom:1px solid var(--line);padding:44px 0 38px}
+.storeCover{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--violet-100) 0%,var(--cyan-50) 55%,var(--pink-50) 100%);border-bottom:1px solid var(--line);padding:44px 0 38px}
 .coverArt{position:absolute;inset:0;pointer-events:none}
 .coverArt i{position:absolute;border-radius:50%;filter:blur(46px);opacity:.5;animation:drift 16s ease-in-out infinite}
 .coverArt i:nth-child(1){width:280px;height:280px;left:-60px;top:-110px;background:var(--accent,var(--violet))}

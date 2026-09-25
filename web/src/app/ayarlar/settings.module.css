@@ -46,7 +46,7 @@
 .card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 10px 34px rgba(79,70,229,.06);animation:cardIn .32s cubic-bezier(.2,.8,.2,1) both}
 @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.card{animation:none}}
-.card>header{padding:16px 22px;border-bottom:1px solid var(--line-soft);background:linear-gradient(100deg,var(--violet-100),#eaf8fc)}
+.card>header{padding:16px 22px;border-bottom:1px solid var(--line-soft);background:linear-gradient(100deg,var(--violet-100),var(--cyan-50))}
 .card>header h2{margin:0;font-family:var(--font-fraunces),Georgia,serif;font-size:19px;font-weight:700}
 .card>header p{margin:5px 0 0;font-size:13px;color:var(--muted)}
 
