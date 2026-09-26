@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\AppSettings;
+use App\Services\StorefrontAccess;
 use Illuminate\Support\Facades\Schema;
 
 use Illuminate\Support\ServiceProvider;
@@ -14,7 +15,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Istek boyunca tek ornek: vitrin erisim karari bir ilan
+        // galerisinde onlarca kez soruluyor ve servis karari kendi
+        // icinde belliyor. Yeni ornek uretilse bellek her seferinde
+        // bostan baslardi.
+        $this->app->scoped(StorefrontAccess::class);
     }
 
     /**

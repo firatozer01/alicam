@@ -78,6 +78,15 @@ class SellerRequestResource extends JsonResource
                     'name' => $this->user->name,
                     'email' => $this->user->email,
                     'phone' => $this->user->phone,
+                    // Fotograf da kimliktir ve bu blok KILIT ACILINCA
+                    // doluyor. Kilit oncesi alicinin adi bile donmuyor;
+                    // avatari yukari tasimak, satici kontor odemeden
+                    // aliciyi taniyabilsin demek olurdu.
+                    //
+                    // Adres kullanici id'si tasidigi icin ayrica onemli:
+                    // disari ciktigi anda mesajlasma uzerinden odemesiz
+                    // bir kanal acilirdi.
+                    'avatar_url' => $this->user->avatar_url,
                 ],
             ];
         }

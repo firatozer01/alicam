@@ -79,6 +79,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/me/password', [AuthController::class, 'updatePassword'])->middleware('throttle:10,1');
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Profil fotografi: HERKES icin, satici grubunda degil. Alici da
+    // yukleyebilmeli.
+    Route::post('/avatar', [App\Http\Controllers\Api\AvatarController::class, 'store'])
+        ->middleware('throttle:20,1');
+    Route::delete('/avatar', [App\Http\Controllers\Api\AvatarController::class, 'destroy']);
+
+    // Gorsel akislari bilerek oturum ICINDE.
+    //
+    // Mevcut /portfolio-images ve /service-covers rotalari oturum
+    // disinda ve hicbir denetim yapmiyor; id'ler sirayla arttigi icin
+    // kapali bir vitrinin fotograflari disaridan tek tek cekilebiliyor.
+    // Yeni uclarda ayni hatayi tekrarlamiyoruz.
+    Route::get('/avatars/{user}', [App\Http\Controllers\Api\AvatarController::class, 'show']);
+    Route::get('/seller-banners/{user}', [App\Http\Controllers\Api\SellerBrandingController::class, 'show'])
+        ->defaults('kind', 'banner');
+    Route::get('/seller-logos/{user}', [App\Http\Controllers\Api\SellerBrandingController::class, 'show'])
+        ->defaults('kind', 'logo');
+    Route::get('/listing-images/{sellerListingImage}', App\Http\Controllers\Api\ListingImageController::class);
+
+    // Vitrindeki bir ilanin detayi: fotograf galerisi ve ozellik
+    // tablosu. Vitrinin kendisiyle ayni kapiya bagli.
+    Route::get('/listings/{sellerListing}', [App\Http\Controllers\Api\PublicListingController::class, 'show']);
+
     // Asistanin hizli sorgulamasi: yalnizca uyeye acik, kendi talebi ya da
     // teklif verdigi talep disinda bir sey dondurmez.
     Route::post('/assistant/lookup', [AssistantController::class, 'lookup'])
@@ -149,6 +172,26 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/services/{sellerService}/cover', [App\Http\Controllers\Api\SellerServiceController::class, 'uploadCover'])
                 ->middleware('throttle:30,1');
             Route::delete('/services/{sellerService}/cover', [App\Http\Controllers\Api\SellerServiceController::class, 'destroyCover']);
+            // Vitrin gorselleri: genis kapak ve firma logosu.
+            Route::post('/branding/{kind}', [App\Http\Controllers\Api\SellerBrandingController::class, 'store'])
+                ->middleware('throttle:20,1');
+            Route::delete('/branding/{kind}', [App\Http\Controllers\Api\SellerBrandingController::class, 'destroy']);
+
+            // Urun/ilanlar: emlakci bir daireyi, galerici bir araci
+            // vitrinine koyar ve teklif verirken iliktirir.
+            Route::get('/listings', [App\Http\Controllers\Api\SellerListingController::class, 'index']);
+            Route::get('/listings/pickable', [App\Http\Controllers\Api\SellerListingController::class, 'pickable']);
+            Route::post('/listings', [App\Http\Controllers\Api\SellerListingController::class, 'store'])
+                ->middleware('throttle:30,1');
+            Route::get('/listings/{sellerListing}', [App\Http\Controllers\Api\SellerListingController::class, 'show']);
+            Route::put('/listings/{sellerListing}', [App\Http\Controllers\Api\SellerListingController::class, 'update']);
+            Route::patch('/listings/{sellerListing}/status', [App\Http\Controllers\Api\SellerListingController::class, 'setStatus']);
+            Route::delete('/listings/{sellerListing}', [App\Http\Controllers\Api\SellerListingController::class, 'destroy']);
+            Route::post('/listings/{sellerListing}/images', [App\Http\Controllers\Api\SellerListingController::class, 'uploadImage'])
+                ->middleware('throttle:60,1');
+            Route::delete('/listing-images/{sellerListingImage}', [App\Http\Controllers\Api\SellerListingController::class, 'destroyImage']);
+            Route::patch('/listing-images/{sellerListingImage}/cover', [App\Http\Controllers\Api\SellerListingController::class, 'makeCover']);
+
             Route::get('/credits', [SellerCreditController::class, 'show']);
             Route::post('/credits/purchase', [CreditPurchaseController::class, 'store'])
                 ->middleware('throttle:10,1');

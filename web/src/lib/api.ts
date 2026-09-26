@@ -69,6 +69,25 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   return payload as T;
 }
 
+/**
+ * Dosya yukler.
+ *
+ * apiRequest gövdeyi JSON'a çevirmediği için FormData ile de çalışır,
+ * ama asıl mesele CSRF: panel içindeki mevcut yüklemeler XSRF-TOKEN
+ * çerezini doğrudan document.cookie'den okuyor ve çerezin daha önce
+ * bir başka istekle oluşturulmuş olmasına güveniyor. Sayfayı açıp ilk
+ * iş olarak fotoğraf yükleyen kullanıcı 419 alıyordu.
+ *
+ * Content-Type BİLEREK ayarlanmaz: multipart sınırını tarayıcının
+ * kendisi yazmalı.
+ */
+export async function apiUpload<T>(path: string, file: File, field = "image"): Promise<T> {
+  const body = new FormData();
+  body.append(field, file);
+
+  return apiRequest<T>(path, { method: "POST", body });
+}
+
 export function firstApiError(error: unknown): string {
   if (!(error instanceof ApiError)) return "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.";
 

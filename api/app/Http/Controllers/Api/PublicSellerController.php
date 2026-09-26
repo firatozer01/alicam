@@ -3,16 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Offer;
+use App\Models\SellerListing;
 use App\Models\SellerPortfolioItem;
 use App\Models\SellerReview;
 use App\Models\User;
+use App\Services\StorefrontAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PublicSellerController extends Controller
 {
+    public function __construct(
+        private readonly StorefrontAccess $access,
+    ) {}
+
     /** Onaylı hizmet verenlerin filtrelenebilir vitrin listesi. */
     /**
      * Vitrin. Alici bir hizmet vereni ancak O HIZMET VEREN KENDISINE TEKLIF
@@ -23,7 +28,7 @@ class PublicSellerController extends Controller
      */
     public function show(Request $request, User $user): JsonResponse
     {
-        abort_unless($this->mayView($request->user(), $user), 404, 'Hizmet veren bulunamadı.');
+        abort_unless($this->access->allows($request->user(), $user), 404, 'Hizmet veren bulunamadı.');
 
         // Modal icin iki seviye alt kategori de yuklenir.
         $user->loadMissing([
@@ -56,6 +61,17 @@ class PublicSellerController extends Controller
             ->latest()
             ->get();
 
+        // Vitrindeki urunler: emlakcinin daireleri, galericinin araclari.
+        // Yalnizca yayindakiler ve satilanlar; taslak ve arsiv disarida.
+        $listings = SellerListing::query()
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['published', 'sold'])
+            ->with(['category:id,name,slug,icon', 'city:id,name', 'district:id,name', 'images'])
+            ->orderBy('sort_order')
+            ->latest('id')
+            ->limit(48)
+            ->get();
+
         $ratingRows = SellerReview::query()->where('seller_id', $user->id)->pluck('rating');
         $breakdown = collect(range(5, 1))
             ->mapWithKeys(fn (int $star) => [$star => $ratingRows->filter(fn ($value) => (int) $value === $star)->count()])
@@ -70,6 +86,10 @@ class PublicSellerController extends Controller
                 'company_name' => $user->sellerProfile?->company_name,
                 'profile_type' => $user->sellerProfile?->profile_type,
                 'description' => $user->sellerProfile?->description,
+                // Vitrinin ustundeki genis kapak ve firma logosu.
+                'banner_url' => $user->sellerProfile?->banner_url,
+                'logo_url' => $user->sellerProfile?->logo_url,
+                'avatar_url' => $user->avatar_url,
                 'is_featured' => $user->activeSellerPromotions()->exists(),
                 'member_since' => $user->created_at?->toIso8601String(),
                 // Vitrindeki teklif modali bu agaci gosterir: saticinin
@@ -121,6 +141,10 @@ class PublicSellerController extends Controller
                         'color' => $service->category->color,
                     ] : null,
                 ])->values(),
+                // public: yonetim alanlari (durum, teklif sayisi) dusuyor.
+                'listings' => $listings->map(
+                    fn (SellerListing $listing) => SellerListingController::present($listing, public: true),
+                )->values(),
                 'portfolio' => $portfolio->map(fn (SellerPortfolioItem $item) => SellerPortfolioController::present($item))->values(),
                 'reviews' => $reviews->map(fn (SellerReview $review) => [
                     'id' => $review->id,
@@ -131,27 +155,6 @@ class PublicSellerController extends Controller
                 ])->values(),
             ],
         ]);
-    }
-
-    private function mayView(?User $viewer, User $seller): bool
-    {
-        if ($viewer === null) {
-            return false;
-        }
-
-        if ($viewer->id === $seller->id || $viewer->hasRole('admin')) {
-            return true;
-        }
-
-        // Bu hizmet veren, ziyaretcinin taleplerinden birine teklif vermis mi.
-        return Offer::query()
-            ->where('offers.seller_id', $seller->id)
-            ->whereExists(fn ($query) => $query
-                ->selectRaw('1')
-                ->from('requests')
-                ->whereColumn('requests.id', 'offers.request_id')
-                ->where('requests.user_id', $viewer->id))
-            ->exists();
     }
 
     private static function maskName(string $name): string

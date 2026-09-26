@@ -8,16 +8,19 @@ use App\Models\BuyerRequest;
 use App\Models\Category;
 use App\Models\District;
 use App\Models\User;
+use App\Services\CategoryAttributeForm;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use App\Support\CategoryTree;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class BuyerRequestController extends Controller
 {
+    public function __construct(
+        private readonly CategoryAttributeForm $attributeForm,
+    ) {}
+
     public function store(Request $request): JsonResponse
     {
         $base = $request->validate([
@@ -57,65 +60,10 @@ class BuyerRequestController extends Controller
             ['district_id.accepted' => 'Seçilen ilçe seçilen şehre ait değil.'],
         )->validate();
 
-        // Alan seti kalitimlidir: yaprak kategoride sorulanlar ust kategorilerin
-        // alanlarini da icerir, yoksa derin agacta hicbir alan dogrulanmaz.
-        $effectiveAttributes = CategoryTree::effectiveAttributes($category);
-
-        $attributeRules = [];
-        $allowedKeys = $effectiveAttributes->pluck('key')->all();
-        $attributeRules['attributes'] = $allowedKeys === []
-            ? ['array']
-            : ['array:'.implode(',', $allowedKeys)];
-
-        foreach ($effectiveAttributes as $attribute) {
-            $key = 'attributes.'.$attribute->key;
-
-            // Zorunlu bir boolean alanda "Hayir" (false) cevabi da gecerlidir;
-            // Laravel'de required false'u bos sayip reddettigi icin present kullanilir.
-            $presence = $attribute->is_required
-                ? ($attribute->type === 'boolean' ? 'present' : 'required')
-                : 'nullable';
-            $rules = [$presence];
-
-            match ($attribute->type) {
-                'number', 'range' => $rules[] = 'numeric',
-                'boolean' => $rules[] = 'boolean',
-                'date' => $rules[] = 'date',
-                'select' => $rules[] = Rule::in($attribute->options ?? []),
-                'multiselect' => $rules[] = 'array',
-                'textarea' => $rules[] = 'string',
-                default => $rules[] = 'string',
-            };
-
-            if (in_array($attribute->type, ['text', 'select'], true)) {
-                $rules[] = 'max:500';
-            }
-
-            if ($attribute->type === 'textarea') {
-                $rules[] = 'max:2000';
-            }
-
-            $attributeRules[$key] = $rules;
-
-            if ($attribute->type === 'multiselect') {
-                $attributeRules[$key.'.*'] = [Rule::in($attribute->options ?? [])];
-            }
-        }
-
-        $validatedAttributes = Validator::make(
-            ['attributes' => $request->input('attributes', [])],
-            $attributeRules,
-        )->validate()['attributes'];
-
-        $snapshot = $effectiveAttributes->map(fn ($attribute) => [
-            'key' => $attribute->key,
-            'label' => $attribute->label,
-            'type' => $attribute->type,
-            'options' => $attribute->options,
-            'unit' => $attribute->unit,
-            'is_private' => $attribute->is_private,
-            'show_in_summary' => $attribute->show_in_summary,
-        ])->values()->all();
+        // Alan dogrulamasi ve sema anlik goruntusu satici ilanlariyla
+        // ortak; kurallar CategoryAttributeForm'da tek yerde duruyor.
+        ['attributes' => $validatedAttributes, 'snapshot' => $snapshot] =
+            $this->attributeForm->resolve($category, $request->input('attributes', []));
 
         // Yalnizca onayli hizmet verenler davet edilebilir.
         $invitedSellers = empty($base['invited_seller_ids']) ? [] : User::query()
@@ -163,7 +111,7 @@ class BuyerRequestController extends Controller
         });
 
         return response()->json([
-            'data' => new BuyerRequestResource($buyerRequest->load(['category', 'categories', 'invitedSellers', 'city', 'district'])),
+            'data' => new BuyerRequestResource($buyerRequest->load(['category', 'categories', 'invitedSellers', 'city', 'district', 'user'])),
         ], 201);
     }
 
@@ -171,7 +119,7 @@ class BuyerRequestController extends Controller
     {
         $items = BuyerRequest::query()
             ->where('user_id', $request->user()->id)
-            ->with(['category', 'city', 'district'])
+            ->with(['category', 'city', 'district', 'user'])
             ->withCount('offers')
             ->latest()
             ->paginate(15);
@@ -201,7 +149,7 @@ class BuyerRequestController extends Controller
 
         return response()->json([
             'message' => 'Talep iptal edildi.',
-            'data' => new BuyerRequestResource($buyerRequest->fresh()->load(['category', 'city', 'district'])->loadCount('offers')),
+            'data' => new BuyerRequestResource($buyerRequest->fresh()->load(['category', 'city', 'district', 'user'])->loadCount('offers')),
         ]);
     }
 

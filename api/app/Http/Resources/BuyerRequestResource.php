@@ -12,6 +12,12 @@ class BuyerRequestResource extends JsonResource
         return [
             'id' => $this->id,
             'reference' => $this->public_reference,
+            // Talebi acan kisi; bu kaynak yalnizca talebin sahibine
+            // donduruldugu icin kendi fotografini gormesinde sakinca yok.
+            'owner' => [
+                'name' => $this->user?->name,
+                'avatar_url' => $this->user?->avatar_url,
+            ],
             'title' => $this->title,
             'description' => $this->description,
             'status' => $this->status,

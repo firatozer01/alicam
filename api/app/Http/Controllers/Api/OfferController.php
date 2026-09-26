@@ -7,6 +7,8 @@ use App\Http\Resources\OfferResource;
 use App\Http\Resources\SellerRequestResource;
 use App\Models\BuyerRequest;
 use App\Models\Offer;
+use App\Models\SellerListing;
+use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\SellerCreditService;
 use App\Services\SellerMatchingService;
@@ -23,6 +25,31 @@ class OfferController extends Controller
         private readonly NotificationService $notifications,
     ) {}
 
+    /**
+     * Iliktirilecek ilani dogrular.
+     *
+     * exists: kurali TEK BASINA YETMEZ: satici rakibinin ilan id'sini
+     * gonderip baskasinin urununu kendi teklifinde gosterebilirdi.
+     * Ilan hem bu saticiya ait hem yayinda olmali.
+     */
+    private function ownedListing(User $seller, ?int $listingId): ?SellerListing
+    {
+        if ($listingId === null) {
+            return null;
+        }
+
+        $listing = SellerListing::query()
+            ->whereKey($listingId)
+            ->where('user_id', $seller->id)
+            ->published()
+            ->with(['category', 'city', 'district', 'images'])
+            ->first();
+
+        abort_if($listing === null, 422, 'Seçilen ürün bulunamadı ya da yayında değil.');
+
+        return $listing;
+    }
+
     public function sellerIndex(Request $request): JsonResponse
     {
         $seller = $request->user();
@@ -31,6 +58,7 @@ class OfferController extends Controller
             ->with([
                 'seller.sellerProfile',
                 'review',
+                'listing.images',
                 'buyerRequest' => fn ($query) => $query
                     ->with(['category.creditCost', 'city', 'district', 'user'])
                     ->withExists([
@@ -58,7 +86,7 @@ class OfferController extends Controller
     {
         abort_unless($buyerRequest->user_id === $request->user()->id, 404);
         $offers = $buyerRequest->offers()
-            ->with(['seller.sellerProfile', 'review'])
+            ->with(['seller.sellerProfile', 'review', 'listing.images'])
             ->latest()
             ->get();
 
@@ -71,8 +99,11 @@ class OfferController extends Controller
             'request_id' => ['required', 'integer', 'exists:requests,id'],
             'price' => ['required', 'numeric', 'min:1', 'max:9999999999'],
             'message' => ['required', 'string', 'min:20', 'max:2000'],
+            // Vitrindeki bir urunu teklife iliktirmek istege bagli.
+            'seller_listing_id' => ['sometimes', 'nullable', 'integer'],
         ]);
         $seller = $request->user();
+        $listing = $this->ownedListing($seller, $data['seller_listing_id'] ?? null);
         $buyerRequest = $this->matching->query($seller)
             ->whereKey($data['request_id'])
             ->firstOrFail();
@@ -92,6 +123,8 @@ class OfferController extends Controller
                 'price' => $data['price'],
                 'message' => $data['message'],
                 'status' => 'pending',
+                'seller_listing_id' => $listing?->id,
+                'listing_snapshot' => $listing ? SellerListingController::present($listing, true, public: true) : null,
             ]);
             BuyerRequest::query()
                 ->whereKey($buyerRequest->id)
@@ -117,7 +150,7 @@ class OfferController extends Controller
             'message' => $unlock['already_unlocked']
                 ? 'Teklifiniz gönderildi; talep daha önce açıldığı için kontör düşülmedi.'
                 : 'Teklifiniz gönderildi ve talep açma bedeli bakiyenizden düşüldü.',
-            'data' => new OfferResource($offer->load('seller.sellerProfile')),
+            'data' => new OfferResource($offer->load(['seller.sellerProfile', 'listing.images'])),
             'balance' => $unlock['balance'],
             'credit_spent' => $unlock['already_unlocked'] ? 0 : $unlock['unlock']->credit_spent,
         ], 201);
@@ -130,12 +163,22 @@ class OfferController extends Controller
         $data = $request->validate([
             'price' => ['required', 'numeric', 'min:1', 'max:9999999999'],
             'message' => ['required', 'string', 'min:20', 'max:2000'],
+            'seller_listing_id' => ['sometimes', 'nullable', 'integer'],
         ]);
+
+        // Alan hic gonderilmediyse mevcut iliktirme korunur; null
+        // gonderildiyse kaldirilir.
+        if (array_key_exists('seller_listing_id', $data)) {
+            $listing = $this->ownedListing($request->user(), $data['seller_listing_id']);
+            $data['seller_listing_id'] = $listing?->id;
+            $data['listing_snapshot'] = $listing ? SellerListingController::present($listing, true, public: true) : null;
+        }
+
         $offer->update($data);
 
         return response()->json([
             'message' => 'Teklifiniz güncellendi; ek kontör düşülmedi.',
-            'data' => new OfferResource($offer->load('seller.sellerProfile')),
+            'data' => new OfferResource($offer->load(['seller.sellerProfile', 'listing.images'])),
         ]);
     }
 
@@ -170,7 +213,7 @@ class OfferController extends Controller
                 $buyerRequest->update(['status' => $hasPending ? 'in_negotiation' : 'open']);
             }
 
-            return $lockedOffer->fresh('seller.sellerProfile');
+            return $lockedOffer->fresh(['seller.sellerProfile', 'listing.images']);
         }, 3);
 
         // Kararin sahibi hizmet veren; kabul de ret de onun icin haberdir.

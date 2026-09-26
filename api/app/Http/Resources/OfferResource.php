@@ -22,7 +22,12 @@ class OfferResource extends JsonResource
                 'company_name' => $profile?->company_name,
                 'profile_type' => $profile?->profile_type,
                 'description' => $profile?->description,
+                // Teklifi veren taraf aliciya zaten aciktir: teklif
+                // vermek vitrini o aliciya acan eylem.
+                'avatar_url' => $this->seller->avatar_url,
+                'logo_url' => $profile?->logo_url,
             ],
+            'listing' => $this->listingBlock(),
             'reviewed_at' => $this->reviewed_at?->toIso8601String(),
             'accepted_at' => $this->accepted_at?->toIso8601String(),
             'created_at' => $this->created_at->toIso8601String(),
@@ -45,5 +50,41 @@ class OfferResource extends JsonResource
         }
 
         return $data;
+    }
+
+    /**
+     * Teklife iliktirilen urun.
+     *
+     * Gosterilen sey ANLIK GORUNTU, canli ilan degil: satici teklifi
+     * verdikten sonra ilani duzenleyebilir ya da silebilir, ama alici
+     * neyi teklif aldigini gormeye devam etmeli. Canli baglanti
+     * yalnizca "hala duruyor mu" sorusunu yanitlar ve ilan sayfasina
+     * gitmek icin kullanilir.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function listingBlock(): ?array
+    {
+        $anlik = $this->listing_snapshot;
+
+        if (! is_array($anlik) || $anlik === []) {
+            return null;
+        }
+
+        $canli = $this->relationLoaded('listing') ? $this->listing : null;
+
+        return [
+            'reference' => $anlik['reference'] ?? null,
+            'title' => $anlik['title'] ?? null,
+            'price' => $anlik['price'] ?? null,
+            'cover_url' => $anlik['cover_url'] ?? null,
+            'category' => $anlik['category'] ?? null,
+            'location' => $anlik['location'] ?? null,
+            // Tabloda yalnizca ozet satirlar; tamami ilan sayfasinda.
+            'attributes' => array_slice($anlik['attributes'] ?? [], 0, 6),
+            // Silinmis ya da yayindan kaldirilmis olabilir.
+            'is_available' => $canli !== null && in_array($canli->status, ['published', 'sold'], true),
+            'listing_id' => $canli?->id,
+        ];
     }
 }

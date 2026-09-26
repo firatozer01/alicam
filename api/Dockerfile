@@ -11,7 +11,7 @@ RUN apk add --no-cache libpq libjpeg-turbo libpng libwebp \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS libpq-dev linux-headers \
        libjpeg-turbo-dev libpng-dev libwebp-dev \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
-    && docker-php-ext-install pcntl pdo_pgsql gd \
+    && docker-php-ext-install pcntl pdo_pgsql gd exif \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && apk del .build-deps

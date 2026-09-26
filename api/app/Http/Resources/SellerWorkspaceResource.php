@@ -35,7 +35,10 @@ class SellerWorkspaceResource extends JsonResource
                 'company_name' => $profile->company_name,
                 'tax_no' => $profile->tax_no,
                 'description' => $profile->description,
-                'logo_path' => $profile->logo_path,
+                // Disk yolu degil akis adresi: istemci dosya duzenimizi
+                // hicbir zaman gormez.
+                'logo_url' => $profile->logo_url,
+                'banner_url' => $profile->banner_url,
                 'approval_status' => $profile->approval_status,
                 'rejection_reason' => $profile->rejection_reason,
                 'submitted_at' => $profile->submitted_at?->toIso8601String(),

@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute as EloquentAttribute;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,11 +16,39 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'email', 'phone', 'password', 'status'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'avatar_path'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    /**
+     * Profil fotografi adresi.
+     *
+     * $appends ile OTOMATIK EKLENMEZ, bilerek. SellerMatchingService her
+     * talep satirinda alicinin User modelini yukluyor; model butun olarak
+     * serilestirilirse bu adres kilidi acilmamis talebe de duser ve
+     * icindeki kullanici id'si saticiya aliciya ulasma yolu verir.
+     * Oysa kilit acilana kadar alicinin adi bile donmuyor.
+     *
+     * Bu yuzden her Resource bu alani ACIKCA istemek zorunda.
+     *
+     * avatar_path da Fillable listesinde degil: toplu atamayla
+     * degistirilebilen bir alan olmamali, yalnizca kendi yukleme
+     * ucundan yazilir.
+     */
+    protected function avatarUrl(): EloquentAttribute
+    {
+        if ($this->avatar_path === null) {
+            return EloquentAttribute::get(fn () => null);
+        }
+
+        // Surum damgasi: fotograf degisince adres de degisir, yoksa
+        // tarayici eskisini onbellekten gostermeye devam eder.
+        $damga = $this->updated_at?->timestamp ?? 0;
+
+        return EloquentAttribute::get(fn () => "/api/avatars/{$this->id}?v={$damga}");
+    }
 
     public function roles(): BelongsToMany
     {

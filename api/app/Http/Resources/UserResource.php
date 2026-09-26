@@ -15,6 +15,10 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'status' => $this->status,
+            // Kisinin KENDI fotografi. User modelinde $appends yok
+            // (kilitli talebe sizmasin diye), bu yuzden her kaynak
+            // acikca istemek zorunda.
+            'avatar_url' => $this->avatar_url,
             'roles' => $this->roles->pluck('name')->values(),
             'verification' => [
                 'email' => $this->email_verified_at !== null,
