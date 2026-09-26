@@ -16,7 +16,8 @@
 
 /* Acikken: sag kenara yapisik, tam yukseklik. */
 .dock {
-  position: fixed; right: 0; top: 0; bottom: 0; z-index: 71;
+  /* Acik mesaj paneli odakli yuzey: asistan maskotunun (80) uzerinde durur. */
+  position: fixed; right: 0; top: 0; bottom: 0; z-index: 90;
   display: flex; flex-direction: column; min-width: 320px; max-width: 640px;
   border-left: 1px solid var(--line); background: var(--card);
   box-shadow: -18px 0 50px rgba(76, 60, 180, .16);

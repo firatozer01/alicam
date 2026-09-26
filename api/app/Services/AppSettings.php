@@ -35,7 +35,7 @@ class AppSettings
         'mail.from_name' => 'alıcam.net',
         // Bos birakilirsa asistan hazir cevap modunda calisir.
         'assistant.gemini_key' => '',
-        'assistant.model' => 'gemini-3-flash',
+        'assistant.model' => 'gemini-3.8-flash',
     ];
 
     /**
@@ -98,6 +98,29 @@ class AppSettings
                 ],
             );
         }
+
+        self::forget();
+    }
+
+    /**
+     * Kayitli bir ayari tamamen siler.
+     *
+     * put() gizli bir alan bos gonderildiginde mevcut degeri korur, yoksa
+     * panel maskelenmis gosterdigi icin her kayitta sifreyi yeniden yazmak
+     * gerekirdi. Bunun yan etkisi olarak girilen bir anahtar bir daha
+     * kaldirilamazdi; kaldirma islemi bu yuzden ayri bir yol.
+     *
+     * @param  array<int, string>  $keys
+     */
+    public static function clear(array $keys): void
+    {
+        $allowed = array_values(array_intersect($keys, array_keys(self::EDITABLE)));
+
+        if ($allowed === []) {
+            return;
+        }
+
+        DB::table('app_settings')->whereIn('key', $allowed)->delete();
 
         self::forget();
     }

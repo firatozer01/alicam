@@ -42,7 +42,12 @@ class AdminSettingsController extends Controller
             'mail.from_name' => ['sometimes', 'nullable', 'string', 'max:120'],
             'assistant.gemini_key' => ['sometimes', 'nullable', 'string', 'max:200'],
             'assistant.model' => ['sometimes', 'nullable', 'string', 'max:60'],
+            // Kaldirilacak alanlar: gizli bir deger yalnizca boyle silinebilir.
+            'clear' => ['sometimes', 'array', 'max:10'],
+            'clear.*' => ['string', Rule::in(array_keys(AppSettings::EDITABLE))],
         ]);
+
+        AppSettings::clear($data['clear'] ?? []);
 
         $flat = [];
         foreach (['mail', 'assistant'] as $group) {
@@ -66,7 +71,7 @@ class AdminSettingsController extends Controller
         AppSettings::put($flat);
 
         return response()->json([
-            'message' => 'E-posta ayarları kaydedildi.',
+            'message' => 'Ayarlar kaydedildi.',
             'data' => AppSettings::forAdmin(),
         ]);
     }

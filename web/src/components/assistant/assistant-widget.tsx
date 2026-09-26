@@ -30,6 +30,7 @@ export function AssistantWidget() {
   const [suggestions, setSuggestions] = useState<Topic[]>([]);
   const [question, setQuestion] = useState("");
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
   const threadRef = useRef<HTMLDivElement>(null);
   const counter = useRef(0);
 
@@ -42,7 +43,7 @@ export function AssistantWidget() {
         setIntro(data);
         setSuggestions(data.topics);
       })
-      .catch(() => undefined);
+      .catch(() => { if (active) setFailed(true); });
     return () => { active = false; };
   }, [open, intro]);
 
@@ -83,7 +84,9 @@ export function AssistantWidget() {
     void send({ question: trimmed }, trimmed);
   };
 
-  const guest = intro !== null && intro.display_name === null;
+  // Varsayilan misafir: kimlik belli olana kadar koyu surum gosterilir.
+  // Tersi olsaydi giris yapmamis ziyaretci once acik surumu gorurdu.
+  const guest = intro === null || intro.display_name === null;
 
   return <>
     <button
@@ -93,7 +96,7 @@ export function AssistantWidget() {
       onClick={() => setOpen((current) => !current)}
       type="button"
     >
-      <Image alt="" height={132} priority={false} src="/asistan.gif" unoptimized width={132} />
+      <Image alt="" height={106} priority={false} src="/asistan.gif" unoptimized width={132} />
       {!open && <span className={styles.ping} />}
     </button>
 
@@ -115,6 +118,12 @@ export function AssistantWidget() {
           <p className={styles.bubbleBot}>
             {intro?.greeting ?? "Merhaba! Birkaç saniye içinde hazır olacağım."}
           </p>
+
+          {failed && (
+            <p className={styles.modeNote}>
+              Şu an bağlanamadım. İnternet bağlantını kontrol edip paneli kapatıp açabilirsin.
+            </p>
+          )}
 
           {intro?.mode === "knowledge" && (
             <p className={styles.modeNote}>

@@ -105,7 +105,7 @@ return [
             'key' => 'dogrulama',
             'title' => 'Hesabımı doğrulamak zorunda mıyım?',
             'audience' => 'all',
-            'keywords' => ['doğrulama', 'onay', 'sms', 'kod', 'e-posta doğrula'],
+            'keywords' => ['doğrula', 'doğrulama', 'onay', 'sms', 'kod', 'e-posta doğrula'],
             'answer' => "Kayıt olurken doğrulama zorunlu değil, hesabını hemen kullanmaya başlayabilirsin. "
                 .'Talep açmak ve teklif göndermek gibi adımlar için e-posta ve telefon doğrulaması isteniyor; bunu Hesap ayarları sayfasından istediğin zaman tamamlayabilirsin.',
         ],
@@ -124,6 +124,42 @@ return [
             'keywords' => ['panel', 'geçiş', 'alıcı', 'satıcı', 'çalışma alanı'],
             'answer' => 'Sağ üstteki profil menüsünde “Çalışma alanları” başlığı var. Bir hesap hem alıcı hem hizmet veren olabilir; '
                 .'henüz hizmet veren değilsen aynı menüden başvuru adımına geçebilirsin.',
+        ],
+        [
+            'key' => 'mesajlasma',
+            'title' => 'Karşı tarafa nasıl mesaj atarım?',
+            'audience' => 'all',
+            'keywords' => ['mesaj', 'mesajlaş', 'yazış', 'sohbet', 'chat', 'iletişim', 'konuşma', 'ulaş'],
+            'answer' => "Sayfanın sağ kenarındaki “Mesajlar” tutamağından paneli açabilir ya da üst menüden "
+                ."Mesajlar sayfasına gidebilirsin. Panelin sol kenarından tutup genişliğini ayarlayabilirsin.
+
+"
+                ."Bir hizmet verenin vitrininden de doğrudan yazışma başlatılır.
+
+"
+                .'Karşı taraf o sırada sitede değilse mesajın birkaç dakika içinde okunmazsa e-posta olarak da haber verilir.',
+        ],
+        [
+            'key' => 'mesaj-kontor',
+            'title' => 'Mesajlaşma kontör düşürür mü?',
+            'audience' => 'all',
+            'keywords' => ['mesaj kontör', 'mesaj ücret', 'ilk mesaj', 'yazışma ücret', 'mesaj jeton'],
+            'answer' => "Alıcı için mesajlaşma tamamen ücretsizdir.
+
+"
+                ."Hizmet veren, bir konuşmadaki ilk mesajı için kontör öder; aynı konuşmadaki sonraki "
+                .'mesajların tamamı ücretsizdir. Yani başlattığın bir yazışmayı sürdürmek için tekrar ödeme yapmazsın.',
+        ],
+        [
+            'key' => 'kontor-yukle',
+            'title' => 'Kontörü nasıl yüklerim?',
+            'audience' => 'user',
+            'keywords' => ['kontör yükle', 'kontor yukle', 'bakiye', 'satın al', 'paket', 'kredi kartı', 'yükle'],
+            'answer' => "Satıcı panelindeki “Kontör” bölümünden yükleme sayfasına geçiyorsun. Orada hazır "
+                ."paketlerden birini seçip kredi kartıyla ödüyorsun.
+
+"
+                .'Ödeme onaylandığında bakiyen anında güncellenir; harcamalarını aynı sayfadaki hareket listesinden takip edebilirsin.',
         ],
     ],
 ];

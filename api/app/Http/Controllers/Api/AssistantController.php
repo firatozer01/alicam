@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\AppSettings;
+use App\Services\AssistantAi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,11 +13,14 @@ use Illuminate\Http\Request;
  *
  * Yapay zekâ bağlı değilken sorular Bilgi Bankası'nda aranır ve kayıtlı
  * metin olduğu gibi döner ("hazır cevap modu"). Yönetim panelinden bir
- * Gemini anahtarı girildiğinde aynı uç modele sorar; bilgi bankası o
- * durumda modele bağlam olarak verilir.
+ * Yönetim panelinden bir Gemini anahtarı girildiğinde giriş yapmış
+ * kullanıcıların soruları modele sorulur ve bilgi bankası modele bağlam
+ * olarak verilir. Misafirler her zaman hazır cevap modunda kalır.
  */
 class AssistantController extends Controller
 {
+    public function __construct(private readonly AssistantAi $ai) {}
+
     /** Giris yapmamis ziyaretciye gosterilmeyecek konular. */
     private function topicsFor(?object $user): array
     {
@@ -63,6 +67,7 @@ class AssistantController extends Controller
             if ($match) {
                 return response()->json([
                     'mode' => $this->mode($user),
+                    'source' => 'knowledge',
                     'answer' => $match['answer'],
                     'topic' => $match['key'],
                     'suggestions' => $this->related($topics, $match['key']),
@@ -71,10 +76,35 @@ class AssistantController extends Controller
         }
 
         $question = trim((string) ($data['question'] ?? ''));
+        $mode = $this->mode($user);
+
+        // Yapay zeka aciksa once modele sorulur. Model cevap uretemezse
+        // (anahtar gecersiz, kota dolmus, Google tarafi dusmus) asagidaki
+        // bilgi bankasi aramasi devreye girer; asistan hicbir kosulda
+        // cevapsiz kalmaz.
+        if ($mode === 'ai') {
+            $generated = $this->ai->answer($question, $topics, $user->id);
+
+            if ($generated !== null) {
+                return response()->json([
+                    'mode' => $mode,
+                    'source' => 'ai',
+                    'answer' => $generated,
+                    'topic' => null,
+                    'matched' => true,
+                    'suggestions' => $this->related($topics, null),
+                ]);
+            }
+        }
+
         $match = $this->search($topics, $question);
 
         return response()->json([
-            'mode' => $this->mode($user),
+            'mode' => $mode,
+            // Modele sorulup cevap alinamadiysa mod 'ai' olsa bile cevabi
+            // bilgi bankasi verdi; arayuz rozetinin yalan soylememesi icin
+            // gercek kaynak ayrica bildirilir.
+            'source' => 'knowledge',
             'answer' => $match['answer'] ?? config('assistant.fallback'),
             'topic' => $match['key'] ?? null,
             'matched' => $match !== null,
@@ -92,7 +122,7 @@ class AssistantController extends Controller
             return null;
         }
 
-        $needle = mb_strtolower($question, 'UTF-8');
+        $needle = $this->fold($question);
         $best = null;
         $bestScore = 0;
 
@@ -100,12 +130,12 @@ class AssistantController extends Controller
             $score = 0;
 
             foreach ($topic['keywords'] as $keyword) {
-                if (str_contains($needle, mb_strtolower($keyword, 'UTF-8'))) {
+                if (str_contains($needle, $this->fold($keyword))) {
                     $score += mb_strlen($keyword) > 4 ? 3 : 2;
                 }
             }
 
-            if (str_contains($needle, mb_strtolower($topic['title'], 'UTF-8'))) {
+            if (str_contains($needle, $this->fold($topic['title']))) {
                 $score += 5;
             }
 
@@ -116,6 +146,28 @@ class AssistantController extends Controller
         }
 
         return $bestScore >= 2 ? $best : null;
+    }
+
+    /**
+     * Turkce aksanlari sadelestirir. Kullanicilarin cogu "kontör" yerine
+     * "kontor", "ücret" yerine "ucret" yaziyor; aksi halde bu sorular
+     * bilgi bankasinda hic eslesmiyordu.
+     */
+    private function fold(string $value): string
+    {
+        $folded = str_replace(
+            ['ı', 'İ', 'ş', 'Ş', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'ç', 'Ç', 'â', 'î', 'û'],
+            ['i', 'i', 's', 's', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c', 'a', 'i', 'u'],
+            $value,
+        );
+
+        // Noktalama atilir: baslik "Vitrinimi nasil duzenlerim?" seklinde
+        // soru isaretiyle bittigi icin ayni cumleyi yazan kullaniciyla
+        // eslesemiyordu.
+        $folded = preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $folded) ?? $folded;
+        $folded = preg_replace('/\s+/u', ' ', $folded) ?? $folded;
+
+        return trim(mb_strtolower($folded, 'UTF-8'));
     }
 
     /**

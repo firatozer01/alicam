@@ -34,7 +34,7 @@ const empty: Settings = {
   "mail.from_address": "",
   "mail.from_name": "alıcam.net",
   "assistant.gemini_key": "",
-  "assistant.model": "gemini-3-flash",
+  "assistant.model": "gemini-3.8-flash",
 };
 
 export function MailSettings() {
@@ -73,7 +73,7 @@ export function MailSettings() {
     setNotice(""); setError("");
   };
 
-  const save = async () => {
+  const save = async (clear: string[] = []) => {
     setBusy(true); setNotice(""); setError("");
     try {
       const response = await apiRequest<{ message: string; data: Settings }>("/admin/settings", {
@@ -93,11 +93,12 @@ export function MailSettings() {
             gemini_key: form["assistant.gemini_key"],
             model: form["assistant.model"],
           },
+          ...(clear.length > 0 ? { clear } : {}),
         }),
       });
       setNotice(response.message);
-      setPasswordSet(Boolean(response.data["mail.password_set"]) || Boolean(form["mail.password"]));
-      setGeminiSet((current) => current || Boolean(form["assistant.gemini_key"]));
+      setPasswordSet(Boolean(response.data["mail.password_set"]));
+      setGeminiSet(Boolean(response.data["assistant.gemini_key_set"]));
       setForm((current) => ({ ...current, "mail.password": "", "assistant.gemini_key": "" }));
     } catch (requestError: unknown) {
       setError(firstApiError(requestError));
@@ -188,7 +189,7 @@ export function MailSettings() {
           </div>
 
           <footer>
-            <button disabled={busy} onClick={save} type="button">{busy ? "Kaydediliyor…" : "Ayarları kaydet"}</button>
+            <button disabled={busy} onClick={() => void save()} type="button">{busy ? "Kaydediliyor…" : "Ayarları kaydet"}</button>
           </footer>
         </section>
 
@@ -204,7 +205,7 @@ export function MailSettings() {
           <header>
             <div>
               <strong>alıcam asistanı</strong>
-              <small>Şu anki mod: <b>{meta?.assistant_mode === "ai" ? "Yapay zekâ bağlı" : "Hazır cevap modu"}</b></small>
+              <small>Şu anki mod: <b>{geminiSet ? "Yapay zekâ bağlı" : "Hazır cevap modu"}</b></small>
             </div>
           </header>
           <div className={styles.grid}>
@@ -219,10 +220,20 @@ export function MailSettings() {
               />
               <small>{geminiSet ? "Anahtar kayıtlı. Değiştirmek istemiyorsan boş bırak." : "Şifrelenerek saklanır. Anahtar girilene kadar asistan yalnızca Bilgi Bankası'ndaki kayıtlı cevapları verir."}</small>
             </label>
-            <label>Model<input onChange={(event) => set("assistant.model", event.target.value)} placeholder="gemini-3-flash" value={form["assistant.model"]} /><small>Gemini 3 Flash ailesi kullanılır. Google model kimliğini değiştirirse güncelini buraya yazman yeterli.</small></label>
+            <label>Model<input onChange={(event) => set("assistant.model", event.target.value)} placeholder="gemini-3.8-flash" value={form["assistant.model"]} /><small>Gemini 3 Flash ailesi kullanılır. Google model kimliğini değiştirirse güncelini buraya yazman yeterli.</small></label>
           </div>
           <footer>
-            <button disabled={busy} onClick={save} type="button">{busy ? "Kaydediliyor…" : "Asistan ayarlarını kaydet"}</button>
+            {geminiSet && (
+              <button
+                className={styles.unlink}
+                disabled={busy}
+                onClick={() => void save(["assistant.gemini_key"])}
+                type="button"
+              >
+                Yapay zekâyı kaldır
+              </button>
+            )}
+            <button disabled={busy} onClick={() => void save()} type="button">{busy ? "Kaydediliyor…" : "Asistan ayarlarını kaydet"}</button>
           </footer>
         </section>
 
