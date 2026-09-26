@@ -6,6 +6,7 @@ use App\Exceptions\InsufficientCreditsException;
 use App\Http\Controllers\Controller;
 use App\Models\BuyerRequest;
 use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\User;
 use App\Services\MessagingService;
 use Illuminate\Http\JsonResponse;
@@ -95,15 +96,9 @@ class ConversationController extends Controller
 
         return response()->json([
             'data' => $this->present($conversation->fresh(['buyer', 'seller', 'buyerRequest']), $user),
-            'messages' => $messages->map(fn ($message) => [
-                'id' => $message->id,
-                'body' => $message->body,
-                'sender_id' => $message->sender_id,
-                'mine' => $message->sender_id === $user->id,
-                'sender' => $message->sender->name,
-                'read' => $message->read_at !== null,
-                'created_at' => $message->created_at->toIso8601String(),
-            ])->values(),
+            'messages' => $messages
+                ->map(fn ($message) => $this->presentMessage($message, $user, $conversation->canRead($user->id)))
+                ->values(),
             'compose' => $this->composeState($conversation, $user),
         ]);
     }
@@ -121,25 +116,53 @@ class ConversationController extends Controller
             $message = $this->messaging->send($conversation, $user, trim($data['body']));
         } catch (InsufficientCreditsException $exception) {
             return response()->json([
-                'message' => 'İlk mesajı göndermek için yeterli kontörün yok.',
+                'message' => 'Bu konuşmayı açmak için yeterli kontörün yok.',
                 'required' => $exception->required ?? null,
                 'balance' => $exception->balance ?? null,
             ], 402);
         }
 
         return response()->json([
-            'data' => [
-                'id' => $message->id,
-                'body' => $message->body,
-                'sender_id' => $message->sender_id,
-                'mine' => true,
-                'sender' => $user->name,
-                'read' => false,
-                'created_at' => $message->created_at->toIso8601String(),
-            ],
+            // Gonderen her zaman kendi yazdigini gorur.
+            'data' => $this->presentMessage($message->loadMissing('sender:id,name'), $user, true),
             'credit_spent' => $message->credit_spent,
             'compose' => $this->composeState($conversation->fresh(), $user),
         ], 201);
+    }
+
+    /**
+     * Hizmet veren konusmayi acar: kontor duser, govdeler gorunur olur.
+     *
+     * Tekrar cagrilirsa kontor bir daha dusmez; "zaten acik" doner.
+     */
+    public function unlock(Request $request, Conversation $conversation): JsonResponse
+    {
+        $user = $request->user();
+        abort_unless($conversation->isParticipant($user->id), 403);
+        abort_unless($user->id === $conversation->seller_id, 403);
+
+        try {
+            $result = $this->messaging->unlock($conversation, $user);
+        } catch (InsufficientCreditsException $exception) {
+            return response()->json([
+                'message' => 'Bu konuşmayı açmak için yeterli kontörün yok.',
+                'code' => 'insufficient_credits',
+                'required' => $exception->required,
+                'balance' => $exception->balance,
+            ], 402);
+        }
+
+        $fresh = $result['conversation']->fresh(['buyer', 'seller', 'buyerRequest']);
+
+        return response()->json([
+            'message' => $result['already_unlocked']
+                ? 'Bu konuşma zaten açık.'
+                : 'Konuşma açıldı; artık mesajları okuyup yanıtlayabilirsin.',
+            'already_unlocked' => $result['already_unlocked'],
+            'credit_spent' => $result['credit_spent'],
+            'balance' => $result['balance'],
+            'data' => $this->present($fresh, $user),
+        ]);
     }
 
     /**
@@ -168,15 +191,9 @@ class ConversationController extends Controller
         }
 
         return response()->json([
-            'messages' => $messages->map(fn ($message) => [
-                'id' => $message->id,
-                'body' => $message->body,
-                'sender_id' => $message->sender_id,
-                'mine' => $message->sender_id === $user->id,
-                'sender' => $message->sender->name,
-                'read' => $message->read_at !== null,
-                'created_at' => $message->created_at->toIso8601String(),
-            ])->values(),
+            'messages' => $messages
+                ->map(fn ($message) => $this->presentMessage($message, $user, $conversation->canRead($user->id)))
+                ->values(),
         ]);
     }
 
@@ -185,13 +202,60 @@ class ConversationController extends Controller
      */
     private function composeState(Conversation $conversation, User $user): array
     {
-        $cost = $this->messaging->costFor($conversation, $user);
+        $cost = $this->messaging->unlockCost($conversation, $user);
+        $isSeller = $user->id === $conversation->seller_id;
+
+        if ($cost > 0) {
+            return [
+                'credit_cost' => $cost,
+                'locked' => true,
+                'can_send' => false,
+                'notice' => "Bu konuşmayı okumak ve yanıtlamak için {$cost} kontör düşer. "
+                    .'Açtıktan sonra aynı konuşmada sınırsız yazışırsın.',
+            ];
+        }
+
+        // Alici, hizmet veren konusmayi acana kadar sinirli sayida yazabilir.
+        $limit = max(1, (int) config('messaging.locked_message_limit', 3));
+        $kalan = ($isSeller || $conversation->isUnlocked())
+            ? null
+            : max(0, $limit - $conversation->locked_message_count);
 
         return [
-            'credit_cost' => $cost,
-            'notice' => $cost > 0
-                ? "Bu konuşmadaki ilk mesajın {$cost} kontör düşer; sonraki mesajlar ücretsizdir."
-                : null,
+            'credit_cost' => 0,
+            'locked' => false,
+            'can_send' => $kalan === null || $kalan > 0,
+            'notice' => $kalan === null
+                ? null
+                : ($kalan > 0
+                    ? "Hizmet veren konuşmayı henüz açmadı. {$kalan} mesaj daha gönderebilirsin."
+                    : 'Hizmet veren konuşmayı açana kadar yeni mesaj gönderemezsin.'),
+        ];
+    }
+
+    /**
+     * Tek mesajin disariya donen sekli.
+     *
+     * $canRead false ise govde GONDERILMEZ: hizmet veren konusmayi acmadan
+     * metni goremez. Kimden ve ne zaman geldigi yine gorunur ki neye kontor
+     * harcayacagina karar verebilsin. Kendi yazdigini her zaman gorur.
+     *
+     * @return array<string, mixed>
+     */
+    private function presentMessage(Message $message, User $user, bool $canRead): array
+    {
+        $mine = $message->sender_id === $user->id;
+        $gorunur = $canRead || $mine;
+
+        return [
+            'id' => $message->id,
+            'body' => $gorunur ? $message->body : null,
+            'locked' => ! $gorunur,
+            'sender_id' => $message->sender_id,
+            'mine' => $mine,
+            'sender' => $message->sender?->name ?? 'Hesap',
+            'read' => $message->read_at !== null,
+            'created_at' => $message->created_at->toIso8601String(),
         ];
     }
 
@@ -211,6 +275,9 @@ class ConversationController extends Controller
             'counterpart' => ['id' => $other?->id, 'name' => $other?->name ?? 'Hesap'],
             'role' => $isBuyer ? 'buyer' : 'seller',
             'unread' => $isBuyer ? $conversation->buyer_unread : $conversation->seller_unread,
+            // Hizmet veren icin kilit durumu; alicida her zaman acik.
+            'locked' => ! $conversation->canRead($user->id),
+            'unlock_cost' => $this->messaging->unlockCost($conversation, $user),
             'last_message_at' => $conversation->last_message_at?->toIso8601String(),
             'request' => $conversation->buyerRequest ? [
                 'id' => $conversation->buyerRequest->id,

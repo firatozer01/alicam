@@ -45,10 +45,11 @@ export function MessagesDock() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
+  const [unlocking, setUnlocking] = useState(false);
   const dragging = useRef(false);
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  const { messages, compose, send } = useConversation(open ? activeId : null);
+  const { messages, compose, send, unlock } = useConversation(open ? activeId : null);
 
   useEffect(() => {
     let active = true;
@@ -121,6 +122,20 @@ export function MessagesDock() {
       setSendError("Gönderilemedi. Kontörün yetmiyor olabilir.");
     } finally {
       setSending(false);
+    }
+  };
+
+  /** Hizmet veren kontor odeyip konusmayi acar. */
+  const runUnlock = async () => {
+    if (unlocking) return;
+    setUnlocking(true);
+    setSendError("");
+    try {
+      await unlock();
+    } catch {
+      setSendError("Açılamadı. Kontörün yetmiyor olabilir.");
+    } finally {
+      setUnlocking(false);
     }
   };
 
@@ -215,7 +230,10 @@ export function MessagesDock() {
             <p className={styles.hint}>Henüz mesaj yok.</p>
           ) : messages.map((message) => (
             <article className={message.mine ? styles.mine : styles.theirs} key={message.id}>
-              <p>{message.body}</p>
+              {/* Kilitli konusmada govde sunucudan hic gelmez. */}
+              {message.locked
+                ? <p className={styles.masked}>🔒 Mesajı görmek için konuşmayı aç</p>
+                : <p>{message.body}</p>}
               <time>{timeLabel(message.created_at)}</time>
             </article>
           ))}
@@ -224,14 +242,28 @@ export function MessagesDock() {
         {activeId && <>
           {compose.notice && <p className={styles.notice}>⚡ {compose.notice}</p>}
           {sendError && <p className={styles.error}>{sendError}</p>}
-          <form className={styles.composer} onSubmit={submit}>
-            <input
-              onChange={(event) => setDraft(event.target.value)}
-              placeholder="Mesaj yaz…"
-              value={draft}
-            />
-            <button aria-label="Gönder" disabled={sending || draft.trim().length === 0} type="submit">➤</button>
-          </form>
+
+          {compose.locked ? (
+            <div className={styles.unlock}>
+              <button disabled={unlocking} onClick={() => void runUnlock()} type="button">
+                {unlocking ? "Açılıyor…" : `Konuşmayı aç · ${compose.credit_cost} ⚡`}
+              </button>
+            </div>
+          ) : (
+            <form className={styles.composer} onSubmit={submit}>
+              <input
+                disabled={!compose.can_send}
+                onChange={(event) => setDraft(event.target.value)}
+                placeholder={compose.can_send ? "Mesaj yaz…" : "Yeni mesaj gönderemezsin"}
+                value={draft}
+              />
+              <button
+                aria-label="Gönder"
+                disabled={sending || !compose.can_send || draft.trim().length === 0}
+                type="submit"
+              >➤</button>
+            </form>
+          )}
         </>}
       </aside>
     )}

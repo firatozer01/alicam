@@ -70,13 +70,22 @@ class NotifyUnreadMessage implements ShouldQueue
         }
 
         $sender = $message->sender->name;
-        $preview = mb_substr(trim($message->body), 0, 160);
+        $link = rtrim((string) config('services.frontend_url'), '/').'/mesajlar';
+
+        // Konusma kilitliyse hizmet veren mesajin metnini henuz goremez;
+        // e-postaya onizleme koymak odemeden okutmak olurdu.
+        $gizli = ! $message->conversation->canRead($recipient->id);
+
+        $govde = $gizli
+            ? "{$sender} sana alıcam.net üzerinden bir mesaj gönderdi.\n\n"
+                ."Mesajı okumak ve yanıtlamak için konuşmayı açman gerekiyor:\n{$link}\n"
+            : "{$sender} sana alıcam.net üzerinden bir mesaj gönderdi:\n\n"
+                .'"'.mb_substr(trim($message->body), 0, 160)."\"\n\n"
+                ."Yanıtlamak için: {$link}\n";
 
         try {
             Mail::raw(
-                "{$sender} sana alıcam.net üzerinden bir mesaj gönderdi:\n\n"
-                ."\"{$preview}\"\n\n"
-                ."Yanıtlamak için: ".rtrim((string) config('services.frontend_url'), '/')."/mesajlar\n",
+                $govde,
                 fn ($mail) => $mail->to($recipient->email)
                     ->subject("{$sender} sana mesaj gönderdi — alıcam.net"),
             );

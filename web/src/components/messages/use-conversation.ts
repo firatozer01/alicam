@@ -6,7 +6,9 @@ import { realtime } from "@/lib/echo";
 
 export type ChatMessage = {
   id: number;
-  body: string;
+  /** Konusma kilitliyken sunucu govdeyi hic gondermez. */
+  body: string | null;
+  locked: boolean;
   sender_id: number;
   mine: boolean;
   sender: string;
@@ -17,6 +19,9 @@ export type ChatMessage = {
 export type ConversationSummary = {
   id: number;
   viewer_id: number;
+  /** Hizmet veren henuz acmadiysa true; alicida her zaman false. */
+  locked: boolean;
+  unlock_cost: number;
   counterpart: { id: number | null; name: string };
   role: "buyer" | "seller";
   unread: number;
@@ -24,7 +29,12 @@ export type ConversationSummary = {
   request: { id: number; reference: string; title: string } | null;
 };
 
-export type ComposeState = { credit_cost: number; notice: string | null };
+export type ComposeState = {
+  credit_cost: number;
+  locked: boolean;
+  can_send: boolean;
+  notice: string | null;
+};
 
 /** Soketten gelen yuk; "mine" tasimaz cunku tek yayin iki tarafa birden gider. */
 type Broadcast = Omit<ChatMessage, "mine">;
@@ -59,7 +69,12 @@ function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]): ChatMes
  */
 export function useConversation(conversationId: number | null, pollMs = 5000) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [compose, setCompose] = useState<ComposeState>({ credit_cost: 0, notice: null });
+  const [compose, setCompose] = useState<ComposeState>({
+    credit_cost: 0,
+    locked: false,
+    can_send: true,
+    notice: null,
+  });
   const [summary, setSummary] = useState<ConversationSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -178,6 +193,30 @@ export function useConversation(conversationId: number | null, pollMs = 5000) {
     return response.data;
   }, [conversationId]);
 
+  /**
+   * Hizmet veren konusmayi acar. Basarili olursa konusma bastan yuklenir:
+   * kilitliyken govdeler hic gelmedigi icin elde guncellenecek bir metin yok.
+   */
+  const unlock = useCallback(async () => {
+    if (!conversationId) return null;
+
+    const response = await apiRequest<{ credit_spent: number; balance: number | null }>(
+      `/conversations/${conversationId}/unlock`,
+      { method: "POST" },
+    );
+
+    const detay = await apiRequest<{ data: ConversationSummary; messages: ChatMessage[]; compose: ComposeState }>(
+      `/conversations/${conversationId}`,
+    );
+
+    setSummary(detay.data);
+    setMessages(detay.messages);
+    setCompose(detay.compose);
+    lastId.current = detay.messages.at(-1)?.id ?? 0;
+
+    return response;
+  }, [conversationId]);
+
   // Sahiplik gonderen kimligiyle belirlenir: soketten gelen mesajda sunucu
   // "mine" gonderemez, cunku ayni yayini iki taraf da aliyor.
   const owned = useMemo(() => {
@@ -189,5 +228,5 @@ export function useConversation(conversationId: number | null, pollMs = 5000) {
       : { ...message, mine: message.sender_id === viewerId });
   }, [messages, summary]);
 
-  return { messages: owned, compose, summary, loading, error, send };
+  return { messages: owned, compose, summary, loading, error, send, unlock };
 }

@@ -30,7 +30,8 @@ export function MessagesPage({ initialConversationId }: { initialConversationId?
   const [sendError, setSendError] = useState("");
   const [sending, setSending] = useState(false);
 
-  const { messages, compose, summary, loading, send } = useConversation(activeId);
+  const [unlocking, setUnlocking] = useState(false);
+  const { messages, compose, summary, loading, send, unlock } = useConversation(activeId);
 
   useEffect(() => {
     let active = true;
@@ -51,6 +52,22 @@ export function MessagesPage({ initialConversationId }: { initialConversationId?
 
   const active = useMemo(() => list.find((item) => item.id === activeId) ?? summary, [list, activeId, summary]);
 
+  /** Hizmet veren kontor odeyip konusmayi acar. */
+  const runUnlock = async () => {
+    if (unlocking) return;
+    setUnlocking(true);
+    setSendError("");
+    try {
+      await unlock();
+    } catch (error: unknown) {
+      setSendError(error instanceof ApiError && error.status === 402
+        ? "Konuşmayı açmak için yeterli kontörün yok. Kontör yükleyip tekrar dene."
+        : firstApiError(error));
+    } finally {
+      setUnlocking(false);
+    }
+  };
+
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     const body = draft.trim();
@@ -66,7 +83,7 @@ export function MessagesPage({ initialConversationId }: { initialConversationId?
         : item));
     } catch (error: unknown) {
       setSendError(error instanceof ApiError && error.status === 402
-        ? "İlk mesaj için yeterli kontörün yok. Kontör yükleyip tekrar dene."
+        ? "Konuşmayı açmak için yeterli kontörün yok. Kontör yükleyip tekrar dene."
         : firstApiError(error));
     } finally {
       setSending(false);
@@ -125,7 +142,10 @@ export function MessagesPage({ initialConversationId }: { initialConversationId?
                 : messages.length === 0 ? <p className={styles.hint}>Henüz mesaj yok. İlk mesajı sen yaz.</p>
                   : messages.map((message) => (
                     <article className={message.mine ? styles.mine : styles.theirs} key={message.id}>
-                      <p>{message.body}</p>
+                      {/* Kilitli konusmada govde sunucudan hic gelmez. */}
+                      {message.locked
+                        ? <p className={styles.masked}>🔒 Mesajı görmek için konuşmayı aç</p>
+                        : <p>{message.body}</p>}
                       <time>{timeLabel(message.created_at)}{message.mine && message.read ? " · okundu" : ""}</time>
                     </article>
                   ))}
@@ -134,20 +154,30 @@ export function MessagesPage({ initialConversationId }: { initialConversationId?
             {compose.notice && <p className={styles.notice}>⚡ {compose.notice}</p>}
             {sendError && <p className={styles.error}>{sendError}</p>}
 
-            <form className={styles.composer} onSubmit={submit}>
-              <textarea
-                onChange={(event) => setDraft(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void submit(event); }
-                }}
-                placeholder="Mesajını yaz… (Enter ile gönder)"
-                rows={2}
-                value={draft}
-              />
-              <button disabled={sending || draft.trim().length === 0} type="submit">
-                {sending ? "…" : "Gönder"}
-              </button>
-            </form>
+            {compose.locked ? (
+              <div className={styles.unlock}>
+                <p>Bu konuşmayı okumak ve yanıtlamak için açman gerekiyor.</p>
+                <button disabled={unlocking} onClick={() => void runUnlock()} type="button">
+                  {unlocking ? "Açılıyor…" : `Konuşmayı aç · ${compose.credit_cost} ⚡`}
+                </button>
+              </div>
+            ) : (
+              <form className={styles.composer} onSubmit={submit}>
+                <textarea
+                  disabled={!compose.can_send}
+                  onChange={(event) => setDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void submit(event); }
+                  }}
+                  placeholder={compose.can_send ? "Mesajını yaz… (Enter ile gönder)" : "Yeni mesaj gönderemezsin"}
+                  rows={2}
+                  value={draft}
+                />
+                <button disabled={sending || !compose.can_send || draft.trim().length === 0} type="submit">
+                  {sending ? "…" : "Gönder"}
+                </button>
+              </form>
+            )}
           </>}
         </section>
       </div>

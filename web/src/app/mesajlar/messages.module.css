@@ -44,6 +44,14 @@
 .error { margin: 0 18px; padding: 9px 12px; border-radius: var(--r-sm); background: var(--danger-bg); color: var(--danger-fg); font-size: 12px; }
 .hint { margin: auto; padding: 20px; color: var(--muted); font-size: 13px; text-align: center; }
 
+/* Kilitli mesaj balonu ve acma kutusu. */
+.masked { opacity: .75; font-style: italic; }
+.unlock { display: grid; gap: 10px; justify-items: start; padding: 16px 18px; border-top: 1px solid var(--line-soft); background: var(--surface); }
+.unlock p { margin: 0; color: var(--muted); font-size: 13px; }
+.unlock button { border: 0; border-radius: 12px; padding: 11px 18px; font: inherit; font-size: 13.5px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); cursor: pointer; transition: filter .16s ease; }
+.unlock button:hover:not(:disabled) { filter: brightness(1.07); }
+.unlock button:disabled { opacity: .5; cursor: default; }
+
 .composer { display: flex; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--line-soft); background: var(--surface); }
 .composer textarea { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 13px; font: inherit; font-size: 13.5px; line-height: 1.6; color: var(--ink); background: var(--card); outline: none; resize: none; transition: border-color .16s ease, box-shadow .16s ease; }
 .composer textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 58, 237, .12); }

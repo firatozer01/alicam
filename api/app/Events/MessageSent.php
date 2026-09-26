@@ -16,7 +16,7 @@ use Illuminate\Queue\SerializesModels;
  * olurdu. Reverb ayni docker aginda oldugundan cagri birkac milisaniye surer.
  *
  * Yuk, ConversationController::poll ile AYNI alanlari tasir; tek fark "mine"
- * alaninin olmamasi. Bir yayin iki kisiye birden gider, "bu benim mesajim mi"
+ * alaninin olmamasi. Konusma kilitliyse govde null gelir. Bir yayin iki kisiye birden gider, "bu benim mesajim mi"
  * sorusunun cevabi ise bakana gore degisir; bu yuzden sender_id gonderilir ve
  * karari arayuz verir.
  */
@@ -24,7 +24,10 @@ class MessageSent implements ShouldBroadcastNow
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(private readonly Message $message) {}
+    public function __construct(
+        private readonly Message $message,
+        private readonly bool $unlocked = true,
+    ) {}
 
     /**
      * @return array<int, PrivateChannel>
@@ -49,7 +52,11 @@ class MessageSent implements ShouldBroadcastNow
         return [
             'id' => $this->message->id,
             'conversation_id' => $this->message->conversation_id,
-            'body' => $this->message->body,
+            // Konusma kilitliyken govde yayina konmaz: kanala hizmet veren de
+            // abone ve odemeden metni okuyabilirdi. Kilit acilinca arayuz
+            // konusmayi yeniden yukleyip metinleri alir.
+            'body' => $this->unlocked ? $this->message->body : null,
+            'locked' => ! $this->unlocked,
             'sender_id' => $this->message->sender_id,
             'sender' => $this->message->sender?->name ?? 'Hesap',
             'read' => $this->message->read_at !== null,

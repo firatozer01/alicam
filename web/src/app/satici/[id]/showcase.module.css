@@ -211,5 +211,11 @@
 
 /* Link yerine buton olan CTA'lar ayni gorunur. */
 .primaryCta, .barCta, .serviceCta, .modalPrimary { border: 0; font-family: inherit; cursor: pointer; }
+/* Vitrinden dogrudan mesaj: teklif istemenin yaninda ikincil eylem. */
+.ctaGhost { border: 1px solid var(--line); border-radius: 12px; padding: 12px 20px; font: inherit; font-size: 13.5px; font-weight: 700; color: var(--ink-2); background: var(--card); cursor: pointer; transition: border-color .16s ease, color .16s ease, transform .16s ease; }
+.ctaGhost:hover:not(:disabled) { border-color: var(--violet); color: var(--indigo); transform: translateY(-1px); }
+.ctaGhost:disabled { opacity: .55; cursor: default; }
+.ctaError { margin: 8px 0 0; color: var(--danger-fg); font-size: 12.5px; }
+
 .ctaButton { display: inline-flex; align-items: center; border: 0; border-radius: var(--r-md); padding: 13px 22px; font: inherit; font-size: 14px; font-weight: 700; color: var(--violet); background: #fff; cursor: pointer; transition: transform .16s ease, box-shadow .16s ease; }
 .ctaButton:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }

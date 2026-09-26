@@ -84,6 +84,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/conversations', [ConversationController::class, 'store'])->middleware('throttle:20,1');
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show']);
     Route::get('/conversations/{conversation}/poll', [ConversationController::class, 'poll']);
+    // Hizmet veren konusmayi acar: kontor duser, mesajlar gorunur olur.
+    Route::post('/conversations/{conversation}/unlock', [ConversationController::class, 'unlock'])
+        ->middleware('throttle:20,1');
     Route::post('/conversations/{conversation}/messages', [ConversationController::class, 'send'])
         ->middleware('throttle:60,1');
 

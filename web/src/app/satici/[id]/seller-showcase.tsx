@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Modal } from "@/components/modal/modal";
 import { SiteHeader } from "@/components/shell/site-header";
@@ -43,6 +44,36 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
   const [workFilter, setWorkFilter] = useState("");
   const [reviewFilter, setReviewFilter] = useState(0);
   const [tab, setTab] = useState<"hizmetler" | "isler" | "yorumlar">("hizmetler");
+  const [messaging, setMessaging] = useState(false);
+  const [messageError, setMessageError] = useState("");
+  const router = useRouter();
+
+  /**
+   * Vitrinden dogrudan yazisma baslatir.
+   *
+   * Konusmayi acmak ucretsizdir ve tekrar tiklansa da ayni konusma doner;
+   * kontoru hizmet veren, mesaji okuyup yanitlamak istediginde oder.
+   */
+  const startConversation = async () => {
+    if (messaging || !seller) return;
+    setMessaging(true);
+    setMessageError("");
+
+    try {
+      const response = await apiRequest<{ data: { id: number } }>("/conversations", {
+        method: "POST",
+        body: JSON.stringify({ seller_id: seller.id }),
+      });
+      router.push(`/mesajlar?konusma=${response.data.id}`);
+    } catch (requestError: unknown) {
+      if (requestError instanceof ApiError && requestError.status === 401) {
+        router.push(`/giris?devam=${encodeURIComponent(`/satici/${sellerId}`)}`);
+        return;
+      }
+      setMessageError(firstApiError(requestError));
+      setMessaging(false);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -124,6 +155,9 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
           )}
 
           <button className={styles.primaryCta} onClick={() => openQuote()} type="button">Teklif iste →</button>
+          <button className={styles.ghostCta} disabled={messaging} onClick={() => void startConversation()} type="button">
+            {messaging ? "Açılıyor…" : "Mesaj gönder"}
+          </button>
           <button className={styles.ghostCta} onClick={() => goto("hizmetler")} type="button">Hizmetleri gör</button>
         </aside>
       </div>
@@ -241,6 +275,10 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
       <section className={styles.cta}>
         <div><strong>Benzer bir iş mi yaptıracaksın?</strong><p>Talebini ücretsiz yayınla; {title} ve alanındaki diğer profesyoneller sana teklif göndersin.</p></div>
         <button className={styles.ctaButton} onClick={() => openQuote()} type="button">Bu mağazadan teklif iste →</button>
+        <button className={styles.ctaGhost} disabled={messaging} onClick={() => void startConversation()} type="button">
+          {messaging ? "Açılıyor…" : "Mesaj gönder"}
+        </button>
+        {messageError && <p className={styles.ctaError}>{messageError}</p>}
       </section>
     </div>
 

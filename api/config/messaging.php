@@ -1,9 +1,14 @@
 <?php
 
 return [
-    // Hizmet verenin bir konusmadaki ILK mesaji icin dusulen kontor.
-    // Sonraki mesajlar ucretsizdir; alici hicbir zaman odemez.
-    'first_message_cost' => (int) env('MESSAGING_FIRST_MESSAGE_COST', 1),
+    // Hizmet veren bir konusmayi acmak icin bir kez bu kadar kontor oder.
+    // Acilan konusmada hem gelen mesajlari okur hem de sinirsiz yanit yazar.
+    // Alici hicbir zaman odemez.
+    'unlock_cost' => (int) env('MESSAGING_UNLOCK_COST', 1),
+
+    // Konusma acilmadan alicinin ust uste yazabilecegi mesaj sayisi. Amac
+    // hizmet vereni duvar metinle kontor odemeye zorlamayi engellemek.
+    'locked_message_limit' => (int) env('MESSAGING_LOCKED_MESSAGE_LIMIT', 3),
 
     // Okunmamis mesaj e-postasi bu kadar dakika sonra gonderilir. Karsi taraf
     // bu sure icinde okursa e-posta hic cikmaz.
