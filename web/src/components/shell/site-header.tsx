@@ -112,6 +112,11 @@ export function SiteHeader({
 
         <div className={styles.actions}>
           {typeof credits === "number" && <Link className={styles.credit} href="/kontor-yukle">⚡ {credits} kontör</Link>}
+          {/* Favori talepler yalnizca hizmet vereni ilgilendirir. */}
+          {ready && isSeller && (
+            <Link aria-label="Favori talepler" className={styles.fav} href="/favorilerim" title="Favori talepler">★</Link>
+          )}
+
           {/* Zil yalnizca oturum acmis kullanicida; sayac kendi icinde okunur. */}
           {ready && currentUser && <NotificationBell userId={currentUser.id} />}
           {!ready

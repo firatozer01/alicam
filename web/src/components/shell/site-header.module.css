@@ -31,6 +31,8 @@
 .line{display:inline-flex;align-items:center;border:1px solid #e7e5f5;border-radius:11px;padding:9px 16px;font-size:13.5px;font-weight:700;color:#15162d;text-decoration:none;background:#fff;white-space:nowrap;transition:border-color .16s ease,color .16s ease,transform .16s ease}
 .line:hover{border-color:var(--violet);color:var(--indigo);transform:translateY(-1px)}
 
+.fav{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--amber);font-size:16px;text-decoration:none;transition:border-color .16s ease,transform .16s ease}
+.fav:hover{border-color:var(--violet);transform:translateY(-1px)}
 .cta{display:inline-flex;align-items:center;border-radius:11px;padding:10px 17px;font-size:13.5px;font-weight:700;color:#fff;text-decoration:none;white-space:nowrap;background:linear-gradient(135deg,var(--violet),var(--indigo));box-shadow:0 10px 24px rgba(124,58,237,.26);transition:filter .16s ease,transform .16s ease}
 .cta:hover{filter:brightness(1.07);transform:translateY(-1px)}
 

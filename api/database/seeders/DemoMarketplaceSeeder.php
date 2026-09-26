@@ -213,6 +213,13 @@ class DemoMarketplaceSeeder extends Seeder
             );
             $request->forceFill(['created_at' => now()->subHours($number * 3)])->save();
 
+            // Eslestirme request_categories uzerinden calisiyor; bu tablo
+            // taleplerden sonra eklendigi icin tohum onu doldurmazsa demo
+            // kurulumda hicbir satici talep goremiyor.
+            $request->categories()->sync([
+                $category->id => ['is_primary' => true, 'sort_order' => 0],
+            ]);
+
             $eligible = $sellers->filter(fn ($definition) => in_array($slug, $definition['slugs'], true))->values();
             if ($status === 'open') {
                 continue;

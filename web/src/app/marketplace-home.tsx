@@ -358,49 +358,9 @@ export function MarketplaceHome() {
       <div className={`${styles.feedCard} ${styles.reveal}`}><header><div><i /> <strong>Canlı akış</strong></div><a href="#talepler">Tüm talepleri gör →</a></header><div>{feedItems.map((item, index) => <article className={`${styles.feedRow} ${index === 0 ? styles.feedNew : ""}`} key={`${feedOffset}-${item.id}`} style={{ animationDelay: `${index * 55}ms` }}><span style={{ background: `${item.category.color}15`, color: item.category.color }}>{item.category.icon} {item.category.name}</span><div><strong>{item.title}</strong><small>{item.location.city.name}, {item.location.district.name} · {relativeTime(item.created_at)}</small></div><b>{money(item.budget.min)} – {money(item.budget.max)}</b><em>{item.offer_count} teklif</em></article>)}</div></div>
     </div></section>
 
-    <section className={styles.featured} id="one-cikanlar"><div className={styles.wrap}>
-      <header className={`${styles.marketHead} ${styles.reveal}`}>
-        <div><span>GÜVENLE KARAR VER</span><h2>Öne çıkan hizmet verenler</h2><p>Gerçek müşteri puanları, doğrulanmış profiller ve tamamlanmış işler.</p></div>
-        <Link className={styles.seeAll} href="/hizmet-verenler">Tüm hizmet verenler →</Link>
-      </header>
-      <div className={styles.providerRow}>{(marketplace?.data.sellers ?? []).slice(0, 5).map((seller) => {
-        const name = seller.company_name || seller.name;
-        const initials = name.split(/\\s+/).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR");
-        return <article className={`${styles.provider} ${styles.reveal} ${seller.is_featured ? styles.providerFeatured : ""}`} key={seller.id}>
-          {seller.is_featured && <b className={styles.sellerFlag}>★ ÖNE ÇIKAN</b>}
-          <span className={styles.providerAvatar}>{initials || "A"}<i /></span>
-          <strong>{name}</strong>
-          <small>{seller.categories.slice(0, 2).map((item) => item.name).join(" · ") || "Hizmet veren"}</small>
-          <div className={styles.sellerRating}>{seller.review_count > 0 ? <><em>★</em><b>{seller.rating.toFixed(1)}</b><span>({seller.review_count})</span></> : <span className={styles.sellerNew}>Yeni katıldı</span>}</div>
-          <p className={styles.providerStat}>🖼 <b>{seller.portfolio_count}</b> tamamlanan iş · ▦ <b>{seller.services.length}</b> hizmet</p>
-          <Link className={styles.providerLink} href={`/satici/${seller.id}`}>Profile git</Link>
-        </article>;
-      })}</div>
-
-      <header className={`${styles.marketHead} ${styles.reveal} ${styles.headGap}`}>
-        <div><span>KATALOGDAN SEÇ</span><h2>Öne çıkan hizmetler</h2><p>Hizmet verenlerin kapak görselli kartları; başlangıç fiyatını gör, profile geç, teklif iste.</p></div>
-      </header>
-      <div className={styles.serviceRow}>{(marketplace?.data.featured_services ?? []).map((service) => <Link className={`${styles.serviceTile} ${styles.reveal}`} href={`/satici/${service.seller.id}`} key={service.id}>
-        <div className={styles.serviceTileCover} style={!service.cover_url && service.category ? { background: `linear-gradient(135deg, ${service.category.color}22, ${service.category.color}55)` } : undefined}>
-          {service.cover_url
-            // eslint-disable-next-line @next/next/no-img-element
-            ? <img alt={service.title} loading="lazy" src={service.cover_url} />
-            : <span>{service.category?.icon ?? "▦"}</span>}
-          {service.is_featured && <b className={styles.sellerFlag}>★ ÖNE ÇIKAN</b>}
-        </div>
-        <div className={styles.serviceTileBody}>
-          <small>{service.seller.name}{service.category ? ` · ${service.category.name}` : ""}</small>
-          <strong>{service.title}</strong>
-          <p>{service.description}</p>
-          <footer><em>{service.price_from ? `${money(service.price_from)} başlangıç` : "Teklife göre"}</em>{service.delivery_time && <span>◷ {service.delivery_time}</span>}</footer>
-        </div>
-      </Link>)}</div>
-      {(marketplace?.data.featured_services.length ?? 0) === 0 && <p className={styles.emptyNote}>Henüz yayında hizmet yok.</p>}
-    </div></section>
-
     <section className={styles.sellerBand} id="hizmet-veren"><div className={styles.aurora}><i className={styles.blobOne} /><i className={styles.blobTwo} /></div><div className={styles.wrap}><div className={styles.reveal}><span>HİZMET VERENLER İÇİN</span><h2>Müşteriyi arama, gelen talebe teklif ver.</h2><ul><li><i>01</i><div><strong>Ücretsiz üye ol, firmanı tanıt</strong><p>Firma bilgilerini ve hizmet verdiğin kategorileri ekle.</p></div></li><li><i>02</i><div><strong>Şehir ve ilçeni seç</strong><p>Yalnızca hizmet verdiğin bölgelerdeki talepleri gör.</p></div></li><li><i>03</i><div><strong>Uygun talebe teklif ver</strong><p>Kontör yalnızca ilk teklif veya detay açma işleminde düşer.</p></div></li></ul><Link className={styles.buttonGrad} href={sellerHref}>{sellerLabel} →</Link></div><aside className={styles.reveal}><span>KONTÖR MALİYETİ · KATEGORİYE GÖRE</span>{categories.slice(0, 6).map((item, index) => <p key={item.id}><b>{item.icon} {item.name}</b><strong>{index + 1} kontör</strong></p>)}</aside></div></section>
 
     <section className={styles.cta}><div className={styles.wrap}><h2>Aradığını bulmak için beklemeyi bırak.</h2><Link href={isSeller ? "/satici-paneli" : "/talep-olustur"}>{isSeller ? "Gelen talepleri aç" : "Hemen talep oluştur"}</Link></div></section>
-    <footer className={styles.footer}><div className={styles.wrap}><section><Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link><p>Talep tabanlı pazaryeri. Sen iste, onlar teklif etsin.</p></section><nav><strong>Keşfet</strong><a href="#kategoriler">Kategoriler</a><a href="#talepler">Güncel talepler</a><a href="#one-cikanlar">Öne çıkanlar</a></nav><nav><strong>Hizmet veren</strong><Link href={sellerHref}>{sellerLabel}</Link><Link href="/kontor-yukle">Kontör paketleri</Link></nav><nav><strong>Hesabın</strong>{user ? <Link href={panelHref}>{panelLabel}</Link> : <Link href="/giris">Giriş yap</Link>}<Link href="/talep-olustur">Talep oluştur</Link></nav><small>© 2026 alıcam.net</small></div></footer>
+    <footer className={styles.footer}><div className={styles.wrap}><section><Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link><p>Talep tabanlı pazaryeri. Sen iste, onlar teklif etsin.</p></section><nav><strong>Keşfet</strong><a href="#kategoriler">Kategoriler</a><a href="#talepler">Güncel talepler</a></nav><nav><strong>Hizmet veren</strong><Link href={sellerHref}>{sellerLabel}</Link><Link href="/kontor-yukle">Kontör paketleri</Link></nav><nav><strong>Hesabın</strong>{user ? <Link href={panelHref}>{panelLabel}</Link> : <Link href="/giris">Giriş yap</Link>}<Link href="/talep-olustur">Talep oluştur</Link></nav><small>© 2026 alıcam.net</small></div></footer>
   </main>;
 }
