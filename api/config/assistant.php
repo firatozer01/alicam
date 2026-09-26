@@ -298,7 +298,7 @@ return [
             'group' => 'hizmet-veren',
             'icon' => '✨',
             'summary' => 'Kontörle ana sayfa vitrinine gir',
-            'keywords' => ['öne çık', 'öne çıkan', 'vitrin paketi', 'görünürlük', 'tanıtım', 'reklam', 'paket', 'üst sıra'],
+            'keywords' => ['öne çık', 'öne çıkmak', 'öne çıkar', 'öne çıkan', 'vitrin paketi', 'görünürlük', 'tanıtım', 'reklam', 'paket', 'üst sıra'],
             'answer' => "Satıcı panelinde Firma menüsündeki “Öne çık” bölümünde kontörle alınan vitrin paketleri var: 7, 14 ve 30 günlük. Her paketin kontör bedeli kendi kartında yazar.\n\nPaketi etkinleştirdiğinde bedel bakiyenden düşer ve profilin ana sayfadaki öne çıkan hizmet verenler bölümünde “★ ÖNE ÇIKAN” rozetiyle görünür; hizmet verenler listesinde de öne çıkanlar sıralamasında üst sıralara gelir.\n\nSüren dolmadan yeni paket alırsan gün sayısı mevcut sürenin üzerine eklenir; sayfanın üstündeki rozette vitrinde kalacağın son tarih yazar.\n\nBakiyen pakete yetmiyorsa düğme “Bakiye yetersiz” der; aynı sayfadaki bağlantıdan kontör yükleyebilirsin.",
         ],
         [
