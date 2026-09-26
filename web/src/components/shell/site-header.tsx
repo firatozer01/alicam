@@ -37,20 +37,20 @@ export const discoverMenu: NavMenuDef = {
       ],
       footer: { label: "Tüm talepleri gör", href: "/#talepler" },
     },
+    // Hizmet veren rehberi kaldirildi: alicilar firma gezmez, yon her
+    // zaman talepten teklife dogrudur. Kalan tek baslik hizmet veren
+    // OLMAK isteyenler icin.
     {
-      key: "sellers", title: "HİZMET VERENLER", icon: "🏬", color: "#06B6D4",
-      description: "Vitrinleri, galerileri ve puanları gör.",
+      key: "sellers", title: "HİZMET VERMEK", icon: "🏬", color: "#06B6D4",
+      description: "Talep al, teklif ver, işini büyüt.",
       items: [
-        { key: "rehber", label: "Hizmet veren rehberi", icon: "🏬", hint: "Puan, bölge ve uzmanlık filtresi", href: "/hizmet-verenler" },
-        { key: "one-cikan", label: "Öne çıkanlar", icon: "★", hint: "Vitrin paketi olan firmalar", badge: "Yeni", tone: "new", href: "/hizmet-verenler?one_cikan=1" },
         { key: "satici-ol", label: "Hizmet vermeye başla", icon: "⌂", hint: "Firma bilgilerini ekle, talep al", href: "/satici-ol" },
       ],
-      footer: { label: "Rehberi aç", href: "/hizmet-verenler" },
+      footer: { label: "Başvuruya git", href: "/satici-ol" },
     },
   ],
   quickLinks: [
     { key: "how", label: "Nasıl çalışır", icon: "◷", href: "/#nasil-calisir" },
-    { key: "sellers", label: "Hizmet verenler", icon: "🏬", href: "/hizmet-verenler" },
     { key: "new", label: "Ücretsiz talep oluştur", icon: "＋", href: "/talep-olustur", primary: true },
   ],
 };
@@ -58,7 +58,7 @@ export const discoverMenu: NavMenuDef = {
 const defaultLinks = [
   { label: "Ana sayfa", href: "/" },
   { label: "Talepler", href: "/#talepler" },
-  { label: "Hizmet verenler", href: "/hizmet-verenler" },
+  { label: "Nasıl çalışır", href: "/#nasil-calisir" },
 ];
 
 /**

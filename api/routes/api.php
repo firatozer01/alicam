@@ -60,7 +60,9 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-Route::get('/sellers', [App\Http\Controllers\Api\PublicSellerController::class, 'index']);
+// Vitrin herkese acik degil: yalnizca kendisine teklif vermis hizmet
+// verenler, saticinin kendisi ve yonetici gorebilir. Karari denetleyici
+// verir; misafir her zaman 404 alir.
 Route::get('/sellers/{user}', [App\Http\Controllers\Api\PublicSellerController::class, 'show']);
 Route::get('/portfolio-images/{portfolioImage}', [App\Http\Controllers\Api\SellerPortfolioController::class, 'showImage']);
 Route::get('/service-covers/{sellerService}', [App\Http\Controllers\Api\SellerServiceController::class, 'showCover']);

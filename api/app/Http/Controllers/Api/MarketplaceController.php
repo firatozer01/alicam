@@ -41,57 +41,9 @@ class MarketplaceController extends Controller
         };
 
         $page = $requests->paginate(18)->withQueryString();
-        $sellers = User::query()
-            ->whereHas('sellerProfile', fn (Builder $query) => $query->where('approval_status', 'approved'))
-            ->with([
-                'sellerProfile',
-                'sellerCategories:id,name,slug,icon,color',
-                'sellerServices' => fn ($query) => $query
-                    ->where('is_active', true)
-                    ->latest()
-                    ->limit(3),
-            ])
-            ->withAvg('sellerReviews', 'rating')
-            ->withCount(['sellerReviews', 'portfolioItems'])
-            ->withMax('activeSellerPromotions', 'expires_at')
-            ->orderByRaw('active_seller_promotions_max_expires_at desc nulls last')
-            ->orderByRaw('seller_reviews_avg_rating desc nulls last')
-            ->orderByDesc('seller_reviews_count')
-            ->limit(8)
-            ->get();
-
-        $featuredServices = \App\Models\SellerService::query()
-            ->where('is_active', true)
-            ->whereHas('seller.sellerProfile', fn (Builder $query) => $query->where('approval_status', 'approved'))
-            ->with(['category:id,name,slug,icon,color', 'seller.sellerProfile'])
-            ->withExists(['seller as seller_featured' => fn ($query) => $query->whereHas('activeSellerPromotions')])
-            ->orderByDesc('seller_featured')
-            ->orderByRaw('cover_path is null')
-            ->latest()
-            ->limit(8)
-            ->get();
 
         return response()->json([
             'data' => [
-                'featured_services' => $featuredServices->map(fn ($service) => [
-                    'id' => $service->id,
-                    'title' => $service->title,
-                    'description' => Str::limit($service->description, 110),
-                    'price_from' => $service->price_from,
-                    'delivery_time' => $service->delivery_time,
-                    'cover_url' => $service->cover_url,
-                    'is_featured' => (bool) $service->seller_featured,
-                    'category' => $service->category ? [
-                        'name' => $service->category->name,
-                        'slug' => $service->category->slug,
-                        'icon' => $service->category->icon,
-                        'color' => $service->category->color,
-                    ] : null,
-                    'seller' => [
-                        'id' => $service->seller->id,
-                        'name' => $service->seller->sellerProfile?->company_name ?: $service->seller->name,
-                    ],
-                ])->values(),
                 'requests' => $page->getCollection()->map(fn (BuyerRequest $item) => [
                     'id' => $item->id,
                     'reference' => $item->public_reference,
@@ -122,29 +74,6 @@ class MarketplaceController extends Controller
                     'status' => $item->status,
                     'created_at' => $item->created_at->toIso8601String(),
                     'expires_at' => $item->expires_at?->toIso8601String(),
-                ])->values(),
-                'sellers' => $sellers->map(fn (User $seller) => [
-                    'id' => $seller->id,
-                    'name' => $seller->name,
-                    'company_name' => $seller->sellerProfile?->company_name,
-                    'description' => Str::limit($seller->sellerProfile?->description ?? '', 150),
-                    'rating' => round((float) ($seller->seller_reviews_avg_rating ?? 0), 1),
-                    'review_count' => (int) $seller->seller_reviews_count,
-                    'is_featured' => $seller->active_seller_promotions_max_expires_at !== null,
-                    'featured_until' => $seller->active_seller_promotions_max_expires_at,
-                    'categories' => $seller->sellerCategories->map(fn ($category) => [
-                        'name' => $category->name,
-                        'slug' => $category->slug,
-                        'icon' => $category->icon,
-                        'color' => $category->color,
-                    ])->values(),
-                    'services' => $seller->sellerServices->map(fn ($service) => [
-                        'id' => $service->id,
-                        'title' => $service->title,
-                        'price_from' => $service->price_from,
-                        'cover_url' => $service->cover_url,
-                    ])->values(),
-                    'portfolio_count' => (int) $seller->portfolio_items_count,
                 ])->values(),
                 'stats' => [
                     'active_requests' => BuyerRequest::query()->whereIn('status', ['open', 'in_negotiation'])->count(),

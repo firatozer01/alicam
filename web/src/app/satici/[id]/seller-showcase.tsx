@@ -91,7 +91,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
 
   // Yukleme ve hata durumlarinda da ortak ust cubuk korunur.
   if (loading) return <main className={styles.page}><SiteHeader activeKey="rehber" /><div className={styles.state}><i /><p>Vitrin hazırlanıyor…</p></div></main>;
-  if (error || !seller) return <main className={styles.page}><SiteHeader activeKey="rehber" /><div className={styles.state}><p>{error || "Hizmet veren bulunamadı."}</p><Link href="/hizmet-verenler">Hizmet verenlere dön →</Link></div></main>;
+  if (error || !seller) return <main className={styles.page}><SiteHeader activeKey="rehber" /><div className={styles.state}><p>{error || "Hizmet veren bulunamadı."}</p><Link href="/">Ana sayfaya dön →</Link></div></main>;
 
   const title = seller.company_name || seller.name;
   const initials = title.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR");

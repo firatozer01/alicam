@@ -454,7 +454,7 @@ export function SellerDashboard() {
     <SiteHeader
       activeKey={view === "requests" ? (filter === "all" ? "requests" : filter) : view}
       credits={credits.balance}
-      links={[{ label: "Ana sayfa", href: "/" }, { label: "Hizmet verenler", href: "/hizmet-verenler" }]}
+      links={[{ label: "Ana sayfa", href: "/" }, { label: "Gelen talepler", href: "/satici-paneli" }]}
       cta={{ label: "Vitrinim", href: user ? `/satici/${user.id}` : "/satici-paneli" }}
       displayName={profile.profile?.company_name}
       sessionReady={!loading}

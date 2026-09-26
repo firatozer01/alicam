@@ -130,7 +130,7 @@ export function CustomerDashboard() {
     <SiteHeader
       activeKey={section}
       cta={{ label: "＋ Yeni talep", href: "/talep-olustur" }}
-      links={[{ label: "Ana sayfa", href: "/" }, { label: "Hizmet verenler", href: "/hizmet-verenler" }]}
+      links={[{ label: "Ana sayfa", href: "/" }, { label: "Taleplerim", href: "/musteri-panel" }]}
       sessionReady={!!user}
       user={user}
       workspace="buyer"
@@ -146,9 +146,8 @@ export function CustomerDashboard() {
                 { key: "yeni", label: "Yeni talep oluştur", icon: "＋", hint: "Ücretsiz teklif almaya başla", badge: "Ücretsiz", tone: "free", href: "/talep-olustur" },
               ], footer: { label: "Taleplere git", onSelect: () => jump("taleplerim") } },
               { key: "discover", title: "KEŞFET", icon: "🏬", color: "#06B6D4", description: "Hizmet verenleri incele, hesabını yönet.", items: [
-                { key: "hizmet-verenler", label: "Hizmet verenler", icon: "🏬", hint: "Vitrin, galeri ve puanlar", badge: "Yeni", tone: "new", href: "/hizmet-verenler" },
                 { key: "hesabim", label: "Hesabım", icon: "◎", hint: "İletişim doğrulaması ve güvenlik", onSelect: () => jump("hesabim") },
-              ], footer: { label: "Hizmet verenleri gör", href: "/hizmet-verenler" } },
+              ] },
             ],
             quickLinks: [
               { key: "market", label: "Pazaryeri", icon: "🛒", href: "/" },

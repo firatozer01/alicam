@@ -16,16 +16,6 @@ type PublicRequest = {
   location: { city: { id: number; name: string }; district: { id: number; name: string } };
   created_at: string; expires_at: string | null;
 };
-type PublicSeller = {
-  id: number; name: string; company_name: string | null; description: string; rating: number;
-  review_count: number; is_featured: boolean; categories: Omit<Category, "id">[];
-  services: { id: number; title: string; price_from: string | null; cover_url: string | null }[];
-  portfolio_count: number;
-};
-type FeaturedService = {
-  id: number; title: string; description: string; price_from: string | null; delivery_time: string | null;
-  cover_url: string | null; is_featured: boolean; category: Omit<Category, "id"> | null; seller: { id: number; name: string };
-};
 type RequestFacets = {
   categories: { slug: string; name: string; icon: string; color: string; count: number }[];
   cities: { id: number; name: string; count: number }[];
@@ -33,7 +23,7 @@ type RequestFacets = {
 };
 type MarketplaceResponse = {
   data: {
-    requests: PublicRequest[]; sellers: PublicSeller[]; featured_services: FeaturedService[];
+    requests: PublicRequest[];
     stats: { active_requests: number; approved_sellers: number; reviews: number };
   };
   facets: RequestFacets;
@@ -226,7 +216,6 @@ export function MarketplaceHome() {
       announce="⚡ Yeni nesil talep pazaryeri — talep oluşturmak tamamen ücretsiz."
       cta={isSeller ? { label: "Gelen talepler", href: "/satici-paneli" } : { label: "Ücretsiz talep oluştur", href: "/talep-olustur" }}
       links={[
-        { label: "Hizmet verenler", href: "/hizmet-verenler" },
         { label: "Nasıl çalışır", href: "/#nasil-calisir" },
         { label: "Hizmet verenler için", href: "/#hizmet-veren" },
       ]}
@@ -263,7 +252,6 @@ export function MarketplaceHome() {
               }),
               quickLinks: [
                 { key: "all", label: "Tüm talepler", icon: "▤", onSelect: () => chooseCategory("") },
-                { key: "sellers", label: "Hizmet verenler", icon: "🏬", href: "/hizmet-verenler" },
                 { key: "new", label: "Ücretsiz talep oluştur", icon: "＋", href: "/talep-olustur", primary: true },
               ],
             },
