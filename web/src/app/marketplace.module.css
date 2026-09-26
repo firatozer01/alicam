@@ -235,3 +235,130 @@
   .serviceIcon { width: 46px; height: 46px; font-size: 21px; }
   .groupGrid { grid-template-columns: 1fr; }
 }
+
+/* ===================================================================
+   FOTOGRAFLI HIZMET KARTI
+   Emoji kutusu "Tadilat" ile "Tesisat"i ayirt ettirmiyordu; kart artik
+   ustte fotograf tasiyor. Gorseli olmayan baslik emojiye duser, yani
+   katalogun tamami fotograflanmadan da izgara tutarli kaliyor.
+   =================================================================== */
+
+.svcGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+  gap: 18px;
+}
+
+.svcCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--card);
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.svcCard:hover { border-color: var(--violet-200); transform: translateY(-4px); box-shadow: var(--shadow-md); }
+
+/* Sabit oranli kutu: farkli boyutlardaki fotograflar izgarayi bozmasin. */
+.svcShot {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+.svcShot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .4s ease;
+}
+.svcCard:hover .svcShot img { transform: scale(1.05); }
+
+/* Gorsel yoksa: kategori renginde emoji alani. */
+.svcShot i {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 40px;
+  font-style: normal;
+}
+
+.svcBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: var(--card);
+  color: var(--ok-fg);
+  font-size: 10.5px;
+  font-weight: 800;
+  box-shadow: var(--shadow-sm);
+}
+
+.svcBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 15px 15px;
+  flex: 1;
+}
+.svcBody > strong {
+  font-size: 14.5px;
+  font-weight: 750;
+  color: var(--indigo);
+  line-height: 1.38;
+}
+
+.svcMeta { display: grid; gap: 5px; }
+.svcMeta > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.svcMeta svg { width: 14px; height: 14px; flex: none; color: var(--muted-2); }
+
+/* Teklif al: kart uzerinde durmayan, hover'da acilan eylem. */
+.svcCta {
+  margin-top: auto;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-sm);
+  background: linear-gradient(135deg, var(--violet), var(--indigo));
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 750;
+  /* Kapali halde yer kaplamaz; acilirken yukseklik ve dolgu birlikte artar. */
+  max-height: 0;
+  padding: 0 12px;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height .2s ease, opacity .2s ease, padding .2s ease, margin .2s ease;
+}
+.svcCard:hover .svcCta { max-height: 40px; padding: 10px 12px; margin-top: 10px; opacity: 1; }
+
+/* Dokunmatik cihazda hover yok: eylem her zaman acik dursun. */
+@media (hover: none) {
+  .svcCta { max-height: 40px; padding: 10px 12px; margin-top: 10px; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svcCard, .svcShot img, .svcCta { transition: none; }
+  .svcCard:hover { transform: none; }
+  .svcCard:hover .svcShot img { transform: none; }
+}
+
+@media (max-width: 720px) {
+  .svcGrid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .svcBody { padding: 11px 12px 12px; }
+  .svcBody > strong { font-size: 13px; }
+  .svcMeta > span { font-size: 11px; }
+  .svcShot i { font-size: 30px; }
+}

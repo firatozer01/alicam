@@ -21,7 +21,7 @@ class AppSettings
     private const CACHE_TTL = 300;
 
     /** Gizli alanlar sifrelenerek saklanir ve panele maskelenmis doner. */
-    public const SECRET_KEYS = ['mail.password', 'sms.api_key', 'sms.password', 'assistant.gemini_key'];
+    public const SECRET_KEYS = ['mail.password', 'sms.api_key', 'sms.password', 'assistant.gemini_key', 'images.pexels_key'];
 
     /** Panelden yonetilebilen alanlar ve varsayilanlari. */
     public const EDITABLE = [
@@ -36,6 +36,31 @@ class AppSettings
         // Bos birakilirsa asistan hazir cevap modunda calisir.
         'assistant.gemini_key' => '',
         'assistant.model' => 'gemini-3.8-flash',
+
+        // Kategori kapak fotograflari icin stok gorsel kaynagi.
+        // Bos birakilirsa anahtarsiz kaynaklara (Openverse,
+        // Wikimedia Commons) dusulur; sonuclar daha zayiftir.
+        'images.pexels_key' => '',
+
+        // Anasayfa metinleri. Basliklarin kendisi kategori agacindan
+        // geliyor; buradakiler yalnizca cerceve yazilari, boylece
+        // kampanya donemlerinde dagitim yapmadan degistirilebiliyor.
+        'home.hero_title' => 'İhtiyacın olan hizmeti seç,',
+        'home.hero_accent' => 'teklifler sana gelsin.',
+        'home.hero_placeholder' => 'Hangi hizmete ihtiyacın var? Örn. ev temizliği, klima montajı, İngilizce ders',
+        'home.popular_title' => 'Popüler hizmetler',
+        'home.popular_subtitle' => 'EN ÇOK ARANAN',
+        'home.trending_title' => 'Bu hafta trendde',
+        'home.trending_subtitle' => 'HAREKETLENEN',
+        'home.groups_title' => 'Aradığın her iş için bir başlık var.',
+        'home.groups_subtitle' => 'TÜM HİZMETLER',
+        'home.listing_title' => 'Hizmet değil, ürün mü arıyorsun?',
+        'home.listing_subtitle' => 'İLANLAR',
+
+        // Elle one cikarilan hizmet basliklari (slug, virgulle ayrilir).
+        // Dolu ise populer seridi talep sayisi yerine bu siraya uyar;
+        // bos ise otomatik siralama devam eder.
+        'home.popular_pinned' => '',
     ];
 
     /**

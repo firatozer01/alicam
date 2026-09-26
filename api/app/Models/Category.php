@@ -18,6 +18,7 @@ class Category extends Model
     protected $fillable = [
         'parent_id', 'name', 'slug', 'icon', 'color', 'schema_version',
         'is_active', 'sort_order',
+        'image_path', 'image_credit', 'image_source',
     ];
 
     protected static function booted(): void

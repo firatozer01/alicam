@@ -19,10 +19,12 @@ type Settings = {
   "mail.from_name": string;
   "assistant.gemini_key": string;
   "assistant.gemini_key_set"?: boolean;
+  "images.pexels_key": string;
+  "images.pexels_key_set"?: boolean;
   "assistant.model": string;
 };
 
-type Meta = { active_mailer: string; sms_ready: boolean; assistant_mode: "ai" | "knowledge" };
+type Meta = { active_mailer: string; sms_ready: boolean; assistant_mode: "ai" | "knowledge"; image_source: "pexels" | "acik-kaynak" };
 
 const empty: Settings = {
   "mail.enabled": "0",
@@ -35,6 +37,7 @@ const empty: Settings = {
   "mail.from_name": "alıcam.net",
   "assistant.gemini_key": "",
   "assistant.model": "gemini-3.8-flash",
+  "images.pexels_key": "",
 };
 
 export function MailSettings() {
@@ -42,6 +45,7 @@ export function MailSettings() {
   const [form, setForm] = useState<Settings>(empty);
   const [passwordSet, setPasswordSet] = useState(false);
   const [geminiSet, setGeminiSet] = useState(false);
+  const [pexelsSet, setPexelsSet] = useState(false);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -54,9 +58,10 @@ export function MailSettings() {
     apiRequest<{ data: Settings; meta: Meta }>("/admin/settings")
       .then((response) => {
         if (!active) return;
-        setForm({ ...empty, ...response.data, "mail.password": "", "assistant.gemini_key": "" });
+        setForm({ ...empty, ...response.data, "mail.password": "", "assistant.gemini_key": "", "images.pexels_key": "" });
         setPasswordSet(Boolean(response.data["mail.password_set"]));
         setGeminiSet(Boolean(response.data["assistant.gemini_key_set"]));
+        setPexelsSet(Boolean(response.data["images.pexels_key_set"]));
         setMeta(response.meta);
       })
       .catch((requestError: unknown) => {
@@ -93,13 +98,17 @@ export function MailSettings() {
             gemini_key: form["assistant.gemini_key"],
             model: form["assistant.model"],
           },
+          images: {
+            pexels_key: form["images.pexels_key"],
+          },
           ...(clear.length > 0 ? { clear } : {}),
         }),
       });
       setNotice(response.message);
       setPasswordSet(Boolean(response.data["mail.password_set"]));
       setGeminiSet(Boolean(response.data["assistant.gemini_key_set"]));
-      setForm((current) => ({ ...current, "mail.password": "", "assistant.gemini_key": "" }));
+      setPexelsSet(Boolean(response.data["images.pexels_key_set"]));
+      setForm((current) => ({ ...current, "mail.password": "", "assistant.gemini_key": "", "images.pexels_key": "" }));
     } catch (requestError: unknown) {
       setError(firstApiError(requestError));
     } finally {
@@ -130,7 +139,7 @@ export function MailSettings() {
       <div className="admin-product"><span>YÖNETİM MERKEZİ</span><strong>Operasyon</strong></div>
       <nav>
         <Link href="/admin"><i>◇</i> Genel bakış</Link>
-        <Link href="/admin/kategoriler"><i>▦</i> Kategoriler</Link>
+        <Link href="/admin/anasayfa"><i>▤</i> Anasayfa</Link><Link href="/admin/kategoriler"><i>▦</i> Kategoriler</Link>
         <Link href="/admin/satici-onaylari"><i>✓</i> Satıcı onayları</Link>
         <Link className="active" href="/admin/ayarlar"><i>✉</i> Bildirim ayarları</Link>
       </nav>
@@ -234,6 +243,47 @@ export function MailSettings() {
               </button>
             )}
             <button disabled={busy} onClick={() => void save()} type="button">{busy ? "Kaydediliyor…" : "Asistan ayarlarını kaydet"}</button>
+          </footer>
+        </section>
+
+        <section className={styles.card}>
+          <header>
+            <div>
+              <strong>Hizmet kartı fotoğrafları</strong>
+              <small>
+                Şu anki kaynak: <b>{meta?.image_source === "pexels" ? "Pexels (stok fotoğraf)" : "Açık kaynak (Openverse + Wikimedia)"}</b>
+              </small>
+            </div>
+          </header>
+          <div className={styles.grid}>
+            <label className={styles.wide}>
+              Pexels API anahtarı
+              <input
+                autoComplete="off"
+                onChange={(event) => set("images.pexels_key", event.target.value)}
+                placeholder={pexelsSet ? "•••••••• (kayıtlı)" : "Boş bırakırsan açık kaynaklardan aranır"}
+                type="password"
+                value={form["images.pexels_key"]}
+              />
+              <small>
+                {pexelsSet
+                  ? "Anahtar kayıtlı. Değiştirmek istemiyorsan boş bırak."
+                  : "pexels.com/api adresinden ücretsiz alınır. Açık kaynaklar ansiklopedik olduğu için hizmet kartlarına uygun fotoğraf bulmakta zorlanıyor; Pexels bir stok fotoğraf kütüphanesi ve belirgin şekilde daha isabetli sonuç veriyor."}
+              </small>
+            </label>
+          </div>
+          <footer>
+            {pexelsSet && (
+              <button
+                className={styles.unlink}
+                disabled={busy}
+                onClick={() => void save(["images.pexels_key"])}
+                type="button"
+              >
+                Anahtarı kaldır
+              </button>
+            )}
+            <button disabled={busy} onClick={() => void save()} type="button">{busy ? "Kaydediliyor…" : "Görsel ayarını kaydet"}</button>
           </footer>
         </section>
 

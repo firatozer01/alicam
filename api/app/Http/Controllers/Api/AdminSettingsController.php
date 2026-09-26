@@ -25,6 +25,8 @@ class AdminSettingsController extends Controller
                 'sms_ready' => false,
                 // Anahtar girilmediyse asistan hazir cevap modunda calisir.
                 'assistant_mode' => AppSettings::get('assistant.gemini_key') ? 'ai' : 'knowledge',
+                // Anahtar yoksa gorsel arama anahtarsiz kaynaklara duser.
+                'image_source' => AppSettings::get('images.pexels_key') ? 'pexels' : 'acik-kaynak',
             ],
         ]);
     }
@@ -42,6 +44,7 @@ class AdminSettingsController extends Controller
             'mail.from_name' => ['sometimes', 'nullable', 'string', 'max:120'],
             'assistant.gemini_key' => ['sometimes', 'nullable', 'string', 'max:200'],
             'assistant.model' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'images.pexels_key' => ['sometimes', 'nullable', 'string', 'max:200'],
             // Kaldirilacak alanlar: gizli bir deger yalnizca boyle silinebilir.
             'clear' => ['sometimes', 'array', 'max:10'],
             'clear.*' => ['string', Rule::in(array_keys(AppSettings::EDITABLE))],
@@ -50,7 +53,7 @@ class AdminSettingsController extends Controller
         AppSettings::clear($data['clear'] ?? []);
 
         $flat = [];
-        foreach (['mail', 'assistant'] as $group) {
+        foreach (['mail', 'assistant', 'images'] as $group) {
             foreach ($data[$group] ?? [] as $key => $value) {
                 $flat[$group.'.'.$key] = is_bool($value) ? ($value ? '1' : '0') : (string) ($value ?? '');
             }

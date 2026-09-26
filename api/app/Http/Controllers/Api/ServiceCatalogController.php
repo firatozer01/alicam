@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Services\AppSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -35,6 +36,15 @@ class ServiceCatalogController extends Controller
     /** Bu kadar baslik esigi gecemezse serit mevsimsel kipe duser. */
     private const TREND_MIN_ITEMS = 6;
 
+    /** Yonetici panelinden degistirilebilen anasayfa metinleri. */
+    private const COPY_KEYS = [
+        'hero_title', 'hero_accent', 'hero_placeholder',
+        'popular_title', 'popular_subtitle',
+        'trending_title', 'trending_subtitle',
+        'groups_title', 'groups_subtitle',
+        'listing_title', 'listing_subtitle',
+    ];
+
     public function __invoke(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -44,37 +54,62 @@ class ServiceCatalogController extends Controller
         ]);
 
         $populerAdet = $data['popular_limit'] ?? 12;
-        $trendAdet = $data['trending_limit'] ?? 8;
+        $trendAdet = $data['trending_limit'] ?? 12;
         $cocukAdet = $data['children_per_group'] ?? 6;
 
-        $anahtar = "service-catalog:v1:{$populerAdet}:{$trendAdet}:{$cocukAdet}";
+        // Yonetici metinleri ya da sabitlenen basliklari degistirince
+        // onbellek kendiliginden gecersizlesir: anahtar bu degerlerin
+        // ozetini tasiyor. AdminHomeController ayrica temizliyor.
+        $ayar = $this->copy();
+        $sabit = $this->pinned();
+        // Surum sayaci gorsel degisikliklerini de kapsar; metin ve sabitleme
+        // zaten ozete giriyor.
+        $surum = Cache::get(AdminHomeController::VERSION_KEY, 0);
+        $imza = substr(md5(json_encode([$ayar, $sabit, $surum])), 0, 8);
 
-        $govde = Cache::remember($anahtar, 600, function () use ($populerAdet, $trendAdet, $cocukAdet): array {
+        $anahtar = "service-catalog:v3:{$populerAdet}:{$trendAdet}:{$cocukAdet}:{$imza}";
+
+        $govde = Cache::remember($anahtar, 600, function () use ($populerAdet, $trendAdet, $cocukAdet, $ayar, $sabit): array {
             $basliklar = $this->headings();
             $talep = $this->demandByHeading();
             $yakin = $this->demandByHeading(self::TREND_WINDOW);
             $onceki = $this->demandByHeading(self::TREND_WINDOW * 2, self::TREND_WINDOW);
             $alici = $this->buyersByHeading(self::TREND_WINDOW);
             $ornekler = $this->leafSamples($basliklar->pluck('id')->all());
+            $saticilar = $this->sellersByHeading();
+            $puanlar = $this->ratingsByHeading();
 
-            $kart = fn (object $b, ?string $rozet = null) => [
-                'id' => $b->id,
-                'slug' => $b->slug,
-                'name' => $b->name,
-                'icon' => $b->icon,
-                'color' => $b->color,
-                'root' => ['slug' => $b->kok_slug, 'name' => $b->kok_name],
-                'leaf_samples' => $ornekler[$b->id] ?? [],
-                'child_count' => (int) $b->child_count,
-                // Ham sayi yukte durur ama arayuzde gosterilmez: esik
-                // degistiginde API surumu degistirmeden acilabilsin diye.
-                'request_count' => $talep[$b->id] ?? 0,
-                'badge' => $rozet,
-            ];
+            $kart = function (object $b, ?string $rozet = null) use ($talep, $ornekler, $saticilar, $puanlar) {
+                $puan = $puanlar[$b->id] ?? null;
 
-            // --- populer: toplam talebe gore, esitlikte sitenin kendi sirasi
-            $populer = $basliklar
+                return [
+                    'id' => $b->id,
+                    'slug' => $b->slug,
+                    'name' => $b->name,
+                    'icon' => $b->icon,
+                    'color' => $b->color,
+                    'image_url' => $b->image_path ? "/api/category-images/{$b->id}" : null,
+                    'root' => ['slug' => $b->kok_slug, 'name' => $b->kok_name],
+                    'leaf_samples' => $ornekler[$b->id] ?? [],
+                    'child_count' => (int) $b->child_count,
+                    'request_count' => $talep[$b->id] ?? 0,
+                    // Sifirsa null doner ve kartta hic gosterilmez.
+                    // "0 hizmet veren" yazan bir kart, bos oldugunu
+                    // soylemekten baska bir sey yapmiyor.
+                    'seller_count' => ($saticilar[$b->id] ?? 0) ?: null,
+                    'rating' => $puan['rating'] ?? null,
+                    'review_count' => $puan['count'] ?? null,
+                    'badge' => $rozet,
+                ];
+            };
+
+            // --- populer: once elle sabitlenenler (panel sirasiyla),
+            // kalan yerler toplam talebe gore dolar.
+            $siralanmis = $basliklar
                 ->sortByDesc(fn ($b) => [$talep[$b->id] ?? 0, -$b->sort_order])
+                ->values();
+
+            $populer = $this->applyPinned($siralanmis, $sabit)
                 ->take($populerAdet)
                 ->map(fn ($b) => $kart($b))
                 ->values()
@@ -110,6 +145,7 @@ class ServiceCatalogController extends Controller
             }
 
             return [
+                'copy' => $ayar,
                 'popular' => $populer,
                 'trending' => $trend,
                 'groups' => $this->groups($cocukAdet),
@@ -139,6 +175,60 @@ class ServiceCatalogController extends Controller
     }
 
     /**
+     * Yonetici panelinden girilen anasayfa metinleri.
+     *
+     * @return array<string, string>
+     */
+    private function copy(): array
+    {
+        $out = [];
+
+        foreach (self::COPY_KEYS as $anahtar) {
+            $out[$anahtar] = AppSettings::get(
+                'home.'.$anahtar,
+                AppSettings::EDITABLE['home.'.$anahtar] ?? '',
+            ) ?? '';
+        }
+
+        return $out;
+    }
+
+    /**
+     * Elle one cikarilan baslik slug'lari.
+     *
+     * @return array<int, string>
+     */
+    private function pinned(): array
+    {
+        $ham = AppSettings::get('home.popular_pinned', '') ?? '';
+
+        return array_values(array_filter(array_map('trim', explode(',', $ham))));
+    }
+
+    /**
+     * Sabitlenen basliklari listenin basina alir.
+     *
+     * @param  \Illuminate\Support\Collection<int, object>  $basliklar
+     * @param  array<int, string>  $sabit
+     * @return \Illuminate\Support\Collection<int, object>
+     */
+    private function applyPinned($basliklar, array $sabit)
+    {
+        if ($sabit === []) {
+            return $basliklar;
+        }
+
+        // Sabitlenenler once, kalanlar kendi sirasinda. Slug yanlis
+        // yazilmissa sessizce yok sayilir: panel yuzunden anasayfa
+        // bosalmasin.
+        $secili = collect($sabit)
+            ->map(fn (string $slug) => $basliklar->firstWhere('slug', $slug))
+            ->filter();
+
+        return $secili->concat($basliklar->reject(fn ($b) => $secili->contains('id', $b->id)))->values();
+    }
+
+    /**
      * Aktif hizmet agacinin 2. seviyesi: gosterilecek "hizmet basligi".
      *
      * @return \Illuminate\Support\Collection<int, object>
@@ -146,7 +236,7 @@ class ServiceCatalogController extends Controller
     private function headings()
     {
         return collect(DB::select("
-            select c.id, c.slug, c.name, c.icon, c.color, c.sort_order,
+            select c.id, c.slug, c.name, c.icon, c.color, c.sort_order, c.image_path,
                    k.slug as kok_slug, k.name as kok_name,
                    (select count(*) from categories y
                      where y.parent_id = c.id and y.is_active = true) as child_count
@@ -205,6 +295,70 @@ class ServiceCatalogController extends Controller
     }
 
     /**
+     * Baslik basina onayli hizmet veren sayisi.
+     *
+     * Satici hem basligin kendisine hem bir yapragina abone olabilir;
+     * ikisi de o baslikta calistigi anlamina gelir, bu yuzden yaprak
+     * abonelikleri bir seviye yukari toplanir ve satici tekillestirilir.
+     *
+     * @return array<int, int>
+     */
+    private function sellersByHeading(): array
+    {
+        $rows = DB::select("
+            select baslik_id, count(distinct seller_id) as adet from (
+                select sc.category_id as baslik_id, sc.seller_id
+                from seller_categories sc
+                join seller_profiles sp on sp.user_id = sc.seller_id
+                where sp.approval_status = 'approved'
+                union all
+                select y.parent_id as baslik_id, sc.seller_id
+                from seller_categories sc
+                join categories y on y.id = sc.category_id
+                join seller_profiles sp on sp.user_id = sc.seller_id
+                where sp.approval_status = 'approved' and y.parent_id is not null
+            ) t
+            group by baslik_id
+        ");
+
+        return collect($rows)->pluck('adet', 'baslik_id')->map(fn ($n) => (int) $n)->all();
+    }
+
+    /**
+     * Baslik basina ortalama puan ve yorum sayisi.
+     *
+     * Yorum saticiya yazilir, baslige degil; burada saticinin abone
+     * oldugu basliklara dagitiliyor. Yaklasik bir degerdir ve yorum
+     * yoksa hic gosterilmez.
+     *
+     * @return array<int, array{rating: float, count: int}>
+     */
+    private function ratingsByHeading(): array
+    {
+        $rows = DB::select("
+            select baslik_id, round(avg(rating)::numeric, 1) as puan, count(*) as adet from (
+                select coalesce(y.parent_id, sc.category_id) as baslik_id, r.rating
+                from seller_reviews r
+                join seller_categories sc on sc.seller_id = r.seller_id
+                left join categories y on y.id = sc.category_id
+            ) t
+            where baslik_id is not null
+            group by baslik_id
+        ");
+
+        $out = [];
+
+        foreach ($rows as $row) {
+            $out[(int) $row->baslik_id] = [
+                'rating' => (float) $row->puan,
+                'count' => (int) $row->adet,
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
      * Baslik basina ilk uc yaprak adi; kartta "bu baslik neyi kapsiyor"
      * sorusunu agaci acmadan yanitlar.
      *
@@ -244,7 +398,7 @@ class ServiceCatalogController extends Controller
         $kokler = Category::query()
             ->whereNull('parent_id')->where('kind', 'service')->where('is_active', true)
             ->orderBy('sort_order')
-            ->get(['id', 'slug', 'name', 'icon', 'color']);
+            ->get(['id', 'slug', 'name', 'icon', 'color', 'image_path']);
 
         $cocuklar = Category::query()
             ->whereIn('parent_id', $kokler->pluck('id'))
@@ -262,6 +416,7 @@ class ServiceCatalogController extends Controller
                 'name' => $kok->name,
                 'icon' => $kok->icon,
                 'color' => $kok->color,
+                'image_url' => $kok->image_path ? "/api/category-images/{$kok->id}" : null,
                 'child_count' => $liste->count(),
                 'children' => $liste->take($cocukAdet)->map(fn ($c) => [
                     'id' => $c->id,
@@ -283,13 +438,14 @@ class ServiceCatalogController extends Controller
         return Category::query()
             ->whereNull('parent_id')->where('kind', 'listing')->where('is_active', true)
             ->orderBy('sort_order')
-            ->get(['id', 'slug', 'name', 'icon', 'color'])
+            ->get(['id', 'slug', 'name', 'icon', 'color', 'image_path'])
             ->map(fn (Category $c) => [
                 'id' => $c->id,
                 'slug' => $c->slug,
                 'name' => $c->name,
                 'icon' => $c->icon,
                 'color' => $c->color,
+                'image_url' => $c->image_path ? "/api/category-images/{$c->id}" : null,
             ])->values()->all();
     }
 

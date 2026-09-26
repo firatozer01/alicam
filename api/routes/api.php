@@ -71,6 +71,7 @@ Route::middleware('throttle:10,1')->group(function () {
 Route::get('/sellers/{user}', [App\Http\Controllers\Api\PublicSellerController::class, 'show']);
 Route::get('/portfolio-images/{portfolioImage}', [App\Http\Controllers\Api\SellerPortfolioController::class, 'showImage']);
 Route::get('/service-covers/{sellerService}', [App\Http\Controllers\Api\SellerServiceController::class, 'showCover']);
+Route::get('/category-images/{category}', App\Http\Controllers\Api\CategoryImageController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
@@ -177,6 +178,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/settings', [AdminSettingsController::class, 'update']);
         Route::post('/settings/mail-test', [AdminSettingsController::class, 'test'])
             ->middleware('throttle:5,1');
+        Route::get('/home', [App\Http\Controllers\Api\AdminHomeController::class, 'show']);
+        Route::put('/home', [App\Http\Controllers\Api\AdminHomeController::class, 'update']);
+        Route::post('/home/categories/{category}/image', [App\Http\Controllers\Api\AdminHomeController::class, 'uploadImage']);
+        Route::post('/home/categories/{category}/fetch-image', [App\Http\Controllers\Api\AdminHomeController::class, 'fetchImage'])
+            ->middleware('throttle:30,1');
+        Route::delete('/home/categories/{category}/image', [App\Http\Controllers\Api\AdminHomeController::class, 'destroyImage']);
         Route::get('/seller-approvals', [AdminSellerApprovalController::class, 'index']);
         Route::patch('/seller-approvals/{seller}', [AdminSellerApprovalController::class, 'update']);
     });

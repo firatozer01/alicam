@@ -1,0 +1,204 @@
+/* Anasayfa duzenleyici. Renkler ve yuvarlaklik globals.css token'larindan
+   gelir; yonetim ekranlarinin ortak cercevesi admin-standard.css'te. */
+
+.state {
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.notice {
+  margin: 0 0 16px;
+  border: 1px solid var(--ok-fg);
+  border-radius: var(--r-md);
+  padding: 11px 14px;
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.card {
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+.card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.card > header strong { display: block; font-size: 14.5px; color: var(--ink); }
+.card > header small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+/* --- metin alanlari --- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink-2);
+}
+.grid label small { color: var(--muted-2); font-size: 11px; font-weight: 500; }
+.grid input {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--surface);
+  outline: none;
+  transition: border-color .15s ease;
+}
+.grid input:focus { border-color: var(--violet); }
+.wide { grid-column: 1 / -1; }
+
+/* --- sabitlenen basliklar --- */
+.pinList { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.pinList li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 9px 12px;
+  background: var(--surface);
+}
+.pinList b {
+  width: 22px; height: 22px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  background: var(--violet-100);
+  color: var(--indigo);
+  font-size: 11px;
+}
+.pinList li > span { flex: 1; font-size: 13px; color: var(--ink); }
+.pinList button {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 5px 10px;
+  background: var(--card);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease;
+}
+.pinList button:hover:not(:disabled) { border-color: var(--violet); color: var(--indigo); }
+.pinList button:disabled { opacity: .4; cursor: default; }
+
+/* --- arac cubugu --- */
+.toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.toolbar > input {
+  flex: 1;
+  min-width: 180px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 13px;
+  background: var(--surface);
+  outline: none;
+}
+.toolbar > input:focus { border-color: var(--violet); }
+.check { display: flex; align-items: center; gap: 7px; color: var(--ink-2); font-size: 12.5px; font-weight: 650; cursor: pointer; }
+.count { color: var(--muted); font-size: 12px; }
+
+/* --- gorsel izgarasi --- */
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
+  gap: 14px;
+}
+.imageCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.shot { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; }
+.shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.shot i { position: absolute; inset: 0; display: grid; place-items: center; font-size: 32px; font-style: normal; }
+
+.imageBody { padding: 11px 12px 8px; }
+.imageBody strong { display: block; font-size: 13px; color: var(--ink); line-height: 1.35; }
+.imageBody small { display: block; margin-top: 2px; color: var(--muted-2); font-size: 11px; }
+/* Lisans satiri: uzun oldugu icin tek satira sikistirilir, tamami title'da. */
+.imageBody em {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-style: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imageActions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 12px; margin-top: auto; }
+.imageActions button {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease;
+}
+.imageActions button:hover:not(:disabled) { border-color: var(--violet); color: var(--indigo); }
+.imageActions button:disabled { opacity: .5; cursor: default; }
+
+/* Esit ozgullukte siniflar yayim sirasina gore cozuluyor; modifier
+   taban sinifla birlikte baglaniyor ki sirasi ne olursa olsun kazansin. */
+.imageActions button.danger { color: #b91c1c; }
+.imageActions button.danger:hover:not(:disabled) { border-color: #b91c1c; color: #b91c1c; }
+.imageActions button.pinOn { border-color: var(--amber); color: var(--amber); }
+.pinList button.danger { color: #b91c1c; }
+.pinList button.danger:hover:not(:disabled) { border-color: #b91c1c; color: #b91c1c; }
+
+.hiddenFile { display: none; }
+
+/* --- kaydet --- */
+.saveBar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 4px 0 30px; }
+.saveBar small { color: var(--muted); font-size: 12px; }
+.primary {
+  border: 0;
+  border-radius: var(--r-md);
+  padding: 12px 22px;
+  background: linear-gradient(135deg, var(--violet), var(--indigo));
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.primary:disabled { opacity: .6; cursor: default; }
+
+@media (max-width: 720px) {
+  .imageGrid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .card { padding: 15px; }
+}

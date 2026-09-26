@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { SiteHeader } from "@/components/shell/site-header";
@@ -14,11 +15,31 @@ type ServiceCard = {
   name: string;
   icon: string;
   color: string;
+  /** Kapak fotografi; yoksa kart emojiye duser. */
+  image_url: string | null;
   root: { slug: string; name: string };
   leaf_samples: string[];
   child_count: number;
   request_count: number;
+  /** Bu iki alan yalnizca gercekten veri varken dolu gelir. */
+  seller_count: number | null;
+  rating: number | null;
+  review_count: number | null;
   badge: string | null;
+};
+
+type HomeCopy = {
+  hero_title: string;
+  hero_accent: string;
+  hero_placeholder: string;
+  popular_title: string;
+  popular_subtitle: string;
+  trending_title: string;
+  trending_subtitle: string;
+  groups_title: string;
+  groups_subtitle: string;
+  listing_title: string;
+  listing_subtitle: string;
 };
 
 type ServiceGroup = {
@@ -27,16 +48,18 @@ type ServiceGroup = {
   name: string;
   icon: string;
   color: string;
+  image_url: string | null;
   child_count: number;
   children: { id: number; slug: string; name: string; icon: string }[];
 };
 
 type Catalog = {
   data: {
+    copy: HomeCopy;
     popular: ServiceCard[];
     trending: { mode: "trend" | "seasonal"; window_days: number; items: ServiceCard[] };
     groups: ServiceGroup[];
-    listing_roots: { id: number; slug: string; name: string; icon: string; color: string }[];
+    listing_roots: { id: number; slug: string; name: string; icon: string; color: string; image_url: string | null }[];
     stats: { service_roots: number; service_headings: number; cities: number; districts: number };
   };
 };
@@ -50,6 +73,82 @@ const QUICK_CHIPS = [
 ];
 
 const talepLinki = (slug: string) => `/talep-olustur?kategori=${encodeURIComponent(slug)}`;
+
+const sayi = new Intl.NumberFormat("tr-TR");
+
+/** Katalog gelmeden once ekranin bos gorunmemesi icin. */
+const VARSAYILAN_METIN: HomeCopy = {
+  hero_title: "İhtiyacın olan hizmeti seç,",
+  hero_accent: "teklifler sana gelsin.",
+  hero_placeholder: "Hangi hizmete ihtiyacın var? Örn. ev temizliği, klima montajı, İngilizce ders",
+  popular_title: "Popüler hizmetler",
+  popular_subtitle: "EN ÇOK ARANAN",
+  trending_title: "Bu hafta trendde",
+  trending_subtitle: "HAREKETLENEN",
+  groups_title: "Aradığın her iş için bir başlık var.",
+  groups_subtitle: "TÜM HİZMETLER",
+  listing_title: "Hizmet değil, ürün mü arıyorsun?",
+  listing_subtitle: "İLANLAR",
+};
+
+/**
+ * Hizmet karti: ustte fotograf, altinda ad ve iki bilgi satiri.
+ *
+ * Fotograf zorunlu degil. Gorseli olmayan baslik, kategorinin kendi
+ * rengiyle boyanmis bir emoji alanina duser; boylece katalogun tamami
+ * fotograflanmadan da sayfa tutarli gorunur.
+ *
+ * Sayilar yalnizca gercekten varsa yazilir: "0 hizmet veren" yazan bir
+ * kart, o baslikta kimsenin olmadigini duyurmaktan baska is yapmaz.
+ */
+function HizmetKarti({ item }: { item: ServiceCard }) {
+  // Kayitta gorsel yazili ama dosya yoksa (elle silinmis, tasinmamis)
+  // tarayicinin kirik ikonu yerine emojiye duseriz.
+  const [bozuk, setBozuk] = useState(false);
+
+  return (
+    <Link className={styles.svcCard} href={talepLinki(item.slug)}>
+      <span className={styles.svcShot} style={{ background: `${item.color}1f` }}>
+        {/* unoptimized: /api/... bir Next rewrite'i uzerinden Laravel'e gidiyor
+            ve gorsel iyilestirici rewrite'i cozemiyor ("received null").
+            Kucultme bu yuzden sunucuda, yazma aninda yapiliyor:
+            App\Services\CategoryImage. */}
+        {item.image_url && !bozuk
+          ? <Image alt="" fill onError={() => setBozuk(true)} sizes="(max-width: 720px) 45vw, 260px" src={item.image_url} unoptimized />
+          : <i aria-hidden="true">{item.icon}</i>}
+        {item.badge === "rising" && <b className={styles.svcBadge}>↑ bu hafta</b>}
+      </span>
+
+      <span className={styles.svcBody}>
+        <strong>{item.name}</strong>
+
+        <span className={styles.svcMeta}>
+          {item.seller_count
+            ? <span><IconPro />{sayi.format(item.seller_count)} hizmet veren</span>
+            : <span><IconPro />{item.child_count} alt başlık</span>}
+
+          {item.rating && item.review_count
+            ? <span><IconStar />{item.rating.toLocaleString("tr-TR", { minimumFractionDigits: 1 })} ({sayi.format(item.review_count)} yorum)</span>
+            : <span><IconReq />{sayi.format(item.request_count)} talep</span>}
+        </span>
+
+        <span className={styles.svcCta}>Teklif al</span>
+      </span>
+    </Link>
+  );
+}
+
+function IconPro() {
+  return <svg aria-hidden="true" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="2.6" stroke="currentColor" strokeWidth="1.3" /><path d="M2.8 13.4c0-2.6 2.3-4.2 5.2-4.2s5.2 1.6 5.2 4.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>;
+}
+
+function IconStar() {
+  return <svg aria-hidden="true" viewBox="0 0 16 16" fill="none"><path d="M8 1.9l1.85 3.86 4.15.58-3 3.01.71 4.25L8 11.6l-3.71 2l.71-4.25-3-3.01 4.15-.58z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /></svg>;
+}
+
+function IconReq() {
+  return <svg aria-hidden="true" viewBox="0 0 16 16" fill="none"><path d="M3 3.6h10v7.2H8.6L5.4 13.2v-2.4H3z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" /></svg>;
+}
 
 function BrandMark() {
   return <svg aria-hidden="true" className={styles.brandMark} viewBox="0 0 30 30" fill="none"><path d="M4 10 L14 4 L14 10 Z" fill="#7C3AED" /><path d="M26 20 L16 26 L16 20 Z" fill="#06B6D4" /><path d="M14 7 H16 V23 H14 Z" fill="#4F46E5" opacity=".9" /></svg>;
@@ -147,6 +246,7 @@ export function MarketplaceHome() {
 
   const stats = catalog?.stats ?? { service_roots: 0, service_headings: 0, cities: 0, districts: 0 };
   const trend = catalog?.trending;
+  const metin = catalog?.copy ?? VARSAYILAN_METIN;
 
   return <main className={styles.page}>
     <SiteHeader
@@ -172,7 +272,7 @@ export function MarketplaceHome() {
 
       <div className={styles.wrap}>
         <div className={styles.eyebrow}><i /> Aramak yok, beklemek yok</div>
-        <h1>İhtiyacın olan hizmeti seç,<br /><em>teklifler sana gelsin.</em></h1>
+        <h1>{metin.hero_title}<br /><em>{metin.hero_accent}</em></h1>
         <p>İşi tarif et; uygun ustalar ve firmalar sana teklif göndersin. Alıcı için 0 ₺.</p>
 
         <div className={styles.searchBox} ref={searchRef}>
@@ -180,7 +280,7 @@ export function MarketplaceHome() {
             <input
               autoComplete="off"
               onChange={(event) => setTerm(event.target.value)}
-              placeholder="Hangi hizmete ihtiyacın var? Örn. ev temizliği, klima montajı, İngilizce ders"
+              placeholder={metin.hero_placeholder}
               value={term}
             />
             <button className={styles.buttonGrad} type="submit">Hizmet bul →</button>
@@ -221,22 +321,13 @@ export function MarketplaceHome() {
     <section className={styles.serviceSection} id="populer">
       <div className={styles.wrap}>
         <header className={styles.sectionHead}>
-          <span>EN ÇOK ARANANLAR</span>
-          <h2>Popüler hizmetler</h2>
+          <span>{metin.popular_subtitle}</span>
+          <h2>{metin.popular_title}</h2>
           <p>Seç, birkaç soruyu yanıtla; teklifler gelsin.</p>
         </header>
 
-        <div className={styles.serviceGrid}>
-          {(catalog?.popular ?? []).map((item) => (
-            <Link className={styles.serviceCard} href={talepLinki(item.slug)} key={item.id}>
-              <span className={styles.serviceIcon} style={{ background: `${item.color}1f` }}>{item.icon}</span>
-              <strong>{item.name}</strong>
-              {item.leaf_samples.length > 0 && (
-                <small className={styles.serviceLeaves}>{item.leaf_samples.join(" · ")}</small>
-              )}
-              <em>Ücretsiz teklif al →</em>
-            </Link>
-          ))}
+        <div className={styles.svcGrid}>
+          {(catalog?.popular ?? []).map((item) => <HizmetKarti item={item} key={item.id} />)}
           {!catalog && Array.from({ length: 12 }, (_, i) => <span className={styles.cardSkeleton} key={i} />)}
         </div>
       </div>
@@ -246,24 +337,15 @@ export function MarketplaceHome() {
       <section className={styles.trendSection}>
         <div className={styles.wrap}>
           <header className={styles.sectionHead}>
-            <span>HAREKETLİ BAŞLIKLAR</span>
-            <h2>{trend.mode === "trend" ? "Bu hafta trendde" : "Bu aralar aranan işler"}</h2>
+            <span>{metin.trending_subtitle}</span>
+            <h2>{trend.mode === "trend" ? metin.trending_title : "Bu aralar aranan işler"}</h2>
             <p>{trend.mode === "trend"
               ? "Son iki haftada belirgin şekilde daha çok talep alan başlıklar."
               : "Mevsimine göre en çok sorulan işler."}</p>
           </header>
 
-          <div className={styles.trendStrip}>
-            {trend.items.map((item) => (
-              <Link className={styles.trendCard} href={talepLinki(item.slug)} key={item.id}>
-                <span style={{ background: `${item.color}1f` }}>{item.icon}</span>
-                <div>
-                  <strong>{item.name}</strong>
-                  <small>{item.root.name}</small>
-                </div>
-                {item.badge && <b>{item.badge === "rising" ? "↑ bu hafta" : item.badge}</b>}
-              </Link>
-            ))}
+          <div className={styles.svcGrid}>
+            {trend.items.map((item) => <HizmetKarti item={item} key={item.id} />)}
           </div>
         </div>
       </section>
@@ -272,8 +354,8 @@ export function MarketplaceHome() {
     <section className={styles.groupSection} id="hizmetler">
       <div className={styles.wrap}>
         <header className={styles.sectionHead}>
-          <span>TÜM HİZMETLER</span>
-          <h2>Aradığın her iş için bir başlık var.</h2>
+          <span>{metin.groups_subtitle}</span>
+          <h2>{metin.groups_title}</h2>
           <p>{stats.service_roots} alan, {stats.service_headings} başlık. Başlığı seç, talebini oluştur.</p>
         </header>
 
@@ -315,8 +397,8 @@ export function MarketplaceHome() {
       <section className={styles.listingSection}>
         <div className={styles.wrap}>
           <header className={styles.sectionHead}>
-            <span>ÜRÜN VE İLAN</span>
-            <h2>Hizmet değil, ürün mü arıyorsun?</h2>
+            <span>{metin.listing_subtitle}</span>
+            <h2>{metin.listing_title}</h2>
           </header>
           <div className={styles.listingStrip}>
             {(catalog?.listing_roots ?? []).map((item) => (
