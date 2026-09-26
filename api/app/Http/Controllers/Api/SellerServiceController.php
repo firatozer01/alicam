@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\SellerService;
 use Illuminate\Http\JsonResponse;
+use App\Services\StorefrontAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -99,14 +100,28 @@ class SellerServiceController extends Controller
     }
 
     /** Kapağı uygulama üzerinden akıtır; herkese açık. */
-    public function showCover(SellerService $sellerService): StreamedResponse
+    /**
+     * Hizmet kapagini akitir; vitrinle ayni kapiya bagli.
+     *
+     * Eskiden denetimsizdi: pasif hizmetlerin kapaklari da dahil,
+     * herkes id deneyerek cekebiliyordu.
+     */
+    public function showCover(Request $request, SellerService $sellerService): StreamedResponse
     {
+        $izleyen = $request->user();
+        $sahibi = $izleyen !== null && $izleyen->id === $sellerService->user_id;
+
+        if (! $sellerService->is_active && ! $sahibi) {
+            abort_unless($izleyen?->hasRole('admin') === true, 404);
+        }
+
+        abort_unless(app(StorefrontAccess::class)->allows($izleyen, $sellerService->user_id), 404);
         abort_unless($sellerService->cover_path && Storage::disk(self::DISK)->exists($sellerService->cover_path), 404);
 
         return Storage::disk(self::DISK)->response(
             $sellerService->cover_path,
             null,
-            ['Cache-Control' => 'public, max-age=604800'],
+            ['Cache-Control' => 'private, max-age=604800'],
         );
     }
 

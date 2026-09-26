@@ -69,8 +69,6 @@ Route::middleware('throttle:10,1')->group(function () {
 // verenler, saticinin kendisi ve yonetici gorebilir. Karari denetleyici
 // verir; misafir her zaman 404 alir.
 Route::get('/sellers/{user}', [App\Http\Controllers\Api\PublicSellerController::class, 'show']);
-Route::get('/portfolio-images/{portfolioImage}', [App\Http\Controllers\Api\SellerPortfolioController::class, 'showImage']);
-Route::get('/service-covers/{sellerService}', [App\Http\Controllers\Api\SellerServiceController::class, 'showCover']);
 Route::get('/category-images/{category}', App\Http\Controllers\Api\CategoryImageController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -85,18 +83,24 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('throttle:20,1');
     Route::delete('/avatar', [App\Http\Controllers\Api\AvatarController::class, 'destroy']);
 
-    // Gorsel akislari bilerek oturum ICINDE.
+    // Gorsel akislari bilerek oturum ICINDE ve her biri vitrin
+    // kapisindan geciyor.
     //
-    // Mevcut /portfolio-images ve /service-covers rotalari oturum
-    // disinda ve hicbir denetim yapmiyor; id'ler sirayla arttigi icin
-    // kapali bir vitrinin fotograflari disaridan tek tek cekilebiliyor.
-    // Yeni uclarda ayni hatayi tekrarlamiyoruz.
+    // Id'ler sirayla artiyor: denetimsiz birakilan bir akis ucu,
+    // kapali bir vitrinin butun fotograflarini disaridan tek tek
+    // cekilebilir hale getirir. Vitrinin JSON'unu kapatip
+    // gorsellerini acik birakmak, kapiyi hic koymamak demek.
     Route::get('/avatars/{user}', [App\Http\Controllers\Api\AvatarController::class, 'show']);
     Route::get('/seller-banners/{user}', [App\Http\Controllers\Api\SellerBrandingController::class, 'show'])
         ->defaults('kind', 'banner');
     Route::get('/seller-logos/{user}', [App\Http\Controllers\Api\SellerBrandingController::class, 'show'])
         ->defaults('kind', 'logo');
     Route::get('/listing-images/{sellerListingImage}', App\Http\Controllers\Api\ListingImageController::class);
+    // Bu ikisi eskiden oturum disindaydi ve hicbir denetim
+    // yapmiyordu; kapali bir vitrinin fotograflari id denenerek
+    // disaridan cekilebiliyordu. Artik ilan gorselleriyle ayni yerde.
+    Route::get('/portfolio-images/{portfolioImage}', [App\Http\Controllers\Api\SellerPortfolioController::class, 'showImage']);
+    Route::get('/service-covers/{sellerService}', [App\Http\Controllers\Api\SellerServiceController::class, 'showCover']);
 
     // Vitrindeki bir ilanin detayi: fotograf galerisi ve ozellik
     // tablosu. Vitrinin kendisiyle ayni kapiya bagli.

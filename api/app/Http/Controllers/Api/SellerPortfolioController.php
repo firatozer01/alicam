@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SellerPortfolioImage;
 use App\Models\SellerPortfolioItem;
 use Illuminate\Http\JsonResponse;
+use App\Services\StorefrontAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -102,14 +103,36 @@ class SellerPortfolioController extends Controller
     }
 
     /** Görseli uygulama üzerinden akıtır; public disk sembolik bağı gerekmez. */
-    public function showImage(SellerPortfolioImage $portfolioImage): StreamedResponse
+    /**
+     * Calisma fotografini akitir.
+     *
+     * Vitrinin JSON kapisiyla AYNI kapiya bagli. Eskiden hicbir denetim
+     * yoktu ve id'ler sirayla arttigi icin kapali bir vitrinin
+     * fotograflari disaridan tek tek cekilebiliyordu; yayinda olmayan
+     * calismalarin fotograflari da herkese aciikti.
+     */
+    public function showImage(Request $request, SellerPortfolioImage $portfolioImage): StreamedResponse
     {
+        $calisma = $portfolioImage->item;
+
+        abort_unless($calisma !== null, 404);
+
+        $izleyen = $request->user();
+        $sahibi = $izleyen !== null && $izleyen->id === $calisma->user_id;
+
+        if (! $calisma->is_published && ! $sahibi) {
+            abort_unless($izleyen?->hasRole('admin') === true, 404);
+        }
+
+        abort_unless(app(StorefrontAccess::class)->allows($izleyen, $calisma->user_id), 404);
         abort_unless(Storage::disk(self::DISK)->exists($portfolioImage->path), 404);
 
         return Storage::disk(self::DISK)->response(
             $portfolioImage->path,
             null,
-            ['Cache-Control' => 'public, max-age=604800'],
+            // private: yanit isteyene gore degistigi icin paylasimli
+            // onbellekler saklamamali.
+            ['Cache-Control' => 'private, max-age=604800'],
         );
     }
 
