@@ -457,7 +457,6 @@ export function SellerDashboard() {
       links={[{ label: "Ana sayfa", href: "/" }, { label: "Hizmet verenler", href: "/hizmet-verenler" }]}
       cta={{ label: "Vitrinim", href: user ? `/satici/${user.id}` : "/satici-paneli" }}
       displayName={profile.profile?.company_name}
-      onBell={() => { changeScope("all"); selectView("requests"); }}
       sessionReady={!loading}
       user={user}
       workspace="seller"

@@ -9,6 +9,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use App\Services\MessagingService;
+use App\Support\Text;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -53,25 +54,36 @@ class ConversationController extends Controller
         ]);
 
         $user = $request->user();
-        $seller = User::query()->whereKey($data['seller_id'])->firstOrFail();
+        $other = User::query()->whereKey($data['seller_id'])->firstOrFail();
 
-        abort_if($seller->id === $user->id, 422, 'Kendinize mesaj gönderemezsiniz.');
-        abort_unless(
-            $seller->sellerProfile()->where('approval_status', 'approved')->exists(),
-            422,
-            'Bu hesap mesaj almaya açık değil.',
-        );
+        abort_if($other->id === $user->id, 422, 'Kendinize mesaj gönderemezsiniz.');
+
+        $onayli = fn (User $aday) => $aday->sellerProfile()
+            ->where('approval_status', 'approved')
+            ->exists();
+
+        // Koltuklar role gore dagitilir, kimin basladigina gore degil.
+        // Karsi taraf hizmet verense cagiran alici koltugundadir; degilse ve
+        // cagiran hizmet verense yonler yer degistirir, boylece satici da
+        // aliciya yazabilir.
+        if ($onayli($other)) {
+            [$buyer, $seller] = [$user, $other];
+        } elseif ($onayli($user)) {
+            [$buyer, $seller] = [$other, $user];
+        } else {
+            abort(422, 'Bu hesap mesaj almaya açık değil.');
+        }
 
         $buyerRequest = null;
         if (! empty($data['request_id'])) {
             $buyerRequest = BuyerRequest::query()->whereKey($data['request_id'])->first();
             // Talep baglantisi yalnizca talebin sahibi icin kurulur.
-            if ($buyerRequest && $buyerRequest->user_id !== $user->id) {
+            if ($buyerRequest && $buyerRequest->user_id !== $buyer->id) {
                 $buyerRequest = null;
             }
         }
 
-        $conversation = $this->messaging->open($user, $seller, $buyerRequest);
+        $conversation = $this->messaging->open($buyer, $seller, $buyerRequest);
 
         return response()->json([
             'data' => $this->present($conversation->fresh(['buyer', 'seller', 'buyerRequest']), $user),
@@ -253,7 +265,9 @@ class ConversationController extends Controller
             'locked' => ! $gorunur,
             'sender_id' => $message->sender_id,
             'mine' => $mine,
-            'sender' => $message->sender?->name ?? 'Hesap',
+            // Ad serbest metindir; kilitliyken kisaltilir ve satir sonlari
+            // atilir, yoksa mesaj adin icine yazilip bedelsiz ulastirilir.
+            'sender' => Text::safeName($message->sender?->name, $gorunur),
             'read' => $message->read_at !== null,
             'created_at' => $message->created_at->toIso8601String(),
         ];
@@ -272,14 +286,18 @@ class ConversationController extends Controller
             // Soketten gelen mesajda "mine" bulunmaz (tek yayin iki kisiye
             // gider); arayuz bunu sender_id ile karsilastirarak bulur.
             'viewer_id' => $user->id,
-            'counterpart' => ['id' => $other?->id, 'name' => $other?->name ?? 'Hesap'],
+            'counterpart' => ['id' => $other?->id, 'name' => Text::safeName($other?->name)],
             'role' => $isBuyer ? 'buyer' : 'seller',
             'unread' => $isBuyer ? $conversation->buyer_unread : $conversation->seller_unread,
             // Hizmet veren icin kilit durumu; alicida her zaman acik.
             'locked' => ! $conversation->canRead($user->id),
             'unlock_cost' => $this->messaging->unlockCost($conversation, $user),
             'last_message_at' => $conversation->last_message_at?->toIso8601String(),
-            'request' => $conversation->buyerRequest ? [
+            // Talep basligi da kilidin arkasindadir. Basligi alici yazar;
+            // serbest metin oldugu icin acilmadan gosterilirse hem mesajin
+            // ozu hem iletisim bilgisi bedelsiz sizar, ustelik ayni basligi
+            // talep listesinde gormek RequestUnlock bedeli ister.
+            'request' => ($conversation->buyerRequest && $conversation->canRead($user->id)) ? [
                 'id' => $conversation->buyerRequest->id,
                 'reference' => $conversation->buyerRequest->public_reference,
                 'title' => $conversation->buyerRequest->title,

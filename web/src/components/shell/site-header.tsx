@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AccountMenu } from "@/components/account-menu";
 import { NavMenuBar, type NavMenuDef } from "@/components/listing/nav-menu";
+import { NotificationBell } from "./notification-bell";
 import { useSession, type SessionUser } from "./use-session";
 import styles from "./site-header.module.css";
 
@@ -73,7 +74,6 @@ export function SiteHeader({
   displayName,
   workspace,
   credits,
-  onBell,
   cta,
   announce,
 }: {
@@ -87,7 +87,6 @@ export function SiteHeader({
   displayName?: string | null;
   workspace?: "buyer" | "seller" | "admin";
   credits?: number;
-  onBell?: () => void;
   cta?: { label: string; href: string };
   announce?: string;
 }) {
@@ -113,7 +112,8 @@ export function SiteHeader({
 
         <div className={styles.actions}>
           {typeof credits === "number" && <Link className={styles.credit} href="/kontor-yukle">⚡ {credits} kontör</Link>}
-          {onBell && <button aria-label="Bildirimler" className={styles.bell} onClick={onBell} type="button">🔔<i /></button>}
+          {/* Zil yalnizca oturum acmis kullanicida; sayac kendi icinde okunur. */}
+          {ready && currentUser && <NotificationBell userId={currentUser.id} />}
           {!ready
             ? <span className={styles.skeleton} />
             : currentUser

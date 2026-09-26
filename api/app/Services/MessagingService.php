@@ -10,8 +10,11 @@ use App\Models\BuyerRequest;
 use App\Models\Conversation;
 use App\Models\CreditTransaction;
 use App\Models\Message;
+use App\Models\RequestUnlock;
 use App\Models\SellerCredit;
 use App\Models\User;
+use App\Services\NotificationService;
+use App\Support\Text;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -28,9 +31,30 @@ use Illuminate\Support\Facades\Log;
  */
 class MessagingService
 {
-    /** Konusmayi bulur, yoksa acar. Ayni ikili + talep icin tek satir olur. */
+    public function __construct(private readonly NotificationService $notifications) {}
+
+    /**
+     * Konusmayi bulur, yoksa acar. Ayni ikili + talep icin tek satir olur.
+     *
+     * Benzersiz indeks yonlu oldugu icin once TERS yonde bir satir olup
+     * olmadigina bakilir: iki taraf da hizmet veren olabildiginden (calisma
+     * alani gecisi var) aksi halde ayni ikili icin iki ayri konusma olusur,
+     * mesajlar bolunur ve iki taraf da ayri ayri odeme istenirdi.
+     */
     public function open(User $buyer, User $seller, ?BuyerRequest $request = null): Conversation
     {
+        $ters = Conversation::query()
+            ->where('buyer_id', $seller->id)
+            ->where('seller_id', $buyer->id)
+            ->where(fn ($query) => $request === null
+                ? $query->whereNull('request_id')
+                : $query->where('request_id', $request->id))
+            ->first();
+
+        if ($ters !== null) {
+            return $ters;
+        }
+
         return Conversation::query()->firstOrCreate(
             [
                 'buyer_id' => $buyer->id,
@@ -48,7 +72,22 @@ class MessagingService
             return 0;
         }
 
+        // Konusma bir talebe bagliysa ve satici o talebi zaten kontorle
+        // actiysa ayni is icin ikinci kez odemez.
+        if ($conversation->request_id !== null && $this->hasRequestUnlock($conversation, $user)) {
+            return 0;
+        }
+
         return max(0, (int) config('messaging.unlock_cost', 1));
+    }
+
+    /** Satici bu konusmanin bagli oldugu talebi daha once acti mi. */
+    private function hasRequestUnlock(Conversation $conversation, User $seller): bool
+    {
+        return RequestUnlock::query()
+            ->where('seller_id', $seller->id)
+            ->where('request_id', $conversation->request_id)
+            ->exists();
     }
 
     /**
@@ -77,7 +116,7 @@ class MessagingService
                 ];
             }
 
-            $cost = max(0, (int) config('messaging.unlock_cost', 1));
+            $cost = $this->unlockCost($locked, $seller);
             $balance = $cost > 0
                 ? $this->charge($seller, $locked, $cost)
                 : SellerCredit::query()->where('user_id', $seller->id)->value('balance');
@@ -110,7 +149,7 @@ class MessagingService
             if (! $locked->isUnlocked()) {
                 if ($isSeller) {
                     throw ConversationLockedException::sellerMustUnlock(
-                        max(0, (int) config('messaging.unlock_cost', 1)),
+                        $this->unlockCost($locked, $sender),
                     );
                 }
 
@@ -161,6 +200,8 @@ class MessagingService
             ]);
         }
 
+        $this->notify($fresh ?? $conversation, $message, $sender);
+
         // Gecikmeli gonderim: karsi taraf birkac dakika icinde okursa e-posta
         // hic cikmaz, sohbet ederken kutusu dolmaz.
         NotifyUnreadMessage::dispatch($message->id)
@@ -191,6 +232,43 @@ class MessagingService
             $reader->id === $conversation->buyer_id
                 ? ['buyer_unread' => 0]
                 : ['seller_unread' => 0],
+        );
+    }
+
+    /**
+     * Ust cubuktaki zil icin bildirim yazar.
+     *
+     * Ayni konusmadan gelen her mesaj yeni satir acmaz; dedupe anahtari
+     * konusma oldugu icin var olan satir tazelenir. Kilitli konusmada
+     * onizleme KONMAZ: e-posta ve yayinda oldugu gibi burada da govde
+     * odemeden gorunmemeli.
+     */
+    private function notify(Conversation $conversation, Message $message, User $sender): void
+    {
+        $recipient = $conversation->counterpartFor($sender->id);
+
+        if ($recipient === null) {
+            return;
+        }
+
+        $okuyabilir = $conversation->canRead($recipient->id);
+        $bedel = $this->unlockCost($conversation, $recipient);
+        $ad = Text::safeName($sender->name, $okuyabilir);
+
+        $this->notifications->push(
+            userId: $recipient->id,
+            type: $okuyabilir ? 'message_received' : 'message_locked',
+            title: $okuyabilir
+                ? "{$ad} sana mesaj gönderdi"
+                : 'Yeni bir mesajın var',
+            body: $okuyabilir
+                ? mb_substr(trim($message->body), 0, 120)
+                : "Okumak ve yanıtlamak için {$bedel} kontör gerekiyor.",
+            link: '/mesajlar?konusma='.$conversation->id,
+            dedupeKey: 'message:'.$conversation->id,
+            data: ['conversation_id' => $conversation->id, 'locked' => ! $okuyabilir],
+            subjectType: 'conversation',
+            subjectId: $conversation->id,
         );
     }
 

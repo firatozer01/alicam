@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Message;
 use App\Services\AppSettings;
+use App\Support\Text;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -69,7 +70,8 @@ class NotifyUnreadMessage implements ShouldQueue
             return;
         }
 
-        $sender = $message->sender->name;
+        // Ad serbest metin; konu satirina satir sonu girmesin diye temizlenir.
+        $sender = Text::safeName($message->sender->name);
         $link = rtrim((string) config('services.frontend_url'), '/').'/mesajlar';
 
         // Konusma kilitliyse hizmet veren mesajin metnini henuz goremez;

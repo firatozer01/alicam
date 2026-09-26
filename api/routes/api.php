@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\CreditPurchaseController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\MarketplaceController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\SellerCreditController;
 use App\Http\Controllers\Api\SellerProfileController;
@@ -75,20 +76,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/assistant/lookup', [AssistantController::class, 'lookup'])
         ->middleware('throttle:20,1');
 
+    // Ust cubuktaki zil. Sayac her sayfa yuklemesinde okundugu icin
+    // listeden ayri ve ucuz bir uc olarak durur.
+    Route::get('/notifications/count', [NotificationController::class, 'count']);
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/read', [NotificationController::class, 'read'])
+        ->middleware('throttle:60,1');
+
     // Ozel kanal yetkilendirmesi. Laravel bunu kokte de sunar ama arayuz
     // yalnizca /api/* yolunu proxy'ledigi icin burada da acilir.
     Route::post('/broadcasting/auth', fn (Request $request) => Broadcast::auth($request));
 
     // Mesajlasma. Soket kurulamazsa arayuz /poll ucuna duser.
     Route::get('/conversations', [ConversationController::class, 'index']);
-    Route::post('/conversations', [ConversationController::class, 'store'])->middleware('throttle:20,1');
+    // Talep acmakla ayni esik: dogrulanmamis hesap konusma baslatamaz,
+    // yoksa tek hesapla dakikada onlarca hizmet verene mesaj atilabilirdi.
+    Route::post('/conversations', [ConversationController::class, 'store'])
+        ->middleware(['contact.verified', 'throttle:20,1']);
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show']);
     Route::get('/conversations/{conversation}/poll', [ConversationController::class, 'poll']);
     // Hizmet veren konusmayi acar: kontor duser, mesajlar gorunur olur.
     Route::post('/conversations/{conversation}/unlock', [ConversationController::class, 'unlock'])
         ->middleware('throttle:20,1');
     Route::post('/conversations/{conversation}/messages', [ConversationController::class, 'send'])
-        ->middleware('throttle:60,1');
+        ->middleware(['contact.verified', 'throttle:60,1']);
 
     Route::post('/verification/send', [VerificationController::class, 'send'])
         ->middleware('throttle:5,1');

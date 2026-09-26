@@ -37,18 +37,13 @@ return new class extends Migration
             where sub.conversation_id = conversations.id
         ");
 
-        // Saticinin kendi yazdigi ama bedelsiz gecmis konusmalar da acik
-        // sayilir: o konusmayi zaten okuyabiliyordu, geriye donuk kilitlemek
-        // calisan bir seyi bozmak olurdu.
+        // Kalan TUM eski konusmalar da acik sayilir. Eski kuralda bedel
+        // YAZMAK icindi; okumak her zaman serbestti. Geriye donuk kilitlemek
+        // saticinin dun okudugu mesaji bugun paraya baglamak olurdu.
         DB::statement('
             update conversations
             set unlocked_at = created_at, unlock_cost = 0
             where unlocked_at is null
-              and exists (
-                select 1 from messages
-                where messages.conversation_id = conversations.id
-                  and messages.sender_id = conversations.seller_id
-              )
         ');
     }
 

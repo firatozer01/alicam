@@ -14,3 +14,12 @@ Broadcast::channel('conversation.{conversationId}', function (User $user, int $c
 
     return $conversation !== null && $conversation->isParticipant($user->id);
 });
+
+/**
+ * Kisisel bildirim akisi. Kanal adindaki kimlige guvenilmez; oturum acmis
+ * kullanicinin kimligiyle karsilastirilir, boylece kimse baskasinin
+ * bildirimlerine abone olamaz.
+ */
+Broadcast::channel('user.{userId}', function (User $user, int $userId): bool {
+    return $user->id === $userId;
+});

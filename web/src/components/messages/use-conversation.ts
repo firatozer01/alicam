@@ -47,14 +47,36 @@ type PusherLike = {
   connector?: { pusher?: { connection?: { bind: (event: string, handler: (payload: { current: string }) => void) => void } } };
 };
 
-/** Ayni mesaj hem soketten hem yoklamadan gelebilir; kimlige gore tekillestirir. */
+/**
+ * Ayni mesaj hem soketten hem yoklamadan gelebilir; kimlige gore tekillestirir.
+ *
+ * Elde metinsiz bir kopya varken metinli kopya gelirse YERINE GECER: kilitli
+ * konusmada yayin govdeyi tasimadigi icin, kendi yazdigi mesajin maskeli
+ * kopyasi HTTP yanitindan once dusen gonderici aksi halde kendi metnini
+ * goremezdi.
+ */
 function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]): ChatMessage[] {
   if (incoming.length === 0) return current;
 
-  const seen = new Set(current.map((message) => message.id));
-  const fresh = incoming.filter((message) => !seen.has(message.id));
+  const byId = new Map(current.map((message) => [message.id, message]));
+  let changed = false;
 
-  return fresh.length === 0 ? current : [...current, ...fresh];
+  for (const message of incoming) {
+    const existing = byId.get(message.id);
+
+    if (existing === undefined) {
+      byId.set(message.id, message);
+      changed = true;
+      continue;
+    }
+
+    if (existing.body === null && message.body !== null) {
+      byId.set(message.id, message);
+      changed = true;
+    }
+  }
+
+  return changed ? [...byId.values()].sort((a, b) => a.id - b.id) : current;
 }
 
 /**

@@ -7,6 +7,7 @@ use App\Http\Resources\OfferResource;
 use App\Http\Resources\SellerRequestResource;
 use App\Models\BuyerRequest;
 use App\Models\Offer;
+use App\Services\NotificationService;
 use App\Services\SellerCreditService;
 use App\Services\SellerMatchingService;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +20,7 @@ class OfferController extends Controller
     public function __construct(
         private readonly SellerMatchingService $matching,
         private readonly SellerCreditService $credits,
+        private readonly NotificationService $notifications,
     ) {}
 
     public function sellerIndex(Request $request): JsonResponse
@@ -99,6 +101,18 @@ class OfferController extends Controller
             return [$offer, $unlock];
         }, 3);
 
+        // Alici talebine teklif geldigini ust cubuktaki zilden gorur.
+        $this->notifications->push(
+            userId: $buyerRequest->user_id,
+            type: 'offer_received',
+            title: 'Talebine yeni teklif geldi',
+            body: $seller->name.' — '.number_format((float) $data['price'], 0, ',', '.').' TL',
+            link: '/musteri-panel',
+            data: ['request_id' => $buyerRequest->id, 'offer_id' => $offer->id],
+            subjectType: 'offer',
+            subjectId: $offer->id,
+        );
+
         return response()->json([
             'message' => $unlock['already_unlocked']
                 ? 'Teklifiniz gönderildi; talep daha önce açıldığı için kontör düşülmedi.'
@@ -158,6 +172,21 @@ class OfferController extends Controller
 
             return $lockedOffer->fresh('seller.sellerProfile');
         }, 3);
+
+        // Kararin sahibi hizmet veren; kabul de ret de onun icin haberdir.
+        $baslik = BuyerRequest::query()->whereKey($decidedOffer->request_id)->value('title');
+        $kabul = $data['decision'] === 'accepted';
+
+        $this->notifications->push(
+            userId: $decidedOffer->seller_id,
+            type: $kabul ? 'offer_accepted' : 'offer_rejected',
+            title: $kabul ? 'Teklifin kabul edildi' : 'Teklifin bu kez seçilmedi',
+            body: $baslik,
+            link: '/satici-paneli',
+            data: ['request_id' => $decidedOffer->request_id, 'offer_id' => $decidedOffer->id],
+            subjectType: 'offer',
+            subjectId: $decidedOffer->id,
+        );
 
         return response()->json([
             'message' => $data['decision'] === 'accepted' ? 'Teklif kabul edildi.' : 'Teklif reddedildi.',
