@@ -84,6 +84,9 @@ class OfferResource extends JsonResource
             'attributes' => array_slice($anlik['attributes'] ?? [], 0, 6),
             // Silinmis ya da yayindan kaldirilmis olabilir.
             'is_available' => $canli !== null && in_array($canli->status, ['published', 'sold'], true),
+            // Satilmis urun hala gorunur ama alici bunu bilmeli:
+            // "hala duruyor" ile "baskasina satilmis" ayni sey degil.
+            'is_sold' => $canli?->status === 'sold',
             'listing_id' => $canli?->id,
         ];
     }

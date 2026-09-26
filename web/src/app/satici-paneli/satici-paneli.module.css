@@ -229,3 +229,105 @@
 }
 /* Ornek talep rozeti: gercek isle karistirilmasin, acmak bedelsizdir. */
 .demoFlag{border-radius:999px;padding:2px 8px;background:var(--warn-bg);color:var(--warn-fg);font-size:10px;font-weight:800}
+/* Vitrin urunleri: kart izgarasi, durum rozeti ve kart ici eylemler. */
+.listingGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.listingCard{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 10px 34px rgba(79,70,229,.06);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease;animation:rowIn .32s ease both}
+.listingCard:hover{border-color:var(--violet-200);box-shadow:0 18px 44px rgba(79,70,229,.12);transform:translateY(-2px)}
+.listingFlag{position:absolute;top:10px;left:10px;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:800;letter-spacing:.06em}
+.listingFlag.flagDraft{background:var(--warn-bg);color:var(--warn-fg)}
+.listingFlag.flagLive{background:var(--ok-bg);color:var(--ok-fg)}
+.listingFlag.flagSold{background:var(--violet-100);color:var(--indigo)}
+.listingFlag.flagArchive{background:var(--surface);color:var(--muted)}
+.listingBody{display:flex;flex-direction:column;gap:7px;padding:13px 14px 14px;flex:1}
+.listingTop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.listingTop small{font-family:var(--font-plex),ui-monospace,monospace;font-size:10.5px;color:var(--faint)}
+.listingCat{border-radius:7px;padding:3px 9px;background:var(--violet-50);color:var(--indigo);font-size:11px;font-weight:700}
+.listingBody h2{margin:0;font-size:15px;font-weight:700;line-height:1.35}
+.listingMeta{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--muted-2)}
+.listingBody footer{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:11px;border-top:1px solid var(--line-soft)}
+.listingActions{display:flex;gap:10px;flex-wrap:wrap}
+.listingActions button{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:700;color:var(--indigo);cursor:pointer}
+.listingActions button:disabled{opacity:.5;cursor:default}
+
+/* Urun detay katmani: fotograf yonetimi solda, kunye sagda. */
+.listingViewer{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px}
+.listingShots{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+.shotGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:9px;width:100%;margin-top:4px}
+.shotGrid figure{position:relative;margin:0;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--bg)}
+.shotGrid img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.shotGrid b{position:absolute;left:7px;top:7px;border-radius:6px;padding:2px 7px;background:var(--ok-bg);color:var(--ok-fg);font-size:9.5px;font-weight:800;letter-spacing:.06em}
+.shotCover{position:absolute;left:7px;bottom:7px;border:0;border-radius:7px;padding:4px 8px;background:rgba(21,22,45,.72);color:#fff;font:inherit;font-size:10.5px;font-weight:700;cursor:pointer;transition:background .15s ease}
+.shotCover:hover{background:rgba(79,70,229,.9)}
+.shotCover:disabled{opacity:.6;cursor:default}
+.shotRemove{position:absolute;right:7px;top:7px;width:23px;height:23px;border:0;border-radius:50%;background:rgba(21,22,45,.72);color:#fff;font-size:10px;cursor:pointer}
+.shotRemove:hover{background:var(--pink)}
+.listingSide{display:flex;flex-direction:column;gap:10px;align-self:start}
+.listingText{margin:0;font-size:12.5px;line-height:1.65;color:var(--ink-2)}
+.listingSpecs{margin:0;display:grid;gap:1px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--line-soft)}
+.listingSpecs>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px;background:#fff}
+.listingSpecs dt{font-size:11.5px;color:var(--muted)}
+.listingSpecs dd{margin:0;font-size:11.5px;font-weight:700;color:var(--ink);text-align:right}
+
+/* Kategoriye bagli cok secimli alanlar formGrid icinde satir olur. */
+.formHint{margin:0;padding:14px 15px;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.formGrid .checkField{display:flex;flex-direction:column;gap:6px;min-width:0}
+.formGrid .checkField>span{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted-2)}
+.formGrid .checkField>div{display:flex;flex-wrap:wrap;gap:7px}
+.formGrid .checkField label{flex-direction:row;align-items:center;gap:6px;border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12.5px;font-weight:600;letter-spacing:normal;color:var(--ink-2);cursor:pointer}
+.formGrid .checkField label:hover{border-color:var(--violet-200)}
+.formGrid .checkField input{width:15px;height:15px;flex:none;padding:0;border:0;border-radius:0;accent-color:var(--violet)}
+.formGrid .checkField input:focus{border:0;box-shadow:none}
+.formGrid .checkField small{font-size:11.5px;font-weight:400;letter-spacing:normal;color:var(--muted-2)}
+
+/* Vitrin kapagi: profileHero'nun kardesi, cocugu degil. */
+.brandBanner{position:relative;aspect-ratio:3/1;max-height:280px;margin-bottom:14px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(120deg,var(--violet-50),#f2fbfd);overflow:hidden}
+.brandBanner img{width:100%;height:100%;object-fit:cover;display:block}
+.brandEmpty{position:absolute;inset:0;display:grid;place-items:center;padding:0 24px;color:var(--muted);font-size:12.5px;text-align:center}
+.brandUpload{position:absolute;left:14px;bottom:14px;border-radius:9px;padding:7px 12px;background:rgba(21,22,45,.72);color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;transition:background .15s ease}
+.brandUpload:hover{background:rgba(79,70,229,.9)}
+.brandRemove{position:absolute;right:14px;bottom:14px;width:28px;height:28px;border:0;border-radius:50%;background:rgba(21,22,45,.72);color:#fff;font-size:11px;cursor:pointer}
+.brandRemove:hover{background:var(--pink)}
+.brandRemove:disabled{opacity:.5;cursor:default}
+
+/* Firma logosu: bas harfler yerine yuklenen gorsel. */
+.logoSlot{position:relative;justify-self:center;width:max-content}
+.logoImage{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+.logoUpload{position:absolute;right:-4px;bottom:-4px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--indigo));color:#fff;font-size:12px;line-height:1;cursor:pointer;box-shadow:0 6px 14px rgba(124,58,237,.3)}
+.logoRemove{position:absolute;left:-4px;bottom:-4px;width:24px;height:24px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--muted);font-size:10px;cursor:pointer}
+.logoRemove:hover{border-color:var(--pink);color:var(--pink)}
+.logoRemove:disabled{opacity:.5;cursor:default}
+
+/* Acilmis talepte alicinin profil fotografi. */
+.details .contactAvatar{width:38px;height:38px;flex:none;display:block;margin-bottom:8px;border-radius:12px;overflow:hidden;background:var(--bg)}
+.details .contactAvatar img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Teklif formuna urun ilistirme. */
+.offerForm .attachButton{margin-top:2px;border:1px dashed var(--violet-300);border-radius:8px;padding:7px 9px;background:#fff;font:inherit;font-size:10.5px;font-weight:700;letter-spacing:normal;color:var(--indigo);cursor:pointer;transition:border-color .15s ease,background .15s ease}
+.offerForm .attachButton:hover{border-color:var(--violet);background:var(--violet-50)}
+.offerForm .offerAttach{grid-column:1/-1;display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--violet-200);border-radius:10px;background:var(--violet-50)}
+.offerForm .offerAttach img{width:44px;height:34px;flex:none;object-fit:cover;border-radius:7px;display:block}
+.offerForm .offerAttach i{width:44px;height:34px;flex:none;display:grid;place-items:center;border-radius:7px;background:#fff;font-style:normal;font-size:15px}
+.offerForm .offerAttach span{flex:1;min-width:0;color:var(--ink-2);font:600 11.5px var(--font-inter);letter-spacing:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.offerForm .offerAttach b{color:var(--indigo)}
+.offerForm .offerAttach button{width:24px;height:24px;flex:none;padding:0;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--muted);font-size:10px;cursor:pointer}
+.offerForm .offerAttach button:hover{border-color:var(--pink);color:var(--pink)}
+.offerForm .offerAttach+aside{grid-column:1/-1;justify-content:flex-end}
+
+/* Urun secici. */
+.pickerGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.pickerCard{display:flex;align-items:center;gap:10px;padding:9px;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:left;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease}
+.pickerCard:hover{border-color:var(--violet);box-shadow:0 10px 24px rgba(79,70,229,.1)}
+.pickerCard img{width:56px;height:44px;flex:none;object-fit:cover;border-radius:9px;display:block}
+.pickerCard i{width:56px;height:44px;flex:none;display:grid;place-items:center;border-radius:9px;background:var(--bg);font-style:normal;font-size:18px}
+.pickerCard span{display:grid;gap:3px;min-width:0}
+.pickerCard strong{font-size:12.5px;font-weight:700;line-height:1.35;color:var(--ink);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pickerCard small{font-family:var(--font-plex),ui-monospace,monospace;font-size:11.5px;font-weight:700;color:var(--indigo)}
+.pickerCard.pickerOn{border-color:var(--violet);background:var(--violet-50)}
+.pickerEmpty{display:grid;justify-items:center;gap:9px;padding:30px 24px;border:1px dashed var(--violet-300);border-radius:14px;background:var(--violet-50);text-align:center}
+.pickerEmpty strong{font-size:14px}
+.pickerEmpty p{max-width:420px;margin:0;color:var(--ink-2);font-size:12.5px;line-height:1.6}
+
+@media(max-width:900px){
+  .listingViewer{grid-template-columns:1fr}
+  .brandBanner{aspect-ratio:2.4/1;border-radius:14px}
+}

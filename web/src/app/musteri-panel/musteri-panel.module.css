@@ -53,3 +53,79 @@
   .shellNav a{display:none}
   .content{width:min(100% - 28px,1400px)}
 }
+
+/* ---- Talep sahibinin fotografi ---- */
+/* Kart basligindaki kategori karosunun solunda kucuk yuvarlak. */
+.requestCard>header>div>.ownerPhoto{flex:none;width:34px;height:34px;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:#fff;background:linear-gradient(100deg,#7c3aed,#4f46e5);font:700 11px var(--font-plex)}
+.requestCard>header>div>.ownerPhoto img{width:100%;height:100%;display:block;object-fit:cover}
+
+/* ---- Sag raydaki profil fotografi kutusu ---- */
+.photoRow{display:flex;align-items:flex-start;gap:12px;margin:10px 0 16px;padding-bottom:15px;border-bottom:1px solid var(--line)}
+.photoRow>div{min-width:0}
+.photoRow strong{display:block;font-size:12.5px;color:var(--ink)}
+.photoRow small{display:block;margin-top:3px;color:var(--muted-2);font-size:10.5px;line-height:1.45}
+.accountPhoto{flex:none;width:52px;height:52px;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:#fff;background:linear-gradient(100deg,#7c3aed,#4f46e5);font:700 15px var(--font-plex)}
+.accountPhoto img{width:100%;height:100%;display:block;object-fit:cover}
+.photoActions{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.photoButton{display:inline-flex;align-items:center;padding:7px 11px;border:0;border-radius:var(--r-sm);font:700 11px var(--font-inter);cursor:pointer;transition:background .2s,opacity .2s}
+.photoButton.photoPick{color:#fff;background:linear-gradient(100deg,#7c3aed,#4f46e5)}
+.photoButton.photoPick input{display:none}
+.photoButton.photoPick:has(input:disabled){opacity:.6;cursor:progress}
+.photoButton.photoDrop{border:1px solid var(--line);color:var(--muted);background:#fff}
+.photoButton.photoDrop:hover{color:var(--danger-fg);background:var(--danger-bg)}
+.photoButton:disabled{opacity:.6;cursor:progress}
+.photoHint{display:block;margin-top:7px;color:var(--faint);font-style:normal;font-size:10px}
+
+/* ---- Teklif karti: satici fotografi ve iliktirilen urun ----
+   Dosyanin ust bloklarindaki .offer kurallari eski 7-9px olcekte;
+   buradaki satirlar panelin geri kalaniyla ayni 10-13.5px olcegi
+   kullanir ve sirasi geregi oncekileri ezer. */
+.offer{padding:15px}
+.offer>header{grid-template-columns:38px minmax(0,1fr) auto;gap:10px}
+.offer>header>.sellerPhoto{width:38px;height:38px;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:#fff;font:700 12px var(--font-plex)}
+.offer>header>.sellerPhoto img{width:100%;height:100%;display:block;object-fit:cover}
+.offer>header>div{min-width:0}
+.offer header strong{overflow:hidden;font-size:13px;text-overflow:ellipsis;white-space:nowrap}
+.offer header small{margin-top:3px;font-size:10.5px}
+.offer header>b{font-size:10px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+.offer>p{min-height:0;margin:9px 0 12px;font-size:12px;line-height:1.6}
+.priceRow>div{display:flex;flex-direction:column;gap:1px}
+.priceLabel{color:var(--faint);font:800 10px var(--font-plex);letter-spacing:.09em}
+.offerPrice{font-size:21px;line-height:1.15}
+
+/* Urun seridi: teklif tutariyla karismasin diye kendi cercevesi var. */
+.attached{display:block;overflow:hidden;margin:0 0 12px;border:1px solid var(--violet-200);border-radius:var(--r-md);background:var(--violet-50);color:var(--ink);text-decoration:none}
+.attached.attachedLink{transition:border-color .2s,box-shadow .2s}
+.attached.attachedLink:hover{border-color:#7c3aed;box-shadow:var(--shadow-sm)}
+.attachedLabel{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 11px;border-bottom:1px solid var(--violet-200);background:var(--violet-100);color:#7c3aed;font:800 10px var(--font-plex);letter-spacing:.09em}
+.attachedLabel b{color:#4f46e5;font-size:10px;letter-spacing:0}
+.attachedBody{display:grid;grid-template-columns:78px minmax(0,1fr);gap:11px;padding:11px}
+.attachedCover{width:78px;height:66px;display:grid;place-items:center;overflow:hidden;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff}
+.attachedCover img{width:100%;height:100%;display:block;object-fit:cover}
+.attachedCover i{color:var(--faint);font-style:normal;font-size:24px}
+.attachedInfo{min-width:0}
+.attachedInfo>strong{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;font-size:12.5px;line-height:1.35}
+.attachedInfo>small{display:block;margin-top:4px;overflow:hidden;color:var(--muted-2);font-size:10.5px;text-overflow:ellipsis;white-space:nowrap}
+.attachedPrice{display:inline-flex;align-items:baseline;gap:6px;margin-top:6px;font-style:normal}
+.attachedPrice b{color:var(--ink);font:700 13.5px var(--font-plex)}
+.attachedPrice span{color:var(--muted-2);font-size:10px;font-weight:700}
+.attachedChips{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 0;padding:0;list-style:none}
+.attachedChips li{padding:3px 7px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink-2);font-size:10px;font-weight:650}
+.attachedChips li b{color:var(--muted-2)}
+.attachedGone{display:flex;align-items:center;gap:6px;margin:0;padding:8px 11px;border-top:1px solid var(--violet-200);color:var(--muted-2);font-size:10.5px}
+
+/* Modalda acilan teklif kartinin dugmeleri .requestCard kapsaminda
+   olmadigi icin kendi olculerini burada alir. */
+.offer>footer button,.acceptedInfo>button,.reviewForm>button{padding:8px 12px;border:0;border-radius:var(--r-sm);color:#fff;background:linear-gradient(100deg,#7c3aed,#4f46e5);font:700 11px var(--font-inter);cursor:pointer;transition:opacity .2s}
+.offer>footer button:disabled,.acceptedInfo>button:disabled,.reviewForm>button:disabled{opacity:.6;cursor:progress}
+.acceptedInfo a{font-size:11px}
+.reviewDone strong{font-size:14px}
+.reviewDone span{font-size:11px}
+.reviewForm textarea{font-size:11.5px}
+.noOffer{font-size:12px}
+
+@media(max-width:620px){
+  .attachedBody{grid-template-columns:58px minmax(0,1fr);gap:9px}
+  .attachedCover{width:58px;height:54px}
+  .photoRow{gap:10px}
+}

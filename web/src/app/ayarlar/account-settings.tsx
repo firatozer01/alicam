@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/components/shell/site-header";
-import { ApiError, apiRequest, firstApiError } from "@/lib/api";
+import { ApiError, apiRequest, apiUpload, firstApiError } from "@/lib/api";
 import styles from "./settings.module.css";
 
 type User = {
   id: number; name: string; email: string; phone: string; roles: string[];
+  avatar_url: string | null;
   verification: { email: boolean; phone: boolean; complete: boolean };
 };
 type SellerProfile = {
@@ -24,6 +25,11 @@ const approvalLabel: Record<string, string> = {
   draft: "Tamamlanmadı",
 };
 
+// Sunucu da ayni siniri uyguluyor; buradaki kontrol yalnizca kullaniciyi
+// 4 MB'lik bir yuklemenin sonunda 422 beklemekten kurtariyor.
+const AVATAR_MAX_BYTES = 4 * 1024 * 1024;
+const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export function AccountSettings() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -33,6 +39,9 @@ export function AccountSettings() {
   const [passwords, setPasswords] = useState({ current_password: "", password: "", password_confirmation: "" });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  // Fotograf icin ayri bir bayrak: yukleme sirasinda yalnizca fotograf
+  // denetimi kilitlenmeli, formun kaydet dugmesi degil.
+  const [avatarBusy, setAvatarBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
@@ -67,6 +76,33 @@ export function AccountSettings() {
     finally { setBusy(false); }
   };
 
+  // Yanittan gelen adresi dogrudan state'e yaziyoruz: dosya adi her
+  // yuklemede degistigi icin tarayici eski fotografi gostermez, sayfayi
+  // yeniden yuklemeye gerek yok.
+  const uploadAvatar = async (file: File) => {
+    setNotice(""); setError("");
+    if (!AVATAR_TYPES.includes(file.type)) return setError("Yalnızca JPG, PNG veya WEBP fotoğraf yükleyebilirsin.");
+    if (file.size > AVATAR_MAX_BYTES) return setError("Fotoğraf en fazla 4 MB olabilir. Daha küçük bir dosya seç.");
+
+    setAvatarBusy(true);
+    try {
+      const response = await apiUpload<{ message: string; data: { avatar_url: string | null } }>("/avatar", file);
+      setUser((current) => current && { ...current, avatar_url: response.data.avatar_url });
+      setNotice(response.message);
+    } catch (requestError: unknown) { setError(firstApiError(requestError)); }
+    finally { setAvatarBusy(false); }
+  };
+
+  const removeAvatar = async () => {
+    setNotice(""); setError(""); setAvatarBusy(true);
+    try {
+      const response = await apiRequest<{ message: string; data: { avatar_url: string | null } }>("/avatar", { method: "DELETE" });
+      setUser((current) => current && { ...current, avatar_url: response.data.avatar_url });
+      setNotice(response.message);
+    } catch (requestError: unknown) { setError(firstApiError(requestError)); }
+    finally { setAvatarBusy(false); }
+  };
+
   const savePassword = async () => {
     setBusy(true); setError(""); setNotice("");
     try {
@@ -93,7 +129,28 @@ export function AccountSettings() {
 
     <div className={styles.wrap}>
       <header className={styles.head}>
-        <span className={styles.avatar}>{initials || "A"}</span>
+        <div className={styles.avatarBox}>
+          <div className={styles.avatarShot}>
+            <span className={styles.avatar}>
+              {user.avatar_url
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img alt={user.name} loading="lazy" src={user.avatar_url} />
+                : initials || "A"}
+            </span>
+            <label className={`${styles.avatarAction} ${avatarBusy ? styles.avatarWaiting : ""}`} title={user.avatar_url ? "Profil fotoğrafını değiştir" : "Profil fotoğrafı ekle"}>
+              <input
+                accept="image/jpeg,image/png,image/webp"
+                disabled={avatarBusy}
+                hidden
+                onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadAvatar(file); event.target.value = ""; }}
+                type="file"
+              />
+              <span aria-hidden="true">{avatarBusy ? "…" : user.avatar_url ? "◉" : "＋"}</span>
+              <span className={styles.srOnly}>{user.avatar_url ? "Profil fotoğrafını değiştir" : "Profil fotoğrafı ekle"}</span>
+            </label>
+          </div>
+          {user.avatar_url && <button className={styles.avatarRemove} disabled={avatarBusy} onClick={removeAvatar} type="button">Kaldır</button>}
+        </div>
         <div>
           <h1>{user.name}</h1>
           <p>{user.email} · {user.phone}</p>

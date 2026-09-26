@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/components/modal/modal";
 import { SiteHeader } from "@/components/shell/site-header";
 import { QuoteModal, type QuoteCategory } from "./quote-modal";
+import { ListingDetail, placeOf, type ListingCard } from "./listing-detail";
 import { WorkViewer, workSpecs } from "@/components/portfolio/work-viewer";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import styles from "./showcase.module.css";
@@ -24,11 +25,15 @@ type Service = { id: number; title: string; description: string; price_from: str
 type Seller = {
   id: number; name: string; company_name: string | null; profile_type: string | null;
   description: string | null; is_featured: boolean; member_since: string | null;
+  // Magazanin genis kapagi, firma logosu ve kullanicinin profil resmi.
+  banner_url: string | null; logo_url: string | null; avatar_url: string | null;
   categories: SellerCategory[];
   locations: { city: string | null; district: string | null }[];
   rating: { average: number; count: number; breakdown: Record<string, number> };
-  services: Service[]; portfolio: PortfolioItem[]; reviews: Review[];
+  services: Service[]; listings: ListingCard[]; portfolio: PortfolioItem[]; reviews: Review[];
 };
+
+type Tab = "urunler" | "hizmetler" | "isler" | "yorumlar";
 
 const money = (value: string) => new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(Number(value));
 const monthYear = (value: string) => new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric" }).format(new Date(value));
@@ -39,11 +44,13 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [openWork, setOpenWork] = useState<PortfolioItem | null>(null);
+  const [openListing, setOpenListing] = useState<ListingCard | null>(null);
   // undefined: modal kapali. Bos metin: genel istek. Dolu: o kategoriden.
   const [quoteFor, setQuoteFor] = useState<string | undefined>(undefined);
   const [workFilter, setWorkFilter] = useState("");
   const [reviewFilter, setReviewFilter] = useState(0);
-  const [tab, setTab] = useState<"hizmetler" | "isler" | "yorumlar">("hizmetler");
+  // null: ziyaretci hicbir sekmeye dokunmadi; magazanin icerigine gore secilir.
+  const [tab, setTab] = useState<Tab | null>(null);
   const [messaging, setMessaging] = useState(false);
   const [messageError, setMessageError] = useState("");
   const router = useRouter();
@@ -102,11 +109,15 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
   const regions = Array.from(new Set(seller.locations.map((item) => item.district || item.city).filter(Boolean)));
   const accent = seller.categories[0]?.color ?? "#7C3AED";
   const cheapest = seller.services.filter((item) => item.price_from).map((item) => Number(item.price_from));
+  const listings = seller.listings ?? [];
+  // Magaza logosu once; yoksa kisisel profil resmi, o da yoksa bas harfler.
+  const badge = seller.logo_url ?? seller.avatar_url;
+  const activeTab: Tab = tab ?? (listings.length > 0 ? "urunler" : "hizmetler");
 
   /** Teklif istegi magazadan cikmadan modalda alinir. */
   const openQuote = (categorySlug?: string) => setQuoteFor(categorySlug ?? "");
 
-  const goto = (next: typeof tab) => {
+  const goto = (next: Tab) => {
     setTab(next);
     document.getElementById(next)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -114,11 +125,23 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
   return <main className={styles.page}>
     <SiteHeader activeKey="rehber" />
 
-    {/* Mağaza kapağı */}
-    <header className={styles.storeCover} style={{ "--accent": accent } as React.CSSProperties}>
-      <div className={styles.coverArt}><i /><i /><i /></div>
+    {/* Magaza kapagi: fotograf varsa genis kapak, yoksa eski degrade. */}
+    <header className={seller.banner_url ? `${styles.storeCover} ${styles.hasBanner}` : styles.storeCover} style={{ "--accent": accent } as React.CSSProperties}>
+      {seller.banner_url
+        ? <div className={styles.banner}>
+          {/* Kullanici yuklemesi; olculer bilinmedigi icin img kullanilir. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img alt={`${title} mağaza kapağı`} src={seller.banner_url} />
+        </div>
+        : <div className={styles.coverArt}><i /><i /><i /></div>}
       <div className={`${styles.wrap} ${styles.coverInner}`}>
-        <span className={styles.avatar}>{initials || "A"}{seller.is_featured && <b>★</b>}</span>
+        <span className={styles.avatar}>
+          {badge
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img alt={title} className={styles.avatarImage} src={badge} />
+            : initials || "A"}
+          {seller.is_featured && <b>★</b>}
+        </span>
 
         <div className={styles.identity}>
           <div className={styles.nameRow}>
@@ -146,7 +169,10 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
           <div className={styles.statGrid}>
             <div><strong>{seller.services.length}</strong><span>hizmet</span></div>
             <div><strong>{seller.portfolio.length}</strong><span>tamamlanan iş</span></div>
-            <div><strong>{totalWorkImages}</strong><span>iş görseli</span></div>
+            {/* Magazasi olan satici icin urun sayisi, is gorselinden daha anlamli. */}
+            {listings.length > 0
+              ? <div><strong>{listings.length}</strong><span>ürün</span></div>
+              : <div><strong>{totalWorkImages}</strong><span>iş görseli</span></div>}
             <div><strong>{seller.rating.count}</strong><span>yorum</span></div>
           </div>
 
@@ -158,7 +184,10 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
           <button className={styles.ghostCta} disabled={messaging} onClick={() => void startConversation()} type="button">
             {messaging ? "Açılıyor…" : "Mesaj gönder"}
           </button>
-          <button className={styles.ghostCta} onClick={() => goto("hizmetler")} type="button">Hizmetleri gör</button>
+          {/* Magazasi olan satici icin once urunler gosterilir. */}
+          {listings.length > 0
+            ? <button className={styles.ghostCta} onClick={() => goto("urunler")} type="button">Ürünleri gör</button>
+            : <button className={styles.ghostCta} onClick={() => goto("hizmetler")} type="button">Hizmetleri gör</button>}
         </aside>
       </div>
     </header>
@@ -166,14 +195,58 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
     {/* Mağaza şeridi: sayılar + sekmeler */}
     <div className={styles.storeBar}><div className={`${styles.wrap} ${styles.storeBarInner}`}>
       <p className={styles.barName}>{title}</p>
+      {/* Serit tek satirda kalmali: seridin sticky konumu (top:64px) ve
+          bolumlerin scroll-margin-top:132px degeri bu yuksekligi kodluyor.
+          Urunler sekmesi yalnizca magazada urun varsa cikar; dort kisa
+          etiket 1040px ustunde ikinci satira tasmiyor, yani serit 57px
+          kaliyor ve iki sayiya dokunmak gerekmedi. */}
       <div className={styles.tabs}>
-        {([["hizmetler", "Hizmetler", seller.services.length], ["isler", "İşler", seller.portfolio.length], ["yorumlar", "Yorumlar", seller.reviews.length]] as const).map(([key, label, count]) =>
-          <button className={tab === key ? styles.tabOn : ""} key={key} onClick={() => goto(key)} type="button">{label} <b>{count}</b></button>)}
+        {([
+          ...(listings.length > 0 ? [["urunler", "Ürünler", listings.length] as const] : []),
+          ["hizmetler", "Hizmetler", seller.services.length] as const,
+          ["isler", "İşler", seller.portfolio.length] as const,
+          ["yorumlar", "Yorumlar", seller.reviews.length] as const,
+        ]).map(([key, label, count]) =>
+          <button className={activeTab === key ? styles.tabOn : ""} key={key} onClick={() => goto(key)} type="button">{label} <b>{count}</b></button>)}
       </div>
       <button className={styles.barCta} onClick={() => openQuote()} type="button">Teklif iste →</button>
     </div></div>
 
     <div className={styles.wrap}>
+      {/* Urunler: emlakcinin daireleri, galericinin araclari. */}
+      {listings.length > 0 && <section className={styles.block} id="urunler">
+        <header className={styles.blockHead}><div><span className={styles.kicker}>VİTRİN</span><h2>Ürünler</h2><p>Bu mağazanın satıştaki ilanları. Detay için bir ilana tıkla.</p></div><span className={styles.blockCount}>{listings.length} ilan</span></header>
+        <div className={styles.listingGrid}>
+          {listings.map((item, index) => <button
+            className={styles.listingCard}
+            key={item.id}
+            onClick={() => setOpenListing(item)}
+            style={{ "--i": index } as React.CSSProperties}
+            type="button"
+          >
+            <span className={styles.listingCover}>
+              {item.cover_url
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img alt={item.title} loading="lazy" src={item.cover_url} />
+                : <span className={styles.coverGlyph}>{item.category?.icon ?? "▦"}</span>}
+              {item.image_count > 1 && <em className={styles.shotCount}>🖼 {item.image_count}</em>}
+              <span className={styles.coverHint}><b>İlanı gör</b></span>
+            </span>
+            <span className={styles.listingBody}>
+              <strong className={styles.listingTitle}>{item.title}</strong>
+              {item.price
+                ? <em className={styles.listingPrice}>{money(item.price)}</em>
+                : <em className={`${styles.listingPrice} ${styles.askPrice}`}>Fiyat sorunuz</em>}
+              <small className={styles.listingPlace}>📍 {placeOf(item.location) || "Konum belirtilmemiş"}</small>
+              <span className={styles.listingFoot}>
+                {item.category && <em className={styles.listingCat}>{item.category.icon ? `${item.category.icon} ` : ""}{item.category.name}</em>}
+                <small className={styles.listingRef}>{item.reference}</small>
+              </span>
+            </span>
+          </button>)}
+        </div>
+      </section>}
+
       {/* Hizmetler */}
       <section className={styles.block} id="hizmetler">
         <header className={styles.blockHead}><div><span className={styles.kicker}>MAĞAZA</span><h2>Hizmetler</h2><p>Bu mağazadan alabileceğin işler ve başlangıç fiyatları.</p></div><span className={styles.blockCount}>{seller.services.length} hizmet</span></header>
@@ -290,6 +363,15 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
       sellerId={seller.id}
       sellerName={title}
     />
+
+    {/* key: baska bir ilana gecilince galeri bastan kurulur. */}
+    {openListing && <ListingDetail
+      key={openListing.id}
+      listing={openListing}
+      onClose={() => setOpenListing(null)}
+      onQuote={(categorySlug) => { setOpenListing(null); openQuote(categorySlug); }}
+      sellerName={title}
+    />}
 
     {openWork && <Modal
       onClose={() => setOpenWork(null)}

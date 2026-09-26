@@ -9,7 +9,7 @@ import { Modal } from "@/components/modal/modal";
 import { WorkViewer } from "@/components/portfolio/work-viewer";
 import { ActiveChips, ListSkeleton, Pagination, ResultBar } from "@/components/listing/listing-chrome";
 import list from "@/components/listing/listing.module.css";
-import { ApiError, apiRequest, firstApiError } from "@/lib/api";
+import { ApiError, apiRequest, apiUpload, firstApiError } from "@/lib/api";
 import styles from "./satici-paneli.module.css";
 
 type CurrentUser = { id: number; name: string; email: string; roles: string[] };
@@ -21,9 +21,9 @@ type SellerRequest = {
   location: { city: { id: number; name: string }; district: { id: number; name: string } };
   summary_attributes: RequestAttribute[]; is_unlocked: boolean; is_favorite: boolean; is_invited: boolean; is_demo?: boolean; unlock_cost: number | null;
   expires_at: string | null; created_at: string;
-  details?: { description: string; full_address: string | null; attributes: RequestAttribute[]; contact: { name: string; email: string; phone: string } };
+  details?: { description: string; full_address: string | null; attributes: RequestAttribute[]; contact: { name: string; email: string; phone: string; avatar_url?: string | null } };
 };
-type Offer = { id: number; request_id: number; price: string; message: string; status: string; created_at: string; updated_at: string };
+type Offer = { id: number; request_id: number; price: string; message: string; status: string; created_at: string; updated_at: string; listing?: OfferListing | null };
 type SellerOfferItem = { offer: Offer; request: SellerRequest };
 type CreditTransaction = { id: number; type: string; amount: number; balance_after: number; reference_type: string | null; metadata: { public_reference?: string; merchant_oid?: string; days?: number } | null; created_at: string };
 type CreditWorkspace = { balance: number; spent_this_month: number; transactions: CreditTransaction[] };
@@ -35,6 +35,7 @@ type ProfileWorkspace = {
   profile: {
     profile_type: "individual" | "company"; company_name: string | null; tax_no: string | null;
     description: string; approval_status: string; reviewed_at: string | null;
+    logo_url: string | null; banner_url: string | null;
   } | null;
 };
 type RequestFacets = {
@@ -50,8 +51,35 @@ type PortfolioItem = {
   highlights: string[]; completed_at: string | null; is_published: boolean;
   category: Category | null; images: PortfolioImage[];
 };
+type CategoryNode = { id: number; name: string; slug: string; icon: string; color: string; children?: CategoryNode[] };
+type CityOption = { id: number; name: string; districts: { id: number; name: string }[] };
+// Kategoriye bagli serbest alanlar; talep sihirbazindaki tanimin aynisi.
+type CategoryAttributeField = {
+  key: string; label: string;
+  type: "text" | "textarea" | "select" | "multiselect" | "number" | "range" | "boolean" | "date";
+  options: string[] | null; unit: string | null; help_text: string | null;
+  is_required: boolean; is_private?: boolean; sort_order?: number;
+};
+type AttributeDraft = string | number | boolean | string[] | null;
+type ListingStatus = "draft" | "published" | "sold" | "archived";
+type ListingCategory = { id: number; name: string; slug: string; icon: string };
+type ListingImage = { id: number; url: string };
+type ListingCard = {
+  id: number; reference: string; title: string; price: string | null; cover_url: string | null;
+  category: ListingCategory | null; location: { city: string | null; district: string | null };
+  image_count: number; created_at: string; status: ListingStatus; offer_count: number;
+};
+type ListingFull = ListingCard & { description: string; images: ListingImage[]; attributes: RequestAttribute[] };
+type ListingMeta = { current_page: number; last_page: number; total: number; max_images: number };
+// Teklifteki urun anlik goruntudur; listing_id yalnizca ilan hala duruyorsa dolu.
+type OfferListing = {
+  reference: string | null; title: string | null; price: string | null; cover_url: string | null;
+  category: ListingCategory | null; location: { city: string | null; district: string | null } | null;
+  attributes: RequestAttribute[]; is_available: boolean; listing_id: number | null;
+};
+type OfferAttachment = { id: number; title: string; price: string | null; cover_url: string | null };
 type Scope = "all" | "unlocked" | "favorite";
-type View = "requests" | "performance" | "offers" | "services" | "visibility" | "profile" | "portfolio";
+type View = "requests" | "performance" | "offers" | "services" | "visibility" | "profile" | "portfolio" | "listings";
 
 const sortOptions = [
   { value: "latest", label: "En yeni" },
@@ -64,6 +92,9 @@ const sortOptions = [
 const money = (value: string | number) => new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(Number(value));
 const date = (value: string) => new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 const statusLabel: Record<string, string> = { pending: "Yanıt bekliyor", accepted: "Kabul edildi", rejected: "Reddedildi" };
+const listingStatusLabel: Record<ListingStatus, string> = { draft: "Taslak", published: "Yayında", sold: "Satıldı", archived: "Arşiv" };
+const listingFlagClass: Record<ListingStatus, string> = { draft: styles.flagDraft, published: styles.flagLive, sold: styles.flagSold, archived: styles.flagArchive };
+const emptyListingForm = { id: 0, category_slug: "", title: "", description: "", price: "", city_id: "", district_id: "" };
 
 function relativeTime(value: string) {
   const minutes = Math.max(1, Math.round((Date.now() - new Date(value).getTime()) / 60000));
@@ -120,6 +151,26 @@ export function SellerDashboard() {
   const [message, setMessage] = useState("");
   const [serviceForm, setServiceForm] = useState({ id: 0, category_id: "", title: "", description: "", price_from: "", delivery_time: "", is_active: true });
   const [showServiceForm, setShowServiceForm] = useState(false);
+  // Vitrin urunleri: emlakci bir daireyi, galerici bir araci buraya koyar.
+  const [listings, setListings] = useState<ListingCard[]>([]);
+  const [listingMeta, setListingMeta] = useState<ListingMeta>(() => ({ current_page: 1, last_page: 1, total: 0, max_images: 15 }));
+  const [listingScope, setListingScope] = useState<"all" | ListingStatus>("all");
+  const [listingForm, setListingForm] = useState(() => ({ ...emptyListingForm }));
+  const [listingValues, setListingValues] = useState<Record<string, AttributeDraft>>(() => ({}));
+  // Alanlar hangi kategoriye aitse onunla birlikte tutulur; kategori
+  // degisince eski sorular ekranda kalmasin.
+  const [listingFields, setListingFields] = useState<{ slug: string; fields: CategoryAttributeField[] }>(() => ({ slug: "", fields: [] }));
+  const [showListingForm, setShowListingForm] = useState(false);
+  const [openListing, setOpenListing] = useState<ListingFull | null>(null);
+  const [listingUploading, setListingUploading] = useState(false);
+  const [catalog, setCatalog] = useState<{ categories: CategoryNode[]; cities: CityOption[] } | null>(null);
+  // Kapak ve logo ayri ayri yuklenir; biri digerini kilitlemesin.
+  const [bannerUploading, setBannerUploading] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  // Teklife iliklenen urun ve secicisi.
+  const [offerListing, setOfferListing] = useState<OfferAttachment | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickable, setPickable] = useState<ListingCard[] | null>(null);
   const [chartsReady, setChartsReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [unlockingId, setUnlockingId] = useState<number | null>(null);
@@ -147,21 +198,23 @@ export function SellerDashboard() {
   const listLoading = loadedQuery !== requestQuery;
 
   const fetchWorkspace = useCallback(async () => {
-    const [offerResponse, creditResponse, serviceResponse, featuredResponse, profileResponse, portfolioResponse] = await Promise.all([
+    const [offerResponse, creditResponse, serviceResponse, featuredResponse, profileResponse, portfolioResponse, listingResponse] = await Promise.all([
       apiRequest<{ data: SellerOfferItem[] }>("/seller/offers"),
       apiRequest<{ data: CreditWorkspace }>("/seller/credits"),
       apiRequest<{ data: SellerService[] }>("/seller/services"),
       apiRequest<{ data: FeaturedWorkspace }>("/seller/featured"),
       apiRequest<{ data: ProfileWorkspace }>("/seller/profile"),
       apiRequest<{ data: PortfolioItem[] }>("/seller/portfolio"),
+      apiRequest<{ data: ListingCard[]; meta: ListingMeta }>("/seller/listings"),
     ]);
-    return { offerResponse, creditResponse, serviceResponse, featuredResponse, profileResponse, portfolioResponse };
+    return { offerResponse, creditResponse, serviceResponse, featuredResponse, profileResponse, portfolioResponse, listingResponse };
   }, []);
 
   const applyWorkspace = useCallback((workspace: Awaited<ReturnType<typeof fetchWorkspace>>) => {
     setOffers(workspace.offerResponse.data); setCredits(workspace.creditResponse.data);
     setServices(workspace.serviceResponse.data); setFeatured(workspace.featuredResponse.data);
     setProfile(workspace.profileResponse.data); setPortfolio(workspace.portfolioResponse.data);
+    setListings(workspace.listingResponse.data); setListingMeta(workspace.listingResponse.meta);
   }, []);
 
   // Liste yuklemesi efektin sorumlulugunda; yenileme bu jetonu artirir.
@@ -212,6 +265,42 @@ export function SellerDashboard() {
     return () => observer.disconnect();
   }, [loading, view]);
 
+  // Urun formunun kategori agaci ve il/ilce listesi yalnizca Urunlerim
+  // ekranina girilince cekilir; panel acilisini agirlastirmasin.
+  useEffect(() => {
+    if (view !== "listings" || catalog) return;
+    let active = true;
+    Promise.all([
+      apiRequest<{ data: CategoryNode[] }>("/categories?tree=1"),
+      apiRequest<{ data: CityOption[] }>("/locations"),
+    ])
+      .then(([categoryResponse, locationResponse]) => { if (active) setCatalog({ categories: categoryResponse.data, cities: locationResponse.data }); })
+      .catch((requestError: unknown) => { if (active) setError(firstApiError(requestError)); });
+    return () => { active = false; };
+  }, [catalog, view]);
+
+  // Kategoriye bagli sorular taleple ayni uctan gelir; effective_attributes
+  // ust kategorilerden miras alinanlari da icerir.
+  useEffect(() => {
+    const slug = listingForm.category_slug;
+    if (!showListingForm || !slug) return;
+    let active = true;
+    apiRequest<{ data: { attributes: CategoryAttributeField[] }; effective_attributes?: CategoryAttributeField[] }>(`/categories/${slug}/attributes`)
+      .then((response) => { if (active) setListingFields({ slug, fields: response.effective_attributes ?? response.data.attributes }); })
+      .catch(() => { if (active) setListingFields({ slug, fields: [] }); });
+    return () => { active = false; };
+  }, [listingForm.category_slug, showListingForm]);
+
+  // Secici her acilista tazelenir: arada yayina alinan urun de gorunsun.
+  useEffect(() => {
+    if (!pickerOpen) return;
+    let active = true;
+    apiRequest<{ data: ListingCard[] }>("/seller/listings/pickable")
+      .then((response) => { if (active) setPickable(response.data); })
+      .catch((requestError: unknown) => { if (active) setError(firstApiError(requestError)); });
+    return () => { active = false; };
+  }, [pickerOpen]);
+
   // Filtre degisimleri her zaman ilk sayfaya doner.
   const selectCategory = (value: string) => {
     setCategoryFilter((current) => value === ""
@@ -243,6 +332,37 @@ export function SellerDashboard() {
     return chips;
   }, [appliedBudget, categoryFilter, cityFilter, facets, filter, search]);
 
+  // Kategori agaci duz listeye acilir; secim kutusunda kok basliklari
+  // optgroup, altlar tire ile girintilenir.
+  const flatCategories = useMemo(() => {
+    const rows: { slug: string; name: string; icon: string; color: string; depth: number; root: string }[] = [];
+    const walk = (nodes: CategoryNode[], depth: number, root: string) => {
+      for (const node of nodes) {
+        rows.push({ slug: node.slug, name: node.name, icon: node.icon, color: node.color, depth, root });
+        if (node.children?.length) walk(node.children, depth + 1, root);
+      }
+    };
+    for (const root of catalog?.categories ?? []) walk([root], 0, root.name);
+    return rows;
+  }, [catalog]);
+
+  const categoryGroups = useMemo(() => {
+    const groups: { root: string; rows: typeof flatCategories }[] = [];
+    for (const row of flatCategories) {
+      const last = groups[groups.length - 1];
+      if (last && last.root === row.root) last.rows.push(row);
+      else groups.push({ root: row.root, rows: [row] });
+    }
+    return groups;
+  }, [flatCategories]);
+
+  // is_private alanlar ilanda gosterilmez: onlar alicinin talebindeki
+  // ozel notlar icin tanimlanmistir.
+  const visibleListingFields = useMemo(
+    () => listingFields.fields.filter((field) => !field.is_private).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+    [listingFields],
+  );
+
   const offerByRequest = useMemo(() => new Map(offers.map((item) => [item.offer.request_id, item.offer])), [offers]);
   const acceptedOffers = offers.filter((item) => item.offer.status === "accepted").length;
   const pendingOffers = offers.filter((item) => item.offer.status === "pending").length;
@@ -268,14 +388,24 @@ export function SellerDashboard() {
   const barPairs = [45, 60, 52, 78, 68, Math.max(36, Math.min(94, 46 + offers.length * 3))];
 
   const selectView = (next: View) => { setView(next); setNotice(""); setError(""); };
-  const openOffer = (requestId: number, offer?: Offer) => { setOfferRequest(requestId); setEditingOffer(offer?.id ?? null); setPrice(offer?.price ?? ""); setMessage(offer?.message ?? ""); setError(""); };
+  const openOffer = (requestId: number, offer?: Offer) => {
+    setOfferRequest(requestId); setEditingOffer(offer?.id ?? null); setPrice(offer?.price ?? ""); setMessage(offer?.message ?? "");
+    // Duzenlemede daha once iliklenen urun secili gelir; ilan silinmisse
+    // listing_id null olur ve ek bos baslar.
+    setOfferListing(offer?.listing && offer.listing.listing_id
+      ? { id: offer.listing.listing_id, title: offer.listing.title ?? "Ürün", price: offer.listing.price, cover_url: offer.listing.cover_url }
+      : null);
+    setError("");
+  };
+
+  const closeOffer = () => { setOfferRequest(null); setEditingOffer(null); setOfferListing(null); };
 
   const submitOffer = async (requestId: number) => {
     setBusy(true); setError(""); setNotice("");
     try {
       const updating = editingOffer !== null;
-      const response = await apiRequest<{ message: string }>(updating ? `/seller/offers/${editingOffer}` : "/seller/offers", { method: updating ? "PUT" : "POST", body: JSON.stringify({ ...(updating ? {} : { request_id: requestId }), price, message }) });
-      setNotice(response.message); setOfferRequest(null); setEditingOffer(null); setPrice(""); setMessage(""); await refreshWorkspace(); if (!updating) setView("offers");
+      const response = await apiRequest<{ message: string }>(updating ? `/seller/offers/${editingOffer}` : "/seller/offers", { method: updating ? "PUT" : "POST", body: JSON.stringify({ ...(updating ? {} : { request_id: requestId }), price, message, seller_listing_id: offerListing?.id ?? null }) });
+      setNotice(response.message); closeOffer(); setPrice(""); setMessage(""); await refreshWorkspace(); if (!updating) setView("offers");
     } catch (requestError: unknown) { setError(firstApiError(requestError)); }
     finally { setBusy(false); }
   };
@@ -435,6 +565,152 @@ export function SellerDashboard() {
     catch (requestError: unknown) { setError(firstApiError(requestError)); }
   };
 
+  const openListingForm = (item?: ListingFull) => {
+    // Ilan konumu sunucudan yalnizca ad olarak geliyor; secim kutulari
+    // icin il/ilce kimligi ad uzerinden geri bulunur.
+    const city = item ? catalog?.cities.find((row) => row.name === item.location.city) ?? null : null;
+    const district = city?.districts.find((row) => row.name === item?.location.district) ?? null;
+    setListingForm(item
+      ? { id: item.id, category_slug: item.category?.slug ?? "", title: item.title, description: item.description, price: item.price ?? "", city_id: city ? String(city.id) : "", district_id: district ? String(district.id) : "" }
+      : { ...emptyListingForm });
+    // Ozellik satirlari anahtar/deger haritasina geri cevrilir.
+    setListingValues(item ? Object.fromEntries(item.attributes.map((row) => [row.key, row.value])) : {});
+    setListingFields({ slug: "", fields: [] });
+    setShowListingForm(true); setOpenListing(null); setError(""); setNotice("");
+  };
+
+  const updateListingValue = (key: string, value: AttributeDraft) => setListingValues((current) => ({ ...current, [key]: value }));
+
+  const openListingDetail = async (listingId: number) => {
+    setError(""); setNotice("");
+    try { const response = await apiRequest<{ data: ListingFull }>(`/seller/listings/${listingId}`); setOpenListing(response.data); }
+    catch (requestError: unknown) { setError(firstApiError(requestError)); }
+  };
+
+  const editListing = async (listingId: number) => {
+    setError("");
+    try { const response = await apiRequest<{ data: ListingFull }>(`/seller/listings/${listingId}`); openListingForm(response.data); }
+    catch (requestError: unknown) { setError(firstApiError(requestError)); }
+  };
+
+  const reloadListing = async (listingId: number) => {
+    const fresh = await apiRequest<{ data: ListingFull }>(`/seller/listings/${listingId}`);
+    setOpenListing((current) => current && current.id === listingId ? fresh.data : current);
+    await refreshWorkspace();
+  };
+
+  // Sunucu yalnizca gorunur alanlari bekler: tanimsiz anahtar gonderilirse
+  // dogrulama tumden reddeder, bu yuzden liste alan setinden uretilir.
+  const listingAttributePayload = () => {
+    const payload: Record<string, unknown> = {};
+    for (const field of visibleListingFields) {
+      const raw = listingValues[field.key];
+      if (field.type === "number" || field.type === "range") payload[field.key] = raw === "" || raw === undefined || raw === null ? null : Number(raw);
+      else if (field.type === "boolean") payload[field.key] = typeof raw === "boolean" ? raw : null;
+      else if (field.type === "multiselect") payload[field.key] = Array.isArray(raw) ? raw : [];
+      else payload[field.key] = raw === "" || raw === undefined ? null : raw;
+    }
+    return payload;
+  };
+
+  const saveListing = async () => {
+    setBusy(true); setError(""); setNotice("");
+    const payload = {
+      category_slug: listingForm.category_slug,
+      title: listingForm.title.trim(),
+      description: listingForm.description.trim(),
+      // Bos fiyat "fiyat sorunuz" demektir.
+      price: listingForm.price.trim() === "" ? null : Number(listingForm.price),
+      city_id: listingForm.city_id ? Number(listingForm.city_id) : null,
+      district_id: listingForm.district_id ? Number(listingForm.district_id) : null,
+      attributes: listingAttributePayload(),
+    };
+    try {
+      const response = listingForm.id
+        ? await apiRequest<{ message: string; data: ListingFull }>(`/seller/listings/${listingForm.id}`, { method: "PUT", body: JSON.stringify(payload) })
+        : await apiRequest<{ message: string; data: ListingFull }>("/seller/listings", { method: "POST", body: JSON.stringify(payload) });
+      setNotice(response.message); setShowListingForm(false);
+      // Yeni urun taslak baslar; fotograf yonetimi hemen acilsin.
+      setOpenListing(response.data);
+      await refreshWorkspace();
+    } catch (requestError: unknown) { setError(firstApiError(requestError)); }
+    finally { setBusy(false); }
+  };
+
+  const changeListingStatus = async (listingId: number, status: ListingStatus) => {
+    setBusy(true); setError(""); setNotice("");
+    try {
+      // Fotografsiz yayin ve kabul edilmis teklife bagli urunun geri
+      // cekilmesi sunucuda 422 doner; mesaji oldugu gibi gosteriyoruz.
+      const response = await apiRequest<{ message: string; data: { status: ListingStatus } }>(`/seller/listings/${listingId}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+      setNotice(response.message);
+      setOpenListing((current) => current && current.id === listingId ? { ...current, status: response.data.status } : current);
+      await refreshWorkspace();
+    } catch (requestError: unknown) { setError(firstApiError(requestError)); }
+    finally { setBusy(false); }
+  };
+
+  const deleteListing = async (listingId: number) => {
+    setBusy(true); setError(""); setNotice("");
+    try { const response = await apiRequest<{ message: string }>(`/seller/listings/${listingId}`, { method: "DELETE" }); setNotice(response.message); setOpenListing(null); await refreshWorkspace(); }
+    catch (requestError: unknown) { setError(firstApiError(requestError)); }
+    finally { setBusy(false); }
+  };
+
+  // Dosyalar sirayla gider: sunucu kapak sirasini kilitle tahsis ediyor,
+  // es zamanli istekler birbirini bekletir.
+  const uploadListingImages = async (item: ListingFull, files: File[]) => {
+    setListingUploading(true); setError(""); setNotice("");
+    const room = Math.max(0, listingMeta.max_images - item.images.length);
+    const queue = files.slice(0, room);
+    if (queue.length === 0) { setError(`Bir ürüne en fazla ${listingMeta.max_images} fotoğraf eklenebilir.`); setListingUploading(false); return; }
+    try {
+      for (const file of queue) await apiUpload<{ message: string }>(`/seller/listings/${item.id}/images`, file);
+      setNotice(`${queue.length} fotoğraf yüklendi.`);
+      await reloadListing(item.id);
+    } catch (requestError: unknown) { setError(firstApiError(requestError)); }
+    finally { setListingUploading(false); }
+  };
+
+  const deleteListingImage = async (item: ListingFull, imageId: number) => {
+    setError("");
+    try { await apiRequest<{ message: string }>(`/seller/listing-images/${imageId}`, { method: "DELETE" }); await reloadListing(item.id); }
+    catch (requestError: unknown) { setError(firstApiError(requestError)); }
+  };
+
+  const makeListingCover = async (item: ListingFull, imageId: number) => {
+    setError("");
+    try { const response = await apiRequest<{ message: string }>(`/seller/listing-images/${imageId}/cover`, { method: "PATCH" }); setNotice(response.message); await reloadListing(item.id); }
+    catch (requestError: unknown) { setError(firstApiError(requestError)); }
+  };
+
+  const applyBranding = (data: { banner_url: string | null; logo_url: string | null }) =>
+    setProfile((current) => current.profile
+      ? { ...current, profile: { ...current.profile, banner_url: data.banner_url, logo_url: data.logo_url } }
+      : current);
+
+  type BrandingKind = "banner" | "logo";
+
+  const uploadBranding = async (kind: BrandingKind, file: File) => {
+    const mark = kind === "banner" ? setBannerUploading : setLogoUploading;
+    mark(true); setError(""); setNotice("");
+    try {
+      const response = await apiUpload<{ message: string; data: { banner_url: string | null; logo_url: string | null } }>(`/seller/branding/${kind}`, file);
+      setNotice(response.message); applyBranding(response.data);
+    } catch (requestError: unknown) { setError(firstApiError(requestError)); }
+    finally { mark(false); }
+  };
+
+  const removeBranding = async (kind: BrandingKind) => {
+    const mark = kind === "banner" ? setBannerUploading : setLogoUploading;
+    mark(true); setError(""); setNotice("");
+    try {
+      const response = await apiRequest<{ message: string; data: { banner_url: string | null; logo_url: string | null } }>(`/seller/branding/${kind}`, { method: "DELETE" });
+      setNotice(response.message); applyBranding(response.data);
+    } catch (requestError: unknown) { setError(firstApiError(requestError)); }
+    finally { mark(false); }
+  };
+
   const buyPromotion = async (packageKey: string) => {
     setBusy(true); setError(""); setNotice("");
     try { const response = await apiRequest<{ message: string }>("/seller/featured", { method: "POST", body: JSON.stringify({ package: packageKey }) }); setNotice(response.message); await refreshWorkspace(); }
@@ -444,6 +720,67 @@ export function SellerDashboard() {
 
   // Yukleme ekraninda da ortak ust cubuk durur; sayfa gecisinde zipla olmaz.
   if (loading && !user) return <main className={styles.page}><SiteHeader workspace="seller" /><div className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></div></main>;
+
+  // Urun ekranindan turetilenler.
+  const visibleListings = listingScope === "all" ? listings : listings.filter((item) => item.status === listingScope);
+  const publishedListings = listings.filter((item) => item.status === "published").length;
+  const listingPhotos = listings.reduce((total, item) => total + item.image_count, 0);
+  const listingOffers = listings.reduce((total, item) => total + item.offer_count, 0);
+  const listingCategory = flatCategories.find((row) => row.slug === listingForm.category_slug) ?? null;
+  const listingCity = catalog?.cities.find((row) => String(row.id) === listingForm.city_id) ?? null;
+  const listingDistrict = listingCity?.districts.find((row) => String(row.id) === listingForm.district_id) ?? null;
+  // Kategori alanlari yuklenmeden kaydetmek, onceki kategorinin
+  // anahtarlarini gonderirdi ve sunucu tumunu reddederdi.
+  const listingReady = Boolean(listingForm.category_slug) && listingFields.slug === listingForm.category_slug
+    && listingForm.title.trim().length >= 10 && listingForm.description.trim().length >= 20;
+
+  // Kategori alanlari talep formundaki tiplerin aynisini cizer.
+  const renderListingField = (field: CategoryAttributeField) => {
+    const raw = listingValues[field.key];
+    const suffix = field.unit ? ` (${field.unit})` : "";
+    const wide = field.type === "textarea" || field.type === "multiselect" ? styles.wide : "";
+    const options = field.options ?? [];
+    const required = field.is_required ? " *" : "";
+
+    if (field.type === "boolean") return <label className={`${styles.wide} ${styles.toggleRow}`} key={field.key}>
+      <input checked={raw === true} onChange={(event) => updateListingValue(field.key, event.target.checked)} type="checkbox" /> {field.label}{required}
+    </label>;
+
+    if (field.type === "multiselect") {
+      const values = Array.isArray(raw) ? raw : [];
+      return <div className={`${styles.wide} ${styles.checkField}`} key={field.key}>
+        <span>{field.label}{suffix}{required}</span>
+        <div>{options.map((option) => <label key={option}>
+          <input checked={values.includes(option)} onChange={(event) => updateListingValue(field.key, event.target.checked ? [...values, option] : values.filter((row) => row !== option))} type="checkbox" /> {option}
+        </label>)}</div>
+        {field.help_text && <small>{field.help_text}</small>}
+      </div>;
+    }
+
+    if (field.type === "select") return <label className={wide} key={field.key}>{field.label}{suffix}{required}
+      <select onChange={(event) => updateListingValue(field.key, event.target.value)} value={typeof raw === "string" ? raw : ""}>
+        <option value="">Seçilmedi</option>
+        {options.map((option) => <option key={option} value={option}>{option}</option>)}
+      </select>
+      {field.help_text && <small>{field.help_text}</small>}
+    </label>;
+
+    if (field.type === "textarea") return <label className={wide} key={field.key}>{field.label}{suffix}{required}
+      <textarea maxLength={2000} onChange={(event) => updateListingValue(field.key, event.target.value)} placeholder={field.help_text ?? ""} value={typeof raw === "string" ? raw : ""} />
+      {field.help_text && <small>{field.help_text}</small>}
+    </label>;
+
+    return <label className={wide} key={field.key}>{field.label}{suffix}{required}
+      <input
+        inputMode={field.type === "number" || field.type === "range" ? "decimal" : undefined}
+        onChange={(event) => updateListingValue(field.key, event.target.value)}
+        placeholder={field.help_text ?? field.label}
+        type={field.type === "number" || field.type === "range" ? "number" : field.type === "date" ? "date" : "text"}
+        value={raw === null || raw === undefined || Array.isArray(raw) || typeof raw === "boolean" ? "" : String(raw)}
+      />
+      {field.help_text && <small>{field.help_text}</small>}
+    </label>;
+  };
 
   // Modal onizlemeleri icin turetilen degerler.
   const workCategory = profile.categories.find((item) => String(item.id) === portfolioForm.category_id);
@@ -485,10 +822,11 @@ export function SellerDashboard() {
           {
             key: "company", label: "Firma",
             panelIcon: "🏢", panelTitle: "Firma vitrinin", panelHint: "Hizmetlerin, galerin ve görünürlüğün",
-            meta: `${services.length} hizmet · ${portfolio.length} çalışma`,
+            meta: `${listings.length} ürün · ${services.length} hizmet · ${portfolio.length} çalışma`,
             allLink: user ? { label: "Vitrinimi gör", href: `/satici/${user.id}` } : undefined,
             sections: [
               { key: "catalog", title: "VİTRİN", icon: "🏬", color: "#EC4899", description: "Müşterilerin profilinde gördüğü içerik.", accent: true, badge: "Yeni", items: [
+                { key: "listings", label: "Ürünlerim", icon: "🏷", hint: "Vitrindeki ürün ve ilanların", badge: "Yeni", tone: "new", count: listings.length, onSelect: () => selectView("listings") },
                 { key: "services", label: "Hizmetlerim", icon: "▦", hint: "Kapak görselli hizmet kartları", count: services.length, onSelect: () => selectView("services") },
                 { key: "portfolio", label: "Galerim", icon: "🖼", hint: "Yaptığın işler ve fotoğrafları", badge: "Yeni", tone: "new", count: portfolio.length, onSelect: () => selectView("portfolio") },
               ], footer: { label: "Vitrini düzenle", onSelect: () => selectView("services") } },
@@ -498,6 +836,7 @@ export function SellerDashboard() {
               ], footer: { label: "Görünürlüğü yönet", onSelect: () => selectView("visibility") } },
             ],
             quickLinks: [
+              { key: "add-listing", label: "Ürün ekle", icon: "🏷", onSelect: () => { selectView("listings"); openListingForm(); } },
               { key: "add-work", label: "Çalışma ekle", icon: "＋", onSelect: () => { selectView("portfolio"); openPortfolioForm(); } },
               { key: "add-service", label: "Hizmet ekle", icon: "▦", onSelect: () => { selectView("services"); editService(); } },
               { key: "public", label: "Vitrinimi gör", icon: "↗", href: user ? `/satici/${user.id}` : "/satici-paneli", primary: true },
@@ -568,8 +907,18 @@ export function SellerDashboard() {
                       : <button className={`${list.act} ${list.actPrimary}`} disabled={busy} onClick={() => unlock(item)} type="button">{unlockingId === item.id ? "Açılıyor…" : `Aç · ${item.unlock_cost} ⚡`}</button>}
                   </div>
                   {item.is_unlocked && item.details && <button className={list.detailToggle} onClick={() => setExpanded(expanded === item.id ? null : item.id)} type="button">{expanded === item.id ? "Detayı kapat" : "Tüm detayı gör"}</button>}
-                  {expanded === item.id && item.details && <div className={styles.details}><section><span>TALEP DETAYI</span><p>{item.details.description}</p><div>{item.details.attributes.map((attribute) => <p key={attribute.key}><small>{attribute.label}</small><strong>{attributeValue(attribute)}</strong></p>)}</div></section><aside><span>İLETİŞİM VE ADRES</span><strong>{item.details.contact.name}</strong><a href={`tel:${item.details.contact.phone}`}>{item.details.contact.phone}</a><a href={`mailto:${item.details.contact.email}`}>{item.details.contact.email}</a><p>{item.details.full_address || "Açık adres belirtilmedi"}</p></aside></div>}
-                  {offerRequest === item.id && !existingOffer && <div className={styles.offerForm}><div><span>TEKLİFİNİ HAZIRLA</span><strong>Bu talep açıldı; teklif gönderirken ek kontör düşmez.</strong></div><label>Fiyat<input inputMode="decimal" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="Örn. 12500" /></label><label>Teklif notu<textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Kapsamı ve teslim süresini açıkla…" /></label><aside><button onClick={() => setOfferRequest(null)}>Vazgeç</button><button disabled={busy} onClick={() => submitOffer(item.id)}>{busy ? "Gönderiliyor…" : "Teklifi gönder"}</button></aside></div>}
+                  {expanded === item.id && item.details && <div className={styles.details}><section><span>TALEP DETAYI</span><p>{item.details.description}</p><div>{item.details.attributes.map((attribute) => <p key={attribute.key}><small>{attribute.label}</small><strong>{attributeValue(attribute)}</strong></p>)}</div></section><aside><span>İLETİŞİM VE ADRES</span>{item.details.contact.avatar_url && <i className={styles.contactAvatar}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" loading="lazy" src={item.details.contact.avatar_url} />
+                  </i>}<strong>{item.details.contact.name}</strong><a href={`tel:${item.details.contact.phone}`}>{item.details.contact.phone}</a><a href={`mailto:${item.details.contact.email}`}>{item.details.contact.email}</a><p>{item.details.full_address || "Açık adres belirtilmedi"}</p></aside></div>}
+                  {offerRequest === item.id && !existingOffer && <div className={styles.offerForm}><div><span>TEKLİFİNİ HAZIRLA</span><strong>Bu talep açıldı; teklif gönderirken ek kontör düşmez.</strong></div><label>Fiyat<input inputMode="decimal" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="Örn. 12500" /><button className={styles.attachButton} onClick={() => setPickerOpen(true)} type="button">🏷 {offerListing ? "Ürünü değiştir" : "Ürün ekle"}</button></label><label>Teklif notu<textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Kapsamı ve teslim süresini açıkla…" /></label>{offerListing && <div className={styles.offerAttach}>
+                      {offerListing.cover_url
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img alt="" loading="lazy" src={offerListing.cover_url} />
+                        : <i>🏷</i>}
+                      <span>Ürün: <b>{offerListing.title}</b> — {offerListing.price ? money(offerListing.price) : "Fiyat sorunuz"}</span>
+                      <button aria-label="Ürünü tekliften çıkar" onClick={() => setOfferListing(null)} type="button">✕</button>
+                    </div>}<aside><button onClick={closeOffer}>Vazgeç</button><button disabled={busy} onClick={() => submitOffer(item.id)}>{busy ? "Gönderiliyor…" : "Teklifi gönder"}</button></aside></div>}
                 </article>;
               })}</div>}
             <Pagination lastPage={meta.last_page} onPage={setPage} page={meta.current_page} />
@@ -668,6 +1017,65 @@ export function SellerDashboard() {
           </div>}
         </section>}
 
+        {view === "listings" && <section className={`${styles.workspaceView} ${styles.viewEnter}`}>
+          <header>
+            <div><span>VİTRİN ÜRÜNLERİ</span><h1>Ürünlerim</h1><p>Daire, araç ya da mağaza ürünlerini vitrine koy; teklif verirken bir ürünü teklifine ekleyip alıcıya gönder.</p></div>
+            <div className={styles.headActions}>
+              {user && <Link className={styles.ghostLink} href={`/satici/${user.id}`} target="_blank">Vitrinimi gör ↗</Link>}
+              <button onClick={() => openListingForm()}>＋ Ürün ekle</button>
+            </div>
+          </header>
+
+          <div className={list.summary}>
+            <div className={list.summaryItem}><span>ÜRÜN</span><strong>{listings.length}</strong><small>vitrininde</small></div>
+            <div className={list.summaryItem}><span>YAYINDA</span><strong>{publishedListings}</strong><small>teklife eklenebilir</small></div>
+            <div className={list.summaryItem}><span>FOTOĞRAF</span><strong>{listingPhotos}</strong><small>toplam yüklenen</small></div>
+            <div className={list.summaryItem}><span>TEKLİFTE</span><strong>{listingOffers}</strong><small>kez gönderildi</small></div>
+          </div>
+
+          <div className={styles.offerTabs}>
+            {(["all", "draft", "published", "sold", "archived"] as const).map((value) =>
+              <button className={listingScope === value ? styles.tabActive : ""} key={value} onClick={() => setListingScope(value)} type="button">
+                {value === "all" ? "Tümü" : listingStatusLabel[value]} <b>{value === "all" ? listings.length : listings.filter((item) => item.status === value).length}</b>
+              </button>)}
+          </div>
+
+          {visibleListings.length === 0 ? <div className={list.table}><div className={list.empty}>{listings.length === 0 ? "Vitrininde henüz ürün yok. İlk ürününü ekle, fotoğraflarını yükle ve yayına al." : "Bu durumda ürün bulunmuyor."}</div></div> : <div className={styles.listingGrid}>
+            {visibleListings.map((item) => <article className={`${styles.listingCard} ${item.status === "published" ? "" : styles.draftCard}`} key={item.id}>
+              <button className={styles.coverButton} onClick={() => openListingDetail(item.id)} type="button">
+                {item.cover_url
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img alt={item.title} loading="lazy" src={item.cover_url} />
+                  : <span className={styles.noCover}>Fotoğraf yok</span>}
+                <em className={styles.coverCount}>📷 {item.image_count}</em>
+                <b className={`${styles.listingFlag} ${listingFlagClass[item.status]}`}>{listingStatusLabel[item.status]}</b>
+                <span className={styles.coverHint}>Fotoğraf ve durum</span>
+              </button>
+              <div className={styles.listingBody}>
+                <div className={styles.listingTop}>
+                  {item.category && <span className={styles.listingCat}>{item.category.icon} {item.category.name}</span>}
+                  <small>№ {item.reference}</small>
+                </div>
+                <h2>{item.title}</h2>
+                <div className={styles.listingMeta}>
+                  <span>📍 {[item.location.city, item.location.district].filter(Boolean).join(", ") || "Konum belirtilmedi"}</span>
+                  {item.offer_count > 0 && <span>📨 {item.offer_count} teklifte</span>}
+                </div>
+                <footer>
+                  <div className={list.cardPrice}><small>FİYAT</small><strong>{item.price ? money(item.price) : "Fiyat sorunuz"}</strong></div>
+                  <div className={styles.listingActions}>
+                    <button onClick={() => editListing(item.id)} type="button">Düzenle</button>
+                    <button onClick={() => openListingDetail(item.id)} type="button">Fotoğraflar</button>
+                    {item.status === "published"
+                      ? <button disabled={busy} onClick={() => changeListingStatus(item.id, "draft")} type="button">Yayından kaldır</button>
+                      : <button disabled={busy} onClick={() => changeListingStatus(item.id, "published")} type="button">Yayınla</button>}
+                  </div>
+                </footer>
+              </div>
+            </article>)}
+          </div>}
+        </section>}
+
         {view === "offers" && <section className={`${styles.workspaceView} ${styles.viewEnter}`}>
           <header><div><span>TEKLİF PORTFÖYÜ</span><h1>Tekliflerim</h1><p>Gönderdiğin teklifleri, sonuçlarını ve kazanç potansiyelini takip et.</p></div><button onClick={() => { changeScope("all"); selectView("requests"); }}>Yeni fırsat bul →</button></header>
 
@@ -707,7 +1115,14 @@ export function SellerDashboard() {
                   ? <button className={`${list.act} ${list.actAccent}`} onClick={() => openOffer(item.id, offer)} type="button">Teklifi düzenle</button>
                   : <span className={`${list.act} ${list.actQuiet}`}>{statusLabel[offer.status]}</span>}
               </div>
-              {offerRequest === item.id && editingOffer === offer.id && <div className={styles.offerForm}><label>Fiyat<input inputMode="decimal" onChange={(event) => setPrice(event.target.value)} value={price} /></label><label>Teklif notu<textarea onChange={(event) => setMessage(event.target.value)} value={message} /></label><aside><button onClick={() => setOfferRequest(null)}>Vazgeç</button><button disabled={busy} onClick={() => submitOffer(item.id)}>{busy ? "Güncelleniyor…" : "Güncelle"}</button></aside></div>}
+              {offerRequest === item.id && editingOffer === offer.id && <div className={styles.offerForm}><label>Fiyat<input inputMode="decimal" onChange={(event) => setPrice(event.target.value)} value={price} /><button className={styles.attachButton} onClick={() => setPickerOpen(true)} type="button">🏷 {offerListing ? "Ürünü değiştir" : "Ürün ekle"}</button></label><label>Teklif notu<textarea onChange={(event) => setMessage(event.target.value)} value={message} /></label>{offerListing && <div className={styles.offerAttach}>
+                {offerListing.cover_url
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img alt="" loading="lazy" src={offerListing.cover_url} />
+                  : <i>🏷</i>}
+                <span>Ürün: <b>{offerListing.title}</b> — {offerListing.price ? money(offerListing.price) : "Fiyat sorunuz"}</span>
+                <button aria-label="Ürünü tekliften çıkar" onClick={() => setOfferListing(null)} type="button">✕</button>
+              </div>}<aside><button onClick={closeOffer}>Vazgeç</button><button disabled={busy} onClick={() => submitOffer(item.id)}>{busy ? "Güncelleniyor…" : "Güncelle"}</button></aside></div>}
             </article>)}
           </div>}
         </section>}
@@ -756,7 +1171,28 @@ export function SellerDashboard() {
           </div>}
         </section>}
 
-        {view === "profile" && <section className={`${styles.workspaceView} ${styles.viewEnter}`}><header><div><span>DOĞRULANMIŞ FİRMA KARTI</span><h1>Firma profilim</h1><p>Müşterilerin vitrinde gördüğü kimlik, hizmet ve bölge özeti.</p></div><b className={styles.featuredBadge}>✓ Profil onaylı</b></header><div className={styles.profileHero}><div className={styles.profileAvatar}>{(profile.profile?.company_name || user?.name || "A").slice(0, 2).toLocaleUpperCase("tr-TR")}</div><div><span>{profile.profile?.profile_type === "company" ? "FİRMA HESABI" : "BİREYSEL PROFESYONEL"}</span><h2>{profile.profile?.company_name || user?.name}</h2><p>{profile.profile?.description || "Firma açıklaması henüz eklenmedi."}</p><div><b>✓ Kimlik doğrulandı</b><b>✓ Yönetici onaylı</b></div></div><aside><small>HESAP SAHİBİ</small><strong>{user?.name}</strong><span>{user?.email}</span>{profile.profile?.reviewed_at && <em>Onay: {new Date(profile.profile.reviewed_at).toLocaleDateString("tr-TR")}</em>}</aside></div><div className={styles.profileGrid}><article><header><i>▦</i><div><span>HİZMET KATEGORİLERİ</span><strong>{profile.categories.length} kategori</strong></div></header><div>{profile.categories.map((item) => <b key={item.id} style={{ color: item.color, background: `${item.color}14` }}>{item.icon} {item.name}</b>)}</div><button onClick={() => selectView("services")}>Hizmet kataloğunu yönet →</button></article><article><header><i>📍</i><div><span>HİZMET BÖLGELERİ</span><strong>{new Set(profile.locations.map((item) => item.city_id)).size} il · {profile.locations.length} ilçe</strong></div></header><div>{profile.locations.slice(0, 8).map((item) => <b key={item.district_id}>📍 {item.city_name}, {item.district_name}</b>)}</div><button onClick={() => { setFilter("all"); selectView("requests"); }}>Bölgedeki talepleri gör →</button></article><article><header><i>✦</i><div><span>VİTRİN DURUMU</span><strong>{featured.is_featured ? "Öne çıkan profil" : "Standart görünürlük"}</strong></div></header><p>{featured.is_featured ? "Profilin ana sayfa vitrininde daha görünür durumda." : "Kontör kullanarak profilini ana sayfadaki öne çıkanlara taşıyabilirsin."}</p><button onClick={() => selectView("visibility")}>Görünürlüğü yönet →</button></article></div></section>}
+        {view === "profile" && <section className={`${styles.workspaceView} ${styles.viewEnter}`}><header><div><span>DOĞRULANMIŞ FİRMA KARTI</span><h1>Firma profilim</h1><p>Müşterilerin vitrinde gördüğü kimlik, hizmet ve bölge özeti.</p></div><b className={styles.featuredBadge}>✓ Profil onaylı</b></header>
+          <div className={styles.brandBanner}>
+            {profile.profile?.banner_url
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img alt="Vitrin kapak görseli" loading="lazy" src={profile.profile.banner_url} />
+              : <span className={styles.brandEmpty}>Vitrin kapağı ekle · geniş fotoğraf (3:1) müşteriyi karşılayan ilk görseldir</span>}
+            <label className={styles.brandUpload}>
+              <input accept="image/jpeg,image/png,image/webp" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) uploadBranding("banner", file); event.target.value = ""; }} type="file" />
+              <span>{bannerUploading ? "Yükleniyor…" : profile.profile?.banner_url ? "Kapağı değiştir" : "＋ Kapak ekle"}</span>
+            </label>
+            {profile.profile?.banner_url && <button aria-label="Kapağı kaldır" className={styles.brandRemove} disabled={bannerUploading} onClick={() => removeBranding("banner")} type="button">✕</button>}
+          </div>
+          <div className={styles.profileHero}><div className={styles.logoSlot}><div className={styles.profileAvatar}>{profile.profile?.logo_url
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img alt="Firma logosu" className={styles.logoImage} loading="lazy" src={profile.profile.logo_url} />
+            : (profile.profile?.company_name || user?.name || "A").slice(0, 2).toLocaleUpperCase("tr-TR")}</div>
+            <label className={styles.logoUpload}>
+              <input accept="image/jpeg,image/png,image/webp" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) uploadBranding("logo", file); event.target.value = ""; }} type="file" />
+              <span>{logoUploading ? "…" : "✎"}</span>
+            </label>
+            {profile.profile?.logo_url && <button aria-label="Logoyu kaldır" className={styles.logoRemove} disabled={logoUploading} onClick={() => removeBranding("logo")} type="button">✕</button>}
+          </div><div><span>{profile.profile?.profile_type === "company" ? "FİRMA HESABI" : "BİREYSEL PROFESYONEL"}</span><h2>{profile.profile?.company_name || user?.name}</h2><p>{profile.profile?.description || "Firma açıklaması henüz eklenmedi."}</p><div><b>✓ Kimlik doğrulandı</b><b>✓ Yönetici onaylı</b></div></div><aside><small>HESAP SAHİBİ</small><strong>{user?.name}</strong><span>{user?.email}</span>{profile.profile?.reviewed_at && <em>Onay: {new Date(profile.profile.reviewed_at).toLocaleDateString("tr-TR")}</em>}</aside></div><div className={styles.profileGrid}><article><header><i>▦</i><div><span>HİZMET KATEGORİLERİ</span><strong>{profile.categories.length} kategori</strong></div></header><div>{profile.categories.map((item) => <b key={item.id} style={{ color: item.color, background: `${item.color}14` }}>{item.icon} {item.name}</b>)}</div><button onClick={() => selectView("services")}>Hizmet kataloğunu yönet →</button></article><article><header><i>📍</i><div><span>HİZMET BÖLGELERİ</span><strong>{new Set(profile.locations.map((item) => item.city_id)).size} il · {profile.locations.length} ilçe</strong></div></header><div>{profile.locations.slice(0, 8).map((item) => <b key={item.district_id}>📍 {item.city_name}, {item.district_name}</b>)}</div><button onClick={() => { setFilter("all"); selectView("requests"); }}>Bölgedeki talepleri gör →</button></article><article><header><i>✦</i><div><span>VİTRİN DURUMU</span><strong>{featured.is_featured ? "Öne çıkan profil" : "Standart görünürlük"}</strong></div></header><p>{featured.is_featured ? "Profilin ana sayfa vitrininde daha görünür durumda." : "Kontör kullanarak profilini ana sayfadaki öne çıkanlara taşıyabilirsin."}</p><button onClick={() => selectView("visibility")}>Görünürlüğü yönet →</button></article></div></section>}
 
         {view === "visibility" && <section className={`${styles.workspaceView} ${styles.viewEnter}`}><header><div><span>VİTRİN VE GÖRÜNÜRLÜK</span><h1>Öne çıkanlarda yer al</h1><p>Profilini ana sayfadaki öne çıkan profesyoneller bölümüne taşı.</p></div>{featured.is_featured && <b className={styles.featuredBadge}>★ {featured.featured_until ? new Date(featured.featured_until).toLocaleDateString("tr-TR") : "Aktif"} tarihine kadar</b>}</header><div className={styles.visibilityHero}><div><span>KONTÖRLE GÖRÜNÜRLÜK</span><h2>Daha çok müşteri tarafından keşfedil.</h2><p>Öne çıkarılan profiller ana sayfa vitrininde sponsorlu etiketiyle gösterilir.</p><ul><li>✓ Ana sayfa profesyonel vitrini</li><li>✓ Şeffaf sponsorlu ibaresi</li><li>✓ Puan ve hizmet görünürlüğü</li></ul></div><aside><small>MEVCUT BAKİYE</small><strong>⚡ {credits.balance}</strong><Link href="/kontor-yukle">Kontör yükle →</Link></aside></div><div className={styles.packageGrid}>{Object.entries(featured.packages).map(([key, item], index) => <article className={index === 1 ? styles.popular : ""} key={key}>{index === 1 && <b>EN AVANTAJLI</b>}<span>{item.label.toUpperCase()}</span><strong>{item.credits}<small> kontör</small></strong><p>{item.days} gün boyunca vitrin görünürlüğü</p><button disabled={busy || credits.balance < item.credits} onClick={() => buyPromotion(key)}>{credits.balance < item.credits ? "Bakiye yetersiz" : "Paketi etkinleştir"}</button></article>)}</div><section className={styles.ledger}><header><div><span>HESAP HAREKETLERİ</span><h2>Kontör geçmişi</h2></div><Link href="/kontor-yukle">Kontör yükle →</Link></header>{credits.transactions.length === 0 ? <p>Henüz kontör hareketi bulunmuyor.</p> : credits.transactions.map((transaction) => <div key={transaction.id}><i className={transaction.amount < 0 ? styles.spend : ""}>{transaction.amount < 0 ? "−" : "+"}</i><p><strong>{transaction.reference_type === "seller_promotion" ? "Vitrinde öne çıkarma" : transaction.type === "spend" ? "Teklif / detay bedeli" : transaction.type === "bonus" ? "Paket bonusu" : "Kontör yükleme"}</strong><small>{transaction.metadata?.public_reference ?? transaction.metadata?.merchant_oid ?? (transaction.metadata?.days ? `${transaction.metadata.days} gün` : "Hesap hareketi")} · {date(transaction.created_at)}</small></p><b>{transaction.amount > 0 ? "+" : ""}{transaction.amount}<small>kalan {transaction.balance_after}</small></b></div>)}</section></section>}
       </section>
@@ -892,6 +1328,130 @@ export function SellerDashboard() {
           </ul>
         </aside>
       </div>
+    </Modal>
+
+    <Modal onClose={() => setShowListingForm(false)} open={showListingForm} size="xl" subtitle="Alıcılar bu bilgileri vitrininde ve gönderdiğin teklifte görür." title={listingForm.id ? "Ürünü düzenle" : "Yeni ürün ekle"} footer={<>
+      <button className={styles.modalGhost} onClick={() => setShowListingForm(false)} type="button">Vazgeç</button>
+      <button className={styles.modalPrimary} disabled={busy || !listingReady} onClick={saveListing} type="button">{busy ? "Kaydediliyor…" : listingForm.id ? "Güncelle" : "Ürünü ekle"}</button>
+    </>}>
+      <div className={styles.builder}>
+        <div className={styles.builderMain}>
+          <section className={styles.formBlock}>
+            <header><i>1</i><div><strong>Ürün künyesi</strong><small>Kategori seçimi hangi özelliklerin sorulacağını belirler.</small></div></header>
+            <div className={styles.formGrid}>
+              <label className={styles.wide}>Kategori
+                <select data-autofocus onChange={(event) => { setListingForm({ ...listingForm, category_slug: event.target.value }); setListingValues({}); }} value={listingForm.category_slug}>
+                  <option value="">Kategori seç</option>
+                  {categoryGroups.map((group) => <optgroup key={group.root} label={group.root}>
+                    {group.rows.map((row) => <option key={row.slug} value={row.slug}>{`${"— ".repeat(row.depth)}${row.icon ? `${row.icon} ` : ""}${row.name}`}</option>)}
+                  </optgroup>)}
+                </select>
+                <small>{catalog ? `${flatCategories.length} kategori · daire, araç, mağaza ürünü hepsi buradan` : "Kategoriler yükleniyor…"}</small>
+              </label>
+              <label className={styles.wide}>Başlık<input maxLength={140} onChange={(event) => setListingForm({ ...listingForm, title: event.target.value })} placeholder="Örn. Kadıköy Moda'da 3+1 deniz manzaralı daire" value={listingForm.title} /><small>{listingForm.title.trim().length} / 140 · en az 10 karakter</small></label>
+              <label>Fiyat (₺)<input inputMode="decimal" onChange={(event) => setListingForm({ ...listingForm, price: event.target.value })} placeholder="Örn. 4750000" value={listingForm.price} /><small>Boş bırakırsan “Fiyat sorunuz” yazar.</small></label>
+              <label>Şehir<select onChange={(event) => setListingForm({ ...listingForm, city_id: event.target.value, district_id: "" })} value={listingForm.city_id}><option value="">Seçilmedi</option>{(catalog?.cities ?? []).map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}</select></label>
+              <label>İlçe<select disabled={!listingCity} onChange={(event) => setListingForm({ ...listingForm, district_id: event.target.value })} value={listingForm.district_id}><option value="">Seçilmedi</option>{(listingCity?.districts ?? []).map((district) => <option key={district.id} value={district.id}>{district.name}</option>)}</select></label>
+              <label className={styles.wide}>Açıklama<textarea maxLength={5000} onChange={(event) => setListingForm({ ...listingForm, description: event.target.value })} placeholder="Ürünün durumunu, kapsamını ve teslim koşullarını anlat…" value={listingForm.description} /><small>{listingForm.description.trim().length} / 5000 · en az 20 karakter</small></label>
+            </div>
+          </section>
+
+          <section className={styles.formBlock}>
+            <header><i>2</i><div><strong>Kategori özellikleri</strong><small>Alıcının ilanda gördüğü özellik tablosu buradan oluşur.</small></div></header>
+            {!listingForm.category_slug ? <p className={styles.formHint}>Önce bir kategori seç; o kategorinin soruları burada açılır.</p>
+              : listingFields.slug !== listingForm.category_slug ? <p className={styles.formHint}>Kategori soruları yükleniyor…</p>
+              : visibleListingFields.length === 0 ? <p className={styles.formHint}>Bu kategoride ek özellik tanımlı değil.</p>
+              : <div className={styles.formGrid}>{visibleListingFields.map(renderListingField)}</div>}
+          </section>
+        </div>
+
+        <aside className={styles.builderSide}>
+          <span className={styles.previewTag}>CANLI ÖNİZLEME</span>
+          <article className={styles.previewCard}>
+            <div className={styles.previewCover} style={listingCategory ? { background: `linear-gradient(135deg, ${listingCategory.color}, #4f46e5)` } : undefined}><span>{listingCategory?.icon ?? "🏷"}</span></div>
+            <div className={styles.previewBody}>
+              <div className={styles.previewTop}>
+                {listingCategory && <b style={{ background: `${listingCategory.color}18`, color: listingCategory.color }}>{listingCategory.icon} {listingCategory.name}</b>}
+                <small>{listingForm.id ? "Düzenleniyor" : "Yeni"}</small>
+              </div>
+              <h4>{listingForm.title || "Ürün başlığı"}</h4>
+              {(listingCity || listingDistrict) && <small className={styles.previewPlace}>📍 {[listingCity?.name, listingDistrict?.name].filter(Boolean).join(", ")}</small>}
+              <p>{listingForm.description || "Ürün açıklaman burada görünecek."}</p>
+              <ul className={styles.previewSpecs}>
+                <li>{listingForm.price.trim() ? money(listingForm.price) : "Fiyat sorunuz"}</li>
+                {visibleListingFields.slice(0, 5).map((field) => {
+                  const raw = listingValues[field.key];
+                  if (raw === undefined || raw === null || raw === "" || (Array.isArray(raw) && raw.length === 0)) return null;
+                  return <li key={field.key}>{field.label}: {Array.isArray(raw) ? raw.join(", ") : typeof raw === "boolean" ? (raw ? "Evet" : "Hayır") : `${raw}${field.unit ? ` ${field.unit}` : ""}`}</li>;
+                })}
+              </ul>
+            </div>
+          </article>
+          <ul className={styles.previewTips}>
+            <li>Kaydettikten sonra ürüne <b>{listingMeta.max_images} adede kadar fotoğraf</b> yükleyebilirsin.</li>
+            <li>Yayınlamak için en az bir fotoğraf gerekir; ürün önce taslak olarak kaydedilir.</li>
+            <li>Yayındaki ürünleri teklif verirken <b>“Ürün ekle”</b> düğmesiyle alıcıya gönderirsin.</li>
+          </ul>
+        </aside>
+      </div>
+    </Modal>
+
+    {openListing && <Modal onClose={() => setOpenListing(null)} open size="lg" subtitle={`${listingStatusLabel[openListing.status]} · ${openListing.reference}`} title={openListing.title} footer={<>
+      <button className={styles.modalGhost} disabled={busy} onClick={() => deleteListing(openListing.id)} type="button">Sil</button>
+      <button className={styles.modalGhost} onClick={() => editListing(openListing.id)} type="button">Düzenle</button>
+      {openListing.status === "published"
+        ? <>
+          <button className={styles.modalGhost} disabled={busy} onClick={() => changeListingStatus(openListing.id, "sold")} type="button">Satıldı olarak işaretle</button>
+          <button className={styles.modalGhost} disabled={busy} onClick={() => changeListingStatus(openListing.id, "draft")} type="button">Yayından kaldır</button>
+        </>
+        : <button className={styles.modalPrimary} disabled={busy} onClick={() => changeListingStatus(openListing.id, "published")} type="button">Yayına al</button>}
+    </>}>
+      <div className={styles.listingViewer}>
+        <div className={styles.listingShots}>
+          {openListing.images.length < listingMeta.max_images
+            ? <label className={styles.uploadInline}>
+              <input accept="image/jpeg,image/png,image/webp" hidden multiple onChange={(event) => { const files = Array.from(event.target.files ?? []); if (files.length) uploadListingImages(openListing, files); event.target.value = ""; }} type="file" />
+              <span>{listingUploading ? "Yükleniyor…" : "＋ Fotoğraf ekle (çoklu seçebilirsin)"}</span>
+            </label>
+            : <span className={styles.uploadHint}>Fotoğraf sınırına ulaştın; yeni eklemek için birini kaldır.</span>}
+          <span className={styles.uploadHint}>{openListing.images.length} / {listingMeta.max_images} fotoğraf · JPEG, PNG veya WebP · en fazla 8 MB · ilk sıradaki kapaktır</span>
+          {openListing.images.length === 0 ? <p className={styles.formHint}>Henüz fotoğraf yok. Yayınlamak için en az bir fotoğraf gerekir.</p> : <div className={styles.shotGrid}>
+            {openListing.images.map((image, index) => <figure key={image.id}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt="" loading="lazy" src={image.url} />
+              {index === 0
+                ? <b>KAPAK</b>
+                : <button className={styles.shotCover} disabled={busy} onClick={() => makeListingCover(openListing, image.id)} type="button">Kapak yap</button>}
+              <button aria-label="Fotoğrafı kaldır" className={styles.shotRemove} onClick={() => deleteListingImage(openListing, image.id)} type="button">✕</button>
+            </figure>)}
+          </div>}
+        </div>
+        <aside className={styles.listingSide}>
+          <div className={list.cardPrice}><small>FİYAT</small><strong>{openListing.price ? money(openListing.price) : "Fiyat sorunuz"}</strong></div>
+          <p className={styles.listingText}>{openListing.description}</p>
+          {openListing.attributes.length > 0 && <dl className={styles.listingSpecs}>
+            {openListing.attributes.map((row) => <div key={row.key}><dt>{row.label}</dt><dd>{attributeValue(row)}</dd></div>)}
+          </dl>}
+        </aside>
+      </div>
+    </Modal>}
+
+    <Modal onClose={() => setPickerOpen(false)} open={pickerOpen} size="lg" subtitle="Yayındaki ürünlerinden birini teklifine ekle; alıcı teklifin içinde görür." title="Ürün seç">
+      {pickable === null ? <p className={styles.formHint}>Ürünlerin yükleniyor…</p>
+        : pickable.length === 0 ? <div className={styles.pickerEmpty}>
+          <strong>Yayında ürünün yok.</strong>
+          <p>Teklife ekleyebilmek için önce “Ürünlerim” bölümünden bir ürün ekle, fotoğrafını yükle ve yayına al.</p>
+          <button className={styles.modalPrimary} onClick={() => { setPickerOpen(false); selectView("listings"); }} type="button">Ürünlerime git</button>
+        </div>
+        : <div className={styles.pickerGrid}>
+          {pickable.map((item) => <button className={`${styles.pickerCard} ${offerListing?.id === item.id ? styles.pickerOn : ""}`} key={item.id} onClick={() => { setOfferListing({ id: item.id, title: item.title, price: item.price, cover_url: item.cover_url }); setPickerOpen(false); }} type="button">
+            {item.cover_url
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img alt="" loading="lazy" src={item.cover_url} />
+              : <i>🏷</i>}
+            <span><strong>{item.title}</strong><small>{item.price ? money(item.price) : "Fiyat sorunuz"}</small></span>
+          </button>)}
+        </div>}
     </Modal>
   </main>;
 }
