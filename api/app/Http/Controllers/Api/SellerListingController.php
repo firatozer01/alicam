@@ -40,6 +40,7 @@ class SellerListingController extends Controller
     {
         $data = $request->validate([
             'status' => ['sometimes', Rule::in(['draft', 'published', 'sold', 'archived'])],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ]);
 
         $items = SellerListing::query()
@@ -49,7 +50,7 @@ class SellerListingController extends Controller
             ->withCount('offers')
             ->orderBy('sort_order')
             ->latest('id')
-            ->paginate(20);
+            ->paginate($data['per_page'] ?? 20);
 
         return response()->json([
             'data' => $items->getCollection()->map(fn (SellerListing $i) => self::present($i))->values(),
@@ -324,6 +325,11 @@ class SellerListingController extends Controller
             'location' => [
                 'city' => $listing->city?->name,
                 'district' => $listing->district?->name,
+                // Id'ler duzenleme formunun secim kutularini doldurmak
+                // icin; ada gore eslestirmek yonetici bir sehri yeniden
+                // adlandirdiginda sessizce bos secim birakiyordu.
+                'city_id' => $listing->city_id,
+                'district_id' => $listing->district_id,
             ],
             'image_count' => $listing->relationLoaded('images')
                 ? $listing->images->count()

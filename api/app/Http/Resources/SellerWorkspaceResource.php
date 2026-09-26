@@ -24,6 +24,9 @@ class SellerWorkspaceResource extends JsonResource
                 'name' => $this->name,
                 'email' => $this->email,
                 'phone' => $this->phone,
+                // Saticinin KENDI profil fotografi; firma logosundan
+                // ayri bir sey ve panelde ikisi de gosterilebilmeli.
+                'avatar_url' => $this->avatar_url,
                 'verification' => [
                     'email' => $this->email_verified_at !== null,
                     'phone' => $this->phone_verified_at !== null,
