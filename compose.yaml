@@ -65,6 +65,18 @@ services:
       PAYTR_NO_INSTALLMENT: ${PAYTR_NO_INSTALLMENT:-0}
       PAYTR_MAX_INSTALLMENT: ${PAYTR_MAX_INSTALLMENT:-0}
       FILESYSTEM_DISK: public
+      BROADCAST_CONNECTION: ${BROADCAST_CONNECTION:-reverb}
+      REVERB_APP_ID: ${REVERB_APP_ID:-alicam}
+      REVERB_APP_KEY: ${REVERB_APP_KEY:-}
+      REVERB_APP_SECRET: ${REVERB_APP_SECRET:-}
+      # Sunucu tarafi yayin docker agi uzerinden dogrudan reverb konteynerine gider.
+      REVERB_HOST: reverb
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
+      # Tarayicinin baglanacagi genel adres; uretimde alan adi + 443 + https.
+      REVERB_PUBLIC_HOST: ${REVERB_PUBLIC_HOST:-localhost}
+      REVERB_PUBLIC_PORT: ${REVERB_PUBLIC_PORT:-8092}
+      REVERB_PUBLIC_SCHEME: ${REVERB_PUBLIC_SCHEME:-http}
     volumes:
       - api_storage:/var/www/html/storage/app
     depends_on:
@@ -109,8 +121,60 @@ services:
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-alıcam.net}
       FILESYSTEM_DISK: public
       SKIP_MIGRATIONS: "1"
+      BROADCAST_CONNECTION: ${BROADCAST_CONNECTION:-reverb}
+      REVERB_APP_ID: ${REVERB_APP_ID:-alicam}
+      REVERB_APP_KEY: ${REVERB_APP_KEY:-}
+      REVERB_APP_SECRET: ${REVERB_APP_SECRET:-}
+      # Sunucu tarafi yayin docker agi uzerinden dogrudan reverb konteynerine gider.
+      REVERB_HOST: reverb
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
+      # Tarayicinin baglanacagi genel adres; uretimde alan adi + 443 + https.
+      REVERB_PUBLIC_HOST: ${REVERB_PUBLIC_HOST:-localhost}
+      REVERB_PUBLIC_PORT: ${REVERB_PUBLIC_PORT:-8092}
+      REVERB_PUBLIC_SCHEME: ${REVERB_PUBLIC_SCHEME:-http}
     volumes:
       - api_storage:/var/www/html/storage/app
+    depends_on:
+      - api
+
+  # WebSocket sunucusu. Yeni bir port acilir (8092); 3000 ve 8091'e dokunulmaz.
+  reverb:
+    build:
+      context: ./api
+    restart: unless-stopped
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    ports:
+      - "${REVERB_BIND_ADDRESS:-127.0.0.1}:${REVERB_PUBLIC_PORT:-8092}:8080"
+    environment:
+      APP_NAME: alicam.net
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${APP_URL:-http://localhost:8091}
+      APP_KEY: ${APP_KEY:-}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Europe/Istanbul}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-alicam}
+      DB_USERNAME: ${POSTGRES_USER:-alicam}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-change-this-in-production}
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      BROADCAST_CONNECTION: ${BROADCAST_CONNECTION:-reverb}
+      REVERB_APP_ID: ${REVERB_APP_ID:-alicam}
+      REVERB_APP_KEY: ${REVERB_APP_KEY:-}
+      REVERB_APP_SECRET: ${REVERB_APP_SECRET:-}
+      # Sunucunun kendisi icin yalnizca baglanma adresi gerekir. REVERB_HOST
+      # BILEREK verilmez: Reverb onu "hostname" sayip ayni adla bir sertifika
+      # bulursa kendiliginden TLS konusmaya basliyor (Factory.php:123) ve on
+      # nginx'in duz http baglantisi kopuyor. TLS'i on nginx sonlandiriyor.
+      REVERB_SERVER_HOST: 0.0.0.0
+      REVERB_SERVER_PORT: 8080
+      SKIP_MIGRATIONS: "1"
     depends_on:
       - api
 

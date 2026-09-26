@@ -98,6 +98,7 @@ class ConversationController extends Controller
             'messages' => $messages->map(fn ($message) => [
                 'id' => $message->id,
                 'body' => $message->body,
+                'sender_id' => $message->sender_id,
                 'mine' => $message->sender_id === $user->id,
                 'sender' => $message->sender->name,
                 'read' => $message->read_at !== null,
@@ -130,6 +131,7 @@ class ConversationController extends Controller
             'data' => [
                 'id' => $message->id,
                 'body' => $message->body,
+                'sender_id' => $message->sender_id,
                 'mine' => true,
                 'sender' => $user->name,
                 'read' => false,
@@ -169,6 +171,7 @@ class ConversationController extends Controller
             'messages' => $messages->map(fn ($message) => [
                 'id' => $message->id,
                 'body' => $message->body,
+                'sender_id' => $message->sender_id,
                 'mine' => $message->sender_id === $user->id,
                 'sender' => $message->sender->name,
                 'read' => $message->read_at !== null,
@@ -202,6 +205,9 @@ class ConversationController extends Controller
 
         return [
             'id' => $conversation->id,
+            // Soketten gelen mesajda "mine" bulunmaz (tek yayin iki kisiye
+            // gider); arayuz bunu sender_id ile karsilastirarak bulur.
+            'viewer_id' => $user->id,
             'counterpart' => ['id' => $other?->id, 'name' => $other?->name ?? 'Hesap'],
             'role' => $isBuyer ? 'buyer' : 'seller',
             'unread' => $isBuyer ? $conversation->buyer_unread : $conversation->seller_unread,

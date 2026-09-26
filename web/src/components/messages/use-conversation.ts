@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api";
+import { realtime } from "@/lib/echo";
 
 export type ChatMessage = {
   id: number;
   body: string;
+  sender_id: number;
   mine: boolean;
   sender: string;
   read: boolean;
@@ -14,6 +16,7 @@ export type ChatMessage = {
 
 export type ConversationSummary = {
   id: number;
+  viewer_id: number;
   counterpart: { id: number | null; name: string };
   role: "buyer" | "seller";
   unread: number;
@@ -23,12 +26,36 @@ export type ConversationSummary = {
 
 export type ComposeState = { credit_cost: number; notice: string | null };
 
+/** Soketten gelen yuk; "mine" tasimaz cunku tek yayin iki tarafa birden gider. */
+type Broadcast = Omit<ChatMessage, "mine">;
+
 /**
- * Bir konusmanin mesajlarini tutar ve yeni gelenleri yoklar.
+ * laravel-echo'nun altindaki pusher baglantisi. Genel tiplerde yer almadigi
+ * icin ihtiyac duyulan kadari burada daraltilir; "any" serpmekten iyidir.
+ */
+type PusherLike = {
+  connector?: { pusher?: { connection?: { bind: (event: string, handler: (payload: { current: string }) => void) => void } } };
+};
+
+/** Ayni mesaj hem soketten hem yoklamadan gelebilir; kimlige gore tekillestirir. */
+function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]): ChatMessage[] {
+  if (incoming.length === 0) return current;
+
+  const seen = new Set(current.map((message) => message.id));
+  const fresh = incoming.filter((message) => !seen.has(message.id));
+
+  return fresh.length === 0 ? current : [...current, ...fresh];
+}
+
+/**
+ * Bir konusmanin mesajlarini tutar ve yenilerini getirir.
  *
- * Canli tasiyici (WebSocket) baglanana kadar kisa araliklarla /poll ucu
- * kullanilir. Tasiyici geldiginde yalnizca bu kancanin icindeki yoklama
- * dongusu degisecek; disaridaki bilesenler ayni kalir.
+ * Once Reverb uzerinden ozel kanala abone olunur; mesajlar aninda duser.
+ * Soket kurulamazsa ya da sessizce olurse (vekil sunucu zaman asimi, uyku,
+ * kopuk ag) bes saniyelik yoklama devreye girer. Soket calisirken de yarim
+ * dakikada bir yoklanir: soketin oldugunu baska turlu anlayamayiz.
+ *
+ * Disariya verdigi sekil degismez; bileşenler tasiyiciyi hic bilmez.
  */
 export function useConversation(conversationId: number | null, pollMs = 5000) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -37,7 +64,6 @@ export function useConversation(conversationId: number | null, pollMs = 5000) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const lastId = useRef(0);
-
 
   // Konusma degisince durum render sirasinda sifirlanir; efekt icinde
   // dogrudan setState cagirmak fazladan bir tur olustururdu.
@@ -73,28 +99,71 @@ export function useConversation(conversationId: number | null, pollMs = 5000) {
     return () => { active = false; };
   }, [conversationId]);
 
-  // Yoklama: sekme arka plandayken durur, boylece bos istek atilmaz.
   useEffect(() => {
     if (!conversationId) return;
-    let stopped = false;
 
-    const tick = async () => {
+    let stopped = false;
+    let live = false;
+    let ticks = 0;
+    let socket: Awaited<ReturnType<typeof realtime>> = null;
+    const channel = `conversation.${conversationId}`;
+
+    const pull = () => {
       if (stopped || document.hidden) return;
-      try {
-        const response = await apiRequest<{ messages: ChatMessage[] }>(
-          `/conversations/${conversationId}/poll?after=${lastId.current}`,
-        );
-        if (response.messages.length > 0) {
-          setMessages((current) => [...current, ...response.messages]);
-          lastId.current = response.messages.at(-1)!.id;
-        }
-      } catch {
-        // Gecici ag hatasi: bir sonraki turda tekrar denenir.
-      }
+
+      apiRequest<{ messages: ChatMessage[] }>(`/conversations/${conversationId}/poll?after=${lastId.current}`)
+        .then((response) => {
+          if (stopped || response.messages.length === 0) return;
+          setMessages((current) => mergeMessages(current, response.messages));
+          lastId.current = Math.max(lastId.current, ...response.messages.map((message) => message.id));
+        })
+        .catch(() => {
+          // Gecici ag hatasi: bir sonraki turda tekrar denenir.
+        });
     };
 
-    const timer = window.setInterval(tick, pollMs);
-    return () => { stopped = true; window.clearInterval(timer); };
+    realtime()
+      .then((instance) => {
+        if (stopped || !instance) return;
+        socket = instance;
+
+        instance.private(channel).listen(".message.sent", (payload: Broadcast) => {
+          if (stopped) return;
+          // "mine" burada gecicidir; gercegi render sirasinda viewer_id ile bulunur.
+          setMessages((current) => mergeMessages(current, [{ ...payload, mine: false }]));
+          lastId.current = Math.max(lastId.current, payload.id);
+        });
+
+        live = true;
+
+        // Soket koparsa yoklama ANINDA devralir; yoksa kalp atisina kadar
+        // (yarim dakika) mesajlar gelmemis gibi gorunurdu.
+        const connection = (instance as unknown as PusherLike).connector?.pusher?.connection;
+        connection?.bind("state_change", ({ current }: { current: string }) => {
+          live = current === "connected";
+          if (!live) pull();
+        });
+      })
+      .catch(() => undefined);
+
+    const timer = window.setInterval(() => {
+      if (stopped) return;
+      ticks += 1;
+      // Soket calisirken yalnizca kalp atisi (30 sn); yoksa her turda.
+      if (live && ticks % 6 !== 0) return;
+      pull();
+    }, pollMs);
+
+    // Sekmeye donunce bekletilmeden bir kez yoklanir.
+    const onVisibility = () => { if (!document.hidden) pull(); };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+      socket?.leave(channel);
+    };
   }, [conversationId, pollMs]);
 
   const send = useCallback(async (body: string) => {
@@ -103,11 +172,22 @@ export function useConversation(conversationId: number | null, pollMs = 5000) {
       `/conversations/${conversationId}/messages`,
       { method: "POST", body: JSON.stringify({ body }) },
     );
-    setMessages((current) => [...current, response.data]);
+    setMessages((current) => mergeMessages(current, [response.data]));
     setCompose(response.compose);
-    lastId.current = response.data.id;
+    lastId.current = Math.max(lastId.current, response.data.id);
     return response.data;
   }, [conversationId]);
 
-  return { messages, compose, summary, loading, error, send };
+  // Sahiplik gonderen kimligiyle belirlenir: soketten gelen mesajda sunucu
+  // "mine" gonderemez, cunku ayni yayini iki taraf da aliyor.
+  const owned = useMemo(() => {
+    const viewerId = summary?.viewer_id;
+    if (viewerId === undefined) return messages;
+
+    return messages.map((message) => message.mine === (message.sender_id === viewerId)
+      ? message
+      : { ...message, mine: message.sender_id === viewerId });
+  }, [messages, summary]);
+
+  return { messages: owned, compose, summary, loading, error, send };
 }

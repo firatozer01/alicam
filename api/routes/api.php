@@ -21,6 +21,8 @@ use App\Http\Controllers\Api\SellerRequestController;
 use App\Http\Controllers\Api\SellerReviewController;
 use App\Http\Controllers\Api\SellerServiceController;
 use App\Http\Controllers\Api\VerificationController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json([
@@ -35,6 +37,18 @@ Route::get('/credits/packages', [CreditPurchaseController::class, 'packages']);
 Route::get('/marketplace', MarketplaceController::class);
 
 // Asistan: oturum zorunlu degil, varsa kullaniciya ozel konular acilir.
+/**
+ * Canli tasiyici ayarlari. Anahtar null donerse arayuz soket acmaz ve
+ * yoklamada kalir; boylece Reverb kapaliyken de mesajlasma calisir.
+ * Derleme aninda gomulmedigi icin tek web imaji her ortamda dogru adresi alir.
+ */
+Route::get('/realtime', fn () => response()->json([
+    'key' => config('realtime.enabled') ? config('realtime.key') : null,
+    'host' => config('realtime.host'),
+    'port' => config('realtime.port'),
+    'scheme' => config('realtime.scheme'),
+]));
+
 Route::get('/assistant', [AssistantController::class, 'intro']);
 Route::post('/assistant/ask', [AssistantController::class, 'ask'])->middleware('throttle:30,1');
 Route::post('/payments/paytr/callback', [CreditPurchaseController::class, 'callback'])
@@ -56,7 +70,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/me/password', [AuthController::class, 'updatePassword'])->middleware('throttle:10,1');
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Mesajlasma. Canli tasiyici baglanana kadar arayuz /poll ucunu kullanir.
+    // Ozel kanal yetkilendirmesi. Laravel bunu kokte de sunar ama arayuz
+    // yalnizca /api/* yolunu proxy'ledigi icin burada da acilir.
+    Route::post('/broadcasting/auth', fn (Request $request) => Broadcast::auth($request));
+
+    // Mesajlasma. Soket kurulamazsa arayuz /poll ucuna duser.
     Route::get('/conversations', [ConversationController::class, 'index']);
     Route::post('/conversations', [ConversationController::class, 'store'])->middleware('throttle:20,1');
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show']);

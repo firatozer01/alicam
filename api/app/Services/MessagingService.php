@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\MessageSent;
 use App\Exceptions\InsufficientCreditsException;
 use App\Jobs\NotifyUnreadMessage;
 use App\Models\BuyerRequest;
@@ -11,6 +12,7 @@ use App\Models\Message;
 use App\Models\SellerCredit;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Birebir mesajlasma.
@@ -65,7 +67,7 @@ class MessagingService
      */
     public function send(Conversation $conversation, User $sender, string $body): Message
     {
-        return DB::transaction(function () use ($conversation, $sender, $body): Message {
+        $message = DB::transaction(function () use ($conversation, $sender, $body): Message {
             $locked = Conversation::query()->whereKey($conversation->id)->lockForUpdate()->firstOrFail();
             $cost = $this->costFor($locked, $sender);
 
@@ -88,13 +90,31 @@ class MessagingService
                 'seller_unread' => $recipientIsBuyer ? $locked->seller_unread : $locked->seller_unread + 1,
             ]);
 
-            // Gecikmeli gonderim: karsi taraf birkac dakika icinde okursa
-            // e-posta hic cikmaz, sohbet ederken kutusu dolmaz.
-            NotifyUnreadMessage::dispatch($message->id)
-                ->delay(now()->addMinutes((int) config('messaging.email_delay_minutes', 3)));
-
             return $message;
         }, 3);
+
+        // Yayin ve bildirim islem KAPANDIKTAN sonra: geri alinan bir islem
+        // ne hayalet mesaj yayinlamali ne de e-posta tetiklemeli.
+        //
+        // Canli yayin bir EK'tir, bagimlilik degil. WebSocket sunucusu
+        // kapaliysa mesaj yine de kaydedilmis olmali ve karsi tarafa
+        // yoklamayla ulasmalidir; bu yuzden hata yutulur ve yalnizca kayda
+        // yazilir. Aksi halde Reverb dustugunde mesajlasma tumden dururdu.
+        try {
+            MessageSent::dispatch($message);
+        } catch (\Throwable $error) {
+            Log::warning('Mesaj canli yayinlanamadi, yoklamaya birakildi', [
+                'message_id' => $message->id,
+                'error' => mb_substr($error->getMessage(), 0, 200),
+            ]);
+        }
+
+        // Gecikmeli gonderim: karsi taraf birkac dakika icinde okursa e-posta
+        // hic cikmaz, sohbet ederken kutusu dolmaz.
+        NotifyUnreadMessage::dispatch($message->id)
+            ->delay(now()->addMinutes((int) config('messaging.email_delay_minutes', 3)));
+
+        return $message;
     }
 
     /** Kullanicinin bu konusmadaki okunmamislarini sifirlar. */
