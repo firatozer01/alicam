@@ -5,7 +5,30 @@ import { useEffect, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api";
 import styles from "./assistant.module.css";
 
-type Topic = { key: string; title: string };
+type Topic = {
+  key: string;
+  title: string;
+  icon: string | null;
+  summary: string | null;
+  group: string | null;
+};
+
+type Group = { key: string; title: string };
+
+type Lookup = { label: string; placeholder: string; action: string };
+
+type LookupResult = {
+  found: boolean;
+  message?: string;
+  reference?: string;
+  title?: string;
+  status_label?: string;
+  role?: "buyer" | "seller";
+  category?: string | null;
+  location?: string | null;
+  offer_count?: number | null;
+  own_offer_status?: string | null;
+};
 
 type Intro = {
   mode: "knowledge" | "ai";
@@ -13,6 +36,8 @@ type Intro = {
   subtitle: string | null;
   display_name: string | null;
   topics: Topic[];
+  groups: Group[];
+  lookup: Lookup | null;
 };
 
 type Turn = { id: number; role: "bot" | "user"; text: string };
@@ -32,6 +57,8 @@ export function AssistantWidget() {
   const [question, setQuestion] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [reference, setReference] = useState("");
+  const [looking, setLooking] = useState(false);
   const threadRef = useRef<HTMLDivElement>(null);
   const counter = useRef(0);
 
@@ -78,6 +105,44 @@ export function AssistantWidget() {
     }
   };
 
+  /** Talep referansindan durum ogrenme. Sonuc sohbete bot balonu olarak duser. */
+  const runLookup = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const value = reference.trim();
+    if (value.length < 3 || looking) return;
+
+    push("user", value);
+    setReference("");
+    setLooking(true);
+
+    try {
+      const data = await apiRequest<LookupResult>("/assistant/lookup", {
+        method: "POST",
+        body: JSON.stringify({ reference: value }),
+      });
+
+      if (!data.found) {
+        push("bot", data.message ?? "Bu referansla bir talep bulamadım.");
+      } else {
+        const satirlar = [
+          `${data.reference} — ${data.title}`,
+          `Durum: ${data.status_label}`,
+          data.category ? `Kategori: ${data.category}` : null,
+          data.location ? `Konum: ${data.location}` : null,
+          data.role === "buyer"
+            ? `Gelen teklif: ${data.offer_count ?? 0}`
+            : data.own_offer_status ? `Senin teklifin: ${data.own_offer_status}` : null,
+        ].filter(Boolean);
+
+        push("bot", satirlar.join("\n"));
+      }
+    } catch {
+      push("bot", "Sorgulayamadım, birazdan tekrar dener misin?");
+    } finally {
+      setLooking(false);
+    }
+  };
+
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const trimmed = question.trim();
@@ -88,6 +153,10 @@ export function AssistantWidget() {
   // Varsayilan misafir: kimlik belli olana kadar koyu surum gosterilir.
   // Tersi olsaydi giris yapmamis ziyaretci once acik surumu gorurdu.
   const guest = intro === null || intro.display_name === null;
+
+  // Uyenin acilis gorunumu: gruplu kartlar. Sohbet basladiktan sonra yerini
+  // kisa oneri ciplerine birakir, yoksa panel her cevapta bastan sisecekti.
+  const grouped = !guest && turns.length === 0 && (intro?.groups.length ?? 0) > 0;
 
   return <>
     <button
@@ -143,9 +212,56 @@ export function AssistantWidget() {
 
           {busy && <p className={styles.typing}><i /><i /><i /></p>}
 
-          {suggestions.length > 0 && !busy && (
+          {/* Uye: talep referansindan durum sorgulama. Sohbet baslayinca cekilir. */}
+          {intro?.lookup && turns.length === 0 && !busy && (
+            <div className={styles.lookup}>
+              <p className={styles.topicsHead}>{intro.lookup.label}</p>
+              <form onSubmit={runLookup}>
+                <input
+                  onChange={(event) => setReference(event.target.value)}
+                  placeholder={intro.lookup.placeholder}
+                  value={reference}
+                />
+                <button disabled={looking || reference.trim().length < 3} type="submit">
+                  {looking ? "…" : intro.lookup.action}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Uyede ilk gorunum gruplu kartlar; sonrasinda kisa oneri cipleri. */}
+          {grouped && intro && !busy ? (
+            <div className={styles.groups}>
+              {intro.groups.map((group) => (
+                <section key={group.key}>
+                  <p className={styles.topicsHead}>{group.title}</p>
+                  <div className={styles.cards}>
+                    {intro.topics.filter((topic) => topic.group === group.key).map((topic) => (
+                      <button
+                        className={styles.card}
+                        key={topic.key}
+                        onClick={() => void send({ topic: topic.key }, topic.title)}
+                        type="button"
+                      >
+                        <span className={styles.cardIcon}>{topic.icon ?? "💬"}</span>
+                        <span className={styles.cardBody}>
+                          <strong>{topic.title}</strong>
+                          {topic.summary && <small>{topic.summary}</small>}
+                        </span>
+                        <span aria-hidden className={styles.chev}>›</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : suggestions.length > 0 && !busy && (
             <div className={styles.topics}>
-              <p className={styles.topicsHead}>{turns.length === 0 ? "Hangi konuda yardım istersin?" : "Bunlar da ilgini çekebilir"}</p>
+              <p className={styles.topicsHead}>
+                {turns.length === 0
+                  ? "Hangi konuda yardım istersin?"
+                  : guest ? "Başka bir konu seç" : "Bunlar da ilgini çekebilir"}
+              </p>
               <div>
                 {suggestions.map((topic) => (
                   <button key={topic.key} onClick={() => void send({ topic: topic.key }, topic.title)} type="button">

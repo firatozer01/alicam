@@ -78,6 +78,31 @@
 @media (prefers-reduced-motion: reduce) { .typing i { animation: none; } }
 
 /* ---- Konu başlıkları ---- */
+/* Uye: hizli sorgulama kutusu. */
+.lookup { display: flex; flex-direction: column; gap: 7px; }
+.lookup form { display: flex; gap: 7px; }
+.lookup input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 11px; padding: 9px 11px; font: inherit; font-size: 12.5px; color: var(--ink); background: var(--card); outline: none; transition: border-color .16s ease, box-shadow .16s ease; }
+.lookup input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 58, 237, .12); }
+.lookup button { flex: none; border: 0; border-radius: 11px; padding: 0 15px; font: inherit; font-size: 12.5px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); cursor: pointer; }
+.lookup button:disabled { opacity: .45; cursor: default; }
+
+/* Uye: gruplu konu kartlari. */
+.groups { display: flex; flex-direction: column; gap: 14px; }
+.groups section { display: flex; flex-direction: column; gap: 7px; }
+.cards { display: flex; flex-direction: column; gap: 6px; }
+.card {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) 12px; align-items: center; gap: 10px;
+  border: 1px solid var(--line); border-radius: var(--r-md); padding: 9px 11px;
+  background: var(--card); font: inherit; text-align: left; cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+.card:hover { border-color: var(--violet-300); background: var(--violet-50); transform: translateY(-1px); }
+.cardIcon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: var(--violet-100); font-size: 16px; }
+.cardBody { min-width: 0; }
+.cardBody strong { display: block; font-size: 12.8px; font-weight: 700; color: var(--ink); }
+.cardBody small { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chev { color: var(--faint); font-size: 15px; }
+
 .topics { display: flex; flex-direction: column; gap: 8px; }
 .topicsHead { margin: 0; font-size: 10px; font-weight: 800; letter-spacing: .1em; color: var(--muted-2); }
 .panel[data-guest="true"] .topicsHead { color: #8b8ab0; }
