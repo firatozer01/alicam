@@ -10,6 +10,7 @@ type Topic = { key: string; title: string };
 type Intro = {
   mode: "knowledge" | "ai";
   greeting: string;
+  subtitle: string | null;
   display_name: string | null;
   topics: Topic[];
 };
@@ -107,8 +108,13 @@ export function AssistantWidget() {
           <div>
             <strong>alıcam asistanı</strong>
             <small>
-              <i data-mode={intro?.mode ?? "knowledge"} />
-              {intro?.mode === "ai" ? "Yapay zekâ bağlı" : "Hazır cevap modu"}
+              {/* Misafire calisma modu yazilmaz: isine yaramayan bir ic ayrinti. */}
+              {guest
+                ? intro?.subtitle ?? "Sık sorulan konular"
+                : <>
+                    <i data-mode={intro?.mode ?? "knowledge"} />
+                    {intro?.mode === "ai" ? "Yapay zekâ bağlı" : "Hazır cevap modu"}
+                  </>}
             </small>
           </div>
           <button aria-label="Kapat" onClick={() => setOpen(false)} type="button">✕</button>
@@ -125,7 +131,7 @@ export function AssistantWidget() {
             </p>
           )}
 
-          {intro?.mode === "knowledge" && (
+          {!guest && intro?.mode === "knowledge" && (
             <p className={styles.modeNote}>
               Yapay zekâ şu anda bağlı değil. Soruları Bilgi Bankası&apos;nda arayıp bulduğum kaydı olduğu gibi gösteriyorum.
             </p>
@@ -151,14 +157,17 @@ export function AssistantWidget() {
           )}
         </div>
 
-        <form className={styles.composer} onSubmit={submit}>
-          <input
-            onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Sorunu yaz…"
-            value={question}
-          />
-          <button aria-label="Gönder" disabled={busy || question.trim().length < 2} type="submit">➤</button>
-        </form>
+        {/* Giris yapmamis ziyaretci soru yazmaz; yalnizca basliklardan secer. */}
+        {!guest && (
+          <form className={styles.composer} onSubmit={submit}>
+            <input
+              onChange={(event) => setQuestion(event.target.value)}
+              placeholder="Sorunu yaz…"
+              value={question}
+            />
+            <button aria-label="Gönder" disabled={busy || question.trim().length < 2} type="submit">➤</button>
+          </form>
+        )}
       </section>
     )}
   </>;

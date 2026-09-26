@@ -13,7 +13,39 @@ return [
 
     'guest_greeting' => 'Merhaba! alıcam.net hakkında merak ettiklerini buradan yanıtlayabilirim.',
 
+    // Giris yapmamis ziyaretcinin panelinde baslik altinda yazar. Calisma
+    // modundan (yapay zeka bagli mi) hic soz edilmez: ziyaretcinin isine
+    // yaramayan bir ic ayrinti.
+    'guest_subtitle' => 'Sık sorulan konular',
+
+    /*
+     * Giris yapmis kullaniciya saate gore selamlama. {ad} adin ilk parcasiyla
+     * degistirilir. Araliklar [from, to) seklindedir ve gece yarisini asan
+     * aralik ('gece') ayrica ele alinir.
+     */
+    'greetings' => [
+        ['from' => 5, 'to' => 11, 'text' => 'Günaydın {ad}! Bugün sana nasıl yardımcı olayım?'],
+        ['from' => 11, 'to' => 18, 'text' => 'Merhaba {ad}! Takıldığın bir şey varsa buradayım.'],
+        ['from' => 18, 'to' => 23, 'text' => 'İyi akşamlar {ad}! Ne yapmak istersin?'],
+        ['from' => 23, 'to' => 5, 'text' => 'İyi geceler {ad}! Geç saatte mesai var galiba.'],
+    ],
+
     'fallback' => 'Bunu tam anlayamadım. Aşağıdaki başlıklardan birini seçersen adım adım anlatabilirim.',
+
+    // Uye panelindeki kart gruplari, gosterim sirasiyla.
+    'groups' => [
+        ['key' => 'talep', 'title' => 'Talep ve teklifler'],
+        ['key' => 'iletisim', 'title' => 'İletişim'],
+        ['key' => 'satici', 'title' => 'Hizmet veren tarafı'],
+        ['key' => 'hesap', 'title' => 'Hesap ve güvenlik'],
+    ],
+
+    // Panelin ustundeki hizli sorgulama kutusu (yalnizca uye).
+    'lookup' => [
+        'label' => 'HIZLI SORGULA',
+        'placeholder' => 'Talep referansı (örn. ALC-DEMO-001)',
+        'action' => 'Sorgula',
+    ],
 
     'topics' => [
         [

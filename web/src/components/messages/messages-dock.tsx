@@ -1,40 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api";
 import { useConversation, type ConversationSummary } from "./use-conversation";
 import styles from "./dock.module.css";
 
 const MIN_WIDTH = 320;
-const MAX_WIDTH = 640;
+const MAX_WIDTH = 560;
 const WIDTH_KEY = "alicam-dock-width";
 
 const timeLabel = (value: string) =>
   new Date(value).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
 
 /**
- * Sag kenara sabit mesaj paneli.
+ * Sag kenara sabit anlik mesajlasma paneli.
  *
- * Kapaliyken dikey bir tutamak olarak durur; tutamaktan tutup sola cekince
- * acilir. Acikken sol kenarindan tutularak genisligi ayarlanabilir ve secilen
- * genislik tarayicida hatirlanir.
+ * Yalnizca giris yapmis kullaniciya gorunur: konusma listesi 401 donerse
+ * bilesen hicbir sey cizmez. Mesajlar sayfasinin kendisinde de gizlenir,
+ * yoksa ayni liste iki kere gosterilmis olurdu.
+ *
+ * Kapaliyken dikey bir tutamaktir; acilinca sol kenarindan tutularak
+ * genisligi ayarlanir ve secilen genislik tarayicida hatirlanir.
  */
 export function MessagesDock() {
+  const pathname = usePathname();
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
   const [width, setWidth] = useState(() => {
     // Sunucu render'inda depolama yok; istemcide kayitli deger varsa alinir.
-    if (typeof window === "undefined") return 380;
+    if (typeof window === "undefined") return 360;
     try {
       const saved = Number(window.localStorage.getItem(WIDTH_KEY));
-      return saved >= MIN_WIDTH && saved <= MAX_WIDTH ? saved : 380;
+      return saved >= MIN_WIDTH && saved <= MAX_WIDTH ? saved : 360;
     } catch {
-      return 380;
+      return 360;
     }
   });
   const [list, setList] = useState<ConversationSummary[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
+  const [term, setTerm] = useState("");
+  const [tab, setTab] = useState<"all" | "unread">("all");
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
@@ -43,10 +50,9 @@ export function MessagesDock() {
 
   const { messages, compose, send } = useConversation(open ? activeId : null);
 
-  // Oturum yoksa dock hic gorunmez.
   useEffect(() => {
     let active = true;
-    apiRequest<{ data: ConversationSummary[]; meta: { unread_total: number } }>("/conversations")
+    apiRequest<{ data: ConversationSummary[] }>("/conversations")
       .then(({ data }) => {
         if (!active) return;
         setList(data);
@@ -63,8 +69,7 @@ export function MessagesDock() {
 
   const onDrag = useCallback((event: PointerEvent) => {
     if (!dragging.current) return;
-    const next = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, window.innerWidth - event.clientX));
-    setWidth(next);
+    setWidth(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, window.innerWidth - event.clientX)));
   }, []);
 
   const stopDrag = useCallback(() => {
@@ -94,6 +99,14 @@ export function MessagesDock() {
   const unreadTotal = list.reduce((total, item) => total + item.unread, 0);
   const active = list.find((item) => item.id === activeId) ?? null;
 
+  const visible = useMemo(() => {
+    const needle = term.trim().toLocaleLowerCase("tr-TR");
+
+    return list
+      .filter((item) => tab === "all" || item.unread > 0)
+      .filter((item) => needle === "" || item.counterpart.name.toLocaleLowerCase("tr-TR").includes(needle));
+  }, [list, tab, term]);
+
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     const body = draft.trim();
@@ -111,7 +124,14 @@ export function MessagesDock() {
     }
   };
 
-  if (!ready) return null;
+  const emptyText = term.trim() !== ""
+    ? "Bu isimde bir konuşma bulamadım."
+    : tab === "unread"
+      ? "Okunmamış mesajın yok."
+      : "Bu alanda alıcam.net üzerindeki tüm özel mesajlarını yönetebilirsin.";
+
+  // Mesajlar sayfasinda panel gizlenir: ayni liste zaten sayfanin kendisi.
+  if (!ready || pathname?.startsWith("/mesajlar")) return null;
 
   return <>
     {!open && (
@@ -132,21 +152,56 @@ export function MessagesDock() {
 
         <header className={styles.head}>
           {activeId ? (
-            <button className={styles.back} onClick={() => setActiveId(null)} type="button">‹</button>
+            <button aria-label="Listeye dön" className={styles.back} onClick={() => setActiveId(null)} type="button">‹</button>
           ) : null}
           <div>
-            <strong>{active ? active.counterpart.name : "Mesajlar"}</strong>
-            <small>{active ? (active.request?.title ?? "Doğrudan mesaj") : `${list.length} konuşma`}</small>
+            <strong>{active ? active.counterpart.name : "Anlık Mesajlaşma"}</strong>
+            {active && <small>{active.request?.title ?? "Doğrudan mesaj"}</small>}
           </div>
           <Link className={styles.expand} href="/mesajlar" title="Tam sayfada aç">⤢</Link>
-          <button className={styles.close} onClick={() => setOpen(false)} type="button">✕</button>
+          <button aria-label="Kapat" className={styles.close} onClick={() => setOpen(false)} type="button">✕</button>
         </header>
+
+        {!activeId && <>
+          <div className={styles.search}>
+            <span aria-hidden>⌕</span>
+            <input
+              onChange={(event) => setTerm(event.target.value)}
+              placeholder="Kişilerde ara"
+              value={term}
+            />
+          </div>
+
+          <div className={styles.tabs} role="tablist">
+            <button
+              aria-selected={tab === "all"}
+              className={tab === "all" ? styles.tabOn : styles.tab}
+              onClick={() => setTab("all")}
+              role="tab"
+              type="button"
+            >
+              Gelen kutusu
+            </button>
+            <button
+              aria-selected={tab === "unread"}
+              className={tab === "unread" ? styles.tabOn : styles.tab}
+              onClick={() => setTab("unread")}
+              role="tab"
+              type="button"
+            >
+              Okunmamış{unreadTotal > 0 ? ` (${unreadTotal})` : ""}
+            </button>
+          </div>
+        </>}
 
         <div className={styles.body} ref={bodyRef}>
           {!activeId ? (
-            list.length === 0
-              ? <p className={styles.hint}>Henüz konuşman yok. Bir hizmet verenin vitrininden mesaj başlatabilirsin.</p>
-              : list.map((item) => (
+            visible.length === 0
+              ? <div className={styles.empty}>
+                  <span aria-hidden className={styles.emptyArt}>💬</span>
+                  <p>{emptyText}</p>
+                </div>
+              : visible.map((item) => (
                 <button className={styles.row} key={item.id} onClick={() => setActiveId(item.id)} type="button">
                   <span className={styles.avatar}>{item.counterpart.name.slice(0, 2).toLocaleUpperCase("tr-TR")}</span>
                   <span className={styles.rowBody}>
@@ -175,7 +230,7 @@ export function MessagesDock() {
               placeholder="Mesaj yaz…"
               value={draft}
             />
-            <button disabled={sending || draft.trim().length === 0} type="submit">➤</button>
+            <button aria-label="Gönder" disabled={sending || draft.trim().length === 0} type="submit">➤</button>
           </form>
         </>}
       </aside>

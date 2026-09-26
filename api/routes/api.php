@@ -70,6 +70,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/me/password', [AuthController::class, 'updatePassword'])->middleware('throttle:10,1');
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Asistanin hizli sorgulamasi: yalnizca uyeye acik, kendi talebi ya da
+    // teklif verdigi talep disinda bir sey dondurmez.
+    Route::post('/assistant/lookup', [AssistantController::class, 'lookup'])
+        ->middleware('throttle:20,1');
+
     // Ozel kanal yetkilendirmesi. Laravel bunu kokte de sunar ama arayuz
     // yalnizca /api/* yolunu proxy'ledigi icin burada da acilir.
     Route::post('/broadcasting/auth', fn (Request $request) => Broadcast::auth($request));
