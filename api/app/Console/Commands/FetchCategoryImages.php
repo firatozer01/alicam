@@ -76,7 +76,7 @@ class FetchCategoryImages extends Command
                 continue;
             }
 
-            $bayt = $this->arama->download($aday['url']);
+            $bayt = $this->arama->download($aday['url'], $aday['fallback_url'] ?? null);
 
             if ($bayt === null) {
                 $basarisiz[] = "{$kategori->slug} (indirilemedi)";

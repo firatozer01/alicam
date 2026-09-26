@@ -145,7 +145,11 @@ class StockImageSearch
             // bir dosyayi cozmek GD'de 128 MB'lik sinirin ustune cikip
             // toplu indirmeyi ortasinda dusurmustu. Kendi kucuk resmi
             // (~600 px) kart icin zaten yeterli.
+            //
+            // Kucuk resim her zaman hazir olmuyor (toplu calistirmada 15
+            // baslik boyle dustu), o yuzden orijinal yedek olarak tasinir.
             $url = $r['thumbnail'] ?? $r['url'] ?? null;
+            $yedek = $r['url'] ?? null;
 
             if (! $url || $this->rejected($baslik)) {
                 continue;
@@ -167,6 +171,7 @@ class StockImageSearch
                 $enIyi = [
                     'title' => (string) ($r['title'] ?? $sorgu),
                     'url' => $url,
+                    'fallback_url' => $yedek !== $url ? $yedek : null,
                     'license' => $lisans !== '' ? $lisans : 'bilinmiyor',
                     'credit' => (string) ($r['creator'] ?? ''),
                     'page' => (string) ($r['foreign_landing_url'] ?? ''),
@@ -339,21 +344,28 @@ class StockImageSearch
         return trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($deger))) ?? '');
     }
 
-    /** Secilen adayin ham baytlarini indirir. */
-    public function download(string $url): ?string
+    /**
+     * Secilen adayin ham baytlarini indirir.
+     *
+     * Birden fazla adres verilebilir; ilki basarisiz olursa sonrakine
+     * gecilir (Openverse kucuk resmi her zaman hazir degil).
+     */
+    public function download(?string ...$adresler): ?string
     {
-        try {
-            $yanit = Http::withHeaders(['User-Agent' => self::AGENT])
-                ->timeout(40)->retry(2, 1500)
-                ->get($url);
-        } catch (\Throwable) {
-            return null;
+        foreach (array_filter($adresler) as $url) {
+            try {
+                $yanit = Http::withHeaders(['User-Agent' => self::AGENT])
+                    ->timeout(40)->retry(2, 1500)
+                    ->get($url);
+            } catch (\Throwable) {
+                continue;
+            }
+
+            if ($yanit->successful() && strlen($yanit->body()) >= 4000) {
+                return $yanit->body();
+            }
         }
 
-        if (! $yanit->successful() || strlen($yanit->body()) < 4000) {
-            return null;
-        }
-
-        return $yanit->body();
+        return null;
     }
 }
