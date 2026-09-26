@@ -24,20 +24,50 @@ class CategoryAttributeForm
     /**
      * Girdiyi kategorinin alan setine gore dogrular.
      *
+     * $baglam etiket dilini secer. Mevcut etiketler aliciya sorulan
+     * sorular ("Kac oda + salon olsun?"); ilan tarafinda ayni alanin
+     * bildirim kipindeki adi gerekiyor ("Oda Sayisi"). Kategoriye
+     * listing_label girilmediyse label kullanilir.
+     *
      * @param  array<string, mixed>  $girdi  ham 'attributes' dizisi
      * @return array{attributes: array<string, mixed>, snapshot: array<int, array<string, mixed>>}
      */
-    public function resolve(Category $category, array $girdi): array
+    public function resolve(Category $category, array $girdi, string $baglam = 'request'): array
     {
         // Alan seti kalitimlidir: yaprak kategoride sorulanlar ust
         // kategorilerin alanlarini da icerir, yoksa derin agacta hicbir
         // alan dogrulanmaz.
-        $etkin = CategoryTree::effectiveAttributes($category);
+        $etkin = $this->fields($category, $baglam);
 
         return [
             'attributes' => $this->validated($etkin, $girdi),
-            'snapshot' => $this->snapshot($etkin),
+            'snapshot' => $this->snapshot($etkin, $baglam),
         ];
+    }
+
+    /**
+     * Bu baglamda sorulacak alanlar.
+     *
+     * @return \Illuminate\Support\Collection<int, \App\Models\CategoryAttribute>
+     */
+    public function fields(Category $category, string $baglam = 'request')
+    {
+        $etkin = CategoryTree::effectiveAttributes($category);
+
+        if ($baglam === 'listing') {
+            // Ilan tarafinda YALNIZCA listing_label'i olan alanlar
+            // sorulur. Mevcut alan setleri aliciya gore yazilmis ve
+            // buyuk kismi bir satici ilaninda anlamsiz: "Butcen ne
+            // kadar?", "Ne zaman tasinmayi planliyorsun?", "Kimden
+            // teklif almak istersin?".
+            //
+            // Tek sutun iki soruyu birden yanitliyor: bu alan ilana
+            // uyar mi, ve orada adi ne. Yonetici paneli bu alani
+            // duzenleyebildigi icin liste kodda donmus degil.
+            $etkin = $etkin->filter(fn ($alan) => filled($alan->listing_label))->values();
+        }
+
+        return $etkin;
     }
 
     /**
@@ -99,11 +129,11 @@ class CategoryAttributeForm
      * @param  \Illuminate\Support\Collection<int, \App\Models\CategoryAttribute>  $etkin
      * @return array<int, array<string, mixed>>
      */
-    private function snapshot($etkin): array
+    private function snapshot($etkin, string $baglam): array
     {
         return $etkin->map(fn ($alan) => [
             'key' => $alan->key,
-            'label' => $alan->label,
+            'label' => $baglam === 'listing' ? $alan->listing_label : $alan->label,
             'type' => $alan->type,
             'options' => $alan->options,
             'unit' => $alan->unit,

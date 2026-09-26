@@ -11,7 +11,7 @@ class CategoryAttribute extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category_id', 'key', 'label', 'type', 'options', 'validation',
+        'category_id', 'key', 'label', 'listing_label', 'type', 'options', 'validation',
         'unit', 'help_text', 'is_required', 'is_filterable',
         'show_in_summary', 'is_private', 'sort_order',
     ];

@@ -97,7 +97,7 @@ class SellerListingController extends Controller
     {
         [$temel, $kategori] = $this->validatedPayload($request);
 
-        $cozum = $this->attributeForm->resolve($kategori, $request->input('attributes', []));
+        $cozum = $this->attributeForm->resolve($kategori, $request->input('attributes', []), 'listing');
 
         $listing = SellerListing::query()->create([
             'user_id' => $request->user()->id,
@@ -128,7 +128,7 @@ class SellerListingController extends Controller
         abort_unless($sellerListing->user_id === $request->user()->id, 403);
 
         [$temel, $kategori] = $this->validatedPayload($request);
-        $cozum = $this->attributeForm->resolve($kategori, $request->input('attributes', []));
+        $cozum = $this->attributeForm->resolve($kategori, $request->input('attributes', []), 'listing');
 
         $sellerListing->update([
             'category_id' => $kategori->id,

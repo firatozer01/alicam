@@ -80,6 +80,12 @@ class AdminCategoryAttributeController extends Controller
                     ->ignore($attribute?->id),
             ],
             'label' => ['required', 'string', 'min:2', 'max:120'],
+            // Ayni alanin ILAN tarafindaki adi. Mevcut etiketler
+            // aliciya sorulan sorular ("Kac oda olsun?"); satici
+            // ilanini girerken ve alici ozellik tablosunu okurken
+            // bildirim kipi gerekiyor ("Oda Sayisi"). Bos ise
+            // label kullanilir.
+            'listing_label' => ['sometimes', 'nullable', 'string', 'max:120'],
             'type' => ['required', Rule::in(['text', 'textarea', 'select', 'multiselect', 'number', 'range', 'boolean', 'date'])],
             'options' => [$selectType ? 'required' : 'nullable', 'array', 'max:50'],
             'options.*' => ['string', 'min:1', 'max:80', 'distinct'],
