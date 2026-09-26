@@ -92,7 +92,14 @@ const VARSAYILAN_METIN: HomeCopy = {
 };
 
 /**
- * Hizmet karti: ustte fotograf, altinda ad ve iki bilgi satiri.
+ * Hizmet karti: ust uste UC AYRI BOLGE.
+ *
+ *   1) fotograf, kartin ust kenarina yaslanik
+ *   2) govde: once ad, sonra iki satirlik bilgi tablosu
+ *   3) eylem seridi: "Teklif al"
+ *
+ * Bilgi satirlari artik "38 alt baslik" gibi bir cumle degil, etiketi
+ * solda degeri sagda duran bir tablo; ayni bilgi, taranabilir halde.
  *
  * Fotograf zorunlu degil. Gorseli olmayan baslik, kategorinin kendi
  * rengiyle boyanmis bir emoji alanina duser; boylece katalogun tamami
@@ -124,16 +131,19 @@ function HizmetKarti({ item }: { item: ServiceCard }) {
 
         <span className={styles.svcMeta}>
           {item.seller_count
-            ? <span><IconPro />{sayi.format(item.seller_count)} hizmet veren</span>
-            : <span><IconPro />{item.child_count} alt başlık</span>}
+            ? <span><span><IconPro />Hizmet veren</span><b>{sayi.format(item.seller_count)}</b></span>
+            : <span><span><IconPro />Alt başlık</span><b>{item.child_count}</b></span>}
 
           {item.rating && item.review_count
-            ? <span><IconStar />{item.rating.toLocaleString("tr-TR", { minimumFractionDigits: 1 })} ({sayi.format(item.review_count)} yorum)</span>
-            : <span><IconReq />{sayi.format(item.request_count)} talep</span>}
+            ? <span><span><IconStar />Puan</span><b>{item.rating.toLocaleString("tr-TR", { minimumFractionDigits: 1 })} <small>({sayi.format(item.review_count)} yorum)</small></b></span>
+            : <span><span><IconReq />Talep</span><b>{sayi.format(item.request_count)}</b></span>}
         </span>
-
-        <span className={styles.svcCta}>Teklif al</span>
       </span>
+
+      {/* Eylem seridi kartin govdesinden ayri: hover'da acilmadigi icin
+          imlec gelince kartin boyu degismiyor, dokunmatik cihazda da
+          ayni yuksekligi veriyor. */}
+      <span className={styles.svcFoot}>Teklif al<i aria-hidden="true">→</i></span>
     </Link>
   );
 }

@@ -1,11 +1,31 @@
-/* Ilan detayi: buyuk fotograf, kucuk resim seridi ve ozellik tablosu. */
+/* Ilan detayi: net ayrilmis bloklar. Her mantiksal grup kendi kenarlikli
+   karti; aralar bosluk, paylasilan tek cizgi degil. */
 
-.detail{display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:18px;align-items:start}
+/* ---- Yerlesim: solda genis kolon, sagda dar ve yapiskan kolon ---- */
+.detail{display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-areas:"photo side" "info side";gap:16px}
+.photoBlock{grid-area:photo}
+.side{grid-area:side;min-width:0}
+.sideInner{position:sticky;top:0;display:flex;flex-direction:column;gap:14px}
+.info{grid-area:info;min-width:0;display:flex;flex-direction:column;gap:14px}
+
 .state{margin:0;padding:38px 18px;text-align:center;font-size:13.5px;color:var(--muted-2);background:var(--surface);border:1px dashed var(--violet-200);border-radius:var(--r-md)}
 
-/* ---- Galeri ---- */
-.gallery{min-width:0;display:flex;flex-direction:column;gap:10px}
-.stage{position:relative;margin:0;border-radius:var(--r-md);overflow:hidden;background:var(--bg);border:1px solid var(--line);aspect-ratio:4/3}
+/* ---- Blok kabugu ---- */
+.block{min-width:0;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--card)}
+.blockLabel{margin:0 0 10px;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2)}
+
+/* ---- Blok icindeki satirlar: etiket solda, deger sagda ---- */
+.rows{display:flex;flex-direction:column;margin:0}
+.rows>div{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.rows>div:first-child{padding-top:0}
+.rows>div:last-child{padding-bottom:0;border-bottom:0}
+.rows dt{min-width:0;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.rows dd{margin:0;min-width:0;font-size:13px;font-weight:650;color:var(--ink);text-align:right;overflow-wrap:anywhere}
+.mono{font-family:var(--font-plex),ui-monospace,monospace}
+
+/* ---- Fotograf blogu ---- */
+.block.photoBlock{padding:10px}
+.stage{position:relative;margin:0;aspect-ratio:4/3;border-radius:var(--r-md);overflow:hidden;background:var(--ink)}
 .stage img{width:100%;height:100%;object-fit:contain;display:block;background:var(--ink)}
 .stage figcaption{position:absolute;left:12px;bottom:12px;background:rgba(21,22,45,.74);color:#fff;border-radius:999px;padding:5px 12px;font-size:11.5px;font-weight:700;letter-spacing:.01em}
 .arrow{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:rgba(255,255,255,.92);color:var(--indigo);font:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:border-color .16s ease,background .16s ease,transform .16s ease}
@@ -13,54 +33,47 @@
 .prev{left:12px}
 .next{right:12px}
 
-.strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.strip{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px}
 .thumb{flex:none;width:92px;height:68px;padding:0;border:2px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--bg);cursor:pointer;transition:border-color .16s ease,transform .16s ease}
 .thumb:hover{border-color:var(--violet-300);transform:translateY(-2px)}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb.thumbOn{border-color:var(--violet)}
 
-.noImage{aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:1px dashed var(--violet-200);border-radius:var(--r-md);background:var(--surface);color:var(--muted-2);font-size:13.5px}
+.noImage{aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:var(--r-md);background:var(--surface);color:var(--muted-2);font-size:13.5px}
 .noImage span{font-size:56px;opacity:.3;line-height:1}
 .noImage p{margin:0}
 .noImage i{width:26px;height:26px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--violet);animation:listingSpin .8s linear infinite}
 @keyframes listingSpin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.noImage i{animation:none}}
 
-/* ---- Sag kolon ---- */
-.panel{min-width:0;display:flex;flex-direction:column;gap:12px}
-.priceBox{display:flex;flex-direction:column;gap:5px;padding:14px 16px;border-radius:var(--r-md);background:var(--violet-100);border:1px solid var(--violet-200)}
-.priceBox strong{font-family:var(--font-plex),ui-monospace,monospace;font-size:26px;font-weight:700;line-height:1.1;color:var(--ink)}
-.priceBox strong.askPrice{font-family:inherit;font-size:19px;color:var(--indigo)}
-.priceBox span{font-size:12.5px;color:var(--ink-2);font-weight:650}
+/* ---- Fiyat blogu: sayfadaki en buyuk punto ---- */
+.priceBlock strong{display:block;font-family:var(--font-plex),ui-monospace,monospace;font-size:30px;font-weight:700;line-height:1.05;letter-spacing:-.015em;color:var(--ink);overflow-wrap:anywhere}
+.priceBlock strong.askPrice{font-family:inherit;font-size:21px;letter-spacing:0;color:var(--indigo)}
+.place{display:block;margin-top:7px;font-size:12.5px;font-weight:650;color:var(--ink-2)}
+.priceBlock .rows{margin-top:13px;padding-top:12px;border-top:1px solid var(--line-soft)}
 
-.facts{display:flex;flex-direction:column;gap:1px;margin:0;background:var(--line);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
-.facts>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 13px;background:var(--card)}
-.facts dt{font-size:12px;color:var(--muted);flex:none}
-.facts dd{margin:0;font-size:12.5px;font-weight:700;color:var(--ink);text-align:right;min-width:0;overflow-wrap:anywhere}
-.mono{font-family:var(--font-plex),ui-monospace,monospace}
+/* ---- Magaza blogu ---- */
+.sellerRow{display:flex;align-items:center;gap:11px;min-width:0}
+.sellerRow img,.sellerRow i{flex:none;width:44px;height:44px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);object-fit:cover}
+.sellerRow i{display:grid;place-items:center;border-color:var(--violet-200);background:var(--violet-100);color:var(--violet);font-size:17px;font-style:normal;font-weight:800}
+.sellerRow>div{min-width:0}
+.sellerRow strong{display:block;font-size:13.5px;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+.sellerRow span{display:block;margin-top:3px;font-size:11.5px;color:var(--muted-2)}
+.cta{width:100%;margin-top:12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:var(--r-sm);padding:11px 15px;font:inherit;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--violet),var(--indigo));cursor:pointer;transition:filter .16s ease,transform .16s ease}
+.cta:hover{filter:brightness(1.07);transform:translateY(-1px)}
 
-.specBlock h3{margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:.02em;color:var(--ink)}
+/* ---- Ilan bilgileri ve aciklama ---- */
 .specEmpty{margin:0;padding:14px;text-align:center;font-size:12.5px;color:var(--muted-2);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r-sm)}
-.specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;margin:0;background:var(--line);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
-.specs>div{display:flex;flex-direction:column;gap:2px;padding:9px 12px;background:var(--card);min-width:0}
-.specs dt{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--muted-2);text-transform:uppercase}
-.specs dd{margin:0;font-size:13px;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
-
-/* ---- Aciklama ---- */
-.description{grid-column:1/-1;padding-top:4px;border-top:1px solid var(--line-soft)}
-.description h3{margin:14px 0 6px;font-size:13px;font-weight:800;color:var(--ink)}
-.description p{margin:0;font-size:13.5px;line-height:1.7;color:var(--ink-2);white-space:pre-line}
-
-/* ---- Alt seritteki eylem ---- */
-.footNote{margin-right:auto;font-size:12px;color:var(--muted-2)}
-.footCta{display:inline-flex;align-items:center;border:0;border-radius:var(--r-sm);padding:9px 15px;font:inherit;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--violet),var(--indigo));cursor:pointer;white-space:nowrap;transition:filter .16s ease,transform .16s ease}
-.footCta:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.descText{margin:0;font-size:13.5px;line-height:1.7;color:var(--ink-2);white-space:pre-line}
 
 @media(max-width:860px){
-  .detail{grid-template-columns:1fr}
-  .specs{grid-template-columns:1fr}
+  .detail{grid-template-columns:minmax(0,1fr);grid-template-areas:"photo" "side" "info"}
+  .sideInner{position:static}
 }
 @media(max-width:520px){
+  .block{padding:13px 14px}
+  .block.photoBlock{padding:8px}
   .arrow{width:34px;height:34px;font-size:14px}
   .thumb{width:72px;height:54px}
+  .priceBlock strong{font-size:26px}
 }

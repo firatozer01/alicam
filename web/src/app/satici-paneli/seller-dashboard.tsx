@@ -54,8 +54,10 @@ type PortfolioItem = {
 type CategoryNode = { id: number; name: string; slug: string; icon: string; color: string; children?: CategoryNode[] };
 type CityOption = { id: number; name: string; districts: { id: number; name: string }[] };
 // Kategoriye bagli serbest alanlar; talep sihirbazindaki tanimin aynisi.
+// listing_label: ayni alanin ilan tarafindaki bildirim kipi adi
+// ("Oda Sayisi"). Bos ise o alan bir ilanda hic sorulmaz.
 type CategoryAttributeField = {
-  key: string; label: string;
+  key: string; label: string; listing_label?: string | null;
   type: "text" | "textarea" | "select" | "multiselect" | "number" | "range" | "boolean" | "date";
   options: string[] | null; unit: string | null; help_text: string | null;
   is_required: boolean; is_private?: boolean; sort_order?: number;
@@ -93,7 +95,8 @@ const money = (value: string | number) => new Intl.NumberFormat("tr-TR", { style
 const date = (value: string) => new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 const statusLabel: Record<string, string> = { pending: "Yanıt bekliyor", accepted: "Kabul edildi", rejected: "Reddedildi" };
 const listingStatusLabel: Record<ListingStatus, string> = { draft: "Taslak", published: "Yayında", sold: "Satıldı", archived: "Arşiv" };
-const listingFlagClass: Record<ListingStatus, string> = { draft: styles.flagDraft, published: styles.flagLive, sold: styles.flagSold, archived: styles.flagArchive };
+// Dort durum dort ayri rozet; hepsi paletin icinden.
+const listingChipClass: Record<ListingStatus, string> = { draft: styles.isDraft, published: styles.isLive, sold: styles.isSold, archived: styles.isArchived };
 const emptyListingForm = { id: 0, category_slug: "", title: "", description: "", price: "", city_id: "", district_id: "" };
 
 function relativeTime(value: string) {
@@ -356,10 +359,15 @@ export function SellerDashboard() {
     return groups;
   }, [flatCategories]);
 
-  // is_private alanlar ilanda gosterilmez: onlar alicinin talebindeki
-  // ozel notlar icin tanimlanmistir.
+  // Iki elek birden: is_private alanlar alicinin talebindeki ozel notlar
+  // icindir, listing_label'i bos olanlar ise hic ilan alani degildir
+  // ("Butcen ne kadar?", "Ne zaman tasinmayi planliyorsun?"). Sunucu bu
+  // anahtarlari zaten reddeder. Kalanlar ilan kipindeki adiyla sorulur.
   const visibleListingFields = useMemo(
-    () => listingFields.fields.filter((field) => !field.is_private).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+    () => listingFields.fields
+      .filter((field) => !field.is_private && Boolean(field.listing_label?.trim()))
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+      .map((field) => ({ ...field, label: field.listing_label ?? field.label })),
     [listingFields],
   );
 
@@ -576,8 +584,14 @@ export function SellerDashboard() {
     // Ozellik satirlari anahtar/deger haritasina geri cevrilir.
     setListingValues(item ? Object.fromEntries(item.attributes.map((row) => [row.key, row.value])) : {});
     setListingFields({ slug: "", fields: [] });
-    setShowListingForm(true); setOpenListing(null); setError(""); setNotice("");
+    // Duzenlemede urunun tam kaydi yanimizda kalir: formun FOTOGRAFLAR
+    // blogu ayni galeriyi yerinde yonetir. Yeni urunde henuz kayit yok.
+    setShowListingForm(true); setOpenListing(item ?? null); setError(""); setNotice("");
   };
+
+  // Form kapanirken yanindaki kayit da birakilir; aksi halde forma
+  // veda eder etmez fotograf penceresi acilirdi.
+  const closeListingForm = () => { setShowListingForm(false); setOpenListing(null); };
 
   const updateListingValue = (key: string, value: AttributeDraft) => setListingValues((current) => ({ ...current, [key]: value }));
 
@@ -733,6 +747,9 @@ export function SellerDashboard() {
   // anahtarlarini gonderirdi ve sunucu tumunu reddederdi.
   const listingReady = Boolean(listingForm.category_slug) && listingFields.slug === listingForm.category_slug
     && listingForm.title.trim().length >= 10 && listingForm.description.trim().length >= 20;
+  // Duzenlenen urunun tam kaydi: formun FOTOGRAFLAR blogu galeriyi
+  // yerinde yonetsin. Yeni urunde henuz kayit olmadigi icin null.
+  const editingListing = openListing && openListing.id === listingForm.id ? openListing : null;
 
   // Kategori alanlari talep formundaki tiplerin aynisini cizer.
   const renderListingField = (field: CategoryAttributeField) => {
@@ -1041,15 +1058,13 @@ export function SellerDashboard() {
           </div>
 
           {visibleListings.length === 0 ? <div className={list.table}><div className={list.empty}>{listings.length === 0 ? "Vitrininde henüz ürün yok. İlk ürününü ekle, fotoğraflarını yükle ve yayına al." : "Bu durumda ürün bulunmuyor."}</div></div> : <div className={styles.listingGrid}>
-            {visibleListings.map((item) => <article className={`${styles.listingCard} ${item.status === "published" ? "" : styles.draftCard}`} key={item.id}>
-              <button className={styles.coverButton} onClick={() => openListingDetail(item.id)} type="button">
+            {visibleListings.map((item) => <article className={styles.listingCard} key={item.id}>
+              <button className={styles.listingCover} onClick={() => openListingDetail(item.id)} type="button">
                 {item.cover_url
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img alt={item.title} loading="lazy" src={item.cover_url} />
-                  : <span className={styles.noCover}>Fotoğraf yok</span>}
-                <em className={styles.coverCount}>📷 {item.image_count}</em>
-                <b className={`${styles.listingFlag} ${listingFlagClass[item.status]}`}>{listingStatusLabel[item.status]}</b>
-                <span className={styles.coverHint}>Fotoğraf ve durum</span>
+                  : <span className={styles.listingNoCover}>Fotoğraf yok</span>}
+                <span className={styles.listingCoverHint}>Fotoğrafları yönet</span>
               </button>
               <div className={styles.listingBody}>
                 <div className={styles.listingTop}>
@@ -1061,17 +1076,19 @@ export function SellerDashboard() {
                   <span>📍 {[item.location.city, item.location.district].filter(Boolean).join(", ") || "Konum belirtilmedi"}</span>
                   {item.offer_count > 0 && <span>📨 {item.offer_count} teklifte</span>}
                 </div>
-                <footer>
-                  <div className={list.cardPrice}><small>FİYAT</small><strong>{item.price ? money(item.price) : "Fiyat sorunuz"}</strong></div>
-                  <div className={styles.listingActions}>
-                    <button onClick={() => editListing(item.id)} type="button">Düzenle</button>
-                    <button onClick={() => openListingDetail(item.id)} type="button">Fotoğraflar</button>
-                    {item.status === "published"
-                      ? <button disabled={busy} onClick={() => changeListingStatus(item.id, "draft")} type="button">Yayından kaldır</button>
-                      : <button disabled={busy} onClick={() => changeListingStatus(item.id, "published")} type="button">Yayınla</button>}
-                  </div>
-                </footer>
+                <div className={styles.listingPrice}><small>FİYAT</small><strong>{item.price ? money(item.price) : "Fiyat sorunuz"}</strong></div>
               </div>
+              <footer className={styles.listingFoot}>
+                <span className={`${styles.statusChip} ${listingChipClass[item.status]}`}>{listingStatusLabel[item.status]}</span>
+                <span className={styles.listingCount}>📷 {item.image_count} fotoğraf</span>
+                <div className={styles.listingActions}>
+                  <button onClick={() => editListing(item.id)} type="button">Düzenle</button>
+                  <button onClick={() => openListingDetail(item.id)} type="button">Fotoğraflar</button>
+                  {item.status === "published"
+                    ? <button disabled={busy} onClick={() => changeListingStatus(item.id, "draft")} type="button">Yayından kaldır</button>
+                    : <button disabled={busy} onClick={() => changeListingStatus(item.id, "published")} type="button">Yayınla</button>}
+                </div>
+              </footer>
             </article>)}
           </div>}
         </section>}
@@ -1330,14 +1347,14 @@ export function SellerDashboard() {
       </div>
     </Modal>
 
-    <Modal onClose={() => setShowListingForm(false)} open={showListingForm} size="xl" subtitle="Alıcılar bu bilgileri vitrininde ve gönderdiğin teklifte görür." title={listingForm.id ? "Ürünü düzenle" : "Yeni ürün ekle"} footer={<>
-      <button className={styles.modalGhost} onClick={() => setShowListingForm(false)} type="button">Vazgeç</button>
+    <Modal onClose={closeListingForm} open={showListingForm} size="xl" subtitle="Alıcılar bu bilgileri vitrininde ve gönderdiğin teklifte görür." title={listingForm.id ? "Ürünü düzenle" : "Yeni ürün ekle"} footer={<>
+      <button className={styles.modalGhost} onClick={closeListingForm} type="button">Vazgeç</button>
       <button className={styles.modalPrimary} disabled={busy || !listingReady} onClick={saveListing} type="button">{busy ? "Kaydediliyor…" : listingForm.id ? "Güncelle" : "Ürünü ekle"}</button>
     </>}>
-      <div className={styles.builder}>
+      <div className={`${styles.builder} ${styles.listingBuilder}`}>
         <div className={styles.builderMain}>
-          <section className={styles.formBlock}>
-            <header><i>1</i><div><strong>Ürün künyesi</strong><small>Kategori seçimi hangi özelliklerin sorulacağını belirler.</small></div></header>
+          <section className={styles.formSection}>
+            <header><span>ÜRÜN BİLGİLERİ</span><small>Kategori seçimi hangi özelliklerin sorulacağını belirler.</small></header>
             <div className={styles.formGrid}>
               <label className={styles.wide}>Kategori
                 <select data-autofocus onChange={(event) => { setListingForm({ ...listingForm, category_slug: event.target.value }); setListingValues({}); }} value={listingForm.category_slug}>
@@ -1349,19 +1366,49 @@ export function SellerDashboard() {
                 <small>{catalog ? `${flatCategories.length} kategori · daire, araç, mağaza ürünü hepsi buradan` : "Kategoriler yükleniyor…"}</small>
               </label>
               <label className={styles.wide}>Başlık<input maxLength={140} onChange={(event) => setListingForm({ ...listingForm, title: event.target.value })} placeholder="Örn. Kadıköy Moda'da 3+1 deniz manzaralı daire" value={listingForm.title} /><small>{listingForm.title.trim().length} / 140 · en az 10 karakter</small></label>
-              <label>Fiyat (₺)<input inputMode="decimal" onChange={(event) => setListingForm({ ...listingForm, price: event.target.value })} placeholder="Örn. 4750000" value={listingForm.price} /><small>Boş bırakırsan “Fiyat sorunuz” yazar.</small></label>
-              <label>Şehir<select onChange={(event) => setListingForm({ ...listingForm, city_id: event.target.value, district_id: "" })} value={listingForm.city_id}><option value="">Seçilmedi</option>{(catalog?.cities ?? []).map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}</select></label>
-              <label>İlçe<select disabled={!listingCity} onChange={(event) => setListingForm({ ...listingForm, district_id: event.target.value })} value={listingForm.district_id}><option value="">Seçilmedi</option>{(listingCity?.districts ?? []).map((district) => <option key={district.id} value={district.id}>{district.name}</option>)}</select></label>
               <label className={styles.wide}>Açıklama<textarea maxLength={5000} onChange={(event) => setListingForm({ ...listingForm, description: event.target.value })} placeholder="Ürünün durumunu, kapsamını ve teslim koşullarını anlat…" value={listingForm.description} /><small>{listingForm.description.trim().length} / 5000 · en az 20 karakter</small></label>
             </div>
           </section>
 
-          <section className={styles.formBlock}>
-            <header><i>2</i><div><strong>Kategori özellikleri</strong><small>Alıcının ilanda gördüğü özellik tablosu buradan oluşur.</small></div></header>
+          <section className={styles.formSection}>
+            <header><span>FİYAT VE KONUM</span><small>Fiyat alıcıya en büyük puntoyla görünür; konum eşleşmeyi belirler.</small></header>
+            <div className={styles.formGrid}>
+              <label className={styles.wide}>Fiyat (₺)<input inputMode="decimal" onChange={(event) => setListingForm({ ...listingForm, price: event.target.value })} placeholder="Örn. 4750000" value={listingForm.price} /><small>Boş bırakırsan “Fiyat sorunuz” yazar.</small></label>
+              <label>Şehir<select onChange={(event) => setListingForm({ ...listingForm, city_id: event.target.value, district_id: "" })} value={listingForm.city_id}><option value="">Seçilmedi</option>{(catalog?.cities ?? []).map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}</select></label>
+              <label>İlçe<select disabled={!listingCity} onChange={(event) => setListingForm({ ...listingForm, district_id: event.target.value })} value={listingForm.district_id}><option value="">Seçilmedi</option>{(listingCity?.districts ?? []).map((district) => <option key={district.id} value={district.id}>{district.name}</option>)}</select></label>
+            </div>
+          </section>
+
+          <section className={styles.formSection}>
+            <header><span>İLAN ÖZELLİKLERİ</span><small>Alıcının ilanda gördüğü özellik tablosu buradan oluşur.</small></header>
             {!listingForm.category_slug ? <p className={styles.formHint}>Önce bir kategori seç; o kategorinin soruları burada açılır.</p>
               : listingFields.slug !== listingForm.category_slug ? <p className={styles.formHint}>Kategori soruları yükleniyor…</p>
               : visibleListingFields.length === 0 ? <p className={styles.formHint}>Bu kategoride ek özellik tanımlı değil.</p>
               : <div className={styles.formGrid}>{visibleListingFields.map(renderListingField)}</div>}
+          </section>
+
+          <section className={styles.formSection}>
+            <header><span>FOTOĞRAFLAR</span><small>İlk sıradaki fotoğraf kapak olur; yayınlamak için en az bir tane gerekir.</small></header>
+            {!editingListing ? <p className={styles.formHint}>Ürünü kaydettiğinde fotoğraf yöneticisi hemen açılır; {listingMeta.max_images} adede kadar fotoğraf yükleyebilirsin.</p>
+              : <div className={styles.photoBlock}>
+                {editingListing.images.length < listingMeta.max_images
+                  ? <label className={styles.uploadInline}>
+                    <input accept="image/jpeg,image/png,image/webp" hidden multiple onChange={(event) => { const files = Array.from(event.target.files ?? []); if (files.length) uploadListingImages(editingListing, files); event.target.value = ""; }} type="file" />
+                    <span>{listingUploading ? "Yükleniyor…" : "＋ Fotoğraf ekle (çoklu seçebilirsin)"}</span>
+                  </label>
+                  : <span className={styles.uploadHint}>Fotoğraf sınırına ulaştın; yeni eklemek için birini kaldır.</span>}
+                <span className={styles.uploadHint}>{editingListing.images.length} / {listingMeta.max_images} fotoğraf · JPEG, PNG veya WebP · en fazla 8 MB</span>
+                {editingListing.images.length > 0 && <div className={styles.shotGrid}>
+                  {editingListing.images.map((image, index) => <figure key={image.id}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img alt="" loading="lazy" src={image.url} />
+                    {index === 0
+                      ? <b>KAPAK</b>
+                      : <button className={styles.shotCover} disabled={busy} onClick={() => makeListingCover(editingListing, image.id)} type="button">Kapak yap</button>}
+                    <button aria-label="Fotoğrafı kaldır" className={styles.shotRemove} onClick={() => deleteListingImage(editingListing, image.id)} type="button">✕</button>
+                  </figure>)}
+                </div>}
+              </div>}
           </section>
         </div>
 
@@ -1396,7 +1443,7 @@ export function SellerDashboard() {
       </div>
     </Modal>
 
-    {openListing && <Modal onClose={() => setOpenListing(null)} open size="lg" subtitle={`${listingStatusLabel[openListing.status]} · ${openListing.reference}`} title={openListing.title} footer={<>
+    {openListing && !showListingForm && <Modal onClose={() => setOpenListing(null)} open size="lg" subtitle={`${listingStatusLabel[openListing.status]} · ${openListing.reference}`} title={openListing.title} footer={<>
       <button className={styles.modalGhost} disabled={busy} onClick={() => deleteListing(openListing.id)} type="button">Sil</button>
       <button className={styles.modalGhost} onClick={() => editListing(openListing.id)} type="button">Düzenle</button>
       {openListing.status === "published"
@@ -1444,12 +1491,15 @@ export function SellerDashboard() {
           <button className={styles.modalPrimary} onClick={() => { setPickerOpen(false); selectView("listings"); }} type="button">Ürünlerime git</button>
         </div>
         : <div className={styles.pickerGrid}>
-          {pickable.map((item) => <button className={`${styles.pickerCard} ${offerListing?.id === item.id ? styles.pickerOn : ""}`} key={item.id} onClick={() => { setOfferListing({ id: item.id, title: item.title, price: item.price, cover_url: item.cover_url }); setPickerOpen(false); }} type="button">
-            {item.cover_url
-              // eslint-disable-next-line @next/next/no-img-element
-              ? <img alt="" loading="lazy" src={item.cover_url} />
-              : <i>🏷</i>}
-            <span><strong>{item.title}</strong><small>{item.price ? money(item.price) : "Fiyat sorunuz"}</small></span>
+          {pickable.map((item) => <button aria-pressed={offerListing?.id === item.id} className={`${styles.pickerCard} ${offerListing?.id === item.id ? styles.pickerOn : ""}`} key={item.id} onClick={() => { setOfferListing({ id: item.id, title: item.title, price: item.price, cover_url: item.cover_url }); setPickerOpen(false); }} type="button">
+            <span className={styles.pickerCover}>
+              {item.cover_url
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img alt="" loading="lazy" src={item.cover_url} />
+                : <i>🏷</i>}
+              {offerListing?.id === item.id && <em className={styles.pickerCheck}>✓</em>}
+            </span>
+            <span className={styles.pickerText}><strong>{item.title}</strong><small>{item.price ? money(item.price) : "Fiyat sorunuz"}</small></span>
           </button>)}
         </div>}
     </Modal>

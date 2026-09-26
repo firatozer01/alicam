@@ -212,11 +212,11 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
       <button className={styles.barCta} onClick={() => openQuote()} type="button">Teklif iste →</button>
     </div></div>
 
-    <div className={styles.wrap}>
+    <div className={`${styles.wrap} ${styles.sections}`}>
       {/* Urunler: emlakcinin daireleri, galericinin araclari. */}
       {listings.length > 0 && <section className={styles.block} id="urunler">
         <header className={styles.blockHead}><div><span className={styles.kicker}>VİTRİN</span><h2>Ürünler</h2><p>Bu mağazanın satıştaki ilanları. Detay için bir ilana tıkla.</p></div><span className={styles.blockCount}>{listings.length} ilan</span></header>
-        <div className={styles.listingGrid}>
+        <div className={styles.blockBody}><div className={styles.listingGrid}>
           {listings.map((item, index) => <button
             className={styles.listingCard}
             key={item.id}
@@ -237,20 +237,22 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
               {item.price
                 ? <em className={styles.listingPrice}>{money(item.price)}</em>
                 : <em className={`${styles.listingPrice} ${styles.askPrice}`}>Fiyat sorunuz</em>}
+            </span>
+            <span className={styles.listingFoot}>
               <small className={styles.listingPlace}>📍 {placeOf(item.location) || "Konum belirtilmemiş"}</small>
-              <span className={styles.listingFoot}>
+              <span className={styles.listingMeta}>
                 {item.category && <em className={styles.listingCat}>{item.category.icon ? `${item.category.icon} ` : ""}{item.category.name}</em>}
                 <small className={styles.listingRef}>{item.reference}</small>
               </span>
             </span>
           </button>)}
-        </div>
+        </div></div>
       </section>}
 
       {/* Hizmetler */}
       <section className={styles.block} id="hizmetler">
         <header className={styles.blockHead}><div><span className={styles.kicker}>MAĞAZA</span><h2>Hizmetler</h2><p>Bu mağazadan alabileceğin işler ve başlangıç fiyatları.</p></div><span className={styles.blockCount}>{seller.services.length} hizmet</span></header>
-        {seller.services.length === 0 ? <p className={styles.empty}>Hizmet kataloğu henüz paylaşılmamış.</p> : <div className={styles.serviceGrid}>
+        <div className={styles.blockBody}>{seller.services.length === 0 ? <p className={styles.empty}>Hizmet kataloğu henüz paylaşılmamış.</p> : <div className={styles.serviceGrid}>
           {seller.services.map((service, index) => <article className={styles.serviceCard} key={service.id} style={{ "--i": index } as React.CSSProperties}>
             <div className={styles.serviceCover} style={!service.cover_url && service.category ? { background: `linear-gradient(135deg, ${service.category.color}26, ${service.category.color}66)` } : undefined}>
               {service.cover_url
@@ -271,14 +273,14 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
               </footer>
             </div>
           </article>)}
-        </div>}
+        </div>}</div>
       </section>
 
       {/* İşler */}
       <section className={styles.block} id="isler">
         <header className={styles.blockHead}><div><span className={styles.kicker}>GALERİ</span><h2>Yaptığı işler</h2><p>Tamamlanan projelerin fotoğrafları ve kapsamı.</p></div><span className={styles.blockCount}>{visibleWorks.length} çalışma</span></header>
 
-        {workCategories.length > 1 && <div className={styles.filterRow}>
+        <div className={styles.blockBody}>{workCategories.length > 1 && <div className={styles.filterRow}>
           <button className={!workFilter ? styles.filterOn : ""} onClick={() => setWorkFilter("")} type="button">Tümü <b>{seller.portfolio.length}</b></button>
           {workCategories.map((category) => <button className={workFilter === category.name ? styles.filterOn : ""} key={category.name} onClick={() => setWorkFilter(category.name)} type="button">
             {category.icon} {category.name} <b>{seller.portfolio.filter((item) => item.category?.name === category.name).length}</b>
@@ -310,14 +312,14 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
               <button className={styles.workMore} onClick={() => setOpenWork(item)} type="button">Detayları ve fotoğrafları incele →</button>
             </div>
           </article>)}
-        </div>}
+        </div>}</div>
       </section>
 
       {/* Yorumlar */}
       <section className={styles.block} id="yorumlar">
         <header className={styles.blockHead}><div><span className={styles.kicker}>GERİ BİLDİRİM</span><h2>Müşteri yorumları</h2><p>Hizmeti alan müşterilerin değerlendirmeleri.</p></div><span className={styles.blockCount}>{visibleReviews.length} yorum</span></header>
 
-        <div className={styles.reviewLayout}>
+        <div className={styles.blockBody}><div className={styles.reviewLayout}>
           <aside className={styles.scoreCard}>
             <strong>{seller.rating.count ? seller.rating.average.toFixed(1) : "—"}</strong>
             <span className={styles.starRow}>{stars(seller.rating.average)}</span>
@@ -342,7 +344,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
               {review.comment && <p>{review.comment}</p>}
             </article>)}
           </div>}
-        </div>
+        </div></div>
       </section>
 
       <section className={styles.cta}>

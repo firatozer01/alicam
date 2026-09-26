@@ -180,7 +180,8 @@
 .serviceLeaves { color: var(--muted); font-size: 11.5px; line-height: 1.55; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .serviceCard em { margin-top: auto; color: var(--indigo); font-size: 12.5px; font-weight: 700; font-style: normal; }
 
-.cardSkeleton { height: 178px; border-radius: var(--r-lg); background: var(--violet-50); }
+/* Iskelet, uc bolgeli kartin gercek boyuna yakin dursun: 16/10 fotograf + govde + eylem seridi. */
+.cardSkeleton { height: 356px; border-radius: var(--r-lg); background: var(--violet-50); }
 .panelSkeleton { height: 250px; border-radius: var(--r-lg); background: var(--violet-50); }
 
 /* --- trend seridi --- */
@@ -237,10 +238,23 @@
 }
 
 /* ===================================================================
-   FOTOGRAFLI HIZMET KARTI
-   Emoji kutusu "Tadilat" ile "Tesisat"i ayirt ettirmiyordu; kart artik
+   FOTOGRAFLI HIZMET KARTI - NET AYRILMIS BLOKLAR
+   Emoji kutusu "Tadilat" ile "Tesisat"i ayirt ettirmiyordu; kart
    ustte fotograf tasiyor. Gorseli olmayan baslik emojiye duser, yani
    katalogun tamami fotograflanmadan da izgara tutarli kaliyor.
+
+   Kart tek bir yuzey degil, ust uste UC BOLGE:
+     1) fotograf, kartin ust kenarina yaslanik, altinda sac teli cizgi
+     2) govde, kendi dolgusu olan ayri alan: once ad, sonra bilgi
+        tablosu (etiket solda, deger sagda, satir arasi cizgi)
+     3) eylem seridi, kendi cizgisinin altinda
+   Okuyan kisi cozumlemek yerine tariyor.
+
+   EYLEM SERIDI ARTIK HER ZAMAN YERINDE. Eskiden max-height 0'dan
+   acildigi icin imlec kartin uzerine gelince kartin boyu degisiyor,
+   ustelik dokunmatik cihazda (hover: none) serit hep acik oldugundan
+   ayni kart farkli yukseklikte gorunuyordu. Serit sabit durdugu icin
+   ikisi de ayni; hover'da yalnizca serit moru doluyor.
    =================================================================== */
 
 .svcGrid {
@@ -260,14 +274,18 @@
   overflow: hidden;
   transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
 }
-.svcCard:hover { border-color: var(--violet-200); transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.svcCard:hover, .svcCard:focus-visible { border-color: var(--violet-200); transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.svcCard:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
 
-/* Sabit oranli kutu: farkli boyutlardaki fotograflar izgarayi bozmasin. */
+/* --- 1. BOLGE: FOTOGRAF -------------------------------------------
+   Sabit oranli kutu: farkli boyutlardaki fotograflar izgarayi bozmasin.
+   Alttaki cizgi, govdeyi fotograftan ayiran ilk sinir. */
 .svcShot {
   position: relative;
   display: block;
   aspect-ratio: 16 / 10;
   overflow: hidden;
+  border-bottom: 1px solid var(--line);
 }
 .svcShot img {
   width: 100%;
@@ -301,64 +319,113 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* --- 2. BOLGE: GOVDE ----------------------------------------------
+   Bilgi tablosu margin-top:auto ile govdenin altina yaslanir; boylece
+   ayni siradaki kartlarda satirlar ayni hizada baslar, ad bir ya da
+   iki satir olsun fark etmez. Ad ile tablo arasi gercek bosluk. */
 .svcBody {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 14px 15px 15px;
+  gap: 12px;
+  padding: 13px 15px 14px;
   flex: 1;
 }
+/* Iki satirlik yer hep ayrilir: tek satirlik ad da iki satirlik ad da
+   ayni yuksekligi kaplar, boylece izgaradaki butun tablolar ve eylem
+   seritleri ayni hizada durur. */
 .svcBody > strong {
+  min-height: 2.76em;
   font-size: 14.5px;
   font-weight: 750;
   color: var(--indigo);
   line-height: 1.38;
 }
 
-.svcMeta { display: grid; gap: 5px; }
+/* Bilgi satirlari: paragraf degil, kucuk bir tablo.
+   Etiket solda (--muted), deger sagda (--ink / 650); satirlari
+   aralarindaki sac teli cizgi ayirir, sonuncunun altinda cizgi yok. */
+.svcMeta {
+  margin-top: auto;
+  display: grid;
+}
 .svcMeta > span {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 7px 0;
   color: var(--muted);
   font-size: 12px;
 }
-.svcMeta svg { width: 14px; height: 14px; flex: none; color: var(--muted-2); }
+.svcMeta > span + span { border-top: 1px solid var(--line-soft); }
+.svcMeta > span:first-child { padding-top: 0; }
+.svcMeta > span:last-child { padding-bottom: 0; }
 
-/* Teklif al: kart uzerinde durmayan, hover'da acilan eylem. */
-.svcCta {
-  margin-top: auto;
-  display: grid;
-  place-items: center;
-  border-radius: var(--r-sm);
-  background: linear-gradient(135deg, var(--violet), var(--indigo));
-  color: #fff;
+/* Etiket sutunu: dar kartta tasmak yerine kisalir. */
+.svcMeta > span > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.svcMeta b {
+  flex: none;
+  color: var(--ink);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.svcMeta b small { color: var(--muted); font-size: inherit; font-weight: 600; }
+/* display:inline-block sart: Tailwind preflight svg'yi block yapiyor,
+   oyle birakilirsa ikon etiketin ustune satir atliyor. */
+.svcMeta svg { display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: -3px; color: var(--muted-2); }
+
+/* --- 3. BOLGE: EYLEM SERIDI ---------------------------------------
+   Kartin en altinda, kendi cizgisiyle ayrilmis sabit bir serit.
+   Yeri hep ayrildigi icin imlec geldiginde kartin boyu degismez. */
+.svcFoot {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 15px;
+  border-top: 1px solid var(--line);
+  color: var(--indigo);
   font-size: 12.5px;
   font-weight: 750;
-  /* Kapali halde yer kaplamaz; acilirken yukseklik ve dolgu birlikte artar. */
-  max-height: 0;
-  padding: 0 12px;
+  transition: color .18s ease;
+}
+/* Mor gecis, serit acilip kapanmasin diye altta hazir bekliyor;
+   hover'da yalnizca sayligi degisiyor, yukseklik degil. */
+.svcFoot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(135deg, var(--violet), var(--indigo));
   opacity: 0;
-  overflow: hidden;
-  transition: max-height .2s ease, opacity .2s ease, padding .2s ease, margin .2s ease;
+  transition: opacity .18s ease;
 }
-.svcCard:hover .svcCta { max-height: 40px; padding: 10px 12px; margin-top: 10px; opacity: 1; }
-
-/* Dokunmatik cihazda hover yok: eylem her zaman acik dursun. */
-@media (hover: none) {
-  .svcCta { max-height: 40px; padding: 10px 12px; margin-top: 10px; opacity: 1; }
-}
+.svcFoot i { margin-left: auto; font-style: normal; transition: transform .18s ease; }
+.svcCard:hover .svcFoot, .svcCard:focus-visible .svcFoot { color: #fff; }
+.svcCard:hover .svcFoot::before, .svcCard:focus-visible .svcFoot::before { opacity: 1; }
+.svcCard:hover .svcFoot i, .svcCard:focus-visible .svcFoot i { transform: translateX(3px); }
 
 @media (prefers-reduced-motion: reduce) {
-  .svcCard, .svcShot img, .svcCta { transition: none; }
-  .svcCard:hover { transform: none; }
+  .svcCard, .svcShot img, .svcFoot, .svcFoot::before, .svcFoot i { transition: none; }
+  .svcCard:hover, .svcCard:focus-visible { transform: none; }
   .svcCard:hover .svcShot img { transform: none; }
+  .svcCard:hover .svcFoot i, .svcCard:focus-visible .svcFoot i { transform: none; }
 }
 
 @media (max-width: 720px) {
   .svcGrid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-  .svcBody { padding: 11px 12px 12px; }
+  .svcBody { padding: 11px 12px 12px; gap: 10px; }
   .svcBody > strong { font-size: 13px; }
-  .svcMeta > span { font-size: 11px; }
+  .svcMeta > span { font-size: 11px; gap: 6px; padding: 6px 0; }
+  /* 360 px'te etiket + deger ikonla birlikte satira sigmiyor; tabloyu
+     kirpmak yerine sussuz birakiyoruz. */
+  .svcMeta svg { display: none; }
+  .svcFoot { padding: 10px 12px; font-size: 12px; }
   .svcShot i { font-size: 30px; }
 }

@@ -58,14 +58,23 @@ const attributeText = (row: ListingAttribute): string => {
   return row.unit ? `${text} ${row.unit}` : text;
 };
 
+/** Logosu olmayan magaza icin bas harf rozeti. */
+const initialOf = (name: string) => (name.trim().charAt(0) || "M").toLocaleUpperCase("tr-TR");
+
 /**
- * Ilan detayi: solda buyuk fotograf ve kucuk resim seridi, sagda fiyat,
- * konum, ilan no, tarih ve kategori ozellikleri tablosu.
+ * Ilan detayi. Her mantiksal grup kendi kenarlikli blogu: fotograf,
+ * fiyat + ilan kunyesi, magaza, ilan bilgileri ve aciklama. Okuyan
+ * kisi ayristirmak yerine tarasin diye bloklar bitisik degil, aralikli.
+ *
+ * Masaustunde iki kolon: solda genis kolonda fotograf, ozellik tablosu
+ * ve aciklama; sagda dar ve yapiskan kolonda fiyat ile magaza. Tablet ve
+ * telefonda kolonlar alt alta gelir ve fiyat, ozellik tablosundan once
+ * okunur; hicbir sey yapiskan kalmaz.
  *
  * Vitrinden ayrilmadan acilsin diye katman (modal) secildi: sayfa zaten
  * tek bir /sellers/{id} cagrisiyla dolan bir istemci bileseni ve calisma
  * detayi da ayni sekilde katmanda aciliyor. Ayri bir rota olsaydi geri
- * donusta butun vitrin yeniden yuklenir, kaydirma yeri kaybolurdu.
+ * donuste butun vitrin yeniden yuklenir, kaydirma yeri kaybolurdu.
  */
 export function ListingDetail({ listing, sellerName, onClose, onQuote }: {
   listing: ListingCard;
@@ -113,6 +122,8 @@ export function ListingDetail({ listing, sellerName, onClose, onQuote }: {
   const price = detail?.price ?? listing.price;
   const createdAt = detail?.created_at ?? listing.created_at;
   const subtitle = [category?.name, place, `İlan No: ${listing.reference}`].filter(Boolean).join(" · ");
+  const storeName = detail?.seller.name ?? sellerName;
+  const storeLogo = detail?.seller.logo_url ?? null;
 
   return <Modal
     onClose={onClose}
@@ -120,13 +131,11 @@ export function ListingDetail({ listing, sellerName, onClose, onQuote }: {
     size="xl"
     subtitle={subtitle}
     title={detail?.title ?? listing.title}
-    footer={<>
-      <span className={styles.footNote}>Bu ilan {detail?.seller.name ?? sellerName} mağazasına ait.</span>
-      <button className={styles.footCta} onClick={() => onQuote(category?.slug)} type="button">Bu ürün için teklif iste →</button>
-    </>}
   >
     {error ? <p className={styles.state}>{error}</p> : <div className={styles.detail}>
-      <div className={styles.gallery}>
+
+      {/* ---- Fotograf blogu: buyuk kare ve altinda ayni kartta serit ---- */}
+      <section className={`${styles.block} ${styles.photoBlock}`}>
         {total > 0 ? <>
           <figure className={styles.stage}>
             {/* Kullanici yuklemesi; olculer bilinmedigi icin img kullanilir. */}
@@ -155,43 +164,65 @@ export function ListingDetail({ listing, sellerName, onClose, onQuote }: {
           {loading ? <i /> : <span>{category?.icon ?? "▦"}</span>}
           <p>{loading ? "İlan yükleniyor…" : "Bu ilana fotoğraf eklenmemiş."}</p>
         </div>}
-      </div>
+      </section>
 
-      <aside className={styles.panel}>
-        <div className={styles.priceBox}>
-          {price
-            ? <strong>{money(price)}</strong>
-            : <strong className={styles.askPrice}>Fiyat sorunuz</strong>}
-          {place && <span>📍 {place}</span>}
+      {/* ---- Sag kolon: fiyat ve magaza; masaustunde yapiskan ---- */}
+      <aside className={styles.side}>
+        <div className={styles.sideInner}>
+          <section className={`${styles.block} ${styles.priceBlock}`}>
+            <p className={styles.blockLabel}>Fiyat</p>
+            {price
+              ? <strong>{money(price)}</strong>
+              : <strong className={styles.askPrice}>Fiyat sorunuz</strong>}
+            {place && <span className={styles.place}>📍 {place}</span>}
+
+            <dl className={styles.rows}>
+              <div><dt>İlan No</dt><dd className={styles.mono}>{listing.reference}</dd></div>
+              {createdAt && <div><dt>İlan Tarihi</dt><dd>{dayMonthYear(createdAt)}</dd></div>}
+              {category && <div><dt>Kategori</dt><dd>{category.icon ? `${category.icon} ` : ""}{category.name}</dd></div>}
+              {listing.location.city && <div><dt>Şehir</dt><dd>{listing.location.city}</dd></div>}
+              {listing.location.district && <div><dt>İlçe</dt><dd>{listing.location.district}</dd></div>}
+            </dl>
+          </section>
+
+          <section className={`${styles.block} ${styles.sellerBlock}`}>
+            <p className={styles.blockLabel}>Mağaza</p>
+            <div className={styles.sellerRow}>
+              {storeLogo
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img alt="" loading="lazy" src={storeLogo} />
+                : <i>{initialOf(storeName)}</i>}
+              <div>
+                <strong>{storeName}</strong>
+                <span>Bu ilanın satıcısı</span>
+              </div>
+            </div>
+            <button className={styles.cta} onClick={() => onQuote(category?.slug)} type="button">Bu ürün için teklif iste →</button>
+          </section>
         </div>
+      </aside>
 
-        <dl className={styles.facts}>
-          <div><dt>İlan No</dt><dd className={styles.mono}>{listing.reference}</dd></div>
-          {createdAt && <div><dt>İlan Tarihi</dt><dd>{dayMonthYear(createdAt)}</dd></div>}
-          {category && <div><dt>Kategori</dt><dd>{category.icon ? `${category.icon} ` : ""}{category.name}</dd></div>}
-          {listing.location.city && <div><dt>Şehir</dt><dd>{listing.location.city}</dd></div>}
-          {listing.location.district && <div><dt>İlçe</dt><dd>{listing.location.district}</dd></div>}
-        </dl>
-
-        <section className={styles.specBlock}>
-          <h3>İlan Bilgileri</h3>
+      {/* ---- Sol kolonun alti: ozellik tablosu ve aciklama ---- */}
+      <div className={styles.info}>
+        <section className={styles.block}>
+          <p className={styles.blockLabel}>İlan Bilgileri</p>
           {loading && detail === null
             ? <p className={styles.specEmpty}>Özellikler yükleniyor…</p>
             : (detail?.attributes.length ?? 0) === 0
               ? <p className={styles.specEmpty}>Bu ilan için özellik girilmemiş.</p>
-              : <dl className={styles.specs}>
+              : <dl className={styles.rows}>
                 {detail?.attributes.map((row) => <div key={row.key}>
                   <dt>{row.label}</dt>
                   <dd>{attributeText(row)}</dd>
                 </div>)}
               </dl>}
         </section>
-      </aside>
 
-      {detail?.description && <section className={styles.description}>
-        <h3>Açıklama</h3>
-        <p>{detail.description}</p>
-      </section>}
+        {detail?.description && <section className={styles.block}>
+          <p className={styles.blockLabel}>Açıklama</p>
+          <p className={styles.descText}>{detail.description}</p>
+        </section>}
+      </div>
     </div>}
   </Modal>;
 }
