@@ -14,7 +14,7 @@ class BuyerRequest extends Model
     protected $fillable = [
         'public_reference', 'user_id', 'category_id', 'city_id', 'district_id',
         'title', 'description', 'budget_min', 'budget_max', 'lat', 'lng',
-        'full_address', 'attributes', 'attribute_schema_snapshot', 'status', 'expires_at',
+        'full_address', 'attributes', 'attribute_schema_snapshot', 'status', 'is_demo', 'expires_at',
     ];
 
     protected function casts(): array

@@ -128,3 +128,110 @@
 .serviceTileBody footer em{font-style:normal;font-family:var(--font-plex),ui-monospace,monospace;font-size:13px;font-weight:700;color:#4f46e5}
 .serviceTileBody footer span{font-size:11px;color:#8a89a6}
 .emptyNote{margin:8px 0 0;font-size:13px;color:#8a89a6}
+
+
+/* ===================================================================
+   HIZMET KATALOGU — anasayfa talep akisi yerine hizmet secimi uzerine
+   kuruldu. Renkler globals.css :root token'larindan gelir.
+   =================================================================== */
+
+/* --- kahraman alanindaki arama --- */
+.searchBox { position: relative; max-width: 760px; margin: 26px auto 0; }
+.searchBox form { display: flex; gap: 10px; padding: 8px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); box-shadow: var(--shadow-md); }
+.searchBox input { flex: 1; min-width: 0; border: 0; padding: 13px 14px; font: inherit; font-size: 14.5px; color: var(--ink); background: transparent; outline: none; }
+.searchBox input::placeholder { color: var(--faint); }
+.searchBox form button { flex: none; }
+
+.suggestions {
+  position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 60;
+  margin: 0; padding: 6px; list-style: none; max-height: 340px; overflow-y: auto;
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: var(--card); box-shadow: var(--shadow-lg);
+}
+.suggestions a { display: block; padding: 10px 12px; border-radius: var(--r-md); color: inherit; text-decoration: none; transition: background .16s ease; }
+.suggestions a:hover { background: var(--violet-50); }
+.suggestions strong { display: block; font-size: 13.5px; color: var(--ink); }
+.suggestions small { display: block; margin-top: 2px; color: var(--muted); font-size: 11.5px; }
+
+.quickChips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
+.quickChips a, .chipSkeleton {
+  border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px;
+  background: var(--card); color: var(--ink-2); font-size: 12.5px; font-weight: 650; text-decoration: none;
+  transition: border-color .16s ease, color .16s ease, transform .16s ease;
+}
+.quickChips a:hover { border-color: var(--violet); color: var(--indigo); transform: translateY(-1px); }
+.chipSkeleton { color: transparent; background: var(--violet-50); border-color: var(--line-soft); }
+
+/* --- populer hizmet kartlari --- */
+.serviceSection { padding: 58px 0; background: var(--bg); }
+.serviceGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 14px; }
+
+.serviceCard {
+  display: flex; flex-direction: column; gap: 9px;
+  border: 1px solid var(--line); border-radius: var(--r-lg); padding: 17px;
+  background: var(--card); color: inherit; text-decoration: none;
+  transition: border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+.serviceCard:hover { border-color: var(--violet-200); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+/* Emoji genisligi isletim sistemine gore degisiyor; sabit kare kutu sart. */
+.serviceIcon { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 17px; font-size: 25px; }
+.serviceCard strong { font-size: 14.5px; font-weight: 750; color: var(--ink); line-height: 1.4; }
+.serviceLeaves { color: var(--muted); font-size: 11.5px; line-height: 1.55; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.serviceCard em { margin-top: auto; color: var(--indigo); font-size: 12.5px; font-weight: 700; font-style: normal; }
+
+.cardSkeleton { height: 178px; border-radius: var(--r-lg); background: var(--violet-50); }
+.panelSkeleton { height: 250px; border-radius: var(--r-lg); background: var(--violet-50); }
+
+/* --- trend seridi --- */
+.trendSection { padding: 10px 0 58px; background: var(--bg); }
+.trendStrip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
+
+.trendCard {
+  flex: none; width: 268px; scroll-snap-align: start;
+  display: flex; align-items: center; gap: 12px;
+  border: 1px solid var(--line); border-radius: var(--r-lg); padding: 13px 15px;
+  background: var(--card); color: inherit; text-decoration: none;
+  transition: border-color .16s ease, transform .16s ease;
+}
+.trendCard:hover { border-color: var(--violet-200); transform: translateY(-2px); }
+.trendCard > span { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; font-size: 20px; }
+.trendCard > div { min-width: 0; flex: 1; }
+.trendCard strong { display: block; font-size: 13px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trendCard small { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trendCard b { flex: none; border-radius: 999px; padding: 4px 9px; background: var(--ok-bg); color: var(--ok-fg); font-size: 10px; font-weight: 800; white-space: nowrap; }
+
+/* --- on hizmet dikeyi --- */
+.groupSection { padding: 58px 0; background: var(--surface); }
+.groupGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)); gap: 14px; }
+
+.groupPanel { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--r-lg); padding: 17px; background: var(--card); }
+.groupPanel > header { display: flex; align-items: center; gap: 11px; padding-bottom: 12px; border-bottom: 1px solid var(--line-soft); }
+.groupPanel > header i { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; font-size: 20px; font-style: normal; }
+.groupPanel > header strong { display: block; font-size: 14px; color: var(--ink); line-height: 1.35; }
+.groupPanel > header small { display: block; margin-top: 2px; color: var(--muted-2); font-size: 11px; }
+.groupPanel ul { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.groupPanel li a { display: block; padding: 7px 8px; border-radius: var(--r-sm); color: var(--ink-2); font-size: 12.5px; text-decoration: none; transition: background .14s ease, color .14s ease; }
+.groupPanel li a:hover { background: var(--violet-50); color: var(--indigo); }
+.groupPanel > button { margin-top: 11px; border: 0; border-radius: var(--r-sm); padding: 8px; background: transparent; color: var(--indigo); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: background .14s ease; }
+.groupPanel > button:hover { background: var(--violet-50); }
+
+/* --- urun/ilan seridi --- */
+.listingSection { padding: 0 0 62px; background: var(--surface); }
+.listingStrip { display: flex; flex-wrap: wrap; gap: 9px; }
+.listingStrip a {
+  display: flex; align-items: center; gap: 9px;
+  border: 1px solid var(--line); border-radius: 999px; padding: 8px 15px 8px 8px;
+  background: var(--card); color: var(--ink-2); font-size: 12.5px; font-weight: 650; text-decoration: none;
+  transition: border-color .16s ease, color .16s ease, transform .16s ease;
+}
+.listingStrip a:hover { border-color: var(--cyan); color: var(--cyan-fg); transform: translateY(-1px); }
+.listingStrip i { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 999px; font-size: 15px; font-style: normal; }
+
+@media (max-width: 720px) {
+  .searchBox form { flex-direction: column; }
+  .searchBox form button { width: 100%; }
+  .serviceGrid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .serviceIcon { width: 46px; height: 46px; font-size: 21px; }
+  .groupGrid { grid-template-columns: 1fr; }
+}

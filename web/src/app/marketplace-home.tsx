@@ -1,219 +1,156 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { SiteHeader } from "@/components/shell/site-header";
-import { ActiveChips, ListSkeleton, Pagination, ResultBar } from "@/components/listing/listing-chrome";
-import list from "@/components/listing/listing.module.css";
-import { ApiError, apiRequest, firstApiError } from "@/lib/api";
+import { apiRequest } from "@/lib/api";
 import styles from "./marketplace.module.css";
 
 type CurrentUser = { id: number; name: string; email: string; roles: string[] };
-type Category = { id: number; name: string; slug: string; icon: string; color: string };
-type PublicRequest = {
-  id: number; reference: string; title: string; summary: string; status: string; offer_count: number;
-  budget: { min: string; max: string }; category: Category;
-  location: { city: { id: number; name: string }; district: { id: number; name: string } };
-  created_at: string; expires_at: string | null;
-};
-type RequestFacets = {
-  categories: { slug: string; name: string; icon: string; color: string; count: number }[];
-  cities: { id: number; name: string; count: number }[];
-  budget: { min: number; max: number };
-};
-type MarketplaceResponse = {
-  data: {
-    requests: PublicRequest[];
-    stats: { active_requests: number; approved_sellers: number; reviews: number };
-  };
-  facets: RequestFacets;
-  meta: { current_page: number; last_page: number; total: number };
+
+type ServiceCard = {
+  id: number;
+  slug: string;
+  name: string;
+  icon: string;
+  color: string;
+  root: { slug: string; name: string };
+  leaf_samples: string[];
+  child_count: number;
+  request_count: number;
+  badge: string | null;
 };
 
-const sortOptions = [
-  { value: "latest", label: "En yeni" },
-  { value: "popular", label: "En çok teklif alan" },
-  { value: "budget_high", label: "Bütçe: yüksekten" },
-  { value: "budget_low", label: "Bütçe: düşükten" },
+type ServiceGroup = {
+  id: number;
+  slug: string;
+  name: string;
+  icon: string;
+  color: string;
+  child_count: number;
+  children: { id: number; slug: string; name: string; icon: string }[];
+};
+
+type Catalog = {
+  data: {
+    popular: ServiceCard[];
+    trending: { mode: "trend" | "seasonal"; window_days: number; items: ServiceCard[] };
+    groups: ServiceGroup[];
+    listing_roots: { id: number; slug: string; name: string; icon: string; color: string }[];
+    stats: { service_roots: number; service_headings: number; cities: number; districts: number };
+  };
+};
+
+type Suggestion = { id: number; slug: string; name: string; kind: string; path: string[] };
+
+/** Aramasiz da calissin diye gomulu hizli baslangiclar. */
+const QUICK_CHIPS = [
+  "Ev ve Daire Temizliği", "Evden Eve Nakliyat", "Boya, Badana ve Sıva",
+  "Kombi, Doğalgaz ve Isıtma Sistemleri", "Klima Hizmetleri", "Özel Ders ve Eğitim",
 ];
 
-const categoryPastels = ["#F3ECFE", "#ECEDFD", "#E7FAFC", "#FDECF4", "#FEF3E2", "#E9F9EE", "#F6EDFD", "#E6F7F5"];
-
-const money = (value: string | number) => new Intl.NumberFormat("tr-TR", {
-  style: "currency", currency: "TRY", maximumFractionDigits: 0,
-}).format(Number(value));
-
-function relativeTime(value: string) {
-  const minutes = Math.max(1, Math.round((Date.now() - new Date(value).getTime()) / 60000));
-  if (minutes < 60) return `${minutes} dk önce`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours} saat önce`;
-  return `${Math.round(hours / 24)} gün önce`;
-}
+const talepLinki = (slug: string) => `/talep-olustur?kategori=${encodeURIComponent(slug)}`;
 
 function BrandMark() {
   return <svg aria-hidden="true" className={styles.brandMark} viewBox="0 0 30 30" fill="none"><path d="M4 10 L14 4 L14 10 Z" fill="#7C3AED" /><path d="M26 20 L16 26 L16 20 Z" fill="#06B6D4" /><path d="M14 7 H16 V23 H14 Z" fill="#4F46E5" opacity=".9" /></svg>;
 }
 
+/**
+ * Anasayfa: bir talep akisi degil, bir HIZMET KATALOGU.
+ *
+ * Ziyaretci firma aramaz, ihtiyaci olan hizmeti secer ve talep sihirbazina
+ * duser; teklifler ona gelir. Talepler saticinin panelinde, kendi kategori
+ * ve bolgesine gore filtreli durur.
+ */
 export function MarketplaceHome() {
-  const pageRef = useRef<HTMLElement>(null);
-  const statsRef = useRef<HTMLElement>(null);
   const [user, setUser] = useState<CurrentUser | null>(null);
-  const [marketplace, setMarketplace] = useState<MarketplaceResponse | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
-  // Bir talep birden fazla kategoride olabildigi icin filtre de coklu secimli.
-  const [categorySlugs, setCategorySlugs] = useState<string[]>([]);
-  const [city, setCity] = useState("");
-  const [budget, setBudget] = useState({ min: "", max: "" });
-  const [appliedBudget, setAppliedBudget] = useState({ min: "", max: "" });
-  const [sort, setSort] = useState("latest");
-  const [page, setPage] = useState(1);
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
-  const [railOpen, setRailOpen] = useState(false);
-  const [detailedSearch, setDetailedSearch] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [feedOffset, setFeedOffset] = useState(0);
   const [sessionReady, setSessionReady] = useState(false);
-  const [counterStarted, setCounterStarted] = useState(false);
-  const [counters, setCounters] = useState({ requests: 0, sellers: 0, cities: 0 });
+  const [catalog, setCatalog] = useState<Catalog["data"] | null>(null);
+  const [term, setTerm] = useState("");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [openGroup, setOpenGroup] = useState<number | null>(null);
+  const [extraChildren, setExtraChildren] = useState<Record<number, ServiceGroup["children"]>>({});
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const isSeller = user?.roles.includes("seller") ?? false;
+  const sellerHref = isSeller ? "/satici-paneli" : "/satici-ol";
+  const sellerLabel = isSeller ? "Gelen taleplere git" : "Hizmet veren ol";
+  const panelHref = isSeller ? "/satici-paneli" : "/musteri-panel";
+  const panelLabel = isSeller ? "Satıcı paneli" : "Alıcı paneli";
 
   useEffect(() => {
     let active = true;
-    apiRequest<{ data: Category[] }>("/categories")
-      .then((response) => { if (active) setCategories(response.data); })
-      .catch((requestError: unknown) => { if (active) setError(firstApiError(requestError)); });
     apiRequest<{ data: CurrentUser }>("/me")
       .then((response) => { if (active) setUser(response.data); })
-      .catch((requestError: unknown) => {
-        if (active && !(requestError instanceof ApiError && requestError.status === 401)) setError(firstApiError(requestError));
-      })
+      .catch(() => undefined)
       .finally(() => { if (active) setSessionReady(true); });
     return () => { active = false; };
   }, []);
 
   useEffect(() => {
     let active = true;
-    const params = new URLSearchParams({ sort, page: String(page) });
-    if (categorySlugs.length) params.set("category", categorySlugs.join(","));
-    if (city) params.set("city_id", city);
-    if (search) params.set("q", search);
-    if (appliedBudget.min) params.set("budget_min", appliedBudget.min);
-    if (appliedBudget.max) params.set("budget_max", appliedBudget.max);
-    apiRequest<MarketplaceResponse>(`/marketplace?${params}`)
-      .then((response) => { if (active) { setMarketplace(response); setError(""); setFeedOffset(0); } })
-      .catch((requestError: unknown) => { if (active) setError(firstApiError(requestError)); })
-      .finally(() => { if (active) setLoading(false); });
+    apiRequest<Catalog>("/service-catalog")
+      .then((response) => { if (active) setCatalog(response.data); })
+      .catch(() => undefined);
     return () => { active = false; };
-  }, [appliedBudget, categorySlugs, city, page, search, sort]);
-
-  // Bütçe alanları her tuşta istek atmasın.
-  useEffect(() => {
-    const timer = setTimeout(() => setAppliedBudget(budget), 450);
-    return () => clearTimeout(timer);
-  }, [budget]);
-
-  useEffect(() => {
-    const root = pageRef.current;
-    if (!root) return;
-    const elements = root.querySelectorAll(`.${styles.reveal}:not(.${styles.in})`);
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add(styles.in);
-        observer.unobserve(entry.target);
-      });
-    }, { threshold: 0.12 });
-    elements.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
-  }, [categories, marketplace]);
-
-  useEffect(() => {
-    const element = statsRef.current;
-    if (!element) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry?.isIntersecting) { setCounterStarted(true); observer.disconnect(); }
-    }, { threshold: 0.45 });
-    observer.observe(element);
-    return () => observer.disconnect();
   }, []);
 
-  const stats = marketplace?.data.stats ?? { active_requests: 0, approved_sellers: 0, reviews: 0 };
-
+  // Oneri listesi: yazarken 180 ms bekler, iki karakterden kisa sorgu atmaz.
   useEffect(() => {
-    if (!counterStarted) return;
-    const target = { requests: stats.active_requests, sellers: stats.approved_sellers, cities: stats.active_requests ? 81 : 0 };
-    const startedAt = performance.now();
-    let frame = 0;
-    const tick = (now: number) => {
-      const progress = Math.min((now - startedAt) / 1200, 1);
-      const eased = 1 - ((1 - progress) ** 3);
-      setCounters({ requests: Math.floor(target.requests * eased), sellers: Math.floor(target.sellers * eased), cities: Math.floor(target.cities * eased) });
-      if (progress < 1) frame = requestAnimationFrame(tick);
+    const aranan = term.trim();
+    if (aranan.length < 2) {
+      return;
+    }
+
+    let active = true;
+    const timer = window.setTimeout(() => {
+      apiRequest<{ data: Suggestion[] }>(
+        `/categories/search?q=${encodeURIComponent(aranan)}&kind=service&limit=8`,
+      )
+        .then((response) => { if (active) setSuggestions(response.data); })
+        .catch(() => undefined);
+    }, 180);
+
+    return () => { active = false; window.clearTimeout(timer); };
+  }, [term]);
+
+  // Disari tiklayinca oneriler kapansin.
+  useEffect(() => {
+    const onDown = (event: MouseEvent) => {
+      if (!searchRef.current?.contains(event.target as Node)) setSuggestions([]);
     };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [counterStarted, stats.active_requests, stats.approved_sellers]);
-
-  useEffect(() => {
-    const count = marketplace?.data.requests.length ?? 0;
-    if (count < 2) return;
-    const interval = window.setInterval(() => setFeedOffset((current) => (current + 1) % count), 4500);
-    return () => window.clearInterval(interval);
-  }, [marketplace?.data.requests.length]);
-
-  const isSeller = user?.roles.includes("seller") ?? false;
-  const isAdmin = user?.roles.includes("admin") ?? false;
-  const panelHref = isAdmin ? "/admin" : isSeller ? "/satici-paneli" : "/musteri-panel";
-  const panelLabel = isAdmin ? "Admin paneli" : isSeller ? "Satıcı paneli" : "Alıcı paneli";
-  const sellerHref = isSeller ? "/satici-paneli" : "/satici-ol";
-  const sellerLabel = isSeller ? "Gelen taleplere git" : "Hizmet veren ol";
-  const inspectHref = isSeller ? "/satici-paneli" : user ? "/satici-ol" : "/giris?devam=%2Fsatici-paneli";
-
-  const feedItems = useMemo(() => {
-    const items = marketplace?.data.requests ?? [];
-    if (!items.length) return [];
-    return Array.from({ length: Math.min(5, items.length) }, (_, index) => items[(feedOffset + index) % items.length]);
-  }, [feedOffset, marketplace?.data.requests]);
-
-  /** Bos slug tum secimi temizler; dolu slug secime eklenir ya da cikarilir. */
-  const chooseCategory = (slug: string) => {
-    setLoading(true);
-    setCategorySlugs((current) => slug === ""
-      ? []
-      : current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug]);
-    setPage(1);
-    document.querySelector("#talepler")?.scrollIntoView({ behavior: "smooth" });
-  };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
 
   const submitSearch = (event: FormEvent) => {
-    event.preventDefault(); setLoading(true); setPage(1); setSearch(searchInput.trim());
-    document.querySelector("#talepler")?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const facets = useMemo(() => marketplace?.facets ?? { categories: [], cities: [], budget: { min: 0, max: 0 } }, [marketplace]);
-
-  const activeChips = useMemo(() => {
-    const chips: { key: string; label: string; onClear: () => void }[] = [];
-    if (search) chips.push({ key: "q", label: `“${search}”`, onClear: () => { setLoading(true); setSearch(""); setSearchInput(""); setPage(1); } });
-    for (const slug of categorySlugs) {
-      chips.push({ key: `category-${slug}`, label: facets.categories.find((item) => item.slug === slug)?.name ?? slug, onClear: () => chooseCategory(slug) });
+    event.preventDefault();
+    const ilk = suggestions[0];
+    if (ilk) {
+      window.location.href = talepLinki(ilk.slug);
+      return;
     }
-    if (city) chips.push({ key: "city", label: facets.cities.find((item) => String(item.id) === city)?.name ?? city, onClear: () => { setLoading(true); setCity(""); setPage(1); } });
-    if (appliedBudget.min || appliedBudget.max) chips.push({ key: "budget", label: `Bütçe ${appliedBudget.min || "0"}–${appliedBudget.max || "∞"} ₺`, onClear: () => setBudget({ min: "", max: "" }) });
-    return chips;
-  }, [appliedBudget, categorySlugs, city, facets, search]);
-
-  const resetFilters = () => {
-    setLoading(true); setSearch(""); setSearchInput(""); setCategorySlugs([]); setCity("");
-    setBudget({ min: "", max: "" }); setSort("latest"); setPage(1);
+    document.getElementById("hizmetler")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  return <main className={styles.page} ref={pageRef}>
+  /** Panelin kalan alt basliklarini ilk acilista getirir. */
+  const toggleGroup = (group: ServiceGroup) => {
+    const acilacak = openGroup === group.id ? null : group.id;
+    setOpenGroup(acilacak);
+
+    if (acilacak === null || extraChildren[group.id]) return;
+
+    apiRequest<{ data: ServiceGroup["children"] }>(`/categories?parent=${group.slug}`)
+      .then((response) => setExtraChildren((current) => ({ ...current, [group.id]: response.data })))
+      .catch(() => undefined);
+  };
+
+  const stats = catalog?.stats ?? { service_roots: 0, service_headings: 0, cities: 0, districts: 0 };
+  const trend = catalog?.trending;
+
+  return <main className={styles.page}>
     <SiteHeader
-      activeKey={categorySlugs[0] ?? ""}
-      announce="⚡ Yeni nesil talep pazaryeri — talep oluşturmak tamamen ücretsiz."
+      announce="⚡ İhtiyacını yaz, teklifler sana gelsin — alıcı için tamamen ücretsiz."
       cta={isSeller ? { label: "Gelen talepler", href: "/satici-paneli" } : { label: "Ücretsiz talep oluştur", href: "/talep-olustur" }}
       links={[
         { label: "Nasıl çalışır", href: "/#nasil-calisir" },
@@ -221,134 +158,183 @@ export function MarketplaceHome() {
       ]}
       sessionReady={sessionReady}
       user={user}
-      menus={[
-            {
-              key: "categories", label: "Kategoriler",
-              panelIcon: "🗂", panelTitle: "Kategoriler", panelHint: "Talep oluşturabileceğin tüm alanlar tek çatı altında",
-              meta: `${facets.categories.length} kategori · ${marketplace?.meta.total ?? 0} açık talep`,
-              allLink: { label: "Tüm talepler", href: "/#talepler" },
-              sections: categories.slice(0, 4).map((category, index) => {
-                const facet = facets.categories.find((row) => row.slug === category.slug);
-                const cityRows = facets.cities.slice(0, 3);
-                return {
-                  key: category.slug,
-                  title: category.name.toLocaleUpperCase("tr-TR"),
-                  icon: category.icon,
-                  color: category.color,
-                  description: `${facet?.count ?? 0} açık talep teklif bekliyor.`,
-                  accent: index === 0,
-                  items: [
-                    { key: category.slug, label: `Tüm ${category.name} talepleri`, icon: category.icon, hint: "Filtrele ve incele", count: facet?.count ?? 0, onSelect: () => chooseCategory(category.slug) },
-                    ...cityRows.map((city) => ({
-                      key: `${category.slug}-${city.id}`,
-                      label: city.name,
-                      icon: "📍",
-                      hint: `${city.name} bölgesindeki talepler`,
-                      onSelect: () => { chooseCategory(category.slug); setLoading(true); setCity(String(city.id)); setPage(1); },
-                    })),
-                  ],
-                  footer: { label: `${category.name} talepleri`, onSelect: () => chooseCategory(category.slug) },
-                };
-              }),
-              quickLinks: [
-                { key: "all", label: "Tüm talepler", icon: "▤", onSelect: () => chooseCategory("") },
-                { key: "new", label: "Ücretsiz talep oluştur", icon: "＋", href: "/talep-olustur", primary: true },
-              ],
-            },
-      ]}
     />
 
     <header className={styles.hero}>
       <div className={styles.aurora}><i className={styles.blobOne} /><i className={styles.blobTwo} /></div>
-      <div className={styles.floatChips}>{categories.slice(0, 4).map((item, index) => <span key={item.id} style={{ "--delay": `${index * 2}s` } as React.CSSProperties}><i style={{ background: item.color }}>{item.icon}</i>{item.name}</span>)}</div>
+      <div className={styles.floatChips}>
+        {(catalog?.popular ?? []).slice(0, 4).map((item, index) => (
+          <span key={item.id} style={{ "--delay": `${index * 2}s` } as React.CSSProperties}>
+            <i style={{ background: item.color }}>{item.icon}</i>{item.name}
+          </span>
+        ))}
+      </div>
+
       <div className={styles.wrap}>
-        <div className={styles.eyebrow}><i /> Klasik ilanın tersi</div>
-        <h1>İlanı sen verme,<br /><em>teklifi onlar versin.</em></h1>
-        <p>Ne aradığını söyle; uygun galeriler, emlakçılar, ustalar ve firmalar sana teklif göndersin. Aramak yok, beklemek yok.</p>
-        <form className={styles.quickbar} onSubmit={submitSearch}>
-          <select aria-label="Kategori" value={categorySlugs[0] ?? ""} onChange={(event) => { setLoading(true); setCategorySlugs(event.target.value ? [event.target.value] : []); setPage(1); }}><option value="">Tüm kategoriler</option>{categories.map((item) => <option key={item.id} value={item.slug}>{item.icon} {item.name}</option>)}</select>
-          <input value={searchInput} onChange={(event) => setSearchInput(event.target.value)} placeholder="Örn. Çankaya’da 3+1 asansörlü daire arıyorum…" />
-          <button className={styles.buttonGrad}>Talep ara →</button>
-        </form>
-        <div className={styles.liveActivity}><div>{[0, 1, 2, 3, 4].map((item) => <i key={item} />)}</div><span>Canlı: şu anda <b>{stats.active_requests} açık talep</b> teklif bekliyor</span></div>
+        <div className={styles.eyebrow}><i /> Aramak yok, beklemek yok</div>
+        <h1>İhtiyacın olan hizmeti seç,<br /><em>teklifler sana gelsin.</em></h1>
+        <p>İşi tarif et; uygun ustalar ve firmalar sana teklif göndersin. Alıcı için 0 ₺.</p>
+
+        <div className={styles.searchBox} ref={searchRef}>
+          <form onSubmit={submitSearch}>
+            <input
+              autoComplete="off"
+              onChange={(event) => setTerm(event.target.value)}
+              placeholder="Hangi hizmete ihtiyacın var? Örn. ev temizliği, klima montajı, İngilizce ders"
+              value={term}
+            />
+            <button className={styles.buttonGrad} type="submit">Hizmet bul →</button>
+          </form>
+
+          {suggestions.length > 0 && (
+            <ul className={styles.suggestions}>
+              {suggestions.map((item) => (
+                <li key={item.id}>
+                  <Link href={talepLinki(item.slug)} onClick={() => setSuggestions([])}>
+                    <strong>{item.name}</strong>
+                    {item.path.length > 0 && <small>{item.path.join(" › ")}</small>}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className={styles.quickChips}>
+          {(catalog?.popular ?? []).slice(0, 6).map((item) => (
+            <Link href={talepLinki(item.slug)} key={item.id}>{item.icon} {item.name}</Link>
+          ))}
+          {!catalog && QUICK_CHIPS.map((ad) => <span className={styles.chipSkeleton} key={ad}>{ad}</span>)}
+        </div>
       </div>
     </header>
 
-    <section className={`${styles.statsBand} ${styles.reveal}`} ref={statsRef}>
-      <div className={styles.wrap}><div><strong>{counters.requests.toLocaleString("tr-TR")}+</strong><span>aktif talep</span></div><div><strong>{counters.sellers.toLocaleString("tr-TR")}+</strong><span>onaylı satıcı</span></div><div><strong>{counters.cities}</strong><span>ilde hizmet</span></div><div><strong>0 ₺</strong><span>müşteriden alınan ücret</span></div></div>
+    <section className={styles.statsBand}>
+      <div className={styles.wrap}>
+        <div><strong>{stats.service_headings}</strong><span>hizmet başlığı</span></div>
+        <div><strong>{stats.service_roots}</strong><span>hizmet alanı</span></div>
+        <div><strong>{stats.cities}</strong><span>ilde hizmet</span></div>
+        <div><strong>0 ₺</strong><span>alıcıdan alınan ücret</span></div>
+      </div>
     </section>
 
-    <section className={styles.marketSection} id="talepler"><div className={styles.wrap}><header className={`${styles.marketHead} ${styles.reveal}`}><div><span>PAZARYERİNDE ŞİMDİ</span><h2>Güncel talepler</h2><p>Filtrele, karşılaştır, ilgilendiğin talebi incele.</p></div></header>
-      {error && <p className={styles.error}>{error}</p>}
-      <div className={list.shell}>
-        <div>
-          <button className={list.railToggle} onClick={() => setRailOpen(!railOpen)} type="button">☰ Kategoriler{activeChips.length ? ` (${activeChips.length})` : ""}</button>
-          <div className={railOpen ? "" : list.railHidden}>
-            <aside className={list.rail}>
-              <div className={list.railTop}><strong>KATEGORİLER</strong><button className={list.railReset} disabled={!activeChips.length} onClick={resetFilters} type="button">Temizle</button></div>
-              <div className={list.tree}>
-                <button className={`${list.treeRow} ${categorySlugs.length === 0 ? list.treeActive : ""}`} onClick={() => chooseCategory("")} type="button">
-                  <i style={{ background: "#f1eeff", color: "#4f46e5" }}>◎</i><span>Tüm talepler</span><b>{facets.categories.reduce((total, item) => total + item.count, 0)}</b>
-                </button>
-                {facets.categories.map((item) => {
-                  const picked = categorySlugs.includes(item.slug);
-                  return <button aria-pressed={picked} className={`${list.treeRow} ${picked ? list.treeActive : ""}`} key={item.slug} onClick={() => chooseCategory(item.slug)} type="button">
-                    <i style={{ background: `${item.color}15`, color: item.color }}>{item.icon}</i><span>{item.name}</span><b>{picked ? "✓" : item.count}</b>
-                  </button>;
-                })}
-              </div>
-              <div className={list.railTop}><strong>ŞEHİR</strong></div>
-              <div className={list.tree}>
-                <button className={`${list.treeRow} ${!city ? list.treeActive : ""}`} onClick={() => { setLoading(true); setCity(""); setPage(1); }} type="button"><i style={{ background: "#f6f5fc" }}>◎</i><span>Tümü</span><b>{facets.cities.reduce((total, item) => total + item.count, 0)}</b></button>
-                {facets.cities.map((item) => <button className={`${list.treeRow} ${city === String(item.id) ? list.treeActive : ""}`} key={item.id} onClick={() => { setLoading(true); setCity(String(item.id)); setPage(1); }} type="button"><i style={{ background: "#f6f5fc" }}>📍</i><span>{item.name}</span><b>{item.count}</b></button>)}
-              </div>
-            </aside>
+    <section className={styles.serviceSection} id="populer">
+      <div className={styles.wrap}>
+        <header className={styles.sectionHead}>
+          <span>EN ÇOK ARANANLAR</span>
+          <h2>Popüler hizmetler</h2>
+          <p>Seç, birkaç soruyu yanıtla; teklifler gelsin.</p>
+        </header>
+
+        <div className={styles.serviceGrid}>
+          {(catalog?.popular ?? []).map((item) => (
+            <Link className={styles.serviceCard} href={talepLinki(item.slug)} key={item.id}>
+              <span className={styles.serviceIcon} style={{ background: `${item.color}1f` }}>{item.icon}</span>
+              <strong>{item.name}</strong>
+              {item.leaf_samples.length > 0 && (
+                <small className={styles.serviceLeaves}>{item.leaf_samples.join(" · ")}</small>
+              )}
+              <em>Ücretsiz teklif al →</em>
+            </Link>
+          ))}
+          {!catalog && Array.from({ length: 12 }, (_, i) => <span className={styles.cardSkeleton} key={i} />)}
+        </div>
+      </div>
+    </section>
+
+    {trend && trend.items.length > 0 && (
+      <section className={styles.trendSection}>
+        <div className={styles.wrap}>
+          <header className={styles.sectionHead}>
+            <span>HAREKETLİ BAŞLIKLAR</span>
+            <h2>{trend.mode === "trend" ? "Bu hafta trendde" : "Bu aralar aranan işler"}</h2>
+            <p>{trend.mode === "trend"
+              ? "Son iki haftada belirgin şekilde daha çok talep alan başlıklar."
+              : "Mevsimine göre en çok sorulan işler."}</p>
+          </header>
+
+          <div className={styles.trendStrip}>
+            {trend.items.map((item) => (
+              <Link className={styles.trendCard} href={talepLinki(item.slug)} key={item.id}>
+                <span style={{ background: `${item.color}1f` }}>{item.icon}</span>
+                <div>
+                  <strong>{item.name}</strong>
+                  <small>{item.root.name}</small>
+                </div>
+                {item.badge && <b>{item.badge === "rising" ? "↑ bu hafta" : item.badge}</b>}
+              </Link>
+            ))}
           </div>
         </div>
+      </section>
+    )}
 
-        <div>
-          <form className={styles.marketSearch} onSubmit={submitSearch}>
-            <label>⌕<input onChange={(event) => setSearchInput(event.target.value)} placeholder="Talep başlığı, konum veya kategori ara…" value={searchInput} /></label>
-            <button type="submit">Ara</button>
-            <button className={detailedSearch ? styles.detailedOn : ""} onClick={() => setDetailedSearch(!detailedSearch)} type="button">Detaylı Arama {detailedSearch ? "▴" : "▾"}</button>
-          </form>
-          {detailedSearch && <div className={styles.detailedPanel}>
-            <label>Şehir<select onChange={(event) => { setLoading(true); setCity(event.target.value); setPage(1); }} value={city}><option value="">Tümü</option>{facets.cities.map((item) => <option key={item.id} value={item.id}>{item.name} ({item.count})</option>)}</select></label>
-            <label>En az bütçe<input inputMode="numeric" onChange={(event) => setBudget({ min: event.target.value, max: budget.max })} placeholder={String(facets.budget.min)} value={budget.min} /></label>
-            <label>En çok bütçe<input inputMode="numeric" onChange={(event) => setBudget({ min: budget.min, max: event.target.value })} placeholder={String(facets.budget.max)} value={budget.max} /></label>
-            <button onClick={resetFilters} type="button">Temizle</button>
-          </div>}
+    <section className={styles.groupSection} id="hizmetler">
+      <div className={styles.wrap}>
+        <header className={styles.sectionHead}>
+          <span>TÜM HİZMETLER</span>
+          <h2>Aradığın her iş için bir başlık var.</h2>
+          <p>{stats.service_roots} alan, {stats.service_headings} başlık. Başlığı seç, talebini oluştur.</p>
+        </header>
 
-          <ResultBar noun="açık talep" onSort={(value) => { setLoading(true); setSort(value); setPage(1); }} sort={sort} sortOptions={sortOptions} total={marketplace?.meta.total ?? 0} />
-          <ActiveChips chips={activeChips} />
-          {loading ? <ListSkeleton /> : (marketplace?.data.requests.length ?? 0) === 0 ? <div className={list.table}><div className={list.empty}>Bu filtrede açık talep bulunmuyor.</div></div> : <div className={list.tiles} key={`${categorySlugs.join("-")}|${city}|${search}|${sort}|${page}`}>
-            {(marketplace?.data.requests ?? []).map((item, index) => <Link className={list.tile} href={inspectHref} key={item.id} style={{ animationDelay: `${Math.min(index, 12) * 24}ms` }}>
-              <div className={list.tileArt} style={{ background: `${item.category.color}12`, color: item.category.color }}>{item.category.icon}</div>
-              <h3 className={list.tileTitle}>{item.title}</h3>
-              <span className={list.tilePrice}>{money(item.budget.min)} – {money(item.budget.max)}</span>
-              <div className={list.tileMeta}><span>{item.location.district.name}</span><span>{item.offer_count} teklif</span></div>
-            </Link>)}
-          </div>}
-          <Pagination lastPage={marketplace?.meta.last_page ?? 1} onPage={(next) => { setLoading(true); setPage(next); document.querySelector("#talepler")?.scrollIntoView({ behavior: "smooth" }); }} page={marketplace?.meta.current_page ?? 1} />
+        <div className={styles.groupGrid}>
+          {(catalog?.groups ?? []).map((group) => {
+            const acik = openGroup === group.id;
+            const cocuklar = acik ? (extraChildren[group.id] ?? group.children) : group.children;
+
+            return <article className={styles.groupPanel} key={group.id}>
+              <header>
+                <i style={{ background: `${group.color}1f` }}>{group.icon}</i>
+                <div>
+                  <strong>{group.name}</strong>
+                  <small>{group.child_count} başlık</small>
+                </div>
+              </header>
+
+              <ul>
+                {cocuklar.map((child) => (
+                  <li key={child.id}>
+                    <Link href={talepLinki(child.slug)}>{child.icon} {child.name}</Link>
+                  </li>
+                ))}
+              </ul>
+
+              {group.child_count > group.children.length && (
+                <button onClick={() => toggleGroup(group)} type="button">
+                  {acik ? "Daha az göster" : `Tümünü gör (${group.child_count})`}
+                </button>
+              )}
+            </article>;
+          })}
+          {!catalog && Array.from({ length: 6 }, (_, i) => <span className={styles.panelSkeleton} key={i} />)}
         </div>
-      </div>
-    </div></section>
-
-    <section className={styles.categorySection} id="kategoriler">
-      <div className={styles.wrap}><header className={`${styles.sectionHead} ${styles.reveal}`}><span>KATEGORİLER</span><h2>Aradığın her şey için tek bir talep yeter.</h2><p>Kategori seç, birkaç soruyu cevapla, talebin ilgili satıcı ağına düşsün.</p></header>
-        <div className={styles.categoryGrid}>{categories.slice(0, 8).map((item, index) => <button className={styles.reveal} key={item.id} onClick={() => chooseCategory(item.slug)} style={{ background: categoryPastels[index % categoryPastels.length] }}><i style={{ background: item.color }}>{item.icon}</i><strong>{item.name}</strong><p>Uygun ve doğrulanmış hizmet verenlerden teklif al</p><footer><span style={{ color: item.color }}>{categorySlugs.includes(item.slug) ? "Seçili kategori" : "Talepleri keşfet"}</span><b style={{ color: item.color }}>→</b></footer></button>)}</div>
       </div>
     </section>
 
-    <section className={styles.how} id="nasil-calisir"><div className={styles.wrap}><header className={`${styles.sectionHead} ${styles.reveal}`}><span>SÜREÇ</span><h2>Üç adımda teklif almaya başla.</h2></header><div className={styles.howGrid}><article className={styles.reveal}><i>01</i><h3>Talebini oluştur</h3><p>Kategori seç, soruları yanıtla, bütçeni ve konumunu belirt. Tamamen ücretsiz.</p></article><article className={styles.reveal}><i>02</i><h3>Uygun satıcılar görsün</h3><p>Talebin, kategori ve bölgende hizmet veren doğrulanmış satıcılara düşer.</p></article><article className={styles.reveal}><i>03</i><h3>Teklifleri karşılaştır</h3><p>Fiyatı, kapsamı ve hizmet vereni tek ekrandan karşılaştırıp karar ver.</p></article></div></div></section>
+    {(catalog?.listing_roots.length ?? 0) > 0 && (
+      <section className={styles.listingSection}>
+        <div className={styles.wrap}>
+          <header className={styles.sectionHead}>
+            <span>ÜRÜN VE İLAN</span>
+            <h2>Hizmet değil, ürün mü arıyorsun?</h2>
+          </header>
+          <div className={styles.listingStrip}>
+            {(catalog?.listing_roots ?? []).map((item) => (
+              <Link href={talepLinki(item.slug)} key={item.id}>
+                <i style={{ background: `${item.color}1f` }}>{item.icon}</i>{item.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
 
-    <section className={styles.feedSection}><div className={styles.wrap}><header className={`${styles.sectionHead} ${styles.reveal}`}><span>CANLI TALEP AKIŞI</span><h2>Şu anda platformda böyle talepler var.</h2><p>Satıcılar akışı takip eder; müşteriler tek tek hizmet veren aramak zorunda kalmaz.</p></header>
-      <div className={`${styles.feedCard} ${styles.reveal}`}><header><div><i /> <strong>Canlı akış</strong></div><a href="#talepler">Tüm talepleri gör →</a></header><div>{feedItems.map((item, index) => <article className={`${styles.feedRow} ${index === 0 ? styles.feedNew : ""}`} key={`${feedOffset}-${item.id}`} style={{ animationDelay: `${index * 55}ms` }}><span style={{ background: `${item.category.color}15`, color: item.category.color }}>{item.category.icon} {item.category.name}</span><div><strong>{item.title}</strong><small>{item.location.city.name}, {item.location.district.name} · {relativeTime(item.created_at)}</small></div><b>{money(item.budget.min)} – {money(item.budget.max)}</b><em>{item.offer_count} teklif</em></article>)}</div></div>
-    </div></section>
+    <section className={styles.how} id="nasil-calisir"><div className={styles.wrap}><header className={styles.sectionHead}><span>SÜREÇ</span><h2>Üç adımda teklif almaya başla.</h2></header><div className={styles.howGrid}><article><i>01</i><h3>Hizmetini seç</h3><p>İhtiyacın olan başlığı seç, birkaç soruyu yanıtla, bütçeni ve konumunu yaz. Ücretsiz.</p></article><article><i>02</i><h3>Uygun ustalar görsün</h3><p>Talebin, o kategoride ve bölgende çalışan doğrulanmış hizmet verenlere düşer.</p></article><article><i>03</i><h3>Teklifleri karşılaştır</h3><p>Fiyatı, kapsamı ve hizmet vereni tek ekrandan karşılaştırıp karar ver.</p></article></div></div></section>
 
-    <section className={styles.sellerBand} id="hizmet-veren"><div className={styles.aurora}><i className={styles.blobOne} /><i className={styles.blobTwo} /></div><div className={styles.wrap}><div className={styles.reveal}><span>HİZMET VERENLER İÇİN</span><h2>Müşteriyi arama, gelen talebe teklif ver.</h2><ul><li><i>01</i><div><strong>Ücretsiz üye ol, firmanı tanıt</strong><p>Firma bilgilerini ve hizmet verdiğin kategorileri ekle.</p></div></li><li><i>02</i><div><strong>Şehir ve ilçeni seç</strong><p>Yalnızca hizmet verdiğin bölgelerdeki talepleri gör.</p></div></li><li><i>03</i><div><strong>Uygun talebe teklif ver</strong><p>Kontör yalnızca ilk teklif veya detay açma işleminde düşer.</p></div></li></ul><Link className={styles.buttonGrad} href={sellerHref}>{sellerLabel} →</Link></div><aside className={styles.reveal}><span>KONTÖR MALİYETİ · KATEGORİYE GÖRE</span>{categories.slice(0, 6).map((item, index) => <p key={item.id}><b>{item.icon} {item.name}</b><strong>{index + 1} kontör</strong></p>)}</aside></div></section>
+    <section className={styles.sellerBand} id="hizmet-veren"><div className={styles.aurora}><i className={styles.blobOne} /><i className={styles.blobTwo} /></div><div className={styles.wrap}><div><span>HİZMET VERENLER İÇİN</span><h2>Müşteriyi arama, gelen talebe teklif ver.</h2><ul><li><i>01</i><div><strong>Ücretsiz üye ol, firmanı tanıt</strong><p>Firma bilgilerini ve hizmet verdiğin kategorileri ekle.</p></div></li><li><i>02</i><div><strong>Şehir ve ilçeni seç</strong><p>Yalnızca hizmet verdiğin bölgelerdeki talepleri görürsün; ikisi de zorunludur.</p></div></li><li><i>03</i><div><strong>Uygun talebe teklif ver</strong><p>Kontör yalnızca talebin detayını açarken düşer; teklif göndermek ek ücret istemez.</p></div></li></ul><Link className={styles.buttonGrad} href={sellerHref}>{sellerLabel} →</Link></div><aside><span>NASIL İŞLER</span>{(catalog?.groups ?? []).slice(0, 6).map((item) => <p key={item.id}><b>{item.icon} {item.name}</b><strong>{item.child_count} başlık</strong></p>)}</aside></div></section>
 
     <section className={styles.cta}><div className={styles.wrap}><h2>Aradığını bulmak için beklemeyi bırak.</h2><Link href={isSeller ? "/satici-paneli" : "/talep-olustur"}>{isSeller ? "Gelen talepleri aç" : "Hemen talep oluştur"}</Link></div></section>
-    <footer className={styles.footer}><div className={styles.wrap}><section><Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link><p>Talep tabanlı pazaryeri. Sen iste, onlar teklif etsin.</p></section><nav><strong>Keşfet</strong><a href="#kategoriler">Kategoriler</a><a href="#talepler">Güncel talepler</a></nav><nav><strong>Hizmet veren</strong><Link href={sellerHref}>{sellerLabel}</Link><Link href="/kontor-yukle">Kontör paketleri</Link></nav><nav><strong>Hesabın</strong>{user ? <Link href={panelHref}>{panelLabel}</Link> : <Link href="/giris">Giriş yap</Link>}<Link href="/talep-olustur">Talep oluştur</Link></nav><small>© 2026 alıcam.net</small></div></footer>
+
+    <footer className={styles.footer}><div className={styles.wrap}><section><Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link><p>Talep tabanlı pazaryeri. Sen iste, onlar teklif etsin.</p></section><nav><strong>Keşfet</strong><a href="#populer">Popüler hizmetler</a><a href="#hizmetler">Tüm hizmetler</a></nav><nav><strong>Hizmet veren</strong><Link href={sellerHref}>{sellerLabel}</Link><Link href="/kontor-yukle">Kontör paketleri</Link></nav><nav><strong>Hesabın</strong>{user ? <Link href={panelHref}>{panelLabel}</Link> : <Link href="/giris">Giriş yap</Link>}<Link href="/talep-olustur">Talep oluştur</Link></nav><small>© 2026 alıcam.net</small></div></footer>
   </main>;
 }

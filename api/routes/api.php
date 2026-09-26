@@ -32,10 +32,15 @@ Route::get('/health', fn () => response()->json([
 ]));
 
 Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/search', [CategoryController::class, 'search'])
+    ->middleware('throttle:120,1');
 Route::get('/categories/{category:slug}/attributes', [CategoryController::class, 'attributes']);
 Route::get('/locations', [LocationController::class, 'index']);
 Route::get('/credits/packages', [CreditPurchaseController::class, 'packages']);
 Route::get('/marketplace', MarketplaceController::class);
+// Anasayfanin hizmet katalogu. /categories?tree=1 burada KULLANILMAZ:
+// 5689 dugumun tamamini tasidigi icin yaklasik 1,9 MB yanit uretiyor.
+Route::get('/service-catalog', App\Http\Controllers\Api\ServiceCatalogController::class);
 
 // Asistan: oturum zorunlu degil, varsa kullaniciya ozel konular acilir.
 /**

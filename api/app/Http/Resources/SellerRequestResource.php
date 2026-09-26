@@ -53,7 +53,12 @@ class SellerRequestResource extends JsonResource
             // Alici bu talebi dogrudan bu saticinin vitrininden actiysa isaretlenir.
             'is_invited' => (bool) $this->getAttribute('invited_for_seller'),
             'is_favorite' => (bool) $this->getAttribute('favorited_by_seller'),
-            'unlock_cost' => $isUnlocked ? null : (int) ($this->category->creditCost?->unlock_cost ?? 0),
+            'unlock_cost' => $isUnlocked
+                ? null
+                : ($this->is_demo ? 0 : (int) ($this->category->creditCost?->unlock_cost ?? 0)),
+            // Arayuz bunu rozetle gosterir; ornek talep gercek isle
+            // karistirilmasin.
+            'is_demo' => (bool) $this->is_demo,
             'expires_at' => $this->expires_at?->toIso8601String(),
             'created_at' => $this->created_at->toIso8601String(),
         ];

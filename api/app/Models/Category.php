@@ -20,6 +20,33 @@ class Category extends Model
         'is_active', 'sort_order',
     ];
 
+    protected static function booted(): void
+    {
+        // Arama sutunu adla birlikte tutulur; yonetici panelinden bir
+        // kategori yeniden adlandirilinca aramanin bozulmamasi icin.
+        static::saving(function (self $kategori): void {
+            $kategori->search_name = self::fold($kategori->name);
+        });
+    }
+
+    /**
+     * Aramada kullanilan sadelestirilmis bicim: kucuk harf + Turkce
+     * harflerin ASCII karsiligi.
+     *
+     * Kullanicilarin cogu telefonda Turkce karakter yazmiyor; katlama
+     * olmadan "camasir" arayan "Çamaşır Makinesi"ni bulamiyor.
+     */
+    public static function fold(?string $deger): string
+    {
+        $katlanmis = str_replace(
+            ['Ç', 'ç', 'Ğ', 'ğ', 'İ', 'ı', 'Ö', 'ö', 'Ş', 'ş', 'Ü', 'ü', 'Â', 'â', 'Î', 'î', 'Û', 'û'],
+            ['c', 'c', 'g', 'g', 'i', 'i', 'o', 'o', 's', 's', 'u', 'u', 'a', 'a', 'i', 'i', 'u', 'u'],
+            (string) $deger,
+        );
+
+        return mb_strtolower(trim($katlanmis), 'UTF-8');
+    }
+
     protected function casts(): array
     {
         return ['is_active' => 'boolean'];

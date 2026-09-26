@@ -117,7 +117,11 @@ class SellerCreditService
                 'Bu talep artık açılmaya uygun değil.',
             );
 
-            $cost = (int) ($lockedRequest->category->creditCost?->unlock_cost ?? 0);
+            // Ornek talep bedelsiz acilir: hizmet verenin sahte bir
+            // ilan icin gercek kontor odemesi kabul edilemez.
+            $cost = $lockedRequest->is_demo
+                ? 0
+                : (int) ($lockedRequest->category->creditCost?->unlock_cost ?? 0);
 
             if ($wallet->balance < $cost) {
                 throw new InsufficientCreditsException($wallet->balance, $cost);

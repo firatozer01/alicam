@@ -227,3 +227,5 @@
   .builderSide{position:static;order:-1}
   .formGrid{grid-template-columns:1fr}
 }
+/* Ornek talep rozeti: gercek isle karistirilmasin, acmak bedelsizdir. */
+.demoFlag{border-radius:999px;padding:2px 8px;background:var(--warn-bg);color:var(--warn-fg);font-size:10px;font-weight:800}

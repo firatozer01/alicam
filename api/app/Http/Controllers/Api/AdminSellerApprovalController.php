@@ -65,6 +65,20 @@ class AdminSellerApprovalController extends Controller
 
             abort_unless($profile->approval_status === 'pending', 422, 'Yalnızca bekleyen başvurular incelenebilir.');
 
+            // Onay, kategorisi ya da hizmet bolgesi olmayan bir hesabi
+            // yayina almamali: eslestirme ikisini de sart kosuyor, boyle bir
+            // satici hicbir talep goremez ve sebebini anlayamaz.
+            if ($data['decision'] === 'approved') {
+                $kategori = DB::table('seller_categories')->where('seller_id', $seller->id)->count();
+                $bolge = DB::table('seller_locations')->where('seller_id', $seller->id)->count();
+
+                abort_if(
+                    $kategori === 0 || $bolge === 0,
+                    422,
+                    'Bu başvuru onaylanamaz: hizmet kategorisi ve hizmet bölgesi seçilmiş olmalı.',
+                );
+            }
+
             $oldValues = [
                 'approval_status' => $profile->approval_status,
                 'rejection_reason' => $profile->rejection_reason,

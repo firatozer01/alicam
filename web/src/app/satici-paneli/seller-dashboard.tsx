@@ -19,7 +19,7 @@ type SellerRequest = {
   id: number; reference: string; title: string; summary: string; status: string; offer_count: number;
   budget: { min: string; max: string }; category: Category;
   location: { city: { id: number; name: string }; district: { id: number; name: string } };
-  summary_attributes: RequestAttribute[]; is_unlocked: boolean; is_favorite: boolean; is_invited: boolean; unlock_cost: number | null;
+  summary_attributes: RequestAttribute[]; is_unlocked: boolean; is_favorite: boolean; is_invited: boolean; is_demo?: boolean; unlock_cost: number | null;
   expires_at: string | null; created_at: string;
   details?: { description: string; full_address: string | null; attributes: RequestAttribute[]; contact: { name: string; email: string; phone: string } };
 };
@@ -559,6 +559,7 @@ export function SellerDashboard() {
                     <span>👁 <b>{Math.max(12, item.offer_count * 7 + 5)}</b></span>
                     <span>{relativeTime(item.created_at)}</span>
                     {item.is_unlocked ? <span className={list.openFlag}>🔓 açık</span> : <span>🔒 gizli</span>}
+                    {item.is_demo && <span className={styles.demoFlag} title="Vitrini canlı göstermek için eklenmiş örnek talep; açmak kontör düşürmez.">Örnek</span>}
                   </div>
                   <div className={list.cardFoot}>
                     <div className={list.cardPrice}><small>TAHMİNİ BÜTÇE</small><strong>{money(item.budget.min)} – {money(item.budget.max)}</strong></div>
