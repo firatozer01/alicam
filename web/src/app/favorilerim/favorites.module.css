@@ -5,7 +5,7 @@
 .wrap { max-width: 1180px; margin: 0 auto; padding: 30px 20px 64px; }
 
 .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 24px; }
-.kicker { display: block; margin-bottom: 7px; color: var(--muted-2); font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+.kicker { display: block; margin-bottom: 7px; color: var(--muted-2); font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .head h1 { margin: 0; font-family: var(--font-fraunces), Georgia, serif; font-size: 30px; color: var(--ink); }
 .head p { margin: 7px 0 0; max-width: 520px; color: var(--muted); font-size: 13.5px; line-height: 1.65; }
 
@@ -44,7 +44,7 @@
 .meta b { color: var(--ink-2); }
 
 .cardFoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
-.cardFoot small { display: block; color: var(--muted-2); font-size: 9.5px; font-weight: 800; letter-spacing: .1em; }
+.cardFoot small { display: block; color: var(--muted-2); font-size: 12px; font-weight: 800; letter-spacing: .1em; }
 .cardFoot strong { display: block; margin-top: 3px; font-size: 13.5px; color: var(--ink); }
 
 .action {

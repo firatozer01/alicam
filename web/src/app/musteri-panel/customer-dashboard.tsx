@@ -118,6 +118,9 @@ export function CustomerDashboard() {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
   const [busy, setBusy] = useState<number | null>(null);
+  // Yazisma acilirken o teklifin kimligi; ayni anda tek istek gider.
+  const [messaging, setMessaging] = useState<number | null>(null);
+  const [messageError, setMessageError] = useState<{ offer: number; text: string } | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [reviewOffer, setReviewOffer] = useState<number | null>(null);
   const [rating, setRating] = useState(5);
@@ -167,7 +170,7 @@ export function CustomerDashboard() {
   );
 
   const openCompare = async (item: BuyerRequest) => {
-    setCompareRequest(item); setError("");
+    setCompareRequest(item); setError(""); setMessageError(null);
     try { await loadOffers(item.id); } catch (requestError: unknown) { setError(firstApiError(requestError)); }
   };
 
@@ -179,6 +182,33 @@ export function CustomerDashboard() {
       setNotice(response.message);
     } catch (requestError: unknown) { setError(firstApiError(requestError)); }
     finally { setBusy(null); }
+  };
+
+  /**
+   * Teklif karsilastirmasindan hizmet verene yazisma acar.
+   *
+   * Konusma talebe baglanir; boylece hizmet veren hangi is icin
+   * yazildigini gorur. Ayni satici icin tekrar tiklansa da sunucu ayni
+   * konusmayi dondurur. Alici hicbir sey odemez; kontoru hizmet veren,
+   * mesaji okuyup yanitlamak istediginde oder ve bunu sunucu uygular.
+   */
+  const startConversation = async (offer: Offer) => {
+    if (messaging !== null) return;
+    setMessaging(offer.id); setMessageError(null);
+    try {
+      const response = await apiRequest<{ data: { id: number } }>("/conversations", {
+        method: "POST",
+        body: JSON.stringify({ seller_id: offer.seller.id, request_id: offer.request_id }),
+      });
+      router.push(`/mesajlar?konusma=${response.data.id}`);
+    } catch (requestError: unknown) {
+      if (requestError instanceof ApiError && requestError.status === 401) {
+        router.push("/giris?devam=%2Fmusteri-panel");
+        return;
+      }
+      setMessageError({ offer: offer.id, text: firstApiError(requestError) });
+      setMessaging(null);
+    }
   };
 
   const cancel = async (item: BuyerRequest) => {
@@ -324,7 +354,7 @@ export function CustomerDashboard() {
       </div>
     </section>
     {compareRequest && <Modal
-      onClose={() => { setCompareRequest(null); setReviewOffer(null); }}
+      onClose={() => { setCompareRequest(null); setReviewOffer(null); setMessageError(null); }}
       open
       size="xl"
       subtitle={`${compareRequest.category.name} · ${compareRequest.location.district.name}, ${compareRequest.location.city.name} · bütçe ${money(compareRequest.budget.min)} – ${money(compareRequest.budget.max)}`}
@@ -348,13 +378,22 @@ export function CustomerDashboard() {
           <div className={styles.offerGrid}>{rows.map((offer) => {
             const name = offer.seller.company_name || offer.seller.name;
             const isLowest = Number(offer.price) === lowest && rows.length > 1;
+            // Kendi kartina mesaj dugmesi cikmaz; sunucu da buna izin vermez.
+            const canMessage = offer.seller.id !== user?.id;
             return <article className={`${styles.offer} ${styles[offer.status]}`} key={offer.id}>
               <header>
                 <Photo className={styles.sellerPhoto} name={name} url={offer.seller.logo_url ?? offer.seller.avatar_url} />
                 <div><strong>{name}</strong><small>✓ Doğrulanmış hizmet veren</small></div>
                 <b>{offerStatus[offer.status]}</b>
               </header>
-              <Link className={styles.profileLink} href={`/satici/${offer.seller.id}`} target="_blank">Profili ve geçmiş işlerini gör ↗</Link>
+              <div className={styles.offerActions}>
+                <Link className={styles.profileLink} href={`/satici/${offer.seller.id}`} target="_blank">Profili ve geçmiş işlerini gör ↗</Link>
+                {canMessage && <button className={styles.messageButton} disabled={messaging !== null} onClick={() => void startConversation(offer)} type="button">
+                  {messaging === offer.id ? "Açılıyor…" : "✉ Mesaj gönder"}
+                </button>}
+              </div>
+              {canMessage && <em className={styles.messageHint}>Hizmet veren mesajını okumak ve yanıtlamak için kontör harcar.</em>}
+              {messageError?.offer === offer.id && <p className={styles.messageError}>{messageError.text}</p>}
               <p>{offer.message}</p>
               {offer.listing && <AttachedListing listing={offer.listing} sellerId={offer.seller.id} />}
               <div className={styles.priceRow}>

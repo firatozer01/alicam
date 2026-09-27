@@ -104,7 +104,7 @@
 .chev { color: var(--faint); font-size: 15px; }
 
 .topics { display: flex; flex-direction: column; gap: 8px; }
-.topicsHead { margin: 0; font-size: 10px; font-weight: 800; letter-spacing: .1em; color: var(--muted-2); }
+.topicsHead { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .1em; color: var(--muted-2); }
 .panel[data-guest="true"] .topicsHead { color: #8b8ab0; }
 .topics > div { display: flex; flex-wrap: wrap; gap: 7px; }
 .topics button {

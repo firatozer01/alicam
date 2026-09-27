@@ -68,7 +68,7 @@
 .itemActive .itemCount{color:#4f46e5;background:#fff}
 
 /* Rozetler */
-.badge{font-style:normal;flex:none;border-radius:5px;padding:1px 6px;font-size:9.5px;font-weight:800;letter-spacing:.04em;background:#f1eeff;color:#4f46e5}
+.badge{font-style:normal;flex:none;border-radius:5px;padding:1px 6px;font-size:12px;font-weight:800;letter-spacing:.04em;background:#f1eeff;color:#4f46e5}
 .new{background:#e0f7fb;color:#0e7490}
 .hot{background:#fef3c7;color:#b45309}
 .free{background:#dcfce7;color:#15803d}

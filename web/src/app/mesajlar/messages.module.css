@@ -4,7 +4,7 @@
 .wrap { width: min(1320px, calc(100% - 40px)); margin: 0 auto; }
 
 .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin: 24px 0 18px; }
-.kicker { display: block; margin-bottom: 5px; font-size: 10px; font-weight: 800; letter-spacing: .14em; color: var(--violet); }
+.kicker { display: block; margin-bottom: 5px; font-size: 12px; font-weight: 800; letter-spacing: .14em; color: var(--violet); }
 .head h1 { margin: 0; font-family: var(--font-fraunces), Georgia, serif; font-size: 28px; font-weight: 700; }
 .head p { margin: 5px 0 0; color: var(--muted); font-size: 13.5px; }
 .ghost { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 9px 15px; background: var(--card); color: var(--indigo); font-size: 13px; font-weight: 700; text-decoration: none; }
@@ -22,8 +22,8 @@
 .rowBody strong { display: block; font-size: 13.5px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rowBody small { display: block; margin-top: 2px; color: var(--muted); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rowMeta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.rowMeta em { color: var(--faint); font-style: normal; font-size: 10.5px; }
-.rowMeta b { min-width: 19px; height: 19px; display: grid; place-items: center; padding: 0 6px; border-radius: 999px; color: #fff; background: var(--violet); font-size: 10.5px; }
+.rowMeta em { color: var(--faint); font-style: normal; font-size: 12.5px; }
+.rowMeta b { min-width: 19px; height: 19px; display: grid; place-items: center; padding: 0 6px; border-radius: 999px; color: #fff; background: var(--violet); font-size: 12.5px; }
 
 /* ---- Akis ---- */
 .thread { display: flex; flex-direction: column; min-height: 72vh; max-height: 72vh; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--card); box-shadow: var(--shadow-sm); overflow: hidden; }
@@ -36,7 +36,7 @@
 .mine { align-self: flex-end; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); }
 .theirs { align-self: flex-start; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); }
 .mine p, .theirs p { margin: 0; font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
-.mine time, .theirs time { display: block; margin-top: 5px; font-size: 10px; opacity: .75; }
+.mine time, .theirs time { display: block; margin-top: 5px; font-size: 12px; opacity: .75; }
 @keyframes bubbleIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .mine, .theirs { animation: none; } }
 
