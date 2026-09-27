@@ -72,9 +72,13 @@ class MessagingService
             return 0;
         }
 
-        // Konusma bir talebe bagliysa ve satici o talebi zaten kontorle
-        // actiysa ayni is icin ikinci kez odemez.
-        if ($conversation->request_id !== null && $this->hasRequestUnlock($conversation, $user)) {
+        // Konusma bir talebe bagli ve satici o talebi zaten kontorle
+        // acmis olabilir. Bunun bedelsiz sayilip sayilmayacagi bir is
+        // karari, kod karari degil: varsayilan ODEMELI, cunku teklif
+        // vermek ile alicinin ozel yazismasi ayri iki sey.
+        if (config('messaging.free_when_request_unlocked')
+            && $conversation->request_id !== null
+            && $this->hasRequestUnlock($conversation, $user)) {
             return 0;
         }
 
