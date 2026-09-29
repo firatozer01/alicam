@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class BuyerRequestController extends Controller
 {
@@ -40,6 +41,11 @@ class BuyerRequestController extends Controller
             'district_id' => ['required', 'integer', 'exists:districts,id'],
             'full_address' => ['nullable', 'string', 'max:500'],
             'attributes' => ['present', 'array'],
+            // Yeni sihirbazin alanlari; uculu de istege bagli.
+            'timing' => ['sometimes', 'nullable', Rule::in(['urgent', 'this_week', 'this_month', 'flexible'])],
+            'budget_flexible' => ['sometimes', 'boolean'],
+            'contact_preferences' => ['sometimes', 'array', 'max:3'],
+            'contact_preferences.*' => [Rule::in(['message', 'phone', 'whatsapp'])],
         ]);
 
         $category = Category::query()
@@ -93,6 +99,12 @@ class BuyerRequestController extends Controller
             'full_address' => $base['full_address'] ?? null,
             'attributes' => $validatedAttributes,
             'attribute_schema_snapshot' => $snapshot,
+            'timing' => $base['timing'] ?? null,
+            'budget_flexible' => $base['budget_flexible'] ?? false,
+            // Bos dizi ile null ayni sey degil: bos dizi "hicbiri"
+            // demek, null "sorulmadi". Ikisini de saklayabilmek icin
+            // anahtar gonderilmediyse null biraktik.
+            'contact_preferences' => $base['contact_preferences'] ?? null,
             'status' => 'open',
             'expires_at' => now()->addDays(30),
             ]);

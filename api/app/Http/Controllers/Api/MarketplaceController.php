@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Support\Text;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -47,8 +48,13 @@ class MarketplaceController extends Controller
                 'requests' => $page->getCollection()->map(fn (BuyerRequest $item) => [
                     'id' => $item->id,
                     'reference' => $item->public_reference,
-                    'title' => $item->title,
-                    'summary' => Str::limit(strip_tags($item->description), 180),
+                    // Bu uc OTURUMSUZ herkese acik. Alicinin yazdigi
+                    // metinden iletisim kanallari temizlenir; satici
+                    // tarafinda zaten temizleniyordu, burada
+                    // temizlenmemesi numaralarin acik internete
+                    // cikmasi demekti.
+                    'title' => Text::redactContacts($item->title),
+                    'summary' => Str::limit(Text::redactContacts($item->description), 180),
                     'budget' => ['min' => $item->budget_min, 'max' => $item->budget_max],
                     'category' => [
                         'id' => $item->category->id,

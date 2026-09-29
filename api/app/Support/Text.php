@@ -13,6 +13,30 @@ class Text
      * kisaltilir, yoksa mesajin kendisi adin icine yazilip odenmeden
      * ulastirilabilir.
      */
+    /**
+     * Serbest metinden iletisim kanallarini temizler.
+     *
+     * Talep basligi ve aciklamasi alicinin yazdigi metindir ve oraya
+     * telefon, e-posta ya da bir baglanti yazilabiliyor. Bu metin iki
+     * yerde disari cikiyor: kontor odemis saticiya ve HERKESE ACIK
+     * pazaryeri akisina. Ikisinde de ayni temizlikten gecmeli; aksi
+     * halde satici odeyip gizlenmis halini gorurken ayni numara
+     * anasayfada yayinda olur.
+     */
+    public static function redactContacts(string $deger): string
+    {
+        $duz = trim(strip_tags($deger));
+
+        $duz = preg_replace('/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/u', '[e-posta gizlendi]', $duz) ?? $duz;
+        $duz = preg_replace('/(?:https?:\/\/|www\.)\S+/iu', '[bağlantı gizlendi]', $duz) ?? $duz;
+
+        return preg_replace(
+            '/(?<!\d)(?:(?:\+?90|0)[\s().-]*)?[2-5]\d{2}(?:[\s().-]*\d){7}(?!\d)/u',
+            '[telefon gizlendi]',
+            $duz,
+        ) ?? $duz;
+    }
+
     public static function safeName(?string $name, bool $full = true): string
     {
         $temiz = trim(preg_replace('/\s+/u', ' ', (string) $name) ?? '');

@@ -15,6 +15,7 @@ class BuyerRequest extends Model
         'public_reference', 'user_id', 'category_id', 'city_id', 'district_id',
         'title', 'description', 'budget_min', 'budget_max', 'lat', 'lng',
         'full_address', 'attributes', 'attribute_schema_snapshot', 'status', 'is_demo', 'expires_at',
+        'timing', 'budget_flexible', 'contact_preferences',
     ];
 
     protected function casts(): array
@@ -26,6 +27,8 @@ class BuyerRequest extends Model
             'lng' => 'decimal:7',
             'attributes' => 'array',
             'attribute_schema_snapshot' => 'array',
+            'budget_flexible' => 'boolean',
+            'contact_preferences' => 'array',
             'expires_at' => 'datetime',
         ];
     }

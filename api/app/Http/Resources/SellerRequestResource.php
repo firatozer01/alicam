@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Support\Text;
 use Illuminate\Support\Str;
 
 class SellerRequestResource extends JsonResource
@@ -29,13 +30,17 @@ class SellerRequestResource extends JsonResource
         $data = [
             'id' => $this->id,
             'reference' => $this->public_reference,
-            'title' => $this->redact($this->title),
-            'summary' => Str::limit($this->redact($this->description), 220),
+            'title' => Text::redactContacts($this->title),
+            'summary' => Str::limit(Text::redactContacts($this->description), 220),
             'status' => $this->status,
             'budget' => [
                 'min' => $this->budget_min,
                 'max' => $this->budget_max,
+                'flexible' => (bool) $this->budget_flexible,
             ],
+            // Aciliyet kimlik tasimaz ve teklif verenin en cok isine
+            // yarayan bilgilerden biri; kilit oncesi de gorunur.
+            'timing' => $this->timing,
             'category' => [
                 'id' => $this->category->id,
                 'name' => $this->category->name,
@@ -78,6 +83,9 @@ class SellerRequestResource extends JsonResource
                     'name' => $this->user->name,
                     'email' => $this->user->email,
                     'phone' => $this->user->phone,
+                    // Nasil ulasilsin: tek basina kimlik tasimasa da
+                    // iletisim bilgisinin parcasi, onunla birlikte acilir.
+                    'preferences' => $this->contact_preferences ?? [],
                     // Fotograf da kimliktir ve bu blok KILIT ACILINCA
                     // doluyor. Kilit oncesi alicinin adi bile donmuyor;
                     // avatari yukari tasimak, satici kontor odemeden
@@ -92,18 +100,5 @@ class SellerRequestResource extends JsonResource
         }
 
         return $data;
-    }
-
-    private function redact(string $value): string
-    {
-        $plain = trim(strip_tags($value));
-        $plain = preg_replace('/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/u', '[e-posta gizlendi]', $plain) ?? $plain;
-        $plain = preg_replace('/(?:https?:\/\/|www\.)\S+/iu', '[bağlantı gizlendi]', $plain) ?? $plain;
-
-        return preg_replace(
-            '/(?<!\d)(?:(?:\+?90|0)[\s().-]*)?[2-5]\d{2}(?:[\s().-]*\d){7}(?!\d)/u',
-            '[telefon gizlendi]',
-            $plain,
-        ) ?? $plain;
     }
 }

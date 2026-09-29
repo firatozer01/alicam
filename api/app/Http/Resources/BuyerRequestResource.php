@@ -24,7 +24,10 @@ class BuyerRequestResource extends JsonResource
             'budget' => [
                 'min' => $this->budget_min,
                 'max' => $this->budget_max,
+                'flexible' => (bool) $this->budget_flexible,
             ],
+            'timing' => $this->timing,
+            'contact_preferences' => $this->contact_preferences ?? [],
             'invited_sellers' => $this->whenLoaded('invitedSellers', fn () => $this->invitedSellers
                 ->map(fn ($seller) => ['id' => $seller->id, 'name' => $seller->name])->values()),
             'extra_categories' => $this->whenLoaded('categories', fn () => $this->categories

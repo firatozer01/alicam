@@ -1,62 +1,126 @@
 @import "tailwindcss";
 
 :root {
-  /* Yuzeyler */
-  --bg: #f6f5fc;
-  --card: #ffffff;
-  --ink: #15162d;
-  --muted: #67677f;
-  --line: #e7e5f5;
-  --line-soft: #f0eefb;
-  --surface: #faf9ff;
-  /* Metin gri rampasi: koyudan acige tek sira */
-  --ink-2: #4b4a63;
-  --muted-2: #8a89a6;
-  --faint: #a8a6c4;
-  --cyan-fg: #0e7490;
+  /* ==========================================================
+     alicam.net tasarim sistemi
+     Guven icin mavi/lacivert, eylem icin tek sicak vurgu: turuncu.
+     Basliklar Plus Jakarta Sans, govde Inter.
+     ========================================================== */
 
-  /* Marka renkleri - paletin tamami */
-  --violet: #7c3aed;
-  --indigo: #4f46e5;
-  --cyan: #06b6d4;
-  --pink: #ec4899;
-  --amber: #f59e0b;
-  --green: #16a34a;
-  --red: #dc2626;
-  --sky: #0ea5e9;
-  --petrol: #7c3aed;
+  /* --- Marka --- */
+  --blue: #1B5CFF;
+  --blue-600: #0F4AE6;
+  --blue-700: #0B3CC0;
+  --blue-50: #EEF3FF;
+  --blue-100: #DCE6FF;
+  --navy: #0A1433;
+  --navy-2: #13204A;
 
-  /* Mor olcegi: zemin, kenarlik, vurgu */
-  --violet-50: #faf9ff;
-  --violet-100: #f1eeff;
-  --violet-200: #ddd6fe;
-  --violet-300: #c4b5fd;
-  --pink-50: #fdf0f8;
-  --cyan-50: #eaf8fc;
+  /* Eylem vurgusu. Sayfada tek turuncu vardir: yapilmasini
+     istedigimiz sey. Ikinci bir turuncu eklemek onu etkisizlestirir. */
+  --orange: #F2600C;
+  --orange-600: #DB5205;
+  --orange-50: #FFF1E8;
 
-  /* Durum tonlari: her durum icin tek zemin, tek koyu ton.
-     Ayni yesilin sekiz farkli tonu yerine bunlar kullanilir. */
-  --ok-bg: #e9f9ef;
-  --ok-fg: #15803d;
-  --warn-bg: #fef3c7;
-  --warn-fg: #b45309;
-  --danger-bg: #fee2e2;
-  --danger-fg: #b91c1c;
+  /* --- Dikey renkleri ---
+     Her dikey kendi rengini tasir: hizmet mavi, emlak yesil,
+     vasita turuncu, alisveris mor, makine kehribar, eleman turkuaz,
+     hayvan pembe. */
+  --v-hizmet: #1B5CFF;
+  --v-emlak: #0E9F5A;
+  --v-vasita: #F2600C;
+  --v-alisveris: #7A5AF8;
+  --v-makine: #F5A524;
+  --v-eleman: #0EA5B7;
+  --v-hayvan: #E8488A;
 
-  /* Yukseklik ve yaricap */
-  --shadow-sm: 0 8px 26px rgba(79, 70, 229, .05);
-  --shadow-md: 0 14px 34px rgba(79, 70, 229, .08);
-  --shadow-lg: 0 28px 60px rgba(76, 60, 180, .16);
-  --r-sm: 9px;
-  --r-md: 13px;
-  --r-lg: 18px;
+  /* --- Durum --- */
+  --green: #0E9F5A;
+  --green-50: #E7F7EF;
+  --amber: #F5A524;
+  --red: #E5484D;
+  --pink: #E8488A;
+  --teal: #0EA5B7;
+
+  /* --- Notr --- */
+  --bg: #F5F7FB;
+  --card: #FFFFFF;
+  --surface: #FAFBFE;
+  --ink: #0A1433;
+  --ink-2: #47506B;
+  --ink-3: #7A849C;
+  --muted: #47506B;
+  --muted-2: #7A849C;
+  --faint: #9AA3B8;
+  --line: #E3E8F2;
+  --line-2: #EEF1F7;
+  --line-soft: #EEF1F7;
+
+  /* --- ESKI ADLAR ---
+     Site genelinde 400'den fazla yerde kullaniliyorlar. Silmek
+     yerine yeni palete yonlendiriliyorlar: boylece paneller,
+     vitrin ve yonetim ekranlari tek dosyadan yeni renklere geciyor.
+     Yeni kod dogrudan --blue / --orange / --navy kullanmali. */
+  --violet: #1B5CFF;
+  --indigo: #0B3CC0;
+  --cyan: #0EA5B7;
+  --cyan-fg: #0B7A87;
+  --sky: #1B5CFF;
+  --petrol: #0B3CC0;
+  --violet-50: #F7F9FF;
+  --violet-100: #EEF3FF;
+  --violet-200: #DCE6FF;
+  --violet-300: #B9CCFF;
+  --pink-50: #FDF0F6;
+  --cyan-50: #E9F7F9;
+
+  /* --- Durum tonlari --- */
+  --ok-bg: #E7F7EF;
+  --ok-fg: #0B7A44;
+  --warn-bg: #FFF4DE;
+  --warn-fg: #9A6400;
+  --danger-bg: #FDE8E9;
+  --danger-fg: #C02B30;
+
+  /* --- Yukseklik --- */
+  --shadow-xs: 0 1px 2px rgba(10, 20, 51, .06);
+  --shadow-sm: 0 1px 2px rgba(10, 20, 51, .05), 0 4px 12px rgba(10, 20, 51, .05);
+  --shadow-md: 0 2px 6px rgba(10, 20, 51, .05), 0 14px 34px -10px rgba(10, 20, 51, .16);
+  --shadow-lg: 0 4px 10px rgba(10, 20, 51, .05), 0 32px 64px -20px rgba(10, 20, 51, .28);
+
+  /* --- Yaricap --- */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r: 14px;
+
+  /* --- Yazi ve yerlesim --- */
+  --f-head: var(--font-jakarta), "Inter", system-ui, sans-serif;
+  --f-body: var(--font-inter), system-ui, sans-serif;
+  --gutter: clamp(16px, 3.6vw, 56px);
+  --maxw: 1680px;
+  --header-h: 72px;
 }
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-inter), sans-serif; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 16px); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 16px/1.6 var(--f-body);
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
-.shell { width: min(1160px, calc(100% - 48px)); margin-inline: auto; }
+button, input, select, textarea { font: inherit; color: inherit; }
+/* Basliklar yeni tasarimda Plus Jakarta Sans. Eski Fraunces yalnizca
+   .brand ve birkac vitrin basliginda bilerek kaliyor. */
+h1, h2, h3, h4 { font-family: var(--f-head); letter-spacing: -.02em; line-height: 1.14; }
+:focus-visible { outline: 3px solid rgb(27 92 255 / .45); outline-offset: 2px; border-radius: 8px; }
+/* Geniş kapsayici: eski 1160px yeni tasarimda dar kaliyordu. */
+.shell { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; }
+.wrap-wide { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; }
 
 .announcement { height: 38px; display: flex; align-items: center; justify-content: center; gap: 10px; color: white; font-size: 12px; font-weight: 700; letter-spacing: .01em; background: linear-gradient(100deg, var(--cyan), var(--violet) 48%, var(--indigo)); }
 .announcement a { margin-left: 8px; text-decoration: underline; text-underline-offset: 3px; }
