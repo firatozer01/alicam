@@ -1,17 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { AccountMenu } from "@/components/account-menu";
 import { NavMenuBar, type NavMenuDef } from "@/components/listing/nav-menu";
 import { NotificationBell } from "./notification-bell";
 import { useSession, type SessionUser } from "./use-session";
 import styles from "./site-header.module.css";
 
-export function BrandMark() {
-  return <svg aria-hidden="true" className={styles.brandMark} fill="none" viewBox="0 0 30 30">
-    <path d="M4 10 L14 4 L14 10 Z" fill="#7C3AED" />
-    <path d="M26 20 L16 26 L16 20 Z" fill="#06B6D4" />
-    <path d="M14 7 H16 V23 H14 Z" fill="#4F46E5" opacity=".9" />
+/**
+ * Yeni marka isareti: yukari bakan mavi ok (talep), asagi bakan turuncu ok
+ * (teklif), ortada lacivert govde. Aydinlik zeminde koyu, lacivert zeminde
+ * (alt bilgi) acik tonlu cizilir.
+ */
+export function BrandMark({ tone = "dark" }: { tone?: "dark" | "light" }) {
+  const light = tone === "light";
+
+  return <svg aria-hidden="true" fill="none" viewBox="0 0 30 30">
+    <path d="M4 10 L14 4 L14 10 Z" fill={light ? "#7EA2FF" : "#1B5CFF"} />
+    <path d="M26 20 L16 26 L16 20 Z" fill={light ? "#FF8A4C" : "#F2600C"} />
+    <path d="M14 7 H16 V23 H14 Z" fill={light ? "#FFFFFF" : "#0A1433"} />
   </svg>;
 }
 
@@ -28,7 +36,7 @@ export const discoverMenu: NavMenuDef = {
   allLink: { label: "Pazaryerine git", href: "/" },
   sections: [
     {
-      key: "market", title: "PAZARYERİ", icon: "🛒", color: "#7C3AED", accent: true,
+      key: "market", title: "PAZARYERİ", icon: "🛒", color: "#1B5CFF", accent: true,
       description: "Açık talepleri incele, teklif ver.",
       items: [
         { key: "talepler", label: "Güncel talepler", icon: "▤", hint: "Filtrele ve karşılaştır", href: "/#talepler" },
@@ -41,7 +49,7 @@ export const discoverMenu: NavMenuDef = {
     // zaman talepten teklife dogrudur. Kalan tek baslik hizmet veren
     // OLMAK isteyenler icin.
     {
-      key: "sellers", title: "HİZMET VERMEK", icon: "🏬", color: "#06B6D4",
+      key: "sellers", title: "HİZMET VERMEK", icon: "🏬", color: "#0EA5B7",
       description: "Talep al, teklif ver, işini büyüt.",
       items: [
         { key: "satici-ol", label: "Hizmet vermeye başla", icon: "⌂", hint: "Firma bilgilerini ekle, talep al", href: "/satici-ol" },
@@ -55,15 +63,46 @@ export const discoverMenu: NavMenuDef = {
   ],
 };
 
-const defaultLinks = [
-  { label: "Ana sayfa", href: "/" },
-  { label: "Talepler", href: "/#talepler" },
-  { label: "Nasıl çalışır", href: "/#nasil-calisir" },
+export type HeaderLink = {
+  label: string;
+  href: string;
+  /** Baglantinin basinda duran emoji; yeni tasarimda dikeyler simgeli. */
+  icon?: string;
+  /** Dikey kimligi; ana sayfa acilirken hangi sekmenin secili gelecegini belirler. */
+  vertical?: string;
+};
+
+/**
+ * Yeni tasarimin ust menusu: dort dikey, isleyis ve teklif veren cagrisi.
+ * Hepsi ana sayfanin ilgili bolumune iner.
+ */
+const defaultLinks: HeaderLink[] = [
+  { label: "Hizmet", href: "/#kategoriler", icon: "🛠️", vertical: "hizmet" },
+  { label: "Emlak", href: "/#kategoriler", icon: "🏠", vertical: "emlak" },
+  { label: "Vasıta", href: "/#kategoriler", icon: "🚗", vertical: "vasita" },
+  { label: "Alışveriş", href: "/#kategoriler", icon: "🛍️", vertical: "alisveris" },
+  { label: "Nasıl çalışır?", href: "/#nasil-calisir" },
+  { label: "Teklif ver, kazan", href: "/#teklif-ver" },
 ];
 
 /**
- * Tum sayfalarin ortak ust cubugu: ayni yukseklik, ayni marka, ayni sag blok.
- * Sayfaya gore degisen tek sey mega menu icerigi ve istege bagli aksiyonlardir.
+ * Dikey secimi ana sayfaya bu anahtar uzerinden tasinir; statik tasarimdaki
+ * sozlesmenin aynisi. Gizli sekmede yazilamayabilir, sessizce gecilir.
+ */
+function rememberVertical(vertical?: string) {
+  if (!vertical) return;
+  try { window.sessionStorage.setItem("alicam-v", vertical); } catch { /* depolama kapali */ }
+}
+
+/**
+ * Tum sayfalarin ortak ust cubugu: ayni yukseklik (72px), ayni marka, ayni
+ * sag blok. Sayfaya gore degisen tek sey mega menu icerigi ve istege bagli
+ * aksiyonlardir.
+ *
+ * Gorunum yeni tasarimdan gelir; davranis eskisi gibi oturuma duyarlidir:
+ * oturum acmis kullanici avatarini, hesap menusunu, okunmamis rozetini ve
+ * kontor sayacini gormeye devam eder. Tasarimla birebir ortusen yalnizca
+ * oturumsuz hal.
  */
 export function SiteHeader({
   menus,
@@ -76,11 +115,12 @@ export function SiteHeader({
   credits,
   cta,
   announce,
+  minimal,
 }: {
   /** Sayfaya ozel mega menuler; verilmezse ortak kesif menusu kullanilir. */
   menus?: NavMenuDef[];
   activeKey?: string;
-  links?: { label: string; href: string }[];
+  links?: HeaderLink[];
   /** Sayfa oturumu zaten okuduysa buradan gecirir; yoksa cubuk kendi okur. */
   user?: SessionUser | null;
   sessionReady?: boolean;
@@ -89,24 +129,54 @@ export function SiteHeader({
   credits?: number;
   cta?: { label: string; href: string };
   announce?: string;
+  /** Sihirbaz ve giris gibi tek isli sayfalarda yalnizca marka ve cikis baglantisi. */
+  minimal?: string;
 }) {
-  const session = useSession(user === undefined);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const session = useSession(user === undefined && !minimal);
   const currentUser = user === undefined ? session.user : user;
   const ready = sessionReady === undefined ? session.ready : sessionReady;
   const isSeller = currentUser?.roles.includes("seller") ?? false;
   const action = cta ?? (isSeller
     ? { label: "Gelen talepler", href: "/satici-paneli" }
-    : { label: "Ücretsiz talep oluştur", href: "/talep-olustur" });
+    : { label: "Talep oluştur", href: "/talep-olustur" });
+  const actionPlus = action.href === "/talep-olustur";
+  const drawerMenus = menus && menus.length > 0 ? menus : [discoverMenu];
+
+  // Cekmece acikken arka plan kaymasin, Escape kapatsin.
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setDrawerOpen(false); };
+    document.addEventListener("keydown", closeOnEscape);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", closeOnEscape);
+      document.body.style.overflow = "";
+    };
+  }, [drawerOpen]);
+
+  if (minimal) {
+    return <header className={`${styles.bar} ${styles.barMinimal}`}>
+      <div className={styles.inner}>
+        <Link aria-label="alıcam.net ana sayfa" className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
+        <Link className={styles.ghost} href="/">{minimal}</Link>
+      </div>
+    </header>;
+  }
 
   return <>
     {announce && <div className={styles.announce}>{announce}</div>}
     <header className={styles.bar}>
       <div className={styles.inner}>
-        <Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
+        <Link aria-label="alıcam.net ana sayfa" className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
 
-        <nav className={styles.nav}>
-          <NavMenuBar activeKey={activeKey} menus={menus && menus.length > 0 ? menus : [discoverMenu]}>
-            {links.map((link) => <Link href={link.href} key={link.href}>{link.label}</Link>)}
+        <nav aria-label="Ana menü" className={styles.nav}>
+          <NavMenuBar activeKey={activeKey} menus={drawerMenus}>
+            {links.map((link) => <Link
+              href={link.href}
+              key={link.label}
+              onClick={() => rememberVertical(link.vertical)}
+            >{link.icon && <i className={styles.navIcon}>{link.icon}</i>}{link.label}</Link>)}
           </NavMenuBar>
         </nav>
 
@@ -124,9 +194,56 @@ export function SiteHeader({
             : currentUser
               ? <AccountMenu compact displayName={displayName} user={currentUser} workspace={workspace} />
               : <Link className={styles.line} href="/giris">Giriş yap</Link>}
-          <Link className={styles.cta} href={action.href}>{action.label}</Link>
+          <Link className={styles.cta} href={action.href}>
+            {actionPlus && <span aria-hidden="true">＋</span>}{action.label}
+          </Link>
+
+          <button
+            aria-controls="site-drawer"
+            aria-expanded={drawerOpen}
+            aria-label={drawerOpen ? "Menüyü kapat" : "Menüyü aç"}
+            className={styles.burger}
+            onClick={() => setDrawerOpen((open) => !open)}
+            type="button"
+          ><span /><span /><span /></button>
         </div>
       </div>
     </header>
+
+    {/* Dar ekranlarda sagdan giren cekmece. Masaustu cubugu gizlendigi icin
+        buraya hem duz baglantilar hem de mega menulerin ogeleri duz liste
+        olarak iner; boylece hicbir yol kaybolmaz. */}
+    {drawerOpen && <button aria-hidden="true" className={styles.scrim} onClick={() => setDrawerOpen(false)} tabIndex={-1} type="button" />}
+    <nav
+      aria-label="Menü"
+      className={`${styles.drawer} ${drawerOpen ? styles.drawerOpen : ""}`}
+      id="site-drawer"
+    >
+      {links.map((link) => <Link
+        className={styles.drawerLink}
+        href={link.href}
+        key={link.label}
+        onClick={() => { rememberVertical(link.vertical); setDrawerOpen(false); }}
+      >{link.icon && <i className={styles.navIcon}>{link.icon}</i>}{link.label}</Link>)}
+
+      {drawerMenus.map((menu) => <div className={styles.drawerGroup} key={menu.key}>
+        <h3>{menu.label}</h3>
+        {menu.sections.flatMap((section) => section.items).map((item) => item.href
+          ? <Link className={styles.drawerLink} href={item.href} key={item.key} onClick={() => setDrawerOpen(false)}>
+            <i className={styles.navIcon}>{item.icon}</i>{item.label}
+          </Link>
+          : null)}
+      </div>)}
+
+      <div className={styles.drawerFoot}>
+        {ready && !currentUser && <>
+          <Link className={styles.drawerSoft} href="/giris" onClick={() => setDrawerOpen(false)}>Giriş yap</Link>
+          <Link className={styles.drawerLine} href="/satici-ol" onClick={() => setDrawerOpen(false)}>Teklif veren ol</Link>
+        </>}
+        <Link className={styles.drawerCta} href={actionPlus ? "/talep-olustur" : action.href} onClick={() => setDrawerOpen(false)}>
+          {actionPlus ? "＋ Ücretsiz talep oluştur" : action.label}
+        </Link>
+      </div>
+    </nav>
   </>;
 }

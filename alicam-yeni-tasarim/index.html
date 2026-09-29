@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>alıcam.net — Ne istiyorsan yaz, teklifler sana gelsin</title>
+<meta name="description" content="Usta, kiralık daire, ikinci el araç ya da telefon… İhtiyacını ücretsiz yaz; ustalar, emlakçılar, galeriler ve satıcılar sana teklif versin.">
+<link rel="icon" href="https://alicam.net/favicon.ico?favicon.2vob68tjqpejf.ico" sizes="256x256" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=Plus+Jakarta+Sans:wght@600..800&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="anasayfa.css">
+</head>
+<body data-page="anasayfa">
+<a class="skip" href="#icerik">İçeriğe geç</a>
+<header data-site-header></header>
+
+<main id="icerik">
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="wrap hero-in">
+    <div class="hero-copy">
+      <span class="hero-badge"><b>0 ₺</b> Talep oluşturmak her zaman ücretsiz</span>
+      <h1>Ne istiyorsan yaz,<br><span class="hl">teklifler sana gelsin.</span></h1>
+      <p class="hero-lead">Usta, kiralık daire, ikinci el araç ya da yeni bir telefon… İhtiyacını bir kez anlat; <strong>ustalar, emlakçılar, galeriler ve satıcılar</strong> sana teklif versin. Sen sadece karşılaştır ve seç.</p>
+
+      <!-- Arama kartı -->
+      <div class="finder" id="finder">
+        <div class="finder-tabs" role="tablist" aria-label="Ne arıyorsun?" id="finderTabs"></div>
+        <form class="finder-body" id="finderForm" autocomplete="off">
+          <div class="finder-fields" id="finderFields"></div>
+          <button class="btn btn-cta btn-lg finder-go" type="submit"><span>Teklif al</span> →</button>
+        </form>
+      </div>
+
+      <div class="hero-popular" id="heroPopular"></div>
+    </div>
+
+    <div class="hero-visual" aria-label="Örnek talepler ve gelen teklifler">
+      <div class="hv-card hv-main" id="hvMain"></div>
+      <div class="hv-stack" id="hvStack"></div>
+      <div class="hv-toast" id="hvToast" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <ul class="trust-row">
+      <li><i>🔒</i><span><strong>Numaran gizli</strong>Sen izin vermeden kimse göremez</span></li>
+      <li><i>✅</i><span><strong>Onaylı teklif verenler</strong>Her hesap tek tek incelenir</span></li>
+      <li><i>📍</i><span><strong>Sadece bölgendekiler</strong>Talebin yakınındakilere düşer</span></li>
+      <li><i>⚖️</i><span><strong>Tek ekranda karşılaştır</strong>Fiyat, puan, yorum yan yana</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= DİKEYLER ================= -->
+<section class="section section-tight" aria-labelledby="verticals-title">
+  <div class="wrap">
+    <div class="sec-head row">
+      <div><span class="eyebrow">Her şey için</span><h2 id="verticals-title">Sadece hizmet değil. Ne istersen iste.</h2></div>
+      <a class="link-arrow" href="#kategoriler">Tüm kategoriler →</a>
+    </div>
+    <div class="verticals" id="verticals"></div>
+  </div>
+</section>
+
+<!-- ================= SON TALEPLER ================= -->
+<section class="section section-white" id="son-talepler" aria-labelledby="feed-title">
+  <div class="wrap">
+    <div class="sec-head row">
+      <div>
+        <span class="eyebrow"><i class="live-dot"></i> Şu an açık</span>
+        <h2 id="feed-title">İnsanlar şu an bunları istiyor.</h2>
+        <p>Talepler anonim görünür; iletişim bilgisi hiçbir zaman burada yer almaz.</p>
+      </div>
+      <div class="feed-filter chips" id="feedFilter" role="toolbar" aria-label="Talep türü"></div>
+    </div>
+    <div class="feed" id="feed"></div>
+    <div class="feed-more"><a class="btn btn-line" href="giris.html?kayit=veren">Tüm açık talepleri gör ve teklif ver →</a></div>
+  </div>
+</section>
+
+<!-- ================= NASIL ÇALIŞIR ================= -->
+<section class="section" id="nasil-calisir" aria-labelledby="how-title">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow">Süreç</span>
+      <h2 id="how-title"><span class="brand-inline">alıcam<b>.net</b></span> nasıl çalışır?</h2>
+      <p><strong>İki taraf için de basit.</strong> Talep eden ücretsiz ister, teklif veren sadece ilgilendiği iş için öder.</p>
+    </div>
+    <div class="how">
+      <article class="how-col">
+        <header><span class="how-tag tag-blue">Talep ediyorum</span><h3>İstediğini yaz, gelen teklifleri seç.</h3></header>
+        <ol class="how-steps">
+          <li><b>1</b><div><strong>Ne istediğini seç</strong><p>Hizmet, daire, araç, ürün… Birkaç kısa soruyu yanıtla. 2 dakika sürer.</p></div></li>
+          <li><b>2</b><div><strong>Bütçeni ve konumunu yaz</strong><p>Talebin, bölgendeki uygun ustalara, emlakçılara, galerilere ve satıcılara ulaşır.</p></div></li>
+          <li><b>3</b><div><strong>Teklifleri karşılaştır</strong><p>Fiyat, puan ve yorumları yan yana gör. Beğendiğini kabul et; hiçbir teklif seni bağlamaz.</p></div></li>
+        </ol>
+        <a class="btn btn-cta" href="talep-olustur.html">＋ Ücretsiz talep oluştur</a>
+      </article>
+      <article class="how-col how-col-dark">
+        <header><span class="how-tag tag-orange">Teklif veriyorum</span><h3>Müşteri arama, müşteri seni bulsun.</h3></header>
+        <ol class="how-steps">
+          <li><b>1</b><div><strong>Ücretsiz profil oluştur</strong><p>Usta, emlakçı, galeri ya da mağaza; ne sattığını ve nerede çalıştığını seç.</p></div></li>
+          <li><b>2</b><div><strong>Uygun talepleri gör</strong><p>Yalnızca kategorine ve bölgene uyan talepler önüne düşer. Özetler ücretsiz.</p></div></li>
+          <li><b>3</b><div><strong>Detayı aç, teklif ver</strong><p>İlgilendiğin talebin detayını kontörle aç. Teklif göndermek ek ücret istemez.</p></div></li>
+        </ol>
+        <a class="btn btn-white" href="giris.html?kayit=veren">Teklif veren ol →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= KATEGORİLER ================= -->
+<section class="section section-white" id="kategoriler" aria-labelledby="cat-title">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Kategoriler</span>
+      <h2 id="cat-title"><span class="brand-inline">alıcam<b>.net</b></span>'te aradığın her şey için bir başlık var.</h2>
+    </div>
+    <div class="cat-tabs" id="catTabs" role="tablist" aria-label="Kategori türü"></div>
+    <div class="cat-panel" id="catPanel" role="tabpanel"></div>
+  </div>
+</section>
+
+<!-- ================= GÜVEN ================= -->
+<section class="section" id="guven" aria-labelledby="trust-title">
+  <div class="wrap">
+    <div class="sec-head row">
+      <div>
+        <span class="eyebrow">Farkımız</span>
+        <h2 id="trust-title">Neden <span class="brand-inline">alıcam<b>.net</b></span>'i tercih etmeliyim, <em class="h-accent">farkınız nedir?</em></h2>
+        <p><strong>Aramak, sormak, beklemek yok.</strong> İlan ilan gezip herkese aynı şeyi anlatmak yerine bir kez yaz. Uygun olanlar sana gelsin, sen de en iyisini seç.</p>
+      </div>
+      <dl class="stats-pill">
+        <div><dt>177+</dt><dd>hizmet başlığı</dd></div>
+        <div><dt>7</dt><dd>ana kategori</dd></div>
+        <div><dt>81</dt><dd>ilde talep</dd></div>
+      </dl>
+    </div>
+
+    <div class="bento" id="bento">
+      <!-- A: Eski yol → alıcam.net yolu -->
+      <article class="bx bx-compare">
+        <span class="bx-tag">Farkı gör</span>
+        <h3>Eskiden saatler sürerdi.<br><em>Şimdi 2 dakika.</em></h3>
+        <p class="cmp-lead">Tek bir talep yaz; ustalar, emlakçılar, galeriler ve satıcılar sana gelsin. Aramak, beklemek, herkese aynı şeyi anlatmak yok.</p>
+        <div class="road">
+          <div class="road-col road-old">
+            <small>Eski yol</small>
+            <ol>
+              <li><i>🔎</i>İlan ilan gez</li>
+              <li><i>📞</i>Herkesi tek tek ara</li>
+              <li><i>🔁</i>Aynı şeyi baştan anlat</li>
+              <li><i>⏳</i>Fiyat için dönüş bekle</li>
+            </ol>
+          </div>
+          <div class="road-arrow" aria-hidden="true"><span>→</span></div>
+          <div class="road-col road-new">
+            <small>alıcam.net ile</small>
+            <ol>
+              <li><i>✍️</i>Bir kez yaz</li>
+              <li><i>📨</i>Teklifler sana gelsin</li>
+              <li><i>⚖️</i>Yan yana karşılaştır</li>
+              <li><i>🤝</i>En iyisini seç</li>
+            </ol>
+          </div>
+        </div>
+      </article>
+
+      <!-- B: 0 ₺ -->
+      <article class="bx bx-free">
+        <span class="bx-tag tag-green">Talep eden için</span>
+        <div class="big-zero"><b>0</b><span>₺</span></div>
+        <ul class="ticks">
+          <li>Talep oluşturmak</li>
+          <li>Teklif almak</li>
+          <li>Karşılaştırmak</li>
+        </ul>
+      </article>
+
+      <!-- C: Gizlilik -->
+      <article class="bx bx-privacy">
+        <span class="bx-tag">Bilgilerin korunur</span>
+        <h3>Numaran sende kalır.</h3>
+        <div class="peek">
+          <div class="peek-row see"><small>Teklif verenler görür</small><span>🏠 3+1 kiralık · Kadıköy · 35–42 bin ₺</span></div>
+          <div class="peek-row hide"><small>Gizli kalır</small><span><b class="mask">A•••• Y••••</b><b class="mask">05•• ••• •• ••</b><i>🔒</i></span></div>
+        </div>
+      </article>
+
+      <!-- D: Bölge radarı -->
+      <article class="bx bx-radar">
+        <div class="radar" aria-hidden="true">
+          <i class="ring r1"></i><i class="ring r2"></i><i class="ring r3"></i>
+          <i class="sweep"></i>
+          <b class="you">📍</b>
+          <b class="pin p1">🛠️</b><b class="pin p2">🏠</b><b class="pin p3">🚗</b><b class="pin p4">🛍️</b>
+        </div>
+        <div>
+          <span class="bx-tag">Sadece bölgendekiler</span>
+          <h3>Talebin yakınındakilere düşer.</h3>
+          <p>İlçene hizmet veren ustalar, emlakçılar ve satıcılar görür; uzaktan boşuna teklif gelmez.</p>
+        </div>
+      </article>
+
+      <!-- E: Onay + puan -->
+      <article class="bx bx-trust">
+        <span class="bx-tag tag-orange">Onaylı ve puanlı</span>
+        <div class="vcard-mini">
+          <span class="vm-av">IT<b>✓</b></span>
+          <div><strong>Isı Teknik Servis</strong><small>Örnek profil · Kadıköy</small></div>
+        </div>
+        <ul class="checks">
+          <li>Profil incelendi</li><li>Hizmet bölgesi doğrulandı</li><li>Kategori onaylandı</li>
+        </ul>
+        <div class="stars" aria-label="5 üzerinden 4,9 puan"><span class="stars-fill"></span><b>4,9</b><small>gerçek işlerden</small></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TEKLİF VERENLER ================= -->
+<section class="pro" id="teklif-ver" aria-labelledby="pro-title">
+  <div class="wrap pro-in">
+    <div class="pro-copy">
+      <span class="eyebrow eyebrow-light">Teklif verenler için</span>
+      <h2 id="pro-title">Hazır müşteri seni bekliyor.</h2>
+      <p>Bölgendeki gerçek taleplere ulaş. Reklama para dökmeden, sadece ilgilendiğin talep için öde.</p>
+      <div class="pro-who" id="proWho" role="tablist" aria-label="Kimsin?">
+        <button type="button" role="tab" aria-selected="true" data-who="usta">🛠️ Usta / Firma</button>
+        <button type="button" role="tab" aria-selected="false" data-who="emlak">🏠 Emlakçı</button>
+        <button type="button" role="tab" aria-selected="false" data-who="galeri">🚗 Galeri</button>
+        <button type="button" role="tab" aria-selected="false" data-who="magaza">🛍️ Mağaza</button>
+      </div>
+      <p class="pro-example" id="proExample"></p>
+      <div class="pro-actions">
+        <a class="btn btn-cta btn-lg" href="giris.html?kayit=veren">Ücretsiz teklif veren ol →</a>
+        <a class="btn btn-ghost-light btn-lg" href="#sss">Kontör nasıl işler?</a>
+      </div>
+    </div>
+    <div class="kontor">
+      <div class="kontor-head"><strong>Ne zaman ödersin?</strong><span>Sadece ilgilendiğinde.</span></div>
+      <div class="k-row"><i>1</i><div><strong>Talep özetini gör</strong><small>Kategori, ilçe, bütçe ve kısa açıklama</small></div><b class="k-free">Ücretsiz</b></div>
+      <div class="k-row"><i>2</i><div><strong>Detayı aç</strong><small>Maliyet, açmadan önce gösterilir</small></div><b class="k-cost">Kontör</b></div>
+      <div class="k-row"><i>3</i><div><strong>Teklif gönder, güncelle</strong><small>Aynı talebi tekrar açmak da ücretsiz</small></div><b class="k-free">Ücretsiz</b></div>
+      <div class="k-row"><i>★</i><div><strong>Öne çık (isteğe bağlı)</strong><small>7, 14 veya 30 gün vitrinde yer al</small></div><b class="k-cost">Kontör</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SSS ================= -->
+<section class="section section-white" id="sss" aria-labelledby="faq-title">
+  <div class="wrap faq-wrap">
+    <div class="faq-side">
+      <div class="sec-head">
+        <span class="eyebrow">Sık sorulanlar</span>
+        <h2 id="faq-title">Aklına takılanlar.</h2>
+      </div>
+
+      <label class="faq-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="faqQ" type="search" placeholder="Sorunu yaz… örn. ücret, numara, kontör" aria-label="Sık sorulanlarda ara" autocomplete="off">
+        <kbd id="faqCount">8 soru</kbd>
+      </label>
+
+      <div class="faq-topics" role="group" aria-label="Konular">
+        <button type="button" data-topic="ucret"><i>💸</i><span><strong>Ücretler</strong><small>Ne ödersin, ne ödemezsin</small></span></button>
+        <button type="button" data-topic="gizlilik"><i>🔒</i><span><strong>Gizlilik</strong><small>Numaran kime görünür</small></span></button>
+        <button type="button" data-topic="kategori"><i>🏠</i><span><strong>Emlak ve araç</strong><small>Hizmet dışı talepler</small></span></button>
+        <button type="button" data-topic="veren"><i>💼</i><span><strong>Teklif verenler</strong><small>Kontör ve onay süreci</small></span></button>
+      </div>
+
+      <div class="faq-help">
+        <div class="chat" aria-hidden="true">
+          <div class="bubble me">Sorumun cevabını bulamadım 🤔</div>
+          <div class="bubble them"><span class="av-mini">a</span>Hemen yardımcı olalım! Bize yazman yeterli.</div>
+          <div class="bubble them typing"><span class="av-mini">a</span><i></i><i></i><i></i></div>
+        </div>
+        <strong>Hâlâ aklında soru mu var?</strong>
+        <p>Destek ekibimiz talep oluşturma, teklif verme ve hesap konularında yardımcı olur.</p>
+        <div class="faq-help-actions">
+          <a class="btn btn-white" href="mailto:destek@alicam.net">✉️ Bize yaz</a>
+          <a class="btn btn-ghost-light" href="talep-olustur.html">＋ Talep oluştur</a>
+        </div>
+      </div>
+    </div>
+    <div class="faq">
+      <details name="sss" open data-topic="kategori"><summary>alıcam.net nedir, ilan sitelerinden farkı ne?</summary><p>İlan sitelerinde sen satıcıları ararsın. alıcam.net'te ise sen ne istediğini yazarsın, satıcılar seni bulur. Bir usta, kiralık bir daire, ikinci el bir araç ya da yeni bir telefon; ihtiyacını bir kez yazman yeterli.</p></details>
+      <details name="sss" data-topic="ucret"><summary>Talep oluşturmak gerçekten ücretsiz mi?</summary><p>Evet. Talep oluşturmak, teklif almak ve teklifleri karşılaştırmak tamamen ücretsizdir. Ücreti yalnızca teklif verenler, ilgilendikleri talebin detayını açarken kontör olarak öder.</p></details>
+      <details name="sss" data-topic="gizlilik"><summary>Telefon numaram ve adresim kimlere görünür?</summary><p>Hiç kimseye otomatik olarak görünmez. Talep özetinde yalnızca kategori, ilçe, bütçe ve kısa açıklama yer alır. İletişim bilgilerin yalnızca talebini açan onaylı teklif verenle, platform kurallarına göre paylaşılır.</p></details>
+      <details name="sss" data-topic="kategori"><summary>Daire, araç veya ürün için de talep açabilir miyim?</summary><p>Evet. Hizmetin yanında kiralık/satılık emlak, vasıta, elektronik, beyaz eşya, mobilya, iş makinesi, eleman ve evcil hayvan için de talep oluşturabilirsin. Her kategori için sana özel birkaç kısa soru sorarız.</p></details>
+      <details name="sss" data-topic="ucret"><summary>Bir teklifi kabul etmek zorunda mıyım?</summary><p>Hayır. Teklifler seni hiçbir şekilde bağlamaz. Birini kabul edebilir, diğerlerini reddedebilir ya da hiçbirini seçmeyebilirsin.</p></details>
+      <details name="sss" data-topic="veren ucret"><summary>Teklif veren olarak kontör nasıl çalışır?</summary><p>Talep özetlerini ücretsiz görürsün. İlgilendiğin talebin detayını açarken kategoriye göre belirlenen kontör düşer; maliyet işlemden önce gösterilir. Teklif göndermek, güncellemek ve aynı talebi tekrar görmek ek ücret gerektirmez.</p></details>
+      <details name="sss" data-topic="veren"><summary>Teklif veren olmak için ne gerekiyor?</summary><p>Ücretsiz üye olup firma ya da kişisel profilini, hizmet verdiğin veya sattığın kategorileri ve çalıştığın il/ilçeleri eklemen yeterli. Başvurun incelenip onaylandıktan sonra bölgendeki talepleri görmeye başlarsın.</p></details>
+      <details name="sss" data-topic="gizlilik"><summary>Talebimi sonradan düzenleyebilir veya kapatabilir miyim?</summary><p>Evet. Hesabından talebinin açıklamasını, bütçesini ve tarihini güncelleyebilir; ihtiyacın kalmadığında talebi kapatabilirsin. Kapatılan talep yeni teklif almaz.</p></details>
+      <p class="faq-empty" id="faqEmpty" hidden>Bu konuda hazır bir cevap bulamadık. <a href="mailto:destek@alicam.net">destek@alicam.net</a> adresine yaz, hemen yardımcı olalım.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SON ÇAĞRI ================= -->
+<section class="final">
+  <div class="wrap">
+    <div class="final-in">
+      <div class="final-copy">
+        <span class="final-kicker"><i class="live-dot"></i> Hazır mısın?</span>
+        <h2>Aradığını bulmak için <em>beklemeyi bırak.</em></h2>
+        <p>Şimdi yaz, teklifler bugün gelmeye başlasın.</p>
+      </div>
+      <div class="final-side">
+        <div class="final-actions">
+          <a class="btn btn-cta btn-lg" href="talep-olustur.html">＋ Ücretsiz talep oluştur</a>
+          <a class="btn btn-ghost-light btn-lg" href="giris.html?kayit=veren">Teklif veren ol</a>
+        </div>
+        <div class="final-who">
+          <span class="stack" aria-hidden="true"><i style="--c:#1B5CFF">🛠️</i><i style="--c:#0E9F5A">🏠</i><i style="--c:#F2600C">🚗</i><i style="--c:#7A5AF8">🛍️</i></span>
+          <small>Ustalar, emlakçılar, galeriler ve satıcılar talebini bekliyor.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer data-site-footer></footer>
+<a class="mobile-cta" id="mobileCta" href="talep-olustur.html">＋ Ücretsiz talep oluştur</a>
+
+<script src="site.js"></script>
+<script src="anasayfa.js"></script>
+</body>
+</html>

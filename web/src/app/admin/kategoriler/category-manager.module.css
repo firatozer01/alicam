@@ -1,7 +1,7 @@
 .page {
-  --violet: #7c3aed;
-  --indigo: #4f46e5;
-  --cyan: #06b6d4;
+  --violet: var(--blue);
+  --indigo: var(--blue-700);
+  --cyan: var(--teal);
   --ink: #15162d;
   --muted: #6b7280;
   --line: #e7e5f5;
@@ -338,7 +338,7 @@
 .tableWrap td small { display: block; }
 .tableWrap td strong { font-size: 9px; }
 .tableWrap td small { max-width: 210px; margin-top: 4px; overflow: hidden; color: #9a97a8; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
-.type { display: inline-flex; padding: 4px 7px; border-radius: 6px; color: #4f46e5; background: #efedff; font: 600 7px var(--font-plex); }
+.type { display: inline-flex; padding: 4px 7px; border-radius: 6px; color: var(--blue-700); background: #efedff; font: 600 7px var(--font-plex); }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; }
 .tags b,
 .tags em { padding: 3px 6px; border-radius: 10px; color: #6b21a8; background: #f3ecfe; font-size: 6px; font-style: normal; }

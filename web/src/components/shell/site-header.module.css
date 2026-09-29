@@ -1,46 +1,205 @@
-/* Tum sayfalarin ortak ust cubugu. Yukseklik, marka, baglanti tipografisi ve
-   sag aksiyon blogu her sayfada birebir ayni kalir. */
+/* Tum sayfalarin ortak ust cubugu. Yeni tasarimin olculeri: 72px yukseklik,
+   aydinlik yuzey, mavi/lacivert marka ve tek turuncu eylem dugmesi.
+   Yukseklik, marka, baglanti tipografisi ve sag aksiyon blogu her sayfada
+   birebir ayni kalir. */
 
-.announce{background:linear-gradient(90deg,var(--violet),var(--indigo) 45%,var(--cyan));color:#fff;text-align:center;padding:8px 16px;font-size:12.5px;font-weight:650;letter-spacing:.01em}
-
-.bar{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid #e7e5f5}
-.inner{width:min(1320px,calc(100% - 40px));margin:0 auto;height:66px;display:flex;align-items:center;gap:18px}
-
-.brand{display:inline-flex;align-items:center;flex:none;font-family:var(--font-fraunces),Georgia,serif;font-size:22px;font-weight:800;color:#15162d;text-decoration:none;letter-spacing:-.01em}
-.brand span{color:var(--violet)}
-.brandMark{width:26px;height:26px;flex:none;margin-right:8px}
-
-.nav{flex:1;min-width:0;display:flex;align-items:center}
-/* Mega menu cubugunun dogrudan cocugu olan duz baglantilar. */
-.nav>div>a{padding:9px 13px;border-radius:10px;font-size:14.5px;font-weight:650;color:#15162d;text-decoration:none;white-space:nowrap;transition:color .18s ease,background .18s ease}
-.nav>div>a:hover{background:var(--violet-100);color:var(--indigo)}
-
-.actions{flex:none;display:flex;align-items:center;gap:9px}
-
-.credit{display:inline-flex;align-items:center;gap:5px;background:#f1eeff;border:1px solid #ddd6fe;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;color:var(--indigo);text-decoration:none;white-space:nowrap;transition:background .16s ease,transform .16s ease}
-.credit:hover{background:#e7e0ff;transform:translateY(-1px)}
-
-.bell{position:relative;width:38px;height:38px;display:grid;place-items:center;border:1px solid #e7e5f5;border-radius:11px;background:#fff;font-size:15px;cursor:pointer;transition:border-color .16s ease,transform .16s ease}
-.bell:hover{border-color:var(--violet);transform:translateY(-1px)}
-.bell i{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--pink);border:2px solid #fff}
-
-.skeleton{width:120px;height:38px;border-radius:11px;background:linear-gradient(100deg,var(--violet-100) 30%,#e7e5f5 50%,var(--violet-100) 70%);background-size:220% 100%;animation:shine 1.3s linear infinite}
-@keyframes shine{to{background-position:-220% 0}}
-@media(prefers-reduced-motion:reduce){.skeleton{animation:none}}
-
-.line{display:inline-flex;align-items:center;border:1px solid #e7e5f5;border-radius:11px;padding:9px 16px;font-size:13.5px;font-weight:700;color:#15162d;text-decoration:none;background:#fff;white-space:nowrap;transition:border-color .16s ease,color .16s ease,transform .16s ease}
-.line:hover{border-color:var(--violet);color:var(--indigo);transform:translateY(-1px)}
-
-.fav{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--amber);font-size:16px;text-decoration:none;transition:border-color .16s ease,transform .16s ease}
-.fav:hover{border-color:var(--violet);transform:translateY(-1px)}
-.cta{display:inline-flex;align-items:center;border-radius:11px;padding:10px 17px;font-size:13.5px;font-weight:700;color:#fff;text-decoration:none;white-space:nowrap;background:linear-gradient(135deg,var(--violet),var(--indigo));box-shadow:0 10px 24px rgba(124,58,237,.26);transition:filter .16s ease,transform .16s ease}
-.cta:hover{filter:brightness(1.07);transform:translateY(-1px)}
-
-@media(max-width:1080px){
-  .nav>div>a{display:none}
+.announce {
+  background: linear-gradient(90deg, var(--blue), var(--blue-700) 55%, var(--navy));
+  color: #fff; text-align: center; padding: 8px 16px;
+  font-size: 13px; font-weight: 650; letter-spacing: .01em;
 }
-@media(max-width:820px){
-  .inner{width:calc(100% - 24px);gap:10px}
-  .credit,.bell{display:none}
-  .cta{padding:9px 13px;font-size:12.5px}
+
+.bar { position: sticky; top: 0; z-index: 80; }
+.bar::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: rgb(255 255 255 / .9);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.inner {
+  width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter);
+  height: var(--header-h); display: flex; align-items: center; gap: clamp(16px, 2.4vw, 40px);
+}
+.barMinimal .inner { justify-content: space-between; }
+
+/* ---------- Marka ---------- */
+.brand {
+  display: inline-flex; align-items: center; gap: 9px; flex: none;
+  font-family: var(--f-head); font-size: 23px; font-weight: 800; line-height: 1;
+  letter-spacing: -.035em; color: var(--navy); text-decoration: none;
+}
+.brand span { color: var(--blue); }
+.brand svg { width: 30px; height: 30px; flex: none; }
+
+/* ---------- Masaustu menusu ---------- */
+.nav { flex: 1; min-width: 0; display: flex; align-items: center; margin-right: auto; }
+/* Mega menu cubugunun dogrudan cocugu olan duz baglantilar. */
+.nav > div > a {
+  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+  padding: 9px 12px; border-radius: 10px;
+  font-size: 15px; font-weight: 550; color: var(--ink-2); text-decoration: none;
+  transition: background .15s ease, color .15s ease;
+}
+.nav > div > a:hover, .nav > div > a[aria-current="page"] { background: var(--blue-50); color: var(--blue-700); }
+.navIcon { font-style: normal; font-size: 17px; }
+
+/* Mega menu tetikleyicisi kendi modulunde .trigger.trigger ile yaziliyor;
+   yeni palete cekmek icin ozgullugu bir basamak asan tek blok. */
+.bar .nav > div > button { font-size: 15px; font-weight: 550; color: var(--ink-2); }
+.bar .nav > div > button:hover { background: var(--blue-50); color: var(--blue-700); }
+.bar .nav > div > button::after { background: linear-gradient(90deg, var(--blue), var(--blue-700)); }
+
+/* ---------- Sag blok ---------- */
+.actions { flex: none; display: flex; align-items: center; gap: 10px; }
+
+.credit {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--blue-50); border: 1px solid var(--blue-100); border-radius: 999px;
+  padding: 7px 13px; font-size: 13.5px; font-weight: 700; color: var(--blue-700);
+  text-decoration: none; white-space: nowrap;
+  transition: background .16s ease, transform .16s ease;
+}
+.credit:hover { background: var(--blue-100); transform: translateY(-1px); }
+
+.fav {
+  width: 40px; height: 40px; display: grid; place-items: center;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--card);
+  color: var(--amber); font-size: 16px; text-decoration: none;
+  transition: border-color .16s ease, transform .16s ease;
+}
+.fav:hover { border-color: var(--blue); transform: translateY(-1px); }
+
+.skeleton {
+  width: 120px; height: 40px; border-radius: 10px;
+  background: linear-gradient(100deg, var(--blue-50) 30%, var(--blue-100) 50%, var(--blue-50) 70%);
+  background-size: 220% 100%; animation: shine 1.3s linear infinite;
+}
+@keyframes shine { to { background-position: -220% 0; } }
+
+/* Oturumsuz hal: "Giris yap" duz metin baglantisi, tek dugme turuncu kalsin. */
+.line {
+  display: inline-flex; align-items: center; padding: 9px 10px; border-radius: 10px;
+  font-size: 15px; font-weight: 600; color: var(--ink); text-decoration: none; white-space: nowrap;
+  transition: color .16s ease, background .16s ease;
+}
+.line:hover { color: var(--blue); background: var(--blue-50); }
+
+.ghost {
+  display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 10px;
+  background: var(--card); color: var(--ink); text-decoration: none; white-space: nowrap;
+  font-size: 14.5px; font-weight: 650; box-shadow: inset 0 0 0 1.5px var(--line);
+  transition: box-shadow .2s ease, transform .15s ease;
+}
+.ghost:hover { box-shadow: inset 0 0 0 1.5px var(--ink-3); transform: translateY(-1px); }
+
+.cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 40px; padding: 0 16px; border-radius: 10px;
+  font-size: 14.5px; font-weight: 650; color: #fff; text-decoration: none; white-space: nowrap;
+  background: var(--orange); box-shadow: 0 8px 20px -8px rgb(242 96 12 / .7);
+  transition: background .2s ease, transform .15s ease;
+}
+.cta:hover { background: var(--orange-600); transform: translateY(-1px); }
+.cta:active { transform: none; }
+
+/* ---------- Hamburger ---------- */
+.burger {
+  display: none; position: relative; width: 44px; height: 44px; flex: none;
+  border: 0; border-radius: 12px; background: var(--blue-50); cursor: pointer;
+}
+.burger span {
+  position: absolute; left: 12px; right: 12px; height: 2px; border-radius: 2px;
+  background: var(--navy); transition: transform .25s ease, opacity .2s ease;
+}
+.burger span:nth-child(1) { top: 15px; }
+.burger span:nth-child(2) { top: 21px; }
+.burger span:nth-child(3) { top: 27px; }
+.burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* ---------- Cekmece ---------- */
+.scrim {
+  display: none; position: fixed; inset: 0; z-index: 79;
+  border: 0; padding: 0; background: rgb(10 20 51 / .4); cursor: pointer;
+}
+
+.drawer {
+  display: none; position: fixed; top: 0; right: 0; bottom: 0; z-index: 90;
+  width: min(360px, 88vw); flex-direction: column; align-items: stretch; gap: 2px;
+  padding: 88px 18px 22px; overflow-y: auto;
+  background: var(--card); box-shadow: -24px 0 60px rgb(10 20 51 / .22);
+  transform: translateX(105%); visibility: hidden;
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1), visibility .3s;
+}
+.drawer.drawerOpen { transform: none; visibility: visible; }
+
+.drawerLink {
+  display: flex; align-items: center; gap: 10px; padding: 13px 12px; border-radius: 10px;
+  font-size: 16px; font-weight: 600; color: var(--ink-2); text-decoration: none;
+  transition: background .15s ease, color .15s ease;
+}
+.drawerLink:hover { background: var(--blue-50); color: var(--blue-700); }
+
+.drawerGroup { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line-2); }
+.drawerGroup h3 {
+  margin: 0 0 4px; padding: 0 12px;
+  font-family: var(--f-head); font-size: 12px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+}
+
+.drawerFoot { display: grid; gap: 10px; margin-top: auto; padding-top: 20px; }
+.drawerSoft, .drawerLine, .drawerCta {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 48px; padding: 0 20px; border-radius: 12px;
+  font-size: 15.5px; font-weight: 650; text-decoration: none; white-space: nowrap;
+  transition: background .2s ease, box-shadow .2s ease;
+}
+.drawerSoft { background: var(--blue-50); color: var(--blue-700); }
+.drawerSoft:hover { background: var(--blue-100); }
+.drawerLine { background: var(--card); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.drawerLine:hover { box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.drawerCta { background: var(--orange); color: #fff; box-shadow: 0 8px 20px -8px rgb(242 96 12 / .7); }
+.drawerCta:hover { background: var(--orange-600); }
+
+/* ==========================================================
+   Daralma
+   ========================================================== */
+@media (max-width: 1260px) {
+  .nav { display: none; }
+  .line { display: none; }
+  .burger { display: block; }
+  .scrim { display: block; }
+  .drawer { display: flex; }
+  .inner { justify-content: space-between; }
+}
+
+@media (max-width: 820px) {
+  .credit { display: none; }
+}
+
+@media (max-width: 600px) {
+  .brand { font-size: 21px; }
+  .cta { height: 38px; padding: 0 12px; font-size: 13.5px; }
+}
+
+@media (max-width: 400px) {
+  .inner { gap: 10px; }
+  .brand { font-size: 19px; gap: 7px; }
+  .brand svg { width: 26px; height: 26px; }
+  .actions { gap: 8px; }
+  .cta { padding: 0 11px; font-size: 13px; }
+  .fav { display: none; }
+  .burger { width: 40px; height: 40px; }
+  .burger span { left: 11px; right: 11px; }
+  .burger span:nth-child(1) { top: 13px; }
+  .burger span:nth-child(2) { top: 19px; }
+  .burger span:nth-child(3) { top: 25px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+  .drawer { transition: none; }
+  .cta:hover, .credit:hover, .fav:hover, .ghost:hover { transform: none; }
 }

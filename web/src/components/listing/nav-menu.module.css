@@ -5,13 +5,13 @@
 .bar{position:relative;display:flex;align-items:center;gap:4px}
 
 .trigger.trigger{position:relative;display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:9px 13px;border-radius:10px;font:inherit;font-size:14.5px;font-weight:650;color:#15162d;cursor:pointer;transition:color .18s ease,background .18s ease}
-.trigger.trigger::after{content:"";position:absolute;left:13px;right:13px;bottom:2px;height:2px;border-radius:2px;background:linear-gradient(90deg,#7c3aed,#06b6d4);transform:scaleX(0);transform-origin:left;transition:transform .24s cubic-bezier(.2,.8,.2,1)}
-.trigger.trigger:hover{color:#4f46e5}
+.trigger.trigger::after{content:"";position:absolute;left:13px;right:13px;bottom:2px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--teal));transform:scaleX(0);transform-origin:left;transition:transform .24s cubic-bezier(.2,.8,.2,1)}
+.trigger.trigger:hover{color:var(--blue-700)}
 .trigger.trigger:hover::after,.trigger.triggerOpen::after{transform:scaleX(1)}
-.trigger.triggerActive{color:#4f46e5}
-.trigger.triggerOpen{background:#f4f1ff;color:#4f46e5}
+.trigger.triggerActive{color:var(--blue-700)}
+.trigger.triggerOpen{background:#f4f1ff;color:var(--blue-700)}
 .chevron{font-style:normal;font-size:11px;line-height:1;color:#a8a6c4;transition:transform .26s cubic-bezier(.2,.8,.2,1),color .18s ease}
-.chevron[data-open="true"]{transform:rotate(180deg);color:#4f46e5}
+.chevron[data-open="true"]{transform:rotate(180deg);color:var(--blue-700)}
 
 /* Sarmalayicinin ust dolgusu tetikleyiciye kadar uzanir: olu bosluk kalmaz. */
 .panelWrap{position:absolute;top:100%;left:0;z-index:70;width:min(560px,92vw);padding-top:11px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-8px) scale(.985);transform-origin:top left;transition:opacity .2s ease,transform .26s cubic-bezier(.2,.8,.2,1),visibility .26s}
@@ -22,12 +22,12 @@
 
 /* ---- Panel basligi ---- */
 .panelHead{display:flex;align-items:center;gap:13px;padding:16px 20px;background:linear-gradient(100deg,#f5f1ff,#eef8fb);border-bottom:1px solid #eceafa;animation:headIn .3s ease both}
-.panelIcon{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:12px;font-size:18px;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 8px 20px rgba(124,58,237,.3)}
+.panelIcon{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:12px;font-size:18px;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue-700));box-shadow:0 8px 20px rgba(124,58,237,.3)}
 .panelTitle{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .panelTitle strong{font-family:var(--font-fraunces),Georgia,serif;font-size:18px;font-weight:700;color:#15162d;line-height:1.2}
 .panelTitle small{font-size:12.5px;color:#67677f}
 .panelMeta{display:flex;align-items:center;gap:12px;flex:none}
-.panelMeta a{font-size:12.5px;font-weight:700;color:#4f46e5;text-decoration:none;white-space:nowrap}
+.panelMeta a{font-size:12.5px;font-weight:700;color:var(--blue-700);text-decoration:none;white-space:nowrap}
 .panelMeta a:hover{text-decoration:underline}
 .panelMeta span{font-size:11.5px;color:#8a89a6;white-space:nowrap}
 @keyframes headIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
@@ -41,7 +41,7 @@
 @keyframes colIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
 .columnHead{display:flex;align-items:center;gap:9px;margin-bottom:6px}
-.columnIcon{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:9px;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--tint,#7c3aed),color-mix(in srgb,var(--tint,#7c3aed) 55%,#06b6d4));box-shadow:0 6px 14px color-mix(in srgb,var(--tint,#7c3aed) 32%,transparent)}
+.columnIcon{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:9px;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--tint,var(--blue)),color-mix(in srgb,var(--tint,var(--blue)) 55%,var(--teal)));box-shadow:0 6px 14px color-mix(in srgb,var(--tint,var(--blue)) 32%,transparent)}
 .columnHead strong{font-size:11.5px;font-weight:800;letter-spacing:.09em;color:#15162d;text-transform:uppercase;line-height:1.25}
 .columnDesc{margin:0 0 10px;font-size:12px;line-height:1.55;color:#8a89a6}
 
@@ -64,25 +64,25 @@
 .itemCount{font-family:var(--font-plex),ui-monospace,monospace;font-size:11px;font-weight:700;color:#8a89a6;background:#f6f5fc;border-radius:6px;padding:2px 7px;flex:none}
 .itemActive{background:#f1eeff}
 .itemActive .itemIcon{background:#fff;border-color:#ddd6fe}
-.itemActive .itemText strong{color:#4f46e5}
-.itemActive .itemCount{color:#4f46e5;background:#fff}
+.itemActive .itemText strong{color:var(--blue-700)}
+.itemActive .itemCount{color:var(--blue-700);background:#fff}
 
 /* Rozetler */
-.badge{font-style:normal;flex:none;border-radius:5px;padding:1px 6px;font-size:12px;font-weight:800;letter-spacing:.04em;background:#f1eeff;color:#4f46e5}
+.badge{font-style:normal;flex:none;border-radius:5px;padding:1px 6px;font-size:12px;font-weight:800;letter-spacing:.04em;background:#f1eeff;color:var(--blue-700)}
 .new{background:#e0f7fb;color:#0e7490}
 .hot{background:#fef3c7;color:#b45309}
 .free{background:#dcfce7;color:#15803d}
 
-.columnFooter{margin-top:11px;display:inline-flex;align-items:center;align-self:flex-start;gap:5px;border:1px solid #e7e5f5;border-radius:9px;padding:7px 12px;background:#fff;font:inherit;font-size:12px;font-weight:700;color:#4f46e5;cursor:pointer;text-decoration:none;transition:border-color .16s ease,background .16s ease,transform .16s ease}
-.columnFooter:hover{border-color:#7c3aed;background:#f4f1ff;transform:translateX(2px)}
+.columnFooter{margin-top:11px;display:inline-flex;align-items:center;align-self:flex-start;gap:5px;border:1px solid #e7e5f5;border-radius:9px;padding:7px 12px;background:#fff;font:inherit;font-size:12px;font-weight:700;color:var(--blue-700);cursor:pointer;text-decoration:none;transition:border-color .16s ease,background .16s ease,transform .16s ease}
+.columnFooter:hover{border-color:var(--blue);background:#f4f1ff;transform:translateX(2px)}
 
 /* ---- Alt kisayol seridi ---- */
 .quickBar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid #f0eefb;background:#faf9ff;animation:headIn .3s .1s ease both}
 .quickHint{font-size:12px;color:#8a89a6;flex:1;min-width:180px}
 .quickLinks{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .quickLink{display:inline-flex;align-items:center;gap:6px;border:1px solid #e7e5f5;border-radius:9px;padding:7px 12px;background:#fff;font:inherit;font-size:12.5px;font-weight:700;color:#55566d;cursor:pointer;text-decoration:none;white-space:nowrap;transition:border-color .16s ease,color .16s ease,transform .16s ease}
-.quickLink:hover{border-color:#7c3aed;color:#4f46e5;transform:translateY(-1px)}
-.quickPrimary{border-color:transparent;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5)}
+.quickLink:hover{border-color:var(--blue);color:var(--blue-700);transform:translateY(-1px)}
+.quickPrimary{border-color:transparent;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue-700))}
 .quickPrimary:hover{color:#fff;filter:brightness(1.07)}
 
 @media(max-width:1180px){

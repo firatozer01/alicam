@@ -7,14 +7,14 @@
 @media(max-width:760px){.page{display:block}.sidebar{position:static;width:auto;height:auto;padding:18px}.workspace,.sideHelp,.sidebar>nav,.sideAccount{display:none}.content{width:100%}.topbar{height:auto;padding:12px 16px}.topbar>div:first-child{display:none}.canvas{width:min(100% - 24px,1640px);padding-top:20px}.welcome>div,.welcome>aside{padding:21px}.welcome h1{font-size:28px}.metrics{grid-template-columns:1fr 1fr}.metrics article{padding:13px}.mainGrid{display:block}.sectionHead{align-items:flex-start;flex-direction:column;gap:11px}.requestCard>header{align-items:flex-start;gap:10px}.requestCard>header>b{white-space:nowrap}.requestMeta{flex-direction:column;gap:6px}.progress{display:none}.requestCard>footer{align-items:flex-start;flex-direction:column;gap:9px}.rightRail{grid-template-columns:1fr;margin-top:16px}.offerGrid{grid-template-columns:1fr}}
 
 /* Product design standard: same violet / indigo / cyan system as the prototypes. */
-.page{--navy:var(--ink);--teal:#7c3aed;--teal-dark:#4f46e5;--soft:var(--violet-100);color:var(--ink);background:var(--bg)}.sidebar{border-color:var(--line);color:#4b4a63;background:var(--bg)}.brand{color:var(--ink);font:600 23px var(--font-fraunces);letter-spacing:-.02em}.brand span{color:#a5a3bf;font-weight:400}.workspace{border-color:#ddd7f4;background:linear-gradient(100deg,var(--violet-100),var(--violet-100))}.workspace span{color:#7c3aed}.workspace strong{color:var(--ink)}.sidebar>nav a{color:#4b4a63}.sidebar>nav a i{color:#7c3aed}.sidebar>nav a b{color:#6b7280;background:#efedf9}.sidebar>nav a:hover,.sidebar>nav .active{color:#7c3aed;background:linear-gradient(100deg,var(--violet-100),var(--violet-100))}.sidebar>nav .active{box-shadow:inset 3px 0 #7c3aed}.sideHelp{border-color:#ffffff24;background:linear-gradient(145deg,#241542,#4f46e5)}.sideHelp span{color:#67e8f9}.sideHelp p{color:#d4d0ea}.sideHelp a{color:#fff}.sideAccount{border-color:var(--line)}.sideAccount>span{color:#fff;background:linear-gradient(100deg,#06b6d4,#4f46e5)}.sideAccount strong{color:var(--ink)}.sideAccount small{color:#6b7280}.topbar{border-color:var(--line)}.topbar span{color:#7c3aed}.topbar b{color:#06b6d4}.topbar .newButton{background:linear-gradient(100deg,#7c3aed,#4f46e5)}.welcome>div{border-color:var(--line);background:radial-gradient(circle at 95% 10%,#eadcff,transparent 36%),#fff}.welcome>div>span,.sectionHead>div>span,.rightRail section>span{color:#7c3aed}.welcome h1 em{color:#7c3aed}.welcome>aside{background:linear-gradient(145deg,#241542,#4f46e5);box-shadow:0 15px 35px #4c3cb424}.welcome>aside>span{color:#67e8f9}.welcome>aside p{color:#d4d0ea}.metrics i{color:#7c3aed;background:var(--violet-100)}.sectionHead .selected{background:linear-gradient(100deg,#7c3aed,#4f46e5)}.requestCard>header>b{color:var(--ok-fg);background:var(--ok-bg)}.requestCard>header>b i{background:var(--green)}.progress .done{color:#6b21a8}.progress .done:before{border-color:#7c3aed;background:#7c3aed}.requestCard button{background:linear-gradient(100deg,#7c3aed,#4f46e5)}.offers{border-color:#ddd7f4;background:#faf7fe}.offers>header span{color:#7c3aed}.offer.accepted{border-color:var(--green);box-shadow:inset 3px 0 var(--green)}.offer>header>span{background:linear-gradient(100deg,#7c3aed,#4f46e5)}.offer header small{color:#4f46e5}.acceptedInfo a{color:#7c3aed}.acceptedInfo>button{background:linear-gradient(100deg,#7c3aed,#4f46e5)}.reviewForm>div .starActive,.reviewDone strong{color:#f59e0b}.rightRail a{color:#7c3aed}.rightRail li b{color:#7c3aed;background:var(--violet-100)}.rightRail section>p b{color:#7c3aed}.rightRail .marketLink{border-color:#ffffff24;background:linear-gradient(145deg,#241542,#4f46e5)}.marketLink>span{color:#67e8f9!important}.loading{background:var(--bg)}.loading i{border-color:var(--line);border-top-color:#7c3aed}
+.page{--navy:var(--ink);--teal:var(--blue);--teal-dark:var(--blue-700);--soft:var(--violet-100);color:var(--ink);background:var(--bg)}.sidebar{border-color:var(--line);color:#4b4a63;background:var(--bg)}.brand{color:var(--ink);font:600 23px var(--font-fraunces);letter-spacing:-.02em}.brand span{color:#a5a3bf;font-weight:400}.workspace{border-color:#ddd7f4;background:linear-gradient(100deg,var(--violet-100),var(--violet-100))}.workspace span{color:var(--blue)}.workspace strong{color:var(--ink)}.sidebar>nav a{color:#4b4a63}.sidebar>nav a i{color:var(--blue)}.sidebar>nav a b{color:#6b7280;background:#efedf9}.sidebar>nav a:hover,.sidebar>nav .active{color:var(--blue);background:linear-gradient(100deg,var(--violet-100),var(--violet-100))}.sidebar>nav .active{box-shadow:inset 3px 0 var(--blue)}.sideHelp{border-color:#ffffff24;background:linear-gradient(145deg,#241542,var(--blue-700))}.sideHelp span{color:#67e8f9}.sideHelp p{color:#d4d0ea}.sideHelp a{color:#fff}.sideAccount{border-color:var(--line)}.sideAccount>span{color:#fff;background:linear-gradient(100deg,var(--teal),var(--blue-700))}.sideAccount strong{color:var(--ink)}.sideAccount small{color:#6b7280}.topbar{border-color:var(--line)}.topbar span{color:var(--blue)}.topbar b{color:var(--teal)}.topbar .newButton{background:linear-gradient(100deg,var(--blue),var(--blue-700))}.welcome>div{border-color:var(--line);background:radial-gradient(circle at 95% 10%,#eadcff,transparent 36%),#fff}.welcome>div>span,.sectionHead>div>span,.rightRail section>span{color:var(--blue)}.welcome h1 em{color:var(--blue)}.welcome>aside{background:linear-gradient(145deg,#241542,var(--blue-700));box-shadow:0 15px 35px #4c3cb424}.welcome>aside>span{color:#67e8f9}.welcome>aside p{color:#d4d0ea}.metrics i{color:var(--blue);background:var(--violet-100)}.sectionHead .selected{background:linear-gradient(100deg,var(--blue),var(--blue-700))}.requestCard>header>b{color:var(--ok-fg);background:var(--ok-bg)}.requestCard>header>b i{background:var(--green)}.progress .done{color:#6b21a8}.progress .done:before{border-color:var(--blue);background:var(--blue)}.requestCard button{background:linear-gradient(100deg,var(--blue),var(--blue-700))}.offers{border-color:#ddd7f4;background:#faf7fe}.offers>header span{color:var(--blue)}.offer.accepted{border-color:var(--green);box-shadow:inset 3px 0 var(--green)}.offer>header>span{background:linear-gradient(100deg,var(--blue),var(--blue-700))}.offer header small{color:var(--blue-700)}.acceptedInfo a{color:var(--blue)}.acceptedInfo>button{background:linear-gradient(100deg,var(--blue),var(--blue-700))}.reviewForm>div .starActive,.reviewDone strong{color:#f59e0b}.rightRail a{color:var(--blue)}.rightRail li b{color:var(--blue);background:var(--violet-100)}.rightRail section>p b{color:var(--blue)}.rightRail .marketLink{border-color:#ffffff24;background:linear-gradient(145deg,#241542,var(--blue-700))}.marketLink>span{color:#67e8f9!important}.loading{background:var(--bg)}.loading i{border-color:var(--line);border-top-color:var(--blue)}
 
 /* Talep arama ve kategori satiri */
 .searchRow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px}
 .searchRow label{flex:1;min-width:252px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 12px;color:#a8a6c4;font-size:16.5px}
 .searchRow input{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:15.5px;color:var(--ink);outline:none}
 .searchRow select{border:1px solid var(--line);border-radius:11px;padding:9px 12px;font:inherit;font-size:15.5px;color:var(--ink);background:#fff;cursor:pointer;outline:none}
-.searchRow select:focus,.searchRow label:focus-within{border-color:#7c3aed}
+.searchRow select:focus,.searchRow label:focus-within{border-color:var(--blue)}
 
 /* Teklif karsilastirma modali */
 .compareStats{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px}
@@ -22,7 +22,7 @@
 .compareStats span{font-size:13px;font-weight:800;letter-spacing:.09em;color:#a8a6c4}
 .compareStats strong{font-family:var(--font-plex),ui-monospace,monospace;font-size:19px;font-weight:700;color:var(--ink);line-height:1.15}
 
-.profileLink{display:inline-block;margin:2px 0 8px;font-size:14.5px;font-weight:700;color:#4f46e5;text-decoration:none}
+.profileLink{display:inline-block;margin:2px 0 8px;font-size:14.5px;font-weight:700;color:var(--blue-700);text-decoration:none}
 .profileLink:hover{text-decoration:underline}
 
 .priceRow{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
@@ -36,10 +36,10 @@
 .shellBar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .shellInner{width:min(1688px,calc(100% - 48px));height:72px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px}
 .shellInner .brand{font-family:var(--font-fraunces),Georgia,serif;font-size:24px;font-weight:800;color:var(--ink);text-decoration:none;margin:0}
-.shellInner .brand span{color:#7c3aed}
+.shellInner .brand span{color:var(--blue)}
 .shellNav{display:flex;align-items:center;gap:4px}
 .shellNav a{padding:9px 14px;border-radius:9px;color:var(--ink);font-size:16px;font-weight:650;text-decoration:none}
-.shellNav a:hover{background:#f1effc;color:#4f46e5}
+.shellNav a:hover{background:#f1effc;color:var(--blue-700)}
 .shellActions{display:flex;align-items:center;gap:10px}
 .content{width:min(1688px,calc(100% - 48px));margin:0 auto;padding:22px 0 80px;min-width:0}
 .topbar{display:none}
@@ -56,7 +56,7 @@
 
 /* ---- Talep sahibinin fotografi ---- */
 /* Kart basligindaki kategori karosunun solunda kucuk yuvarlak. */
-.requestCard>header>div>.ownerPhoto{flex:none;width:38px;height:38px;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:#fff;background:linear-gradient(100deg,#7c3aed,#4f46e5);font:700 14px var(--font-plex)}
+.requestCard>header>div>.ownerPhoto{flex:none;width:38px;height:38px;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:#fff;background:linear-gradient(100deg,var(--blue),var(--blue-700));font:700 14px var(--font-plex)}
 .requestCard>header>div>.ownerPhoto img{width:100%;height:100%;display:block;object-fit:cover}
 
 /* ---- Sag raydaki profil fotografi kutusu ---- */
@@ -64,11 +64,11 @@
 .photoRow>div{min-width:0}
 .photoRow strong{display:block;font-size:15px;color:var(--ink)}
 .photoRow small{display:block;margin-top:4px;color:var(--muted-2);font-size:13.5px;line-height:1.55}
-.accountPhoto{flex:none;width:58px;height:58px;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:#fff;background:linear-gradient(100deg,#7c3aed,#4f46e5);font:700 16.5px var(--font-plex)}
+.accountPhoto{flex:none;width:58px;height:58px;display:grid;place-items:center;overflow:hidden;border-radius:50%;color:#fff;background:linear-gradient(100deg,var(--blue),var(--blue-700));font:700 16.5px var(--font-plex)}
 .accountPhoto img{width:100%;height:100%;display:block;object-fit:cover}
 .photoActions{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
 .photoButton{display:inline-flex;align-items:center;padding:9px 14px;border:0;border-radius:var(--r-sm);font:700 14px var(--font-inter);cursor:pointer;transition:background .2s,opacity .2s}
-.photoButton.photoPick{color:#fff;background:linear-gradient(100deg,#7c3aed,#4f46e5)}
+.photoButton.photoPick{color:#fff;background:linear-gradient(100deg,var(--blue),var(--blue-700))}
 .photoButton.photoPick input{display:none}
 .photoButton.photoPick:has(input:disabled){opacity:.6;cursor:progress}
 .photoButton.photoDrop{border:1px solid var(--line);color:var(--muted);background:#fff}
@@ -96,9 +96,9 @@
 /* Urun seridi: teklif tutariyla karismasin diye kendi cercevesi var. */
 .attached{display:block;overflow:hidden;margin:0 0 12px;border:1px solid var(--violet-200);border-radius:var(--r-md);background:var(--violet-50);color:var(--ink);text-decoration:none}
 .attached.attachedLink{transition:border-color .2s,box-shadow .2s}
-.attached.attachedLink:hover{border-color:#7c3aed;box-shadow:var(--shadow-sm)}
-.attachedLabel{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:9px 13px;border-bottom:1px solid var(--violet-200);background:var(--violet-100);color:#7c3aed;font:800 13px var(--font-plex);letter-spacing:.09em}
-.attachedLabel b{color:#4f46e5;font-size:13px;letter-spacing:0}
+.attached.attachedLink:hover{border-color:var(--blue);box-shadow:var(--shadow-sm)}
+.attachedLabel{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:9px 13px;border-bottom:1px solid var(--violet-200);background:var(--violet-100);color:var(--blue);font:800 13px var(--font-plex);letter-spacing:.09em}
+.attachedLabel b{color:var(--blue-700);font-size:13px;letter-spacing:0}
 .attachedBody{display:grid;grid-template-columns:90px minmax(0,1fr);gap:12px;padding:13px}
 .attachedCover{width:90px;height:76px;display:grid;place-items:center;overflow:hidden;border:1px solid var(--line);border-radius:var(--r-sm);background:#fff}
 .attachedCover img{width:100%;height:100%;display:block;object-fit:cover}
@@ -116,7 +116,7 @@
 
 /* Modalda acilan teklif kartinin dugmeleri .requestCard kapsaminda
    olmadigi icin kendi olculerini burada alir. */
-.offer>footer button,.acceptedInfo>button,.reviewForm>button{min-height:40px;padding:10px 15px;border:0;border-radius:var(--r-sm);color:#fff;background:linear-gradient(100deg,#7c3aed,#4f46e5);font:700 14px var(--font-inter);cursor:pointer;transition:opacity .2s}
+.offer>footer button,.acceptedInfo>button,.reviewForm>button{min-height:40px;padding:10px 15px;border:0;border-radius:var(--r-sm);color:#fff;background:linear-gradient(100deg,var(--blue),var(--blue-700));font:700 14px var(--font-inter);cursor:pointer;transition:opacity .2s}
 .offer>footer button:disabled,.acceptedInfo>button:disabled,.reviewForm>button:disabled{opacity:.6;cursor:progress}
 .acceptedInfo a{font-size:14px;line-height:1.5}
 .reviewDone strong{font-size:16px}
@@ -130,7 +130,7 @@
    bilsin diye. Kontoru sunucu hizmet verenden tahsil eder. */
 .offerActions{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:2px 0 6px}
 .offerActions .profileLink{margin:0}
-.messageButton{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:8px 13px;border:1px solid var(--violet-200);border-radius:var(--r-sm);color:#4f46e5;background:var(--violet-50);font:700 13px var(--font-inter);cursor:pointer;transition:background .2s,opacity .2s}
+.messageButton{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:8px 13px;border:1px solid var(--violet-200);border-radius:var(--r-sm);color:var(--blue-700);background:var(--violet-50);font:700 13px var(--font-inter);cursor:pointer;transition:background .2s,opacity .2s}
 .messageButton:hover{background:var(--violet-100)}
 .messageButton:disabled{opacity:.6;cursor:progress}
 .messageHint{display:block;margin:0 0 11px;color:var(--muted-2);font-style:normal;font-size:12.5px;line-height:1.55}

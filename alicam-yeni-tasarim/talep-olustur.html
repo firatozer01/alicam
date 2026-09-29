@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talep oluştur — alıcam.net</title>
+<meta name="description" content="Ne istediğini birkaç adımda anlat; ustalar, emlakçılar, galeriler ve satıcılar sana teklif versin. Ücretsiz.">
+<link rel="icon" href="https://alicam.net/favicon.ico?favicon.2vob68tjqpejf.ico" sizes="256x256" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=Plus+Jakarta+Sans:wght@600..800&display=swap">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="talep.css">
+</head>
+<body data-page="talep">
+<a class="skip" href="#icerik">İçeriğe geç</a>
+<header data-site-header data-minimal="Vazgeç ✕"></header>
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<main id="icerik" class="wrap wz">
+  <!-- Sol: adım listesi -->
+  <aside class="wz-steps" aria-label="Adımlar">
+    <ol id="stepList">
+      <li data-s="1"><b>1</b><span><small>Adım 1</small>Ne istiyorsun?</span></li>
+      <li data-s="2"><b>2</b><span><small>Adım 2</small>Detaylar</span></li>
+      <li data-s="3"><b>3</b><span><small>Adım 3</small>Bütçe ve konum</span></li>
+      <li data-s="4"><b>4</b><span><small>Adım 4</small>İletişim ve yayınla</span></li>
+    </ol>
+    <div class="wz-help">
+      <strong>🔒 Bilgilerin güvende</strong>
+      <p>Adın, telefonun ve açık adresin talep özetinde asla görünmez.</p>
+      <a href="mailto:destek@alicam.net">Yardım mı lazım?</a>
+    </div>
+  </aside>
+
+  <!-- Orta: form -->
+  <section class="wz-main">
+    <form id="wizard" novalidate>
+      <!-- ADIM 1 -->
+      <fieldset class="step" data-step="1">
+        <legend class="step-head"><span class="step-no">Adım 1 / 4</span><span class="step-title">Ne için teklif almak istiyorsun?</span></legend>
+        <p class="step-lead">Önce türü seç, sonra başlığı bul. Sana özel birkaç kısa soru soracağız.</p>
+        <div class="vpick" id="vpick" role="radiogroup" aria-label="Talep türü"></div>
+
+        <div class="catpick" id="catpick" hidden>
+          <div class="catpick-head">
+            <h3 id="catTitle">Başlık seç</h3>
+            <label class="cat-search"><span aria-hidden="true">🔍</span><input id="catSearch" type="search" placeholder="Ara… örn. kombi, boya, nakliyat" aria-label="Başlık ara"></label>
+          </div>
+          <div class="catlist" id="catlist" role="radiogroup" aria-labelledby="catTitle"></div>
+          <p class="err-line" id="err1" hidden>Devam etmek için bir tür ve başlık seç.</p>
+        </div>
+      </fieldset>
+
+      <!-- ADIM 2 -->
+      <fieldset class="step" data-step="2" hidden>
+        <legend class="step-head"><span class="step-no">Adım 2 / 4</span><span class="step-title" id="s2title">Biraz detay ver</span></legend>
+        <p class="step-lead">Ne kadar net yazarsan, o kadar isabetli teklif alırsın.</p>
+        <div class="fgrid" id="dynFields"></div>
+        <div class="fgrid">
+          <label class="field full" id="f-title"><span>Talep başlığı</span>
+            <input class="input" id="title" maxlength="80" placeholder="Örn. 3+1 kiralık daire, site içinde">
+            <small>Teklif verenler ilk bunu görür. Kısa ve net tut.</small>
+            <span class="err">Bir başlık yaz (en az 5 karakter).</span>
+          </label>
+          <label class="field full" id="f-desc"><span>Açıklama</span>
+            <textarea class="textarea" id="desc" maxlength="1000" placeholder=""></textarea>
+            <small class="counter"><span id="descTip">İpucu: Beklentini, zamanlamayı ve önemli detayları yaz.</span><b id="descCount">0 / 1000</b></small>
+            <span class="err">Biraz daha anlat (en az 20 karakter).</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- ADIM 3 -->
+      <fieldset class="step" data-step="3" hidden>
+        <legend class="step-head"><span class="step-no">Adım 3 / 4</span><span class="step-title">Bütçen ve konumun</span></legend>
+        <p class="step-lead">Talebin yalnızca bu bölgedeki teklif verenlere gösterilir.</p>
+        <div class="fgrid">
+          <label class="field" id="f-il"><span>İl</span>
+            <select class="select" id="il"><option value="">İl seç</option></select>
+            <span class="err">Bir il seç.</span>
+          </label>
+          <label class="field" id="f-ilce"><span>İlçe / semt</span>
+            <input class="input" id="ilce" placeholder="Örn. Kadıköy">
+            <small>Tam adres istemiyoruz.</small>
+          </label>
+          <div class="field full">
+            <span class="label" id="budgetLabel">Bütçe aralığı</span>
+            <div class="budget">
+              <div class="input-group"><input class="input" id="bmin" inputmode="numeric" placeholder="En az" aria-label="En az bütçe"><span class="suffix" data-unit>₺</span></div>
+              <span class="budget-sep">–</span>
+              <div class="input-group"><input class="input" id="bmax" inputmode="numeric" placeholder="En fazla" aria-label="En fazla bütçe"><span class="suffix" data-unit>₺</span></div>
+            </div>
+            <div class="chips budget-quick" id="budgetQuick"></div>
+            <label class="check"><input type="checkbox" id="esnek"> Bütçem esnek, iyi teklifleri görmek isterim</label>
+          </div>
+          <div class="field full">
+            <span class="label">Ne zamana kadar?</span>
+            <div class="chips" id="zaman" role="radiogroup" aria-label="Zamanlama">
+              <label class="chip"><input type="radio" name="zaman" value="Acil"> ⚡ Acil</label>
+              <label class="chip"><input type="radio" name="zaman" value="Bu hafta"> Bu hafta</label>
+              <label class="chip"><input type="radio" name="zaman" value="Bu ay"> Bu ay</label>
+              <label class="chip"><input type="radio" name="zaman" value="Esnek" checked> Esnek</label>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- ADIM 4 -->
+      <fieldset class="step" data-step="4" hidden>
+        <legend class="step-head"><span class="step-no">Adım 4 / 4</span><span class="step-title">Son adım: sana nasıl ulaşalım?</span></legend>
+        <p class="step-lead">Bu bilgiler talep özetinde görünmez. Yalnızca talebini açan onaylı teklif verenle paylaşılır.</p>
+        <div class="already">Zaten üye misin? <a href="giris.html">Giriş yap</a>, bilgilerin otomatik dolsun.</div>
+        <div class="fgrid">
+          <label class="field" id="f-ad"><span>Ad soyad</span>
+            <input class="input" id="ad" autocomplete="name" placeholder="Adın ve soyadın">
+            <span class="err">Adını yaz.</span>
+          </label>
+          <label class="field" id="f-tel"><span>Cep telefonu</span>
+            <input class="input" id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx">
+            <small>Doğrulama kodu gönderilecek.</small>
+            <span class="err">Geçerli bir cep telefonu yaz (05xx xxx xx xx).</span>
+          </label>
+          <label class="field full" id="f-mail"><span>E-posta <em class="opt">(isteğe bağlı)</em></span>
+            <input class="input" id="mail" type="email" autocomplete="email" placeholder="ornek@eposta.com">
+            <span class="err">E-posta adresi geçerli görünmüyor.</span>
+          </label>
+          <div class="field full"><span class="label">Teklif verenler sana nasıl ulaşsın?</span>
+            <div class="chips" id="pref">
+              <label class="chip"><input type="checkbox" value="Uygulama içi mesaj" checked> 💬 Mesaj</label>
+              <label class="chip"><input type="checkbox" value="Telefon"> 📞 Telefon</label>
+              <label class="chip"><input type="checkbox" value="WhatsApp"> 🟢 WhatsApp</label>
+            </div>
+          </div>
+          <label class="check full" id="f-ok"><input type="checkbox" id="ok"> <span><a href="kullanim-kosullari.html" target="_blank">Kullanım koşullarını</a> ve <a href="gizlilik.html" target="_blank">gizlilik politikasını</a> okudum, kabul ediyorum.</span></label>
+          <p class="err-line full" id="errOk" hidden>Devam etmek için koşulları kabul et.</p>
+        </div>
+      </fieldset>
+
+      <!-- BAŞARILI -->
+      <section class="done" id="done" hidden tabindex="-1">
+        <div class="done-ico">✓</div>
+        <h2>Talebin yayında!</h2>
+        <p>Talep numaran <b id="doneId">#AL-0000</b>. Uygun teklif verenlere şimdi bildirim gidiyor. İlk teklifler genellikle aynı gün gelir.</p>
+        <ol class="done-next">
+          <li><b>1</b><span><strong>Telefonunu doğrula</strong>SMS ile gelen kodu gir, talebin herkese görünsün.</span></li>
+          <li><b>2</b><span><strong>Teklifleri bekle</strong>Her yeni teklifte sana haber vereceğiz.</span></li>
+          <li><b>3</b><span><strong>Karşılaştır ve seç</strong>Beğendiğin teklifi kabul et; diğerleri otomatik kapanır.</span></li>
+        </ol>
+        <div class="done-actions"><a class="btn btn-blue btn-lg" href="index.html">Ana sayfaya dön</a><button class="btn btn-line btn-lg" type="button" id="newReq">＋ Yeni talep oluştur</button></div>
+        <p class="demo-note">Bu bir tasarım önizlemesidir; talep sunucuya gönderilmedi.</p>
+      </section>
+
+      <div class="wz-foot" id="wzFoot">
+        <button class="btn btn-line" type="button" id="back">← Geri</button>
+        <span class="draft" id="draft" aria-live="polite"></span>
+        <button class="btn btn-cta btn-lg" type="submit" id="next">Devam et →</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Sağ: canlı önizleme -->
+  <aside class="wz-preview" aria-label="Talep önizlemesi">
+    <div class="pv-label">👁️ Teklif verenler talebini böyle görecek</div>
+    <article class="pv" id="preview"></article>
+    <ul class="pv-tips">
+      <li><b>💡</b> Net bir bütçe yazarsan <strong>daha isabetli</strong> teklifler alırsın.</li>
+      <li><b>⏱️</b> Popüler kategorilerde ilk teklifler genellikle <strong>aynı gün</strong> gelir.</li>
+    </ul>
+  </aside>
+</main>
+
+<script src="site.js"></script>
+<script src="talep.js"></script>
+</body>
+</html>

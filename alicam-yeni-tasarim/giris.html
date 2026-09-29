@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Giriş yap veya üye ol — alıcam.net</title>
+<meta name="description" content="alıcam.net hesabına giriş yap ya da ücretsiz üye ol. Talep oluştur veya teklif ver.">
+<link rel="icon" href="https://alicam.net/favicon.ico?favicon.2vob68tjqpejf.ico" sizes="256x256" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=Plus+Jakarta+Sans:wght@600..800&display=swap">
+<link rel="stylesheet" href="site.css">
+</head>
+<body data-page="giris">
+<a class="skip" href="#icerik">İçeriğe geç</a>
+<header data-site-header data-minimal="← Ana sayfa"></header>
+
+<main id="icerik" class="auth">
+  <section class="auth-form-side">
+    <div class="auth-card">
+      <div class="tabs" role="tablist" aria-label="Hesap">
+        <button type="button" role="tab" id="tab-login" aria-controls="panel-login" aria-selected="true">Giriş yap</button>
+        <button type="button" role="tab" id="tab-signup" aria-controls="panel-signup" aria-selected="false">Ücretsiz üye ol</button>
+      </div>
+
+      <!-- GİRİŞ -->
+      <div id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+        <h1>Tekrar hoş geldin 👋</h1>
+        <p>Taleplerini ve gelen teklifleri kaldığın yerden takip et.</p>
+        <form class="auth-form" id="loginForm" novalidate>
+          <label class="field" id="lf-mail"><span>E-posta veya cep telefonu</span>
+            <input class="input" id="lmail" autocomplete="username" placeholder="ornek@eposta.com ya da 05xx…">
+            <span class="err">E-posta ya da telefon numaranı yaz.</span>
+          </label>
+          <label class="field" id="lf-pass"><span>Şifre</span>
+            <div class="input-group"><input class="input" id="lpass" type="password" autocomplete="current-password" placeholder="Şifren"><button type="button" class="suffix" data-toggle="lpass" aria-label="Şifreyi göster">Göster</button></div>
+            <span class="err">Şifreni yaz.</span>
+          </label>
+          <div class="auth-row">
+            <label class="check"><input type="checkbox"> Beni hatırla</label>
+            <a href="mailto:destek@alicam.net?subject=%C5%9Eifre%20s%C4%B1f%C4%B1rlama">Şifremi unuttum</a>
+          </div>
+          <button class="btn btn-blue btn-lg btn-block" type="submit">Giriş yap</button>
+          <div class="divider">veya</div>
+          <div class="social-btns">
+            <button class="btn btn-line" type="button" data-demo>📱 SMS kodu ile</button>
+            <button class="btn btn-line" type="button" data-demo><b style="color:#4285F4">G</b> Google ile</button>
+          </div>
+          <p class="auth-note">Hesabın yok mu? <a href="#" data-go="signup">Ücretsiz üye ol</a></p>
+        </form>
+      </div>
+
+      <!-- ÜYE OL -->
+      <div id="panel-signup" role="tabpanel" aria-labelledby="tab-signup" hidden>
+        <h1>Ücretsiz hesap oluştur</h1>
+        <p>Bir dakikada üye ol. Sonra istediğin zaman diğer rolü de ekleyebilirsin.</p>
+        <form class="auth-form" id="signupForm" novalidate>
+          <div class="field"><span class="label">Ne yapmak istiyorsun?</span>
+            <div class="role-pick">
+              <label class="role"><input type="radio" name="rol" value="alici" checked><i>🙋</i><strong>Talep oluşturacağım</strong><small>Hizmet, ev, araç, ürün için teklif almak istiyorum.</small></label>
+              <label class="role"><input type="radio" name="rol" value="veren"><i>💼</i><strong>Teklif vereceğim</strong><small>Usta, emlakçı, galeri, mağaza ya da satıcıyım.</small></label>
+            </div>
+          </div>
+          <div class="field" id="veren-type" hidden><span class="label">Neyle ilgileniyorsun?</span>
+            <div class="chips">
+              <label class="chip"><input type="checkbox" value="hizmet" checked> 🛠️ Hizmet</label>
+              <label class="chip"><input type="checkbox" value="emlak"> 🏠 Emlak</label>
+              <label class="chip"><input type="checkbox" value="vasita"> 🚗 Vasıta</label>
+              <label class="chip"><input type="checkbox" value="alisveris"> 🛍️ Ürün satışı</label>
+              <label class="chip"><input type="checkbox" value="makine"> 🚜 İş makinesi</label>
+            </div>
+          </div>
+          <label class="field" id="sf-name"><span id="nameLabel">Ad soyad</span>
+            <input class="input" id="sname" autocomplete="name" placeholder="Adın ve soyadın">
+            <span class="err">Bu alanı doldur.</span>
+          </label>
+          <label class="field" id="sf-tel"><span>Cep telefonu</span>
+            <input class="input" id="stel" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx">
+            <span class="err">Geçerli bir cep telefonu yaz.</span>
+          </label>
+          <label class="field" id="sf-mail"><span>E-posta</span>
+            <input class="input" id="smail" type="email" autocomplete="email" placeholder="ornek@eposta.com">
+            <span class="err">Geçerli bir e-posta yaz.</span>
+          </label>
+          <label class="field" id="sf-pass"><span>Şifre</span>
+            <div class="input-group"><input class="input" id="spass" type="password" autocomplete="new-password" placeholder="En az 8 karakter"><button type="button" class="suffix" data-toggle="spass" aria-label="Şifreyi göster">Göster</button></div>
+            <div class="pw-meter" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <small id="pwHint">Harf ve rakam karışık, en az 8 karakter.</small>
+            <span class="err">Şifre en az 8 karakter olmalı.</span>
+          </label>
+          <label class="check" id="sf-ok"><input type="checkbox" id="sok"> <span><a href="kullanim-kosullari.html" target="_blank">Kullanım koşullarını</a> ve <a href="gizlilik.html" target="_blank">gizlilik politikasını</a> kabul ediyorum.</span></label>
+          <button class="btn btn-cta btn-lg btn-block" type="submit" id="signupBtn">Ücretsiz üye ol</button>
+          <p class="auth-note">Zaten üye misin? <a href="#" data-go="login">Giriş yap</a></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <aside class="auth-visual" aria-label="alıcam.net nasıl işler">
+    <h2 id="visTitle">Aramakla uğraşma.<br><em>Ne istediğini yaz.</em></h2>
+    <p id="visText">Usta, kiralık daire, araç ya da telefon… Tek bir talep yaz; uygun teklif verenler sana gelsin.</p>
+    <div class="auth-stack" id="visStack">
+      <div class="auth-req"><span class="ico">🏠</span><span><strong>3+1 kiralık daire</strong><small>Ataşehir · 35–42 bin ₺/ay</small></span><b>6 teklif</b></div>
+      <div class="auth-req"><span class="ico">🚗</span><span><strong>Otomatik dizel otomobil</strong><small>Çankaya · 1,15 milyon ₺'ye kadar</small></span><b>4 teklif</b></div>
+      <div class="auth-req"><span class="ico">🔧</span><span><strong>Kombi yıllık bakımı</strong><small>Kadıköy · 1.500–2.500 ₺</small></span><b>3 teklif</b></div>
+    </div>
+    <div class="auth-benefits"><span>Talep etmek ücretsiz</span><span>Numaran gizli</span><span>Onaylı teklif verenler</span></div>
+  </aside>
+</main>
+
+<script src="site.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var A = window.ALICAM, $ = A.$, $$ = A.$$;
+  var tabs = { login: $("#tab-login"), signup: $("#tab-signup") };
+  var VIS = {
+    login: ["Aramakla uğraşma.<br><em>Ne istediğini yaz.</em>", "Usta, kiralık daire, araç ya da telefon… Tek bir talep yaz; uygun teklif verenler sana gelsin."],
+    alici: ["Bir kez yaz,<br><em>teklifler sana gelsin.</em>", "Talep oluşturmak, teklif almak ve karşılaştırmak her zaman ücretsiz."],
+    veren: ["Müşteri aramayı bırak,<br><em>talepler sana gelsin.</em>", "Bölgendeki gerçek taleplere ulaş. Özetleri ücretsiz gör, sadece ilgilendiğin talep için öde."]
+  };
+  function vis(k) { $("#visTitle").innerHTML = VIS[k][0]; $("#visText").textContent = VIS[k][1]; }
+  function show(which) {
+    Object.keys(tabs).forEach(function (k) {
+      tabs[k].setAttribute("aria-selected", k === which);
+      $("#panel-" + k).hidden = k !== which;
+    });
+    vis(which === "login" ? "login" : ($('input[name="rol"]:checked').value));
+  }
+  tabs.login.addEventListener("click", function () { show("login"); });
+  tabs.signup.addEventListener("click", function () { show("signup"); });
+  $$("[data-go]").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); show(a.dataset.go); tabs[a.dataset.go].focus(); }); });
+
+  // Rol seçimi
+  $$('input[name="rol"]').forEach(function (r) {
+    r.addEventListener("change", function () {
+      var veren = r.value === "veren" && r.checked;
+      $("#veren-type").hidden = !veren;
+      $("#nameLabel").textContent = veren ? "Ad soyad veya firma adı" : "Ad soyad";
+      $("#signupBtn").textContent = veren ? "Teklif veren olarak katıl" : "Ücretsiz üye ol";
+      vis(veren ? "veren" : "alici");
+    });
+  });
+
+  // URL: ?kayit=veren | ?kayit=alici
+  var kayit = new URLSearchParams(location.search).get("kayit");
+  if (kayit) {
+    show("signup");
+    var r = $('input[name="rol"][value="' + (kayit === "veren" ? "veren" : "alici") + '"]');
+    r.checked = true; r.dispatchEvent(new Event("change"));
+  }
+
+  // Şifre göster/gizle
+  $$("[data-toggle]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var i = $("#" + b.dataset.toggle), show = i.type === "password";
+      i.type = show ? "text" : "password"; b.textContent = show ? "Gizle" : "Göster";
+      b.setAttribute("aria-label", show ? "Şifreyi gizle" : "Şifreyi göster");
+    });
+  });
+
+  // Şifre gücü
+  $("#spass").addEventListener("input", function () {
+    var v = this.value, s = 0;
+    if (v.length >= 8) s++; if (/[a-zçğıöşü]/.test(v) && /[A-ZÇĞİÖŞÜ]/.test(v)) s++; if (/\d/.test(v)) s++; if (/[^\w\sçğıöşüÇĞİÖŞÜ]/.test(v) || v.length >= 12) s++;
+    $$(".pw-meter i").forEach(function (i, k) { i.className = k < s ? "on s" + s : ""; });
+    $("#pwHint").textContent = !v ? "Harf ve rakam karışık, en az 8 karakter." : ["Çok zayıf", "Zayıf", "Fena değil", "İyi", "Güçlü 💪"][s];
+    $("#sf-pass").classList.remove("invalid");
+  });
+
+  // Telefon maskesi
+  $("#stel").addEventListener("input", function () {
+    var d = this.value.replace(/\D/g, "").slice(0, 11);
+    if (d && d[0] !== "0") d = ("0" + d).slice(0, 11);
+    this.value = [d.slice(0, 4), d.slice(4, 7), d.slice(7, 9), d.slice(9, 11)].filter(Boolean).join(" ");
+  });
+
+  function check(id, ok) { $("#" + id).classList.toggle("invalid", !ok); return ok; }
+  $$(".auth-form .input").forEach(function (i) { i.addEventListener("input", function () { var f = i.closest(".field"); if (f) f.classList.remove("invalid"); }); });
+
+  $("#loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var a = check("lf-mail", $("#lmail").value.trim().length > 3), b = check("lf-pass", $("#lpass").value.length > 0);
+    if (!a) return $("#lmail").focus(); if (!b) return $("#lpass").focus();
+    A.toast("Tasarım önizlemesi: giriş henüz sunucuya bağlı değil.");
+  });
+  $("#signupForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var ok = [
+      check("sf-name", $("#sname").value.trim().length > 1),
+      check("sf-tel", /^05\d{9}$/.test($("#stel").value.replace(/\D/g, ""))),
+      check("sf-mail", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($("#smail").value.trim())),
+      check("sf-pass", $("#spass").value.length >= 8)
+    ];
+    var first = $(".auth-form .invalid .input"); if (first) return first.focus();
+    if (!$("#sok").checked) { A.toast("Devam etmek için koşulları kabul et."); return $("#sok").focus(); }
+    if (ok.every(Boolean)) A.toast("Tasarım önizlemesi: hesap oluşturma henüz sunucuya bağlı değil.");
+  });
+  $$("[data-demo]").forEach(function (b) { b.addEventListener("click", function () { A.toast("Tasarım önizlemesi: bu giriş yöntemi henüz bağlı değil."); }); });
+});
+</script>
+</body>
+</html>
