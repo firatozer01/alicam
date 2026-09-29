@@ -4,6 +4,7 @@ import "./globals.css";
 import "./admin/admin-standard.css";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { MessagesDock } from "@/components/messages/messages-dock";
+import { PublicFooter } from "@/components/shell/site-footer";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter" });
 const fraunces = Fraunces({ subsets: ["latin", "latin-ext"], variable: "--font-fraunces" });
@@ -19,7 +20,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="tr" className={`${inter.variable} ${fraunces.variable} ${plexMono.variable} ${jakarta.variable}`} data-scroll-behavior="smooth">
-      <body>{children}<MessagesDock /><AssistantWidget /></body>
+      {/* Ortak alt bilgi burada duruyor: sayfalar kendi ust cubugunu kurdugu
+          icin ortak bir "acik sayfa" yerlesimi yok. PublicFooter yalnizca
+          herkese acik yollarda kendini basar, panellere girmez. */}
+      <body>{children}<PublicFooter /><MessagesDock /><AssistantWidget /></body>
     </html>
   );
 }

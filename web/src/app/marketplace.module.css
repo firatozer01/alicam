@@ -24,7 +24,6 @@
 .btn:hover { transform: translateY(-1px); }
 .btn:active { transform: none; }
 .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-.btnSm { height: 40px; padding: 0 16px; font-size: 14.5px; border-radius: 10px; }
 .btnLg { height: 56px; padding: 0 28px; font-size: 16.5px; border-radius: 14px; }
 .btnCta { background: var(--orange); color: #fff; box-shadow: 0 8px 20px -8px rgba(242, 96, 12, .7); }
 .btnCta:hover { background: var(--orange-600); }
@@ -524,7 +523,6 @@
 .faq { display: grid; gap: 12px; min-width: 0; }
 .faq details { background: var(--bg); border-radius: 16px; border: 1px solid transparent; transition: background .2s, border-color .2s; }
 .faq details[open] { background: #fff; border-color: var(--line); box-shadow: var(--shadow-sm); }
-.faq details.faqDim { display: none; }
 .faq summary { list-style: none; cursor: pointer; padding: 22px 64px 22px 24px; font-weight: 650; font-size: 17px; position: relative; }
 .faq summary::-webkit-details-marker { display: none; }
 .faq summary::after { content: "+"; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: #fff; color: var(--blue); font-size: 22px; font-weight: 500; box-shadow: var(--shadow-xs); transition: transform .25s, background .2s, color .2s; }
@@ -571,7 +569,6 @@
 .skelTile { height: 84px; border-radius: 18px; flex: 1 1 calc((100% - (var(--tc) - 1) * 14px) / var(--tc)); }
 .skelArea { height: 330px; border-radius: 20px; }
 .skelChip { height: 32px; width: 124px; border-radius: 99px; }
-.skelVcard { min-height: 196px; border-radius: 20px; }
 .skelRoot { height: 148px; border-radius: 20px; }
 
 /* ================= DUYARLI ================= */
@@ -608,7 +605,6 @@
   .proIn, .faqWrap, .finalIn { grid-template-columns: minmax(0, 1fr); }
   .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "cmp cmp" "free prv" "rad trs"; }
   .faqSide { position: static; }
-  .footerTop { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 900px) {
   .tiles { --tc: 3; }
@@ -665,8 +661,7 @@
   .areaShot { width: 56px; height: 56px; border-radius: 13px; }
   .panelCta .btn { width: 100%; }
   .rootStrip { grid-template-columns: minmax(0, 1fr); }
-  .footerTop { grid-template-columns: minmax(0, 1fr); }
-  .footer { padding-bottom: 100px; }
+  .page { padding-bottom: 76px; }
   .mobileCta {
     display: flex; position: fixed; left: 16px; right: 16px; bottom: 14px; z-index: 70; height: 54px; border-radius: 14px;
     align-items: center; justify-content: center; background: var(--orange); color: #fff; font-weight: 700;
