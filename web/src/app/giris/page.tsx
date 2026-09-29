@@ -1,46 +1,38 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { SiteHeader } from "@/components/shell/site-header";
 import { AuthPanel } from "./auth-panel";
+import styles from "./auth.module.css";
 
 export const metadata: Metadata = {
-  title: "Giriş ve Üyelik — alıcam.net",
-  description: "alıcam.net hesabına giriş yap veya ücretsiz üyeliğini oluştur.",
+  title: "Giriş yap veya üye ol — alıcam.net",
+  description: "alıcam.net hesabına giriş yap ya da ücretsiz üye ol. Talep oluştur veya teklif ver.",
 };
 
 type LoginPageProps = {
-  searchParams: Promise<{ devam?: string; dogrulama?: string }>;
+  searchParams: Promise<{ devam?: string; dogrulama?: string; kayit?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
+
+  // ?devam= yalnizca site ici bir yol olabilir; "//" ile baslayan deger
+  // baska siteye gonderirdi.
   const requestedPath = params.devam;
   const returnTo = requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
     ? requestedPath
     : null;
 
-  return (
-    <main className="auth-page">
-      <div className="auth-aurora auth-aurora-one" />
-      <div className="auth-aurora auth-aurora-two" />
-      <nav className="auth-nav shell">
-        <Link className="brand" href="/">alıcam<span>.net</span></Link>
-        <Link className="auth-home-link" href="/">Ana sayfaya dön <span>→</span></Link>
-      </nav>
+  // ?kayit=veren | ?kayit=alici uyelik sekmesini secili rolle acar.
+  const initialRole = params.kayit === "veren" ? "veren" : params.kayit === "alici" ? "alici" : null;
 
-      <section className="auth-shell shell">
-        <div className="auth-story">
-          <span className="section-kicker">TEKLİFLER SANA GELSİN</span>
-          <h1>Aramakla uğraşma.<br /><em>Ne istediğini anlat.</em></h1>
-          <p>Ücretsiz hesabını oluştur, talebini yayınla ve uygun hizmet verenlerden teklifleri tek yerde karşılaştır.</p>
-          <div className="auth-benefits">
-            <div><b>01</b><span><strong>Alıcı için tamamen ücretsiz</strong><small>Talep oluştururken veya teklif alırken ödeme yok.</small></span></div>
-            <div><b>02</b><span><strong>İletişim bilgilerin korumalı</strong><small>Anonim özet dışında kişisel verilerin gösterilmez.</small></span></div>
-            <div><b>03</b><span><strong>Doğru kişilerle eşleş</strong><small>Kategori ve konuma göre ilgili hizmet verenlere ulaş.</small></span></div>
-          </div>
-        </div>
-
-        <AuthPanel forceVerification={params.dogrulama === "1"} returnTo={returnTo} />
-      </section>
+  return <>
+    <SiteHeader minimal="← Ana sayfa" />
+    <main className={styles.auth} id="icerik">
+      <AuthPanel
+        forceVerification={params.dogrulama === "1"}
+        initialRole={initialRole}
+        returnTo={returnTo}
+      />
     </main>
-  );
+  </>;
 }

@@ -1,1 +1,105 @@
-.page{min-height:100vh;background:#f6f5fc;color:#15162d;padding:32px 20px 72px}.nav{max-width:920px;margin:0 auto 42px;display:flex;align-items:center;justify-content:space-between}.brand{font-family:var(--font-fraunces),Georgia,serif;font-size:26px;font-weight:800;color:#15162d;text-decoration:none}.brand span{color:var(--blue)}.nav>a:last-child{color:var(--blue-700);font-weight:700;text-decoration:none}.card{max-width:920px;margin:0 auto;background:#fff;border:1px solid #e7e5f5;border-radius:28px;padding:clamp(28px,6vw,64px);box-shadow:0 24px 80px rgba(79,70,229,.08)}.card>span{font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--blue)}.card h1{font-family:var(--font-fraunces),Georgia,serif;font-size:clamp(38px,6vw,64px);line-height:1.05;margin:12px 0 18px}.card>p{color:#67677f;line-height:1.75;margin-bottom:36px}.card section{padding:25px 0;border-top:1px solid #e7e5f5}.card h2{font-size:20px;margin:0 0 10px}.card section p{color:#55566d;line-height:1.75;margin:0}.card a{color:var(--blue-700);font-weight:700}@media(max-width:640px){.nav{margin-bottom:24px}.card{border-radius:20px;padding:28px 22px}}
+/* ==========================================================
+   YASAL SAYFALAR — gizlilik + kullanim kosullari
+   alicam-yeni-tasarim/site.css "YASAL SAYFALAR" bolumunun portu.
+   Iki sayfa da ayni iskeleti kullanir: hero serit, yapiskan
+   icindekiler, makale ve sag surunde yardimci kartlar.
+   ========================================================== */
+
+.skip { position: absolute; left: -999px; top: 8px; z-index: 200; background: var(--navy); color: #fff; padding: 8px 14px; border-radius: 8px; }
+.skip:focus { left: 8px; }
+
+.wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); }
+
+/* ---------- Hero serit ---------- */
+.hero { background: linear-gradient(180deg, var(--blue-50), var(--bg)); padding: 64px 0 40px; }
+.hero h1 { font-size: clamp(34px, 4vw, 54px); margin: 12px 0 12px; }
+.hero p { color: var(--ink-2); font-size: 17px; max-width: 760px; margin: 0; }
+.eyebrow { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
+.meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 650; padding: 4px 10px; border-radius: 99px; background: var(--blue-50); color: var(--blue-700); white-space: nowrap; }
+
+/* ---------- Uc sutunlu govde ---------- */
+.legal { display: grid; grid-template-columns: 280px minmax(0, 1fr) 300px; gap: clamp(24px, 3vw, 56px); padding-top: 40px; padding-bottom: 96px; align-items: start; }
+
+/* ---------- Icindekiler ---------- */
+.toc { position: sticky; top: calc(var(--header-h) + 24px); display: grid; gap: 2px; }
+.tocTitle { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 10px; font-family: var(--f-body); font-weight: 700; }
+.tocLink { padding: 9px 14px; border-radius: 10px; font-size: 15px; color: var(--ink-2); border-left: 3px solid transparent; transition: background .15s, color .15s; }
+.tocLink:hover { background: #fff; color: var(--ink); }
+.tocLink.active { background: #fff; color: var(--blue-700); border-left-color: var(--blue); font-weight: 600; box-shadow: var(--shadow-xs); }
+
+/* ---------- Makale ---------- */
+.body { background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg); padding: clamp(24px, 3.4vw, 56px); box-shadow: var(--shadow-sm); }
+.body section + section { margin-top: 40px; padding-top: 40px; border-top: 1px solid var(--line-2); }
+.body h2 { font-size: 24px; margin: 0 0 14px; display: flex; gap: 14px; align-items: baseline; }
+.body h2 small { font: 700 14px/1 var(--f-body); color: var(--blue); }
+.body p, .body li { color: var(--ink-2); font-size: 16.5px; line-height: 1.75; max-width: 76ch; }
+.body p { margin: 0; }
+.body p + p { margin-top: 12px; }
+.body ul { padding-left: 20px; margin: 12px 0 0; }
+.body a { color: var(--blue); font-weight: 600; }
+.body a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- "Kisaca" ozet kutusu ---------- */
+.summary { background: var(--blue-50); border-radius: var(--r); padding: 20px 22px; margin-bottom: 36px; }
+.summary strong { display: block; margin-bottom: 8px; font-family: var(--f-head); }
+.summary ul { margin: 0; padding-left: 18px; }
+.summary li { font-size: 15.5px; color: var(--ink-2); line-height: 1.75; }
+
+/* ---------- Yardimci kartlar ---------- */
+.aside { position: sticky; top: calc(var(--header-h) + 24px); display: grid; gap: 14px; }
+.asideCard { background: #fff; border: 1px solid var(--line); border-radius: var(--r); padding: 22px; box-shadow: var(--shadow-xs); }
+.asideCard h4 { font-size: 17px; margin: 0 0 6px; }
+.asideCard p { font-size: 14.5px; color: var(--ink-2); margin: 0 0 14px; line-height: 1.6; }
+.asideCard p.flush { margin-bottom: 0; }
+
+/* ---------- Dugmeler (site.css .btn ailesinin gereken kadari) ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; width: 100%; padding: 0 16px; border-radius: 10px; border: 0;
+  font-weight: 650; font-size: 14.5px; white-space: nowrap; cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease, color .2s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: none; }
+.btnCta { background: var(--orange); color: #fff; box-shadow: 0 8px 20px -8px rgba(242, 96, 12, .7); }
+.btnCta:hover { background: var(--orange-600); color: #fff; }
+.btnSoft { background: var(--blue-50); color: var(--blue-700); }
+.btnSoft:hover { background: var(--blue-100); color: var(--blue-700); }
+
+/* ==========================================================
+   Duyarli
+   ========================================================== */
+@media (max-width: 1280px) {
+  .legal { grid-template-columns: 240px minmax(0, 1fr); }
+  .aside { display: none; }
+}
+
+@media (max-width: 860px) {
+  .legal { grid-template-columns: 1fr; padding-top: 16px; }
+  .toc {
+    position: sticky; top: var(--header-h); z-index: 20;
+    display: flex; overflow-x: auto; gap: 6px;
+    margin: 0 calc(-1 * var(--gutter)); padding: 10px var(--gutter);
+    background: rgba(245, 247, 251, .94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    scrollbar-width: none;
+  }
+  .toc::-webkit-scrollbar { display: none; }
+  .tocTitle { display: none; }
+  .tocLink { white-space: nowrap; background: #fff; border: 1px solid var(--line); border-left-width: 1px; }
+  .tocLink.active { border-color: var(--blue); }
+}
+
+@media (max-width: 600px) {
+  .hero { padding: 40px 0 28px; }
+  .body { padding: 22px 18px; border-radius: 16px; }
+  .body section + section { margin-top: 28px; padding-top: 28px; }
+  .body h2 { font-size: 21px; }
+  .body p, .body li { font-size: 16px; }
+  .summary { padding: 16px; margin-bottom: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .tocLink { transition: none; }
+  .btn:hover { transform: none; }
+}

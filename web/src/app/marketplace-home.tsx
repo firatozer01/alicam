@@ -114,9 +114,15 @@ export function MarketplaceHome() {
   return <main className={styles.page}>
     <a className={styles.skip} href="#icerik">İçeriğe geç</a>
 
+    {/* Duyuru bandi BILEREK yok: maket tasarimda hic yer almiyor ve
+        hemen altindaki "Talep olusturmak her zaman ucretsiz" rozetiyle
+        ayni seyi soyluyordu. Dar ekranda 44px'i bosa harciyordu.
+
+        Dugme metni de maketin kisa hali: ust cubukta "Talep olustur",
+        uzun hali yalnizca cekmece ayaginda. Uzun metin telefonda
+        hamburgerin uzerine biniyordu. */}
     <SiteHeader
-      announce="⚡ İhtiyacını yaz, teklifler sana gelsin — talep eden için tamamen ücretsiz."
-      cta={isSeller ? { label: "Gelen talepler", href: "/satici-paneli" } : { label: "Ücretsiz talep oluştur", href: "/talep-olustur" }}
+      cta={isSeller ? { label: "Gelen talepler", href: "/satici-paneli" } : { label: "Talep oluştur", href: "/talep-olustur" }}
       sessionReady={sessionReady}
       user={user}
     />
