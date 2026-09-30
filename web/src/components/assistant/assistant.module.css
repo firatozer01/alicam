@@ -29,6 +29,87 @@
   .launcher { animation: none; }
 }
 
+/* ---- Selamlama baloncugu ---- */
+
+/*
+  Maskotun USTUNDE duran kisa selam. Konumu tetikleyiciden turetiliyor:
+  launcher 20px sagdan/alttan, 124x130 -- baloncuk onun hemen ustune oturuyor.
+  Tiklanabilir olmasinin sebebi: selam bir davet, kullanici ona dokununca
+  asistan acilmali.
+*/
+.selam {
+  position: fixed;
+  right: 24px;
+  bottom: 156px;
+  z-index: 79;
+  max-width: min(272px, calc(100vw - 48px));
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 11px 12px 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px 16px 6px 16px;
+  background: var(--card);
+  box-shadow: 0 16px 38px rgb(10 20 51 / .16);
+  animation: selamGir .42s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+/* Maskota bakan kucuk kuyruk. */
+.selam::after {
+  content: "";
+  position: absolute;
+  right: 26px;
+  bottom: -7px;
+  width: 13px;
+  height: 13px;
+  transform: rotate(45deg);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+
+.selamMetin {
+  flex: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 600 14.5px/1.45 var(--f-body);
+  text-align: left;
+  cursor: pointer;
+}
+.selamMetin:hover { color: var(--blue-700); }
+
+.selamKapat {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -2px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--faint);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+.selamKapat:hover { background: var(--blue-50); color: var(--ink-2); }
+
+@keyframes selamGir {
+  from { opacity: 0; transform: translateY(10px) scale(.94); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) { .selam { animation: none; } }
+
+/* Maskot dar ekranda kuculuyor; baloncuk da onunla birlikte iniyor. */
+@media (max-width: 520px) {
+  .selam { right: 16px; bottom: 124px; }
+}
+
 /* ---- Panel ---- */
 .panel {
   position: fixed; right: 20px; bottom: 176px; z-index: 81;

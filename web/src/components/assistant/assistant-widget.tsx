@@ -15,6 +15,32 @@ type Topic = {
 
 type Group = { key: string; title: string };
 
+/**
+ * Maskotun uzerinde beliren selamlama.
+ *
+ * Saat ARALIKLARI ziyaretcinin kendi saatine gore secilir; sunucu saati
+ * degil. Bu yuzden metin ancak tarayicida hesaplanabiliyor: sunucuda
+ * uretilseydi farkli saat diliminden giren kullanicida yanlis selam
+ * cikar ve hidrasyon uyusmazligi olurdu.
+ */
+const SELAMLAR: { baslangic: number; metinler: string[] }[] = [
+  { baslangic: 5, metinler: ["Günaydın! ☀️ Bugün ne lazım?", "Günaydın! Erkenci kuş teklifini kapar 🐦"] },
+  { baslangic: 11, metinler: ["İyi günler! 👋 Bir şey mi arıyorsun?", "Merhaba! Ne istediğini yaz, gerisini bana bırak ✨"] },
+  { baslangic: 15, metinler: ["İyi günler ☕ Yardım lazım mı?", "Selam! Çayını al, birlikte bakalım ☕"] },
+  { baslangic: 18, metinler: ["İyi akşamlar 🌆 Ne istersen yaz.", "Akşam akşam iyi bir teklif ister misin? 🌆"] },
+  { baslangic: 23, metinler: ["İyi geceler 🌙 Buradayım.", "Geç oldu ama ben buradayım 🌙"] },
+];
+
+/** Gecenin 00-04 araligi listenin SON kusagina (23'ten baslayan) girer. */
+function selamSec(saat: number) {
+  const kusak = [...SELAMLAR].reverse().find((k) => saat >= k.baslangic) ?? SELAMLAR[SELAMLAR.length - 1];
+  return kusak.metinler[Math.floor(Math.random() * kusak.metinler.length)];
+}
+
+/** Ayni ziyarette tekrar tekrar cikmasin. */
+const SELAM_ANAHTARI = "alicam:asistan-selam";
+
+
 type Lookup = { label: string; placeholder: string; action: string };
 
 type LookupResult = {
@@ -51,6 +77,7 @@ type Turn = { id: number; role: "bot" | "user"; text: string };
  */
 export function AssistantWidget() {
   const [open, setOpen] = useState(false);
+  const [selam, setSelam] = useState<string | null>(null);
   const [intro, setIntro] = useState<Intro | null>(null);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [suggestions, setSuggestions] = useState<Topic[]>([]);
@@ -61,6 +88,35 @@ export function AssistantWidget() {
   const [looking, setLooking] = useState(false);
   const threadRef = useRef<HTMLDivElement>(null);
   const counter = useRef(0);
+
+  // Ziyaretin basinda maskotun uzerinde kisa bir selamlama belirir.
+  // sessionStorage: sayfa icinde gezinirken her seferinde tekrar cikmasin,
+  // ama siteyi yeniden actiginda yine gelsin. Erisim ozel sekmede ya da
+  // site verisi engelliyse hata atabiliyor, o yuzden try icinde.
+  useEffect(() => {
+    let gorulmus = false;
+    try {
+      gorulmus = sessionStorage.getItem(SELAM_ANAHTARI) === "1";
+    } catch {
+      // Depolama okunamadi; selam yine de gosterilir, yalnizca hatirlanmaz.
+    }
+    if (gorulmus) return;
+
+    // Sayfa yuklenirken degil, biraz sonra: acilis animasyonlariyla yarismasin.
+    const ac = window.setTimeout(() => {
+      setSelam(selamSec(new Date().getHours()));
+      try { sessionStorage.setItem(SELAM_ANAHTARI, "1"); } catch { /* onemsiz */ }
+    }, 1400);
+
+    return () => window.clearTimeout(ac);
+  }, []);
+
+  // Selam kendi kendini toplar; kullanici okumaya firsat bulsun diye 8 saniye.
+  useEffect(() => {
+    if (!selam) return;
+    const kapat = window.setTimeout(() => setSelam(null), 8000);
+    return () => window.clearTimeout(kapat);
+  }, [selam]);
 
   useEffect(() => {
     if (!open || intro) return;
@@ -163,11 +219,29 @@ export function AssistantWidget() {
       aria-label={open ? "Asistanı kapat" : "alıcam asistanını aç"}
       className={styles.launcher}
       data-open={open}
-      onClick={() => setOpen((current) => !current)}
+      onClick={() => { setSelam(null); setOpen((current) => !current); }}
       type="button"
     >
       <Image alt="" height={130} priority={false} src="/asistan.webp" unoptimized width={124} />
     </button>
+
+    {/* Selamlama yalnizca panel KAPALIYKEN gorunur; acikken zaten asistan
+        ekranda ve baloncuk onu orter. */}
+    {selam && !open && (
+      <div className={styles.selam} role="status">
+        <button
+          className={styles.selamMetin}
+          onClick={() => { setSelam(null); setOpen(true); }}
+          type="button"
+        >{selam}</button>
+        <button
+          aria-label="Kapat"
+          className={styles.selamKapat}
+          onClick={() => setSelam(null)}
+          type="button"
+        >×</button>
+      </div>
+    )}
 
     {open && (
       <section aria-label="alıcam asistanı" className={styles.panel} data-guest={guest}>
