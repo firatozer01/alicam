@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
+import { BrandLogo } from "@/components/shell/brand";
 import "../admin-standard.css";
 import styles from "./mail-settings.module.css";
 
@@ -31,6 +32,30 @@ type Settings = {
 };
 
 type Meta = { active_mailer: string; sms_ready: boolean; assistant_mode: "ai" | "knowledge"; image_source: "pexels" | "acik-kaynak" };
+
+type BrandKind = "logo" | "logo_light" | "mark";
+
+/**
+ * Yuklenmis dosyanin adresi ya da null. null "yonetici bir sey yuklemedi,
+ * paketle gelen gorsel kullaniliyor" demek; bu yuzden bos metin degil null.
+ */
+type Branding = Record<BrandKind, string | null>;
+
+type SiteSettingsResponse = { data: { branding?: Branding } };
+
+type BrandingResponse = { message?: string; data: { branding: Branding } };
+
+const noBranding: Branding = { logo: null, logo_light: null, mark: null };
+
+/**
+ * Uc yuva da ayni kaliba oturdugu icin tek yerden tarif ediliyor.
+ * fallback, hic yukleme yapilmamisken onizlemede gosterilecek gomulu dosya.
+ */
+const brandSlots: { kind: BrandKind; label: string; fallback: string; hint: string; dark?: boolean; square?: boolean }[] = [
+  { kind: "logo", label: "Logo", fallback: "/logo.png", hint: "Üst bar ve panellerde kullanılır." },
+  { kind: "logo_light", label: "Koyu zemin logosu", fallback: "/logo-light.png", hint: "Alt bilgi gibi koyu zeminlerde kullanılır.", dark: true },
+  { kind: "mark", label: "Simge", fallback: "/mark.png", hint: "Dar ekranda ve sekme simgesinde kullanılır.", square: true },
+];
 
 const empty: Settings = {
   "mail.enabled": "0",
@@ -64,6 +89,11 @@ export function MailSettings() {
   const [testTo, setTestTo] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [branding, setBranding] = useState<Branding>(noBranding);
+  // Ayni anda yalnizca bir yuva ile islem yapiliyor; hangisi oldugunu
+  // tutmak, o yuvanin dugmelerini digerlerine dokunmadan kilitlemeye yetiyor.
+  const [brandBusy, setBrandBusy] = useState<BrandKind | "">("");
+  const brandInputs = useRef<Partial<Record<BrandKind, HTMLInputElement | null>>>({});
 
   useEffect(() => {
     let active = true;
@@ -84,6 +114,19 @@ export function MailSettings() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [router]);
+
+  // Marka gorselleri /admin/settings'te degil; sitenin her yeri ile ayni
+  // kaynaktan okunsun diye herkese acik uctan aliniyor. Uc hazir degilse
+  // sessizce gomulu varsayilanlarda kaliyoruz, kart yine de acilir.
+  useEffect(() => {
+    let active = true;
+    apiRequest<SiteSettingsResponse>("/site-settings")
+      .then((response) => {
+        if (active && response.data.branding) setBranding(response.data.branding);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
 
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -165,11 +208,41 @@ export function MailSettings() {
     }
   };
 
+  const uploadBrand = async (kind: BrandKind, file: File) => {
+    setBrandBusy(kind); setNotice(""); setError("");
+    try {
+      // FormData dogrudan veriliyor: apiRequest boyle bir govdede
+      // Content-Type yazmiyor, multipart sinirini tarayici koyuyor.
+      const body = new FormData();
+      body.append("file", file);
+      const response = await apiRequest<BrandingResponse>(`/admin/branding/${kind}`, { method: "POST", body });
+      setBranding(response.data.branding);
+      setNotice(response.message ?? "Görsel yüklendi.");
+    } catch (requestError: unknown) {
+      setError(firstApiError(requestError));
+    } finally {
+      setBrandBusy("");
+    }
+  };
+
+  const resetBrand = async (kind: BrandKind) => {
+    setBrandBusy(kind); setNotice(""); setError("");
+    try {
+      const response = await apiRequest<BrandingResponse>(`/admin/branding/${kind}`, { method: "DELETE" });
+      setBranding(response.data.branding);
+      setNotice(response.message ?? "Varsayılan görsele dönüldü.");
+    } catch (requestError: unknown) {
+      setError(firstApiError(requestError));
+    } finally {
+      setBrandBusy("");
+    }
+  };
+
   const on = form["mail.enabled"] === "1";
 
   return <main className="admin-shell">
     <aside className="admin-sidebar">
-      <Link className="brand admin-brand" href="/">alıcam<span>.net</span></Link>
+      <Link aria-label="alıcam.net ana sayfa" className="brand admin-brand" href="/"><BrandLogo /></Link>
       <div className="admin-product"><span>YÖNETİM MERKEZİ</span><strong>Operasyon</strong></div>
       <nav>
         <Link href="/admin"><i>◇</i> Genel bakış</Link>
@@ -347,6 +420,54 @@ export function MailSettings() {
           <footer>
             <button disabled={busy} onClick={() => void save()} type="button">{busy ? "Kaydediliyor…" : "Sosyal medya bağlantılarını kaydet"}</button>
           </footer>
+        </section>
+
+        <section className={styles.card}>
+          <header>
+            <div>
+              <strong>Logo ve marka</strong>
+              <small>Buradaki görseller sitenin her yerinde kullanılır: üst bar, alt bilgi, yönetim panelleri ve sekme simgesi. Yenisini yükleyince tamamı birden değişir.</small>
+            </div>
+          </header>
+          <div className={styles.brandGrid}>
+            {brandSlots.map((slot) => {
+              const current = branding[slot.kind];
+              const slotBusy = brandBusy === slot.kind;
+              return <div className={styles.brandSlot} key={slot.kind}>
+                <span>{slot.label}</span>
+                <div className={`${styles.brandBox}${slot.dark ? ` ${styles.brandBoxDark}` : ""}${slot.square ? ` ${styles.brandBoxSquare}` : ""}`}>
+                  {/* Adresteki surum damgasi uctan geliyor; next/image ise
+                      /api yollarini optimize edemiyor, o yuzden duz <img>. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img alt={`${slot.label} önizlemesi`} src={current ?? slot.fallback} />
+                </div>
+                <input
+                  accept="image/png,image/webp,image/jpeg"
+                  className={styles.brandFile}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    // Ayni dosya ikinci kez secilirse de onChange dussun diye
+                    // alan hemen bosaltiliyor.
+                    event.target.value = "";
+                    if (file) void uploadBrand(slot.kind, file);
+                  }}
+                  ref={(node) => { brandInputs.current[slot.kind] = node; }}
+                  type="file"
+                />
+                <div className={styles.brandActions}>
+                  <button disabled={slotBusy} onClick={() => brandInputs.current[slot.kind]?.click()} type="button">
+                    {slotBusy ? "Yükleniyor…" : "Değiştir"}
+                  </button>
+                  {current && (
+                    <button className={styles.brandReset} disabled={slotBusy} onClick={() => void resetBrand(slot.kind)} type="button">
+                      Varsayılana dön
+                    </button>
+                  )}
+                </div>
+                <small>{slot.hint}</small>
+              </div>;
+            })}
+          </div>
         </section>
 
         <section className={`${styles.card} ${styles.soon}`}>

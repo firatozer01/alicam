@@ -13,10 +13,10 @@
 .header { position: sticky; top: 0; z-index: 80; }
 .header::before { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(255, 255, 255, .9); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--line); }
 .headerIn { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.brand { display: inline-flex; align-items: center; gap: 9px; font: 800 23px/1 var(--f-head); letter-spacing: -.035em; color: var(--navy); flex: none; }
-.brand img { width: 30px; height: 30px; }
-.brand b { font-weight: inherit; }
-.brand span { color: var(--blue); }
+/* Marka artik isaret + yazi degil, tek parca logo gorseli. Yuksekligi
+   ust menuye gore sabit; genisligi orana birakiyoruz ki logo ezilmesin. */
+.brand { display: inline-flex; align-items: center; min-width: 0; }
+.brand img { display: block; width: min(203px, 100%); height: auto; }
 
 /* ---------- Ilerleme cubugu ---------- */
 .progress { position: sticky; top: var(--header-h); z-index: 70; height: 4px; background: var(--line); }

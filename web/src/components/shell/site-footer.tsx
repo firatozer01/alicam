@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api";
-import { BrandMark } from "./site-header";
+import { BrandLogo } from "./brand";
 import styles from "./site-footer.module.css";
 
 /* ================= Simgeler ================= */
@@ -302,7 +302,8 @@ export function SiteFooter() {
       {/* 3) Bag sutunlari */}
       <div className={styles.columns}>
         <div className={styles.about}>
-          <Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
+          {/* Zemin lacivert, o yuzden yazisi beyaz olan surum. */}
+          <Link className={styles.brand} href="/"><BrandLogo height={36} tone="dark" /></Link>
           <p>Talep tabanlı pazaryeri. İlan aramak yok; ihtiyacını yaz, teklifler sana gelsin.</p>
           {visibleSocial.length > 0 && <div className={styles.social}>
             {visibleSocial.map((link) => <a

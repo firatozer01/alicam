@@ -10,11 +10,15 @@
   border-right: 1px solid #e7e5f5;
 }
 
-.admin-brand {
-  color: #15162d;
+/* Marka artik yazi degil logo gorseli. Kenar cubugu 244px ve iki yani
+   22px dolgulu; en fazla 200px kaliyor. Genisligi sinirlayip yuksekligi
+   otomatik birakiyoruz ki logo dar ekranda da oranini korusun. */
+.admin-brand img {
+  display: block;
+  width: min(190px, 100%);
+  height: auto;
 }
 
-.admin-brand span,
 .admin-product span,
 .admin-sidebar nav i,
 .admin-kicker,

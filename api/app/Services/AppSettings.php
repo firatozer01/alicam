@@ -26,6 +26,9 @@ class AppSettings
     /** Alt bilgideki sosyal medya simgelerinin kanonik sirasi. */
     public const SOCIAL_KEYS = ['instagram', 'youtube', 'tiktok', 'x', 'facebook', 'linkedin'];
 
+    /** Yonetilebilen marka gorselleri. */
+    public const BRANDING_KEYS = ['logo', 'logo_light', 'mark'];
+
     /** Panelden yonetilebilen alanlar ve varsayilanlari. */
     public const EDITABLE = [
         'mail.enabled' => '0',
@@ -74,6 +77,18 @@ class AppSettings
         'social.x' => 'https://x.com/alicamnet',
         'social.facebook' => '',
         'social.linkedin' => '',
+
+        // Marka gorselleri. Arayuzde gomulu duran dosyalar (logo.png,
+        // logo-light.png, mark.png) zaten dogru logo; buradaki alanlar
+        // yalnizca yonetici baska bir gorsel yuklerse doluyor ve o zaman
+        // gomulu dosyanin yerine gecer. Deger, diskteki dosyanin adi.
+        'branding.logo' => '',
+        'branding.logo_light' => '',
+        'branding.mark' => '',
+        // Adres damgasi: her yukleme/kaldirmada artar. Logo her sayfada
+        // basildigi icin uzun onbellekle servis ediliyor; damga olmasa
+        // yeni logo tarayicilara gunlerce ulasmazdi.
+        'branding.version' => '1',
     ];
 
     /**
@@ -224,6 +239,39 @@ class AppSettings
             }
 
             $out[] = ['platform' => $platform, 'url' => $deger];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Yoneticinin yukledigi marka gorsellerinin adresleri.
+     *
+     * Yuklenmemis her tur icin null doner; arayuz o zaman gomulu dosyaya
+     * duser. Burada da bilerek get() kullanilmiyor: get() bos degeri
+     * varsayilana dusuruyor, oysa burada bos "yuklenmis dosya yok"
+     * demek ve anlamli bir cevap.
+     *
+     * @return array<string, string|null>
+     */
+    public static function branding(): array
+    {
+        $all = self::all();
+
+        $surum = trim((string) ($all['branding.version'] ?? '')) ?: '1';
+
+        $out = [];
+
+        foreach (self::BRANDING_KEYS as $tur) {
+            $anahtar = 'branding.'.$tur;
+
+            $ad = array_key_exists($anahtar, $all)
+                ? trim((string) $all[$anahtar])
+                : '';
+
+            // Damga adreste: dosya adi degisse de degismese de tarayici
+            // yeni surumu yeniden ister.
+            $out[$tur] = $ad === '' ? null : '/api/branding/'.$tur.'?v='.$surum;
         }
 
         return $out;

@@ -41,8 +41,19 @@ Route::get('/marketplace', MarketplaceController::class);
 // Anasayfanin hizmet katalogu. /categories?tree=1 burada KULLANILMAZ:
 // 5689 dugumun tamamini tasidigi icin yaklasik 1,9 MB yanit uretiyor.
 Route::get('/service-catalog', App\Http\Controllers\Api\ServiceCatalogController::class);
-// Alt bilgideki sosyal medya baglantilari; her sayfada okundugu icin oturum gerektirmez.
+// Alt bilgideki sosyal medya baglantilari ve marka gorselleri; her sayfada okundugu icin oturum gerektirmez.
 Route::get('/site-settings', App\Http\Controllers\Api\SiteSettingsController::class);
+// Yoneticinin yukledigi logo. Her sayfada, misafire de basiliyor.
+//
+// Oturum bilerek devre disi: yanit adresindeki surum damgasi sayesinde
+// "public, immutable" ve cok uzun sureli onbellekleniyor. Bootstrap'taki
+// statefulApi() butun /api grubuna uygulandigi icin auth:sanctum grubunun
+// disinda olmak yetmiyor; on yuzden gelen istek yine StartSession'dan
+// geciyor ve yanita oturum cerezi basiliyordu. Paylasimli bir onbellek
+// (CDN, kurum vekili) boyle bir yaniti bir yil saklayip bir sonraki
+// ziyaretciye baskasinin oturumunu servis ederdi.
+Route::get('/branding/{kind}', [App\Http\Controllers\Api\BrandingController::class, 'show'])
+    ->withoutMiddleware(Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class);
 
 // Asistan: oturum zorunlu degil, varsa kullaniciya ozel konular acilir.
 /**
@@ -233,6 +244,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/home/categories/{category}/fetch-image', [App\Http\Controllers\Api\AdminHomeController::class, 'fetchImage'])
             ->middleware('throttle:30,1');
         Route::delete('/home/categories/{category}/image', [App\Http\Controllers\Api\AdminHomeController::class, 'destroyImage']);
+        // Marka gorselleri: kaldirilinca arayuz gomulu dosyaya doner.
+        Route::post('/branding/{kind}', [App\Http\Controllers\Api\AdminBrandingController::class, 'store'])
+            ->middleware('throttle:20,1');
+        Route::delete('/branding/{kind}', [App\Http\Controllers\Api\AdminBrandingController::class, 'destroy']);
         Route::get('/seller-approvals', [AdminSellerApprovalController::class, 'index']);
         Route::patch('/seller-approvals/{seller}', [AdminSellerApprovalController::class, 'update']);
     });

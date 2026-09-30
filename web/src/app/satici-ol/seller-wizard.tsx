@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
+import { BrandLogo } from "@/components/shell/brand";
 
 type Category = {
   id: number;
@@ -289,7 +290,7 @@ export function SellerWizard() {
   if (loading) {
     return (
       <main className="seller-page seller-loading">
-        <Link className="brand" href="/">alıcam<span>.net</span></Link>
+        <Link aria-label="alıcam.net ana sayfa" className="brand" href="/"><BrandLogo height={32} /></Link>
         <div className="seller-loader"><i /><p>Başvuru alanın hazırlanıyor…</p></div>
       </main>
     );
@@ -302,7 +303,7 @@ export function SellerWizard() {
     return (
       <main className={`seller-page seller-status-page status-${profileStatus}`}>
         <nav className="seller-nav shell">
-          <Link className="brand" href="/">alıcam<span>.net</span></Link>
+          <Link aria-label="alıcam.net ana sayfa" className="brand" href="/"><BrandLogo height={32} /></Link>
           <Link className="seller-home-link" href="/">Ana sayfaya dön <span>↗</span></Link>
         </nav>
         <section className="seller-status-card">
@@ -326,7 +327,7 @@ export function SellerWizard() {
       <div className="seller-glow seller-glow-one" />
       <div className="seller-glow seller-glow-two" />
       <nav className="seller-nav shell">
-        <Link className="brand" href="/">alıcam<span>.net</span></Link>
+        <Link aria-label="alıcam.net ana sayfa" className="brand" href="/"><BrandLogo height={32} /></Link>
         <span className="seller-nav-note"><b>HİZMET VEREN BAŞVURUSU</b> Ücretsiz katılım</span>
         <Link className="seller-home-link" href="/">Çıkış <span>×</span></Link>
       </nav>

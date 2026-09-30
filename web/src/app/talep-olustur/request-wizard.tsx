@@ -4,6 +4,7 @@ import { Fragment, FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
+import { BrandLogo } from "@/components/shell/brand";
 import styles from "./wizard.module.css";
 
 /* ==========================================================
@@ -219,10 +220,6 @@ const emptyForm: FormState = {
   contactEmail: "",
   contactPreferences: ["message"],
 };
-
-// Gercek marka isareti; ortak kabuktaki BrandMark ile ayni dosya.
-// eslint-disable-next-line @next/next/no-img-element
-const BrandMark = () => <img alt="" aria-hidden="true" height={30} src="/mark.png" width={30} />;
 
 /* ==========================================================
    Bilesen
@@ -1076,7 +1073,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
   const header = (
     <header className={styles.header}>
       <div className={styles.headerIn}>
-        <Link className={styles.brand} href="/"><BrandMark /><b>alıcam<span>.net</span></b></Link>
+        <Link aria-label="alıcam.net ana sayfa" className={styles.brand} href="/"><BrandLogo height={32} /></Link>
         <Link className={cn(styles.btn, styles.btnLine, styles.btnSm)} href="/">Vazgeç ✕</Link>
       </div>
     </header>

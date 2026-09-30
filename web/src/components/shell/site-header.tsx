@@ -4,25 +4,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AccountMenu } from "@/components/account-menu";
 import { NavMenuBar, type NavMenuDef } from "@/components/listing/nav-menu";
+import { BrandLogo, BrandMark } from "./brand";
 import { NotificationBell } from "./notification-bell";
 import { useSession, type SessionUser } from "./use-session";
 import styles from "./site-header.module.css";
 
 /**
- * Yeni marka isareti: yukari bakan mavi ok (talep), asagi bakan turuncu ok
- * (teklif), ortada lacivert govde. Aydinlik zeminde koyu, lacivert zeminde
- * (alt bilgi) acik tonlu cizilir.
+ * Marka gorselleri ortak dosyaya tasindi: alt bilgi de ayni gorselleri
+ * kullaniyor ve adresleri yonetim panelinden degisebiliyor. BrandMark
+ * eskiden buradan import ediliyordu, kirilmasin diye yeniden disa aktariliyor.
  */
-export function BrandMark() {
-  // Gercek marka isareti (el sikisma). Tek dosya hem koyu hem acik
-  // zeminde calisiyor: isaretin kendi renkleri var, tonlanmiyor.
-  //
-  // next/image kullanilmiyor: dosya /public'te duruyor ve zaten
-  // ikon olcusunde, iyilestiriciye girmesi kazanc getirmiyor.
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img alt="" aria-hidden="true" height={30} src="/mark.png" width={30} />;
-}
-
+export { BrandMark } from "./brand";
 
 /**
  * Sayfa kendi menusunu vermediginde gosterilen ortak kesif menusu. Boylece
@@ -159,7 +151,10 @@ export function SiteHeader({
   if (minimal) {
     return <header className={`${styles.bar} ${styles.barMinimal}`}>
       <div className={styles.inner}>
-        <Link aria-label="alıcam.net ana sayfa" className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
+        <Link aria-label="alıcam.net ana sayfa" className={styles.brand} href="/">
+          <BrandLogo className={styles.brandFull} />
+          <span className={styles.brandMark}><BrandMark /></span>
+        </Link>
         <Link className={styles.ghost} href="/">{minimal}</Link>
       </div>
     </header>;
@@ -169,7 +164,14 @@ export function SiteHeader({
     {announce && <div className={styles.announce}>{announce}</div>}
     <header className={styles.bar}>
       <div className={styles.inner}>
-        <Link aria-label="alıcam.net ana sayfa" className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
+        {/* Tam logo 32px yukseklikte ~203px genisliginde. Ust cubukta ayrica
+            eylem dugmesi ve hamburger var; 600px altinda bu genislik
+            sigmiyor. Bu yuzden ikisi de basilir, hangisinin gorunecegine
+            CSS karar verir. */}
+        <Link aria-label="alıcam.net ana sayfa" className={styles.brand} href="/">
+          <BrandLogo className={styles.brandFull} />
+          <span className={styles.brandMark}><BrandMark /></span>
+        </Link>
 
         <nav aria-label="Ana menü" className={styles.nav}>
           <NavMenuBar activeKey={activeKey} menus={drawerMenus}>

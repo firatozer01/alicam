@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
+import { BrandLogo } from "@/components/shell/brand";
 import "../admin-standard.css";
 import styles from "./home-editor.module.css";
 
@@ -221,7 +222,7 @@ export function HomeEditor() {
 
   return <main className="admin-shell">
     <aside className="admin-sidebar">
-      <Link className="brand admin-brand" href="/">alıcam<span>.net</span></Link>
+      <Link aria-label="alıcam.net ana sayfa" className="brand admin-brand" href="/"><BrandLogo /></Link>
       <div className="admin-product"><span>YÖNETİM MERKEZİ</span><strong>Operasyon</strong></div>
       <nav>
         <Link href="/admin"><i>◇</i> Genel bakış</Link>

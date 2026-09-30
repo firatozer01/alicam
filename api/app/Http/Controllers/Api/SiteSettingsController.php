@@ -7,15 +7,15 @@ use App\Services\AppSettings;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Alt bilgideki sosyal medya baglantilari.
+ * Alt bilgideki sosyal medya baglantilari ve marka gorselleri.
  *
  * Panel ucu (GET /admin/settings) yonetici oturumu ister ve SMTP,
- * asistan anahtari, gorsel kaynagi gibi her seyi tasir. Alt bilgi ise her
- * sayfada, misafire de gorunuyor; bu yuzden ayri ve oturumsuz bir uc var.
+ * asistan anahtari, gorsel kaynagi gibi her seyi tasir. Alt bilgi ve logo
+ * ise her sayfada, misafire de gorunuyor; bu yuzden ayri ve oturumsuz bir
+ * uc var.
  *
- * Yanit yalnizca sosyal baglantilari tasir. Ayar tablosunun tamamini
- * herkese acik bir uctan dondurmek, panel ucunun kapisini anlamsiz
- * kilardi.
+ * Yanit yalnizca bu iki alani tasir. Ayar tablosunun tamamini herkese
+ * acik bir uctan dondurmek, panel ucunun kapisini anlamsiz kilardi.
  */
 class SiteSettingsController extends Controller
 {
@@ -35,7 +35,12 @@ class SiteSettingsController extends Controller
         // (AppSettings sunucuda onbellekli) ve alt bilgi ayni gezinme
         // icinde modul duzeyinde saklandigi icin sayfa basina tek istek.
         return response()
-            ->json(['data' => ['social' => AppSettings::socialLinks()]])
+            ->json(['data' => [
+                'social' => AppSettings::socialLinks(),
+                // Yuklenmemis her tur null doner; arayuz o zaman gomulu
+                // dosyayi kullanir.
+                'branding' => AppSettings::branding(),
+            ]])
             ->header('Cache-Control', 'private, max-age=0, must-revalidate');
     }
 }

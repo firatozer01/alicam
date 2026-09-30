@@ -125,13 +125,15 @@
 /* ---------- 3) Bag sutunlari ---------- */
 .columns { display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: 40px; padding: 56px 0 24px; }
 
-.brand {
-  display: inline-flex; align-items: center; gap: 9px;
-  font-family: var(--f-head); font-size: 23px; font-weight: 800; line-height: 1;
-  letter-spacing: -.035em; color: #fff; text-decoration: none;
+/* Marka gercek logo gorseli oldugu icin eski yazi tipi kurallari kalkti.
+   Alt bilgide sutun genis, logo ust cubuktakinden biraz buyuk (36px) durur.
+   max-width, en dar ekranda sutunu tasirmamak icin; object-fit orani boyle
+   bir durumda da korur. */
+.brand { display: inline-flex; align-items: center; text-decoration: none; }
+.brand img {
+  display: block; height: 36px; width: auto;
+  max-width: 100%; object-fit: contain; object-position: left;
 }
-.brand span { color: var(--orange); }
-.brand img { width: 30px; height: 30px; flex: none; }
 
 .about p { margin: 16px 0 20px; font-size: 15px; max-width: 340px; }
 /* Alti hesabin tamami acikken (6x44 + 5x8 = 304px) en dar ekranda satir

@@ -24,13 +24,16 @@
 .barMinimal .inner { justify-content: space-between; }
 
 /* ---------- Marka ---------- */
-.brand {
-  display: inline-flex; align-items: center; gap: 9px; flex: none;
-  font-family: var(--f-head); font-size: 23px; font-weight: 800; line-height: 1;
-  letter-spacing: -.035em; color: var(--navy); text-decoration: none;
-}
-.brand span { color: var(--orange); }
-.brand img { width: 30px; height: 30px; flex: none; }
+/* Marka artik yazi tipiyle degil gercek logo gorseliyle basiliyor; bu yuzden
+   eski font kurallari kalkti. Tam logo 939x148, yani 6,34 oraninda: 32px
+   yukseklikte ~203px genislik eder. Ust cubukta ayrica eylem dugmesi ve
+   hamburger duruyor, 600px altinda bu genislik sigmiyor; orada tam logo
+   gizlenip yalnizca isaret kaliyor. Ikisi de basildigi icin degisim
+   anlik, yeniden cizim ya da ikinci istek gerektirmiyor. */
+.brand { display: inline-flex; align-items: center; flex: none; text-decoration: none; }
+.brandFull { display: block; height: 32px; width: auto; }
+.brandMark { display: none; }
+.brandMark img { display: block; width: 30px; height: 30px; }
 
 /* ---------- Masaustu menusu ---------- */
 .nav { flex: 1; min-width: 0; display: flex; align-items: center; margin-right: auto; }
@@ -180,14 +183,14 @@
 }
 
 @media (max-width: 600px) {
-  .brand { font-size: 21px; }
+  .brandFull { display: none; }
+  .brandMark { display: block; }
   .cta { height: 38px; padding: 0 12px; font-size: 13.5px; }
 }
 
 @media (max-width: 400px) {
   .inner { gap: 10px; }
-  .brand { font-size: 19px; gap: 7px; }
-  .brand img { width: 26px; height: 26px; }
+  .brandMark img { width: 26px; height: 26px; }
   .actions { gap: 8px; }
   .cta { padding: 0 11px; font-size: 13px; }
   .fav { display: none; }
