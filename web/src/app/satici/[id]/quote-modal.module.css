@@ -77,7 +77,7 @@
 .doneActions { display: flex; gap: 9px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
 
 @media (max-width: 640px) {
-  .grid { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: minmax(0,1fr); }
   /* Kirinti yolu 28px, secenek cipsleri 36px yuksekligindeydi. */
   .crumbs button, .chips button, .primary, .ghost { min-height: 40px; }
   /* 11.5px govde metni telefonda okunmuyor; ikincil ton renkte kaliyor. */

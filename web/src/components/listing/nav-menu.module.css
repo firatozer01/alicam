@@ -93,7 +93,7 @@
 @media(max-width:760px){
   .trigger.trigger{padding:7px 9px;font-size:13.5px}
   .panelWrap,.panelWide{width:min(420px,90vw)}
-  .columns{grid-template-columns:1fr}
+  .columns{grid-template-columns:minmax(0,1fr)}
   .panelHead{padding:13px 15px}
   .quickBar{padding:11px 14px}
 }

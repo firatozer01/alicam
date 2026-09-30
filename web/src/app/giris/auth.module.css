@@ -165,11 +165,11 @@
    Duyarli
    ========================================================== */
 @media (max-width: 1260px) {
-  .auth { grid-template-columns: 1fr; }
+  .auth { grid-template-columns: minmax(0,1fr); }
   .visual { order: 2; }
 }
 @media (max-width: 600px) {
-  .rolePick, .social { grid-template-columns: 1fr; }
+  .rolePick, .social { grid-template-columns: minmax(0,1fr); }
   .formSide { padding: 36px 0; }
   .title { font-size: 28px; }
   .visual { padding: 44px 16px 48px; }
@@ -179,7 +179,7 @@
   .reqCount { font-size: 12.5px; padding: 4px 8px; }
   .req:nth-child(3) { display: none; }
   .benefits { margin-top: 24px; }
-  .verifyInput { grid-template-columns: 1fr; }
+  .verifyInput { grid-template-columns: minmax(0,1fr); }
   /* "Sifremi unuttum" ve "Ucretsiz uye ol" 22-23px yuksekligindeydi. */
   .rowLink, .noteLink { display: inline-flex; align-items: center; min-height: 40px; }
   /* Kodu yeniden gonder: satir ici gorunen ama dokunulmasi gereken bir dugme. */

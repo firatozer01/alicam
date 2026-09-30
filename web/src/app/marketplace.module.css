@@ -249,12 +249,26 @@
 .rqSpecs { display: flex; flex-wrap: wrap; gap: 6px; }
 .rqSpecs span { font-size: 13px; font-weight: 550; padding: 4px 9px; border-radius: 7px; background: var(--bg); color: var(--ink-2); }
 .rqFoot { margin-top: auto; padding-top: 14px; border-top: 1px dashed var(--line); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.rqCta { position: relative; overflow: hidden; isolation: isolate; display: inline-flex; align-items: center; gap: 7px; height: 42px; padding: 0 16px; border-radius: 12px; background: var(--orange); color: #fff; font-weight: 700; font-size: 14.5px; white-space: nowrap; box-shadow: 0 8px 18px -8px rgba(242, 96, 12, .75); transition: transform .2s, box-shadow .2s, background .2s; }
+/*
+  Koyudan aciga mavi degrade.
+
+  Turuncuydu, ama palette yazili kural su: "Sayfada tek turuncu vardir:
+  yapilmasini istedigimiz sey." Anasayfada turuncu talep olusturmanin
+  rengi -- ust cubuktaki dugme, kahraman, yapisik serit ve son cagri
+  hepsi turuncu. Bu dugme teklif VERENE sesleniyor, yani baska bir isi;
+  ayni turuncuyu tasiyinca ikisi birbiriyle yarisiyordu.
+
+  Degrade uc marka mavisinden kuruluyor ve zemin kutudan genis
+  (background-size: 170%); uzerine gelince konum kayiyor, yani ayni
+  degrade aydinlaniyor. Ikinci bir renk tanimlamaya gerek kalmiyor.
+  Acik uc --blue: beyaz yazi orada da okunuyor (4,6:1).
+*/
+.rqCta { position: relative; overflow: hidden; isolation: isolate; display: inline-flex; align-items: center; gap: 7px; height: 42px; padding: 0 16px; border-radius: 12px; background: linear-gradient(100deg, var(--blue-700), var(--blue-600) 45%, var(--blue)); background-size: 170% 100%; background-position: 0 0; color: #fff; font-weight: 700; font-size: 14.5px; white-space: nowrap; box-shadow: 0 8px 18px -8px rgba(27, 92, 255, .7); transition: transform .2s, box-shadow .2s, background-position .35s ease; }
 .rqCta::after { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: -60%; width: 45%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent); transform: skewX(-20deg); animation: ctaShine 3.2s ease-in-out infinite; animation-delay: var(--d, 0s); }
 .rqCta i { font-style: normal; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; background: rgba(255, 255, 255, .2); animation: ctaZap 3.2s ease-in-out infinite; animation-delay: var(--d, 0s); }
 .rqCta i svg { width: 15px; height: 15px; fill: #fff; display: block; }
 .rqCta span { display: inline-block; transition: transform .2s; animation: ctaNudge 1.6s ease-in-out infinite; }
-.rqCta:hover { background: var(--orange-600); transform: translateY(-2px); box-shadow: 0 12px 24px -8px rgba(242, 96, 12, .85); }
+.rqCta:hover { background-position: 100% 0; transform: translateY(-2px); box-shadow: 0 12px 24px -8px rgba(27, 92, 255, .8); }
 .rqCta:hover span { animation: none; transform: translateX(5px); }
 .rq:hover .rqCta::after { animation-duration: 1.2s; }
 @keyframes ctaShine { 0%, 55% { left: -60%; } 85%, 100% { left: 120%; } }
@@ -666,8 +680,8 @@
   .ff { padding: 12px 16px; }
   .finderGo { min-height: 54px; }
   .suggest { width: 100%; }
-  .heroVisual { grid-template-columns: 1fr; }
-  .how { grid-template-columns: 1fr; }
+  .heroVisual { grid-template-columns: minmax(0,1fr); }
+  .how { grid-template-columns: minmax(0,1fr); }
   .verticals { grid-template-columns: repeat(2, 1fr); }
   .feed { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .areas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -675,7 +689,7 @@
 @media (max-width: 760px) {
   .tiles { --tc: 2; }
   .bento { grid-template-columns: minmax(0, 1fr); grid-template-areas: "cmp" "free" "prv" "rad" "trs"; }
-  .road { grid-template-columns: 1fr; }
+  .road { grid-template-columns: minmax(0,1fr); }
   .roadArrow { justify-self: center; transform: rotate(90deg); }
   .statsPill { width: 100%; }
   .statsPill div { flex: 1; padding: 10px 8px; }
@@ -705,7 +719,7 @@
   .hl { white-space: normal; }
   .finder { margin-top: 24px; border-radius: 18px; }
   .finderTabs button { padding: 10px 12px 12px; font-size: 14px; }
-  .trustRow { grid-template-columns: 1fr; }
+  .trustRow { grid-template-columns: minmax(0,1fr); }
   .trustRow li { padding: 14px 16px; }
   .verticals { gap: 10px; }
   .vcard { min-height: 170px; padding: 16px; }

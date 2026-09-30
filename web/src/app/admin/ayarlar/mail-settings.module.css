@@ -73,7 +73,7 @@
 .soonText { margin: 0; padding: 16px 20px; color: var(--muted); font-size: 12.5px; line-height: 1.7; }
 
 @media (max-width: 720px) {
-  .grid { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: minmax(0,1fr); }
 }
 
 /* --- Logo ve marka karti --- */
@@ -109,5 +109,5 @@
 .brandActions button.brandReset:hover:not(:disabled) { color: var(--danger-fg); border-color: transparent; filter: brightness(.97); }
 
 @media (max-width: 900px) {
-  .brandGrid { grid-template-columns: 1fr; }
+  .brandGrid { grid-template-columns: minmax(0,1fr); }
 }

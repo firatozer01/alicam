@@ -285,11 +285,11 @@
      dort sutunlu satira hala sigiyor. */
   .stepRow > span { font-size: 13px; }
   .step { padding: 24px 16px; }
-  .fgrid { grid-template-columns: 1fr; }
+  .fgrid { grid-template-columns: minmax(0,1fr); }
   .vpick { grid-template-columns: 1fr 1fr; gap: 10px; }
   .vopt { padding: 14px; }
   .vopt small { display: none; }
-  .catlist { grid-template-columns: 1fr; max-height: none; }
+  .catlist { grid-template-columns: minmax(0,1fr); max-height: none; }
   .wzFoot { padding: 12px 16px; border-radius: 0; }
   .wzFoot .next { min-width: 0; flex: 1; }
   .draft { display: none; }

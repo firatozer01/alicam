@@ -83,7 +83,7 @@
 }
 
 @media (max-width: 860px) {
-  .legal { grid-template-columns: 1fr; padding-top: 16px; }
+  .legal { grid-template-columns: minmax(0,1fr); padding-top: 16px; }
   .toc {
     position: sticky; top: var(--header-h); z-index: 20;
     display: flex; overflow-x: auto; gap: 6px;

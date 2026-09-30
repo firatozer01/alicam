@@ -98,7 +98,7 @@
 @media(max-width:860px){
   .head{grid-template-columns:auto minmax(0,1fr)}
   .verifyBox{grid-column:1/-1}
-  .form{grid-template-columns:1fr}
+  .form{grid-template-columns:minmax(0,1fr)}
 }
 
 /* Vitrinle ayni baslik dili: kicker + serif baslik */
@@ -108,7 +108,7 @@
 @media(max-width:600px){
   /* minmax(320px,...) 320px'lik ekranda 288px'lik kabuga sigmiyor ve sayfayi
      yatay tasiyordu (scrollWidth 320 > clientWidth 288). */
-  .spaces{grid-template-columns:1fr}
+  .spaces{grid-template-columns:minmax(0,1fr)}
   /* Sag alttaki asistan maskotu 124x130 ve 20px dipten yukarida: 70px'lik alt
      bosluk son kartin eylemlerini maskotun altinda birakiyordu. */
   .page{padding-bottom:170px}

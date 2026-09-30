@@ -252,13 +252,30 @@ export function SiteHeader({
         onClick={() => { rememberVertical(link.vertical); setDrawerOpen(false); }}
       >{link.icon && <i className={styles.navIcon}>{link.icon}</i>}{link.label}</Link>)}
 
+      {/*
+        href'i olmayan oge de basilir.
+
+        Eskiden yalnizca href tasiyanlar basiliyor, gerisi null donuyordu.
+        Masaustunde sorun cikmiyordu cunku mega menu (NavMenuBar) zaten
+        acilir kapanir bir buton olarak basiyor onlari -- ama o cubuk
+        1260px altinda gizli. Satici panelinin butun bolumleri (Tekliflerim,
+        Performans, Urunlerim, Hizmetlerim, Galerim, Firma profilim, One cik)
+        sayfa degil GORUNUM; yani hepsi onSelect. Sonuc: telefondan giren
+        satici panelinde yalnizca "Gelen talepler"i gorebiliyordu, obur
+        bolumlere ulasmanin hicbir yolu yoktu.
+      */}
       {drawerMenus.map((menu) => <div className={styles.drawerGroup} key={menu.key}>
         <h3>{menu.label}</h3>
         {menu.sections.flatMap((section) => section.items).map((item) => item.href
           ? <Link className={styles.drawerLink} href={item.href} key={item.key} onClick={() => setDrawerOpen(false)}>
             <i className={styles.navIcon}>{item.icon}</i>{item.label}
           </Link>
-          : null)}
+          : <button
+            className={styles.drawerLink}
+            key={item.key}
+            onClick={() => { item.onSelect?.(); setDrawerOpen(false); }}
+            type="button"
+          ><i className={styles.navIcon}>{item.icon}</i>{item.label}</button>)}
       </div>)}
 
       <div className={styles.drawerFoot}>

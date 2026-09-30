@@ -128,7 +128,7 @@
 
 /* ---- Dar ekran: tablo yığılmış satıra döner ---- */
 @media(max-width:1080px){
-  .shell{grid-template-columns:1fr}
+  .shell{grid-template-columns:minmax(0,1fr)}
   .rail{position:static}
   .railToggle{display:flex}
   .railHidden{display:none}

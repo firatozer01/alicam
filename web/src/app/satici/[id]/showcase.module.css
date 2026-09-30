@@ -175,18 +175,18 @@
   .coverSide{grid-column:1/-1;flex-direction:row;align-items:center;flex-wrap:wrap}
   .ratingBox{flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;gap:10px;text-align:left}
   .ratingBox strong{font-size:24px}
-  .reviewLayout{grid-template-columns:1fr}
+  .reviewLayout{grid-template-columns:minmax(0,1fr)}
   .storeBar{position:static}
   .block{scroll-margin-top:80px}
 }
 @media(max-width:620px){
-  .coverInner{grid-template-columns:1fr}
+  .coverInner{grid-template-columns:minmax(0,1fr)}
   .avatar{width:84px;height:84px;font-size:26px;border-radius:22px}
   .counts{gap:16px}
-  .workGrid,.serviceGrid{grid-template-columns:1fr}
+  .workGrid,.serviceGrid{grid-template-columns:minmax(0,1fr)}
   /* 320px'de blok govdesine 264px kaliyor; 280px'lik sutun sayfayi tasiriyordu.
      Komsulari (.workGrid/.serviceGrid) zaten burada tek sutuna dusuyor. */
-  .reviewGrid{grid-template-columns:1fr}
+  .reviewGrid{grid-template-columns:minmax(0,1fr)}
   /* Serit sekmeleri 31px, filtre dugmeleri 30px yuksekligindeydi. */
   .tabs button,.filterRow button,.clearFilter,.workMore,.ghostCta,.serviceCta,.barCta,.modalPrimary{min-height:40px}
   /* Puan dagilimi filtresi 20px'lik bir seritti: yanlis yildiza basmak kolaydi. */

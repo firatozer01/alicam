@@ -386,13 +386,13 @@
 @media (max-width: 720px) {
   .header { align-items: flex-start; flex-direction: column; }
   .header h1 { font-size: 31px; }
-  .summary { grid-template-columns: 1fr; }
+  .summary { grid-template-columns: minmax(0,1fr); }
   .categoryFields { grid-template-columns: 1fr 1fr; }
-  .split { grid-template-columns: 1fr; }
+  .split { grid-template-columns: minmax(0,1fr); }
   .categoryList { position: static; max-height: 285px; overflow-y: auto; }
   .usage { flex-wrap: wrap; }
   .usage button { width: 100%; margin: 5px 0 0; }
-  .attributeEditor > div { grid-template-columns: 1fr; }
+  .attributeEditor > div { grid-template-columns: minmax(0,1fr); }
   .panelHead aside { width: 100%; }
   .panelHead aside button { flex: 1; }
 }

@@ -77,7 +77,7 @@
 .composer button:disabled { opacity: .5; cursor: default; }
 
 @media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; }
+  .layout { grid-template-columns: minmax(0,1fr); }
   .list { max-height: 260px; }
 }
 
