@@ -228,7 +228,7 @@ export function HomeEditor() {
         <Link className="active" href="/admin/anasayfa"><i>▤</i> Anasayfa</Link>
         <Link href="/admin/kategoriler"><i>▦</i> Kategoriler</Link>
         <Link href="/admin/satici-onaylari"><i>✓</i> Satıcı onayları</Link>
-        <Link href="/admin/ayarlar"><i>✉</i> Bildirim ayarları</Link>
+        <Link href="/admin/ayarlar"><i>⚙</i> Ayarlar</Link>
       </nav>
     </aside>
 

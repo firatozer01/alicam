@@ -41,6 +41,8 @@ Route::get('/marketplace', MarketplaceController::class);
 // Anasayfanin hizmet katalogu. /categories?tree=1 burada KULLANILMAZ:
 // 5689 dugumun tamamini tasidigi icin yaklasik 1,9 MB yanit uretiyor.
 Route::get('/service-catalog', App\Http\Controllers\Api\ServiceCatalogController::class);
+// Alt bilgideki sosyal medya baglantilari; her sayfada okundugu icin oturum gerektirmez.
+Route::get('/site-settings', App\Http\Controllers\Api\SiteSettingsController::class);
 
 // Asistan: oturum zorunlu degil, varsa kullaniciya ozel konular acilir.
 /**

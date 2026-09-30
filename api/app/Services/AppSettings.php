@@ -23,6 +23,9 @@ class AppSettings
     /** Gizli alanlar sifrelenerek saklanir ve panele maskelenmis doner. */
     public const SECRET_KEYS = ['mail.password', 'sms.api_key', 'sms.password', 'assistant.gemini_key', 'images.pexels_key'];
 
+    /** Alt bilgideki sosyal medya simgelerinin kanonik sirasi. */
+    public const SOCIAL_KEYS = ['instagram', 'youtube', 'tiktok', 'x', 'facebook', 'linkedin'];
+
     /** Panelden yonetilebilen alanlar ve varsayilanlari. */
     public const EDITABLE = [
         'mail.enabled' => '0',
@@ -61,6 +64,16 @@ class AppSettings
         // Dolu ise populer seridi talep sayisi yerine bu siraya uyar;
         // bos ise otomatik siralama devam eder.
         'home.popular_pinned' => '',
+
+        // Alt bilgide gorunen sosyal medya baglantilari. Bos birakilan
+        // hesabin simgesi hic basilmaz, yani bir hesabi kaldirmanin yolu
+        // alani bosaltmaktir.
+        'social.instagram' => 'https://www.instagram.com/alicamnet',
+        'social.youtube' => 'https://www.youtube.com/@alicamnet',
+        'social.tiktok' => 'https://www.tiktok.com/@alicamnet',
+        'social.x' => 'https://x.com/alicamnet',
+        'social.facebook' => '',
+        'social.linkedin' => '',
     ];
 
     /**
@@ -175,6 +188,42 @@ class AppSettings
             }
 
             $out[$key] = $all[$key] ?? $default;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Alt bilgide basilacak sosyal medya baglantilari, kanonik sirada.
+     *
+     * Burada bilerek get() kullanilmiyor: get() bos degeri varsayilana
+     * dusuruyor, dolayisiyla yonetici bir hesabi silip alani bosaltinca
+     * varsayilan adres geri gelirdi. Kayitli bir satir varsa degeri bos
+     * olsa bile gecerlidir; anahtar hic yoksa varsayilana bakilir.
+     *
+     * @return array<int, array{platform: string, url: string}>
+     */
+    public static function socialLinks(): array
+    {
+        $all = self::all();
+        $out = [];
+
+        foreach (self::SOCIAL_KEYS as $platform) {
+            $anahtar = 'social.'.$platform;
+
+            $deger = array_key_exists($anahtar, $all)
+                ? (string) $all[$anahtar]
+                : (self::EDITABLE[$anahtar] ?? '');
+
+            $deger = trim($deger);
+
+            // Adres dogrudan bir <a href> icine giriyor; yonetim ucu
+            // kaydederken de suzuyor ama son kapi burada.
+            if ($deger === '' || ! preg_match('~^https?://~i', $deger)) {
+                continue;
+            }
+
+            $out[] = ['platform' => $platform, 'url' => $deger];
         }
 
         return $out;

@@ -22,6 +22,12 @@ type Settings = {
   "images.pexels_key": string;
   "images.pexels_key_set"?: boolean;
   "assistant.model": string;
+  "social.instagram": string;
+  "social.youtube": string;
+  "social.tiktok": string;
+  "social.x": string;
+  "social.facebook": string;
+  "social.linkedin": string;
 };
 
 type Meta = { active_mailer: string; sms_ready: boolean; assistant_mode: "ai" | "knowledge"; image_source: "pexels" | "acik-kaynak" };
@@ -38,6 +44,12 @@ const empty: Settings = {
   "assistant.gemini_key": "",
   "assistant.model": "gemini-3.8-flash",
   "images.pexels_key": "",
+  "social.instagram": "",
+  "social.youtube": "",
+  "social.tiktok": "",
+  "social.x": "",
+  "social.facebook": "",
+  "social.linkedin": "",
 };
 
 export function MailSettings() {
@@ -101,6 +113,14 @@ export function MailSettings() {
           images: {
             pexels_key: form["images.pexels_key"],
           },
+          social: {
+            instagram: form["social.instagram"],
+            youtube: form["social.youtube"],
+            tiktok: form["social.tiktok"],
+            x: form["social.x"],
+            facebook: form["social.facebook"],
+            linkedin: form["social.linkedin"],
+          },
           ...(clear.length > 0 ? { clear } : {}),
         }),
       });
@@ -108,7 +128,21 @@ export function MailSettings() {
       setPasswordSet(Boolean(response.data["mail.password_set"]));
       setGeminiSet(Boolean(response.data["assistant.gemini_key_set"]));
       setPexelsSet(Boolean(response.data["images.pexels_key_set"]));
-      setForm((current) => ({ ...current, "mail.password": "", "assistant.gemini_key": "", "images.pexels_key": "" }));
+      // Sunucu sosyal adresleri normalize ediyor ("tiktok.com/@x" ->
+      // "https://tiktok.com/@x"); kaydedilen hali geri yazilmazsa ekranda
+      // yazan ile sitede gorunen farkli kalir.
+      setForm((current) => ({
+        ...current,
+        "social.instagram": response.data["social.instagram"],
+        "social.youtube": response.data["social.youtube"],
+        "social.tiktok": response.data["social.tiktok"],
+        "social.x": response.data["social.x"],
+        "social.facebook": response.data["social.facebook"],
+        "social.linkedin": response.data["social.linkedin"],
+        "mail.password": "",
+        "assistant.gemini_key": "",
+        "images.pexels_key": "",
+      }));
     } catch (requestError: unknown) {
       setError(firstApiError(requestError));
     } finally {
@@ -141,16 +175,16 @@ export function MailSettings() {
         <Link href="/admin"><i>◇</i> Genel bakış</Link>
         <Link href="/admin/anasayfa"><i>▤</i> Anasayfa</Link><Link href="/admin/kategoriler"><i>▦</i> Kategoriler</Link>
         <Link href="/admin/satici-onaylari"><i>✓</i> Satıcı onayları</Link>
-        <Link className="active" href="/admin/ayarlar"><i>✉</i> Bildirim ayarları</Link>
+        <Link className="active" href="/admin/ayarlar"><i>⚙</i> Ayarlar</Link>
       </nav>
     </aside>
 
     <section className="admin-content">
       <header className="admin-header">
         <div>
-          <span className="admin-kicker">BİLDİRİM ALTYAPISI</span>
-          <h1>E-posta bağlantısı</h1>
-          <p>SMTP bilgilerini buradan girin; sunucu dosyasını düzenlemeye gerek yok.</p>
+          <span className="admin-kicker">SİTE AYARLARI</span>
+          <h1>Ayarlar</h1>
+          <p>E-posta gönderimi, asistan, görsel kaynağı ve sosyal medya hesapları buradan yönetilir; sunucu dosyasını düzenlemeye gerek yok.</p>
         </div>
         <Link className="admin-home-button" href="/">Siteyi görüntüle ↗</Link>
       </header>
@@ -284,6 +318,34 @@ export function MailSettings() {
               </button>
             )}
             <button disabled={busy} onClick={() => void save()} type="button">{busy ? "Kaydediliyor…" : "Görsel ayarını kaydet"}</button>
+          </footer>
+        </section>
+
+        <section className={styles.card}>
+          <header>
+            <div>
+              <strong>Sosyal medya hesapları</strong>
+              <small>Alt bilgideki simgeler bu adreslere gider. Boş bıraktığın hesabın simgesi sitede hiç görünmez.</small>
+            </div>
+          </header>
+          <div className={styles.grid}>
+            <label>Instagram<input autoComplete="off" inputMode="url" onChange={(event) => set("social.instagram", event.target.value)} placeholder="https://www.instagram.com/alicamnet" value={form["social.instagram"]} /></label>
+            <label>YouTube<input autoComplete="off" inputMode="url" onChange={(event) => set("social.youtube", event.target.value)} placeholder="https://www.youtube.com/@alicamnet" value={form["social.youtube"]} /></label>
+            <label>TikTok<input autoComplete="off" inputMode="url" onChange={(event) => set("social.tiktok", event.target.value)} placeholder="https://www.tiktok.com/@alicamnet" value={form["social.tiktok"]} /></label>
+            <label>X (Twitter)<input autoComplete="off" inputMode="url" onChange={(event) => set("social.x", event.target.value)} placeholder="https://x.com/alicamnet" value={form["social.x"]} /></label>
+            <label>
+              Facebook
+              <input autoComplete="off" inputMode="url" onChange={(event) => set("social.facebook", event.target.value)} placeholder="https://www.facebook.com/alicamnet" value={form["social.facebook"]} />
+              <small>Hesap yoksa boş bırakılabilir.</small>
+            </label>
+            <label>
+              LinkedIn
+              <input autoComplete="off" inputMode="url" onChange={(event) => set("social.linkedin", event.target.value)} placeholder="https://www.linkedin.com/company/alicamnet" value={form["social.linkedin"]} />
+              <small>Hesap yoksa boş bırakılabilir.</small>
+            </label>
+          </div>
+          <footer>
+            <button disabled={busy} onClick={() => void save()} type="button">{busy ? "Kaydediliyor…" : "Sosyal medya bağlantılarını kaydet"}</button>
           </footer>
         </section>
 

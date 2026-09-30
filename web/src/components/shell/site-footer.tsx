@@ -9,7 +9,7 @@ import styles from "./site-footer.module.css";
 
 /* ================= Simgeler ================= */
 
-const socialIcons = {
+const socialIcons: Record<string, React.ReactNode> = {
   instagram: <svg aria-hidden="true" viewBox="0 0 24 24">
     <rect fill="none" height="18" rx="5" stroke="currentColor" strokeWidth="2" width="18" x="3" y="3" />
     <circle cx="12" cy="12" fill="none" r="4" stroke="currentColor" strokeWidth="2" />
@@ -23,6 +23,12 @@ const socialIcons = {
   </svg>,
   x: <svg aria-hidden="true" viewBox="0 0 24 24">
     <path d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z" fill="currentColor" />
+  </svg>,
+  facebook: <svg aria-hidden="true" viewBox="0 0 24 24">
+    <path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.8 3.7-3.8 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z" fill="currentColor" />
+  </svg>,
+  linkedin: <svg aria-hidden="true" viewBox="0 0 24 24">
+    <path d="M5 3.4a2.3 2.3 0 1 0 0 4.6 2.3 2.3 0 0 0 0-4.6ZM3 9.3h4V21H3V9.3Zm6.4 0h3.8V11h.1c.5-1 1.9-2 3.8-2 4 0 4.9 2.4 4.9 5.7V21h-4v-5.6c0-1.4 0-3.1-2-3.1s-2.3 1.5-2.3 3V21h-4V9.3Z" fill="currentColor" />
   </svg>,
 };
 
@@ -58,6 +64,10 @@ type MarketplaceResponse = {
   };
 };
 
+type SocialLink = { platform: string; url: string };
+
+type SiteSettingsResponse = { data: { social: SocialLink[] } };
+
 /**
  * Serit hicbir zaman bos kalmasin: uc ulasilamazsa bu kucuk liste gosterilir.
  * Gercek veri geldiginde yerini birakir.
@@ -78,6 +88,27 @@ const fallbackTicker: TickerItem[] = [
  * her gezinmede yeniden istek atmasinin anlami yok.
  */
 let tickerCache: TickerItem[] | null = null;
+
+/** Simgenin yaninda okunan ad; aria-label buradan geliyor. */
+const socialLabels: Record<string, string> = {
+  instagram: "Instagram",
+  youtube: "YouTube",
+  tiktok: "TikTok",
+  x: "X",
+  facebook: "Facebook",
+  linkedin: "LinkedIn",
+};
+
+/**
+ * Adresler de serit gibi modul duzeyinde saklanir; nadiren degisiyorlar.
+ *
+ * Seritten farkli olarak burada GOMULU BIR YEDEK YOK. Yedek liste
+ * yoneticinin kaldirdigi bir hesabi geri getirirdi: uc cevap vermediginde
+ * ya da hesap listesi bosaldiginda ekranda eski adresler kalir ve
+ * ziyaretci artik bize ait olmayan bir hesaba tiklardi. Hesap
+ * gostermemek, yanlis hesap gostermekten iyidir.
+ */
+let socialCache: SocialLink[] | null = null;
 
 /**
  * Tasarimin yedi dikeyi. Statik tasarimda "tip" kimlikleriydi; burada
@@ -113,6 +144,7 @@ const prefersReducedMotion = () =>
 export function SiteFooter() {
   const router = useRouter();
   const [items, setItems] = useState<TickerItem[]>(() => tickerCache ?? fallbackTicker);
+  const [social, setSocial] = useState<SocialLink[]>(() => socialCache ?? []);
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ id: number; text: string } | null>(null);
@@ -136,6 +168,22 @@ export function SiteFooter() {
         if (next.length === 0) return;
         tickerCache = next;
         if (active) setItems(next);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+
+  // Sosyal hesaplar: yonetim panelinden degisebiliyor, o yuzden gomulu degil.
+  useEffect(() => {
+    if (socialCache) return;
+    let active = true;
+    apiRequest<SiteSettingsResponse>("/site-settings")
+      .then((response) => {
+        // Bos dizi gecerli bir cevap: seritteki gibi "veri yok" degil,
+        // "yonetici butun hesaplari kaldirdi" demek. Es gecilirse hesaplar
+        // hicbir zaman kapatilamazdi.
+        socialCache = response.data.social;
+        if (active) setSocial(socialCache);
       })
       .catch(() => undefined);
     return () => { active = false; };
@@ -199,6 +247,11 @@ export function SiteFooter() {
       .finally(() => setBusy(false));
   };
 
+  // Adres dogrudan bir href'e giriyor: yonetim ucu kaydederken suzuyor
+  // ama son kapi burada. Simgesi olmayan platform da basilmaz; eleme
+  // cizimden once yapiliyor ki hicbiri kalmayinca kutu hic acilmasin.
+  const visibleSocial = social.filter((link) => socialIcons[link.platform] && /^https?:\/\//i.test(link.url));
+
   const strip = (copy: number) => items.map((item) => <span className={styles.tk} key={`${copy}-${item.key}`}>
     <i>{item.icon}</i><b>{item.title}</b><em>{item.district}</em><u>{item.offers} teklif</u>
   </span>);
@@ -251,12 +304,15 @@ export function SiteFooter() {
         <div className={styles.about}>
           <Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
           <p>Talep tabanlı pazaryeri. İlan aramak yok; ihtiyacını yaz, teklifler sana gelsin.</p>
-          <div className={styles.social}>
-            <a aria-label="Instagram" href="https://www.instagram.com/alicamnet" rel="noopener noreferrer" target="_blank">{socialIcons.instagram}</a>
-            <a aria-label="YouTube" href="https://www.youtube.com/@alicamnet" rel="noopener noreferrer" target="_blank">{socialIcons.youtube}</a>
-            <a aria-label="TikTok" href="https://www.tiktok.com/@alicamnet" rel="noopener noreferrer" target="_blank">{socialIcons.tiktok}</a>
-            <a aria-label="X" href="https://x.com/alicamnet" rel="noopener noreferrer" target="_blank">{socialIcons.x}</a>
-          </div>
+          {visibleSocial.length > 0 && <div className={styles.social}>
+            {visibleSocial.map((link) => <a
+              aria-label={socialLabels[link.platform]}
+              href={link.url}
+              key={link.platform}
+              rel="noopener noreferrer"
+              target="_blank"
+            >{socialIcons[link.platform]}</a>)}
+          </div>}
         </div>
 
         <nav className={styles.column}>
