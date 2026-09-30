@@ -166,14 +166,14 @@ export function AssistantWidget() {
       onClick={() => setOpen((current) => !current)}
       type="button"
     >
-      <Image alt="" height={106} priority={false} src="/asistan.gif" unoptimized width={132} />
+      <Image alt="" height={140} priority={false} src="/asistan.webp" unoptimized width={134} />
       {!open && <span className={styles.ping} />}
     </button>
 
     {open && (
       <section aria-label="alıcam asistanı" className={styles.panel} data-guest={guest}>
         <header className={styles.head}>
-          <span className={styles.avatar}><Image alt="" height={38} src="/asistan.gif" unoptimized width={38} /></span>
+          <span className={styles.avatar}><Image alt="" height={38} src="/asistan.webp" unoptimized width={38} /></span>
           <div>
             <strong>alıcam asistanı</strong>
             <small>

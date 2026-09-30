@@ -3,13 +3,20 @@
 
 .launcher {
   position: fixed; right: 20px; bottom: 20px; z-index: 80;
-  /* Maskot 400x322; kutu da ayni oranda olmali yoksa gorsel uzuyor. */
-  width: 132px; height: 106px; padding: 0; border: 0;
+  /* Maskot 560x585; kutu da ayni oranda olmali yoksa gorsel uzuyor.
+     Eski maskot yatiktı (400x322) ve kutu da oyleydi; yenisi neredeyse
+     kare oldugu icin kutu yukseldi. */
+  width: 134px; height: 140px; padding: 0; border: 0;
   background: none; cursor: pointer; line-height: 0;
   filter: drop-shadow(0 14px 28px rgba(76, 60, 180, .28));
   transition: transform .22s cubic-bezier(.2, .8, .2, 1);
   animation: floatIn .5s cubic-bezier(.2, .8, .2, 1) both;
 }
+/* Yeni maskot TEK KARE bir gorsel; eskisi 16 kareli animasyonlu gif
+   idi. Kose bos bir resim gibi durmasin diye hafif bir salinim
+   CSS'ten veriliyor. Hareket kisitlandiginda asagida kapaniyor. */
+.launcher img { animation: mascotBob 3.4s ease-in-out .5s infinite; }
+@keyframes mascotBob { 0%, 100% { transform: none; } 50% { transform: translateY(-6px); } }
 .launcher:hover { transform: translateY(-4px) scale(1.04); }
 .launcher[data-open="true"] { transform: scale(.88); opacity: .75; }
 @keyframes floatIn { from { opacity: 0; transform: translateY(20px) scale(.9); } to { opacity: 1; transform: none; } }
@@ -23,14 +30,14 @@
 @keyframes ping { to { transform: scale(1.7); opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .launcher { animation: none; }
+  .launcher, .launcher img { animation: none; }
   .ping::after { animation: none; }
 }
 
 /* ---- Panel ---- */
 .panel {
-  position: fixed; right: 20px; bottom: 156px; z-index: 81;
-  width: min(384px, calc(100vw - 32px)); max-height: min(620px, calc(100vh - 160px));
+  position: fixed; right: 20px; bottom: 186px; z-index: 81;
+  width: min(384px, calc(100vw - 32px)); max-height: min(620px, calc(100vh - 210px));
   display: flex; flex-direction: column; overflow: hidden;
   border: 1px solid var(--line); border-radius: var(--r-lg);
   background: var(--card); box-shadow: var(--shadow-lg);
@@ -137,6 +144,6 @@
 .composer button:disabled { opacity: .45; cursor: default; }
 
 @media (max-width: 520px) {
-  .launcher { width: 96px; height: 77px; right: 12px; bottom: 12px; }
-  .panel { right: 12px; bottom: 112px; max-height: calc(100vh - 144px); }
+  .launcher { width: 100px; height: 105px; right: 12px; bottom: 12px; }
+  .panel { right: 12px; bottom: 140px; max-height: calc(100vh - 172px); }
 }
