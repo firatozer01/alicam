@@ -1,7 +1,7 @@
 /* Mesajlar sayfasi. Renkler paletin token'larindan gelir. */
 
-.page { min-height: 100vh; background: var(--bg); color: var(--ink); padding-bottom: 60px; }
-.wrap { width: min(1320px, calc(100% - 40px)); margin: 0 auto; }
+/* Genislik kabugun .wrap'inden gelir; burada yalnizca sayfaya ozel zemin var. */
+.page { background: var(--bg); color: var(--ink); padding-bottom: 60px; }
 
 .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin: 24px 0 18px; }
 .kicker { display: block; margin-bottom: 5px; font-size: 12px; font-weight: 800; letter-spacing: .14em; color: var(--violet); }

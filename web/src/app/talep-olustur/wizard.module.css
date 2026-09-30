@@ -5,25 +5,21 @@
    tasarim belirtecleriyle.
    ========================================================== */
 
-.page { min-height: 100vh; background: var(--bg); color: var(--ink); font-family: var(--f-body); }
+/* Sayfa kabugu (.page) ve ust menu (.header/.headerIn/.brand) buradan
+   kalkti: ikisini de PageShell kuruyor ve buradaki kurallar zaten
+   SiteHeader'inkilerin kopyasiydi. */
 .skip { position: absolute; left: -999px; top: 8px; z-index: 200; padding: 8px 14px; border-radius: 8px; background: var(--navy); color: #fff; }
 .skip:focus { left: 8px; }
-
-/* ---------- Ust menu (site.css .header-min) ---------- */
-.header { position: sticky; top: 0; z-index: 80; }
-.header::before { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(255, 255, 255, .9); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--line); }
-.headerIn { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-/* Marka artik isaret + yazi degil, tek parca logo gorseli. Yuksekligi
-   ust menuye gore sabit; genisligi orana birakiyoruz ki logo ezilmesin. */
-.brand { display: inline-flex; align-items: center; min-width: 0; }
-.brand img { display: block; width: min(203px, 100%); height: auto; }
 
 /* ---------- Ilerleme cubugu ---------- */
 .progress { position: sticky; top: var(--header-h); z-index: 70; height: 4px; background: var(--line); }
 .progressBar { display: block; height: 100%; background: linear-gradient(90deg, var(--blue), #5B84FF); border-radius: 0 4px 4px 0; transition: width .45s cubic-bezier(.2, .8, .2, 1); }
 
 /* ---------- Uc sutunlu yerlesim ---------- */
-.wz { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; display: grid; grid-template-columns: 250px minmax(0, 1fr) 380px; gap: clamp(20px, 2.6vw, 44px); padding: 40px 0 80px; align-items: start; }
+/* flex: 1 -> kabugun dikey akisinda artan yeri govde yutsun; yoksa kisa
+   icerikte (bittiginde cikan tesekkur karti) alt bilgi sayfanin
+   ortasinda asili kaliyor. */
+.wz { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; flex: 1; display: grid; grid-template-columns: 250px minmax(0, 1fr) 380px; gap: clamp(20px, 2.6vw, 44px); padding: 40px 0 80px; align-items: start; }
 
 /* ---------- Sol: adim listesi ---------- */
 .wzSteps { position: sticky; top: calc(var(--header-h) + 32px); display: grid; gap: 24px; }
@@ -173,7 +169,6 @@
 .btn:hover { transform: translateY(-1px); }
 .btn:active { transform: none; }
 .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-.btnSm { height: 40px; padding: 0 16px; font-size: 14.5px; border-radius: 10px; }
 .btnLg { height: 56px; padding: 0 28px; font-size: 16.5px; border-radius: 14px; }
 .btnCta { background: var(--orange); color: #fff; box-shadow: 0 8px 20px -8px rgba(242, 96, 12, .7); }
 .btnCta:hover { background: var(--orange-600); }
@@ -250,7 +245,9 @@
 @media (max-width: 600px) {
   .wz { width: 100%; }
   .formCard { border-radius: 0; border-left: 0; border-right: 0; }
-  .wzSteps, .wzPreview { padding: 0 16px; }
+  /* Kenar boslugunu .wz zaten --gutter ile veriyor; buradaki ikinci 16px
+     icerigi ust cubuktaki logodan 16px daha iceri itiyordu. */
+  .wzSteps, .wzPreview { padding: 0; }
   .stepRow > b { width: 30px; height: 30px; font-size: 13px; }
   .stepRow > span { font-size: 12px; }
   .step { padding: 24px 16px; }

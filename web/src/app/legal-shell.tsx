@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { SiteHeader } from "@/components/shell/site-header";
-import styles from "../legal.module.css";
+import { PageShell } from "@/components/shell/page-shell";
+import styles from "./legal.module.css";
 
 export type LegalTocItem = { id: string; label: string };
 
@@ -24,6 +24,10 @@ type LegalShellProps = {
 /**
  * Yasal sayfalarin ortak iskeleti — alicam-yeni-tasarim/gizlilik.html ve
  * kullanim-kosullari.html portu.
+ *
+ * Bu dosya once gizlilik/ ve kullanim-kosullari/ altinda bayt bayt ayni iki
+ * kopya halindeydi; birinde yapilan duzeltme otekine gecmiyordu. Tek kopya
+ * burada duruyor, iki sayfa da bunu iceri aliyor.
  *
  * Hero serit, yapiskan icindekiler ve makale. Icindekiler okunan bolumu
  * isaretler: tasarimdaki site.js ile ayni pencere kullanilir, ekranin ust
@@ -68,12 +72,17 @@ export function LegalShell({ eyebrow, title, lead, meta, toc, aside, children }:
     nav.scrollTo({ left: Math.max(0, link.offsetLeft - 16), behavior: reduced ? "auto" : "smooth" });
   }, [activeId]);
 
-  return <>
+  /*
+   * width="full": hero seridin degradesi ekranin iki kenarina kadar
+   * uzanmali. Kabuk govdeyi sarsaydi degrade de kapsayiciya sigardi.
+   * Sarmayi hero ile makale kendi .wrap'leri ile yapiyor; o kural da
+   * kabugun kullandigi formulun aynisi, boylece baslik ile ust cubuktaki
+   * logo ayni hizada duruyor.
+   */
+  return <PageShell tone="public" width="full">
     <a className={styles.skip} href="#icerik">İçeriğe geç</a>
 
-    <SiteHeader />
-
-    <main id="icerik">
+    <main className={styles.main} id="icerik">
       <section className={styles.hero}>
         <div className={styles.wrap}>
           <span className={styles.eyebrow}>{eyebrow}</span>
@@ -100,5 +109,5 @@ export function LegalShell({ eyebrow, title, lead, meta, toc, aside, children }:
         <aside className={styles.aside}>{aside}</aside>
       </div>
     </main>
-  </>;
+  </PageShell>;
 }

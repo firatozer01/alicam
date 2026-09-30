@@ -1,20 +1,12 @@
 /* Hesap ayarları: bilgiler, güvenlik ve çalışma alanları. */
 
-.page{min-height:100vh;background:var(--bg);color:var(--ink);padding-bottom:70px}
-.wrap{width:min(1080px,calc(100% - 40px));margin:0 auto}
+/* Genislik kabugun .wrap'inden gelir; burada yalnizca sayfaya ozel zemin var. */
+.page{background:var(--bg);color:var(--ink);padding-bottom:70px}
 
 .state{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:14px}
 .state i{width:26px;height:26px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--violet);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .state a{color:var(--indigo);font-weight:700;text-decoration:none}
-
-.bar{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
-.bar .wrap{height:66px;display:flex;align-items:center;justify-content:space-between;gap:14px}
-.brand{font-family:var(--font-fraunces),Georgia,serif;font-size:22px;font-weight:800;color:var(--ink);text-decoration:none}
-.brand span{color:var(--violet)}
-.navLinks{display:flex;gap:4px;flex:1;margin-left:10px}
-.navLinks a{padding:8px 12px;border-radius:9px;font-size:14px;font-weight:650;color:var(--ink);text-decoration:none;transition:background .16s ease,color .16s ease}
-.navLinks a:hover{background:var(--violet-100);color:var(--indigo)}
 
 /* ---- Başlık ---- */
 .head{display:grid;grid-template-columns:auto minmax(0,1fr) 236px;gap:18px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px;margin-top:22px;box-shadow:0 10px 34px rgba(79,70,229,.06)}
@@ -93,7 +85,6 @@
   .head{grid-template-columns:auto minmax(0,1fr)}
   .verifyBox{grid-column:1/-1}
   .form{grid-template-columns:1fr}
-  .navLinks a{display:none}
 }
 
 /* Vitrinle ayni baslik dili: kicker + serif baslik */

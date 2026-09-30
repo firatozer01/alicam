@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SiteHeader } from "@/components/shell/site-header";
+import { PageShell } from "@/components/shell/page-shell";
 import { AuthPanel } from "./auth-panel";
 import styles from "./auth.module.css";
 
@@ -25,8 +25,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   // ?kayit=veren | ?kayit=alici uyelik sekmesini secili rolle acar.
   const initialRole = params.kayit === "veren" ? "veren" : params.kayit === "alici" ? "alici" : null;
 
-  return <>
-    <SiteHeader minimal="← Ana sayfa" />
+  // width="full": iki panelli yerlesim govdenin tamamini kaplar, ortak
+  // kapsayiciyi .auth izgarasinin kendisi kuruyor (auth.module.css).
+  return <PageShell header={{ minimal: "← Ana sayfa" }} width="full">
     <main className={styles.auth} id="icerik">
       <AuthPanel
         forceVerification={params.dogrulama === "1"}
@@ -34,5 +35,5 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         returnTo={returnTo}
       />
     </main>
-  </>;
+  </PageShell>;
 }

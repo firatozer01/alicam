@@ -4,8 +4,16 @@ import { Fragment, FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
-import { BrandLogo } from "@/components/shell/brand";
+import { PageShell } from "@/components/shell/page-shell";
 import styles from "./wizard.module.css";
+
+/**
+ * Sihirbaz tek isli bir ekran: ortak cubugun minimal kipi tam olarak
+ * marka + tek cikis baglantisi basiyor, yani buranin ihtiyaci kadarini.
+ * Sayfa eskiden bunu kendi kuruyordu ve kurallari SiteHeader'inkilerin
+ * kelimesi kelimesine kopyasiydi.
+ */
+const WIZARD_HEADER = { minimal: "Vazgeç ✕" };
 
 /* ==========================================================
    Tipler
@@ -1070,19 +1078,9 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
      Boyama
      ========================================================== */
 
-  const header = (
-    <header className={styles.header}>
-      <div className={styles.headerIn}>
-        <Link aria-label="alıcam.net ana sayfa" className={styles.brand} href="/"><BrandLogo height={32} /></Link>
-        <Link className={cn(styles.btn, styles.btnLine, styles.btnSm)} href="/">Vazgeç ✕</Link>
-      </div>
-    </header>
-  );
-
   if (reference) {
     return (
-      <div className={styles.page}>
-        {header}
+      <PageShell header={WIZARD_HEADER} tone="panel" width="full">
         <div className={styles.progress}><span className={styles.progressBar} style={{ width: "100%" }} /></div>
         <main className={styles.wz}>
           <div className={cn(styles.wzMain, styles.doneWide)}>
@@ -1105,14 +1103,13 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
             </div>
           </div>
         </main>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className={styles.page}>
+    <PageShell header={WIZARD_HEADER} tone="panel" width="full">
       <a className={styles.skip} href="#icerik">İçeriğe geç</a>
-      {header}
 
       <div className={styles.progress} aria-hidden="true">
         <span className={styles.progressBar} style={{ width: `${step * 25}%` }} />
@@ -1651,6 +1648,6 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
           </ul>
         </aside>
       </main>
-    </div>
+    </PageShell>
   );
 }

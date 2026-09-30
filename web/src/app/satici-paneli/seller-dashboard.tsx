@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FilterRail } from "@/components/listing/filter-rail";
-import { SiteHeader } from "@/components/shell/site-header";
+import { PageShell } from "@/components/shell/page-shell";
 import { Modal } from "@/components/modal/modal";
 import { WorkViewer } from "@/components/portfolio/work-viewer";
 import { ActiveChips, ListSkeleton, Pagination, ResultBar } from "@/components/listing/listing-chrome";
@@ -732,8 +732,8 @@ export function SellerDashboard() {
     finally { setBusy(false); }
   };
 
-  // Yukleme ekraninda da ortak ust cubuk durur; sayfa gecisinde zipla olmaz.
-  if (loading && !user) return <main className={styles.page}><SiteHeader workspace="seller" /><div className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></div></main>;
+  // Yukleme ekraninda da ortak kabuk durur; sayfa gecisinde zipla olmaz.
+  if (loading && !user) return <PageShell className={styles.page} header={{ workspace: "seller" }} tone="panel"><div className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></div></PageShell>;
 
   // Urun ekranindan turetilenler.
   const visibleListings = listingScope === "all" ? listings : listings.filter((item) => item.status === listingScope);
@@ -804,63 +804,66 @@ export function SellerDashboard() {
   const workHighlights = portfolioForm.highlights.split("\n").map((line) => line.trim()).filter(Boolean);
   const serviceCategory = profile.categories.find((item) => String(item.id) === serviceForm.category_id);
 
-  return <main className={styles.page}>
-    <SiteHeader
-      activeKey={view === "requests" ? (filter === "all" ? "requests" : filter) : view}
-      credits={credits.balance}
-      links={[{ label: "Ana sayfa", href: "/" }, { label: "Gelen talepler", href: "/satici-paneli" }]}
-      cta={{ label: "Vitrinim", href: user ? `/satici/${user.id}` : "/satici-paneli" }}
-      displayName={profile.profile?.company_name}
-      sessionReady={!loading}
-      user={user}
-      workspace="seller"
-      menus={[
-          {
-            key: "requests", label: "Talepler",
-            panelIcon: "📥", panelTitle: "Talep akışın", panelHint: "Sana düşen talepler ve teklif portföyün tek yerde",
-            meta: `${meta.total} eşleşen talep`,
-            sections: [
-              { key: "flow", title: "TALEP AKIŞI", icon: "📥", color: "#7C3AED", description: "Kategori ve bölgene düşen açık talepler.", items: [
-                { key: "requests", label: "Gelen talepler", icon: "📥", hint: "Sana eşleşen açık talepler", count: meta.total, onSelect: () => { changeScope("all"); selectView("requests"); } },
-                { key: "unlocked", label: "Açtıklarım", icon: "🔓", hint: "Kontörle detayını açtıkların", count: unlockedCount, onSelect: () => { changeScope("unlocked"); selectView("requests"); } },
-                { key: "favorite", label: "Favorilerim", icon: "★", hint: "Takip için işaretlediklerin", badge: "Yeni", tone: "new", count: favoriteCount, onSelect: () => { changeScope("favorite"); selectView("requests"); } },
-              ], footer: { label: "Talep listesine git", onSelect: () => { changeScope("all"); selectView("requests"); } } },
-              { key: "offers", title: "TEKLİF YÖNETİMİ", icon: "📨", color: "#06B6D4", description: "Gönderdiğin teklifler ve sonuçları.", items: [
-                { key: "offers", label: "Tekliflerim", icon: "📨", hint: `${pendingOffers} yanıt bekliyor`, count: offers.length, onSelect: () => selectView("offers") },
-                { key: "performance", label: "Performans", icon: "📊", hint: `%${successRate} kabul oranı`, onSelect: () => selectView("performance") },
-              ], footer: { label: "Teklif portföyü", onSelect: () => selectView("offers") } },
-            ],
-            quickLinks: [
-              { key: "new", label: "Yeni fırsat bul", icon: "🔍", onSelect: () => { changeScope("all"); selectView("requests"); } },
-              { key: "credit", label: `${credits.balance} kontör`, icon: "⚡", href: "/kontor-yukle" },
-              { key: "store", label: "Vitrinim", icon: "🏬", href: user ? `/satici/${user.id}` : "/satici-paneli", primary: true },
-            ],
-          },
-          {
-            key: "company", label: "Firma",
-            panelIcon: "🏢", panelTitle: "Firma vitrinin", panelHint: "Hizmetlerin, galerin ve görünürlüğün",
-            meta: `${listings.length} ürün · ${services.length} hizmet · ${portfolio.length} çalışma`,
-            allLink: user ? { label: "Vitrinimi gör", href: `/satici/${user.id}` } : undefined,
-            sections: [
-              { key: "catalog", title: "VİTRİN", icon: "🏬", color: "#EC4899", description: "Müşterilerin profilinde gördüğü içerik.", accent: true, badge: "Yeni", items: [
-                { key: "listings", label: "Ürünlerim", icon: "🏷", hint: "Vitrindeki ürün ve ilanların", badge: "Yeni", tone: "new", count: listings.length, onSelect: () => selectView("listings") },
-                { key: "services", label: "Hizmetlerim", icon: "▦", hint: "Kapak görselli hizmet kartları", count: services.length, onSelect: () => selectView("services") },
-                { key: "portfolio", label: "Galerim", icon: "🖼", hint: "Yaptığın işler ve fotoğrafları", badge: "Yeni", tone: "new", count: portfolio.length, onSelect: () => selectView("portfolio") },
-              ], footer: { label: "Vitrini düzenle", onSelect: () => selectView("services") } },
-              { key: "profile", title: "PROFİL VE GÖRÜNÜRLÜK", icon: "🏢", color: "#4F46E5", description: "Firma bilgileri ve öne çıkma.", items: [
-                { key: "profile", label: "Firma profilim", icon: "🏢", hint: "Bilgiler, kategori ve bölge", onSelect: () => selectView("profile") },
-                { key: "visibility", label: "Öne çık", icon: "⭐", hint: featured.is_featured ? "Vitrindesin" : "Vitrin paketleri", badge: featured.is_featured ? "Aktif" : undefined, tone: "hot", onSelect: () => selectView("visibility") },
-              ], footer: { label: "Görünürlüğü yönet", onSelect: () => selectView("visibility") } },
-            ],
-            quickLinks: [
-              { key: "add-listing", label: "Ürün ekle", icon: "🏷", onSelect: () => { selectView("listings"); openListingForm(); } },
-              { key: "add-work", label: "Çalışma ekle", icon: "＋", onSelect: () => { selectView("portfolio"); openPortfolioForm(); } },
-              { key: "add-service", label: "Hizmet ekle", icon: "▦", onSelect: () => { selectView("services"); editService(); } },
-              { key: "public", label: "Vitrinimi gör", icon: "↗", href: user ? `/satici/${user.id}` : "/satici-paneli", primary: true },
-            ],
-          },
-      ]}
-    />
+  return <PageShell
+    className={styles.page}
+    header={{
+      activeKey: view === "requests" ? (filter === "all" ? "requests" : filter) : view,
+      credits: credits.balance,
+      links: [{ label: "Ana sayfa", href: "/" }, { label: "Gelen talepler", href: "/satici-paneli" }],
+      cta: { label: "Vitrinim", href: user ? `/satici/${user.id}` : "/satici-paneli" },
+      displayName: profile.profile?.company_name,
+      sessionReady: !loading,
+      user,
+      workspace: "seller",
+      menus: [
+        {
+          key: "requests", label: "Talepler",
+          panelIcon: "📥", panelTitle: "Talep akışın", panelHint: "Sana düşen talepler ve teklif portföyün tek yerde",
+          meta: `${meta.total} eşleşen talep`,
+          sections: [
+            { key: "flow", title: "TALEP AKIŞI", icon: "📥", color: "#7C3AED", description: "Kategori ve bölgene düşen açık talepler.", items: [
+              { key: "requests", label: "Gelen talepler", icon: "📥", hint: "Sana eşleşen açık talepler", count: meta.total, onSelect: () => { changeScope("all"); selectView("requests"); } },
+              { key: "unlocked", label: "Açtıklarım", icon: "🔓", hint: "Kontörle detayını açtıkların", count: unlockedCount, onSelect: () => { changeScope("unlocked"); selectView("requests"); } },
+              { key: "favorite", label: "Favorilerim", icon: "★", hint: "Takip için işaretlediklerin", badge: "Yeni", tone: "new", count: favoriteCount, onSelect: () => { changeScope("favorite"); selectView("requests"); } },
+            ], footer: { label: "Talep listesine git", onSelect: () => { changeScope("all"); selectView("requests"); } } },
+            { key: "offers", title: "TEKLİF YÖNETİMİ", icon: "📨", color: "#06B6D4", description: "Gönderdiğin teklifler ve sonuçları.", items: [
+              { key: "offers", label: "Tekliflerim", icon: "📨", hint: `${pendingOffers} yanıt bekliyor`, count: offers.length, onSelect: () => selectView("offers") },
+              { key: "performance", label: "Performans", icon: "📊", hint: `%${successRate} kabul oranı`, onSelect: () => selectView("performance") },
+            ], footer: { label: "Teklif portföyü", onSelect: () => selectView("offers") } },
+          ],
+          quickLinks: [
+            { key: "new", label: "Yeni fırsat bul", icon: "🔍", onSelect: () => { changeScope("all"); selectView("requests"); } },
+            { key: "credit", label: `${credits.balance} kontör`, icon: "⚡", href: "/kontor-yukle" },
+            { key: "store", label: "Vitrinim", icon: "🏬", href: user ? `/satici/${user.id}` : "/satici-paneli", primary: true },
+          ],
+        },
+        {
+          key: "company", label: "Firma",
+          panelIcon: "🏢", panelTitle: "Firma vitrinin", panelHint: "Hizmetlerin, galerin ve görünürlüğün",
+          meta: `${listings.length} ürün · ${services.length} hizmet · ${portfolio.length} çalışma`,
+          allLink: user ? { label: "Vitrinimi gör", href: `/satici/${user.id}` } : undefined,
+          sections: [
+            { key: "catalog", title: "VİTRİN", icon: "🏬", color: "#EC4899", description: "Müşterilerin profilinde gördüğü içerik.", accent: true, badge: "Yeni", items: [
+              { key: "listings", label: "Ürünlerim", icon: "🏷", hint: "Vitrindeki ürün ve ilanların", badge: "Yeni", tone: "new", count: listings.length, onSelect: () => selectView("listings") },
+              { key: "services", label: "Hizmetlerim", icon: "▦", hint: "Kapak görselli hizmet kartları", count: services.length, onSelect: () => selectView("services") },
+              { key: "portfolio", label: "Galerim", icon: "🖼", hint: "Yaptığın işler ve fotoğrafları", badge: "Yeni", tone: "new", count: portfolio.length, onSelect: () => selectView("portfolio") },
+            ], footer: { label: "Vitrini düzenle", onSelect: () => selectView("services") } },
+            { key: "profile", title: "PROFİL VE GÖRÜNÜRLÜK", icon: "🏢", color: "#4F46E5", description: "Firma bilgileri ve öne çıkma.", items: [
+              { key: "profile", label: "Firma profilim", icon: "🏢", hint: "Bilgiler, kategori ve bölge", onSelect: () => selectView("profile") },
+              { key: "visibility", label: "Öne çık", icon: "⭐", hint: featured.is_featured ? "Vitrindesin" : "Vitrin paketleri", badge: featured.is_featured ? "Aktif" : undefined, tone: "hot", onSelect: () => selectView("visibility") },
+            ], footer: { label: "Görünürlüğü yönet", onSelect: () => selectView("visibility") } },
+          ],
+          quickLinks: [
+            { key: "add-listing", label: "Ürün ekle", icon: "🏷", onSelect: () => { selectView("listings"); openListingForm(); } },
+            { key: "add-work", label: "Çalışma ekle", icon: "＋", onSelect: () => { selectView("portfolio"); openPortfolioForm(); } },
+            { key: "add-service", label: "Hizmet ekle", icon: "▦", onSelect: () => { selectView("services"); editService(); } },
+            { key: "public", label: "Vitrinimi gör", icon: "↗", href: user ? `/satici/${user.id}` : "/satici-paneli", primary: true },
+          ],
+        },
+      ],
+    }}
+    tone="panel"
+  >
     <div className={styles.layout}>
       <aside className={styles.sidebar}>
         <div className={styles.creditCard}><i /><span>KONTÖR BAKİYEN</span><strong>{credits.balance}</strong><p>Bu ay {monthSpend} kontör harcandı</p><div><i style={{ width: `${Math.min(100, monthSpend)}%` }} /></div><Link href="/kontor-yukle">Kontör yükle</Link></div>
@@ -1503,5 +1506,5 @@ export function SellerDashboard() {
           </button>)}
         </div>}
     </Modal>
-  </main>;
+  </PageShell>;
 }

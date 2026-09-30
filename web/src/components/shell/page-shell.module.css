@@ -1,0 +1,30 @@
+/* Sayfa cercevesi. Genislik kurali TEK yerde: her sayfa buradan gecer. */
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+/*
+  Govde kapsayicisi.
+
+  Site genelinde iki ayri formul dolasiyordu:
+    (a) width: 100%; max-width: var(--maxw); padding: 0 var(--gutter)
+    (b) width: min(var(--maxw), calc(100% - (2 * var(--gutter))))
+  Ikisi 1792px'e kadar ayni sonucu veriyor, ustunde ayrisiyor: (a) icerigi
+  --maxw'e kadar buyutup dolguyu ICERIDEN aliyor, (b) dolguyu her zaman
+  disarida tutuyor. Yani genis ekranda ayni sitenin iki sayfasi arasinda
+  yanda 56px fark olusuyordu.
+
+  (b) seciliyor: kenar boslugu ekran ne kadar genis olursa olsun korunuyor
+  ve ust cubuk da ayni kurala baglandi.
+*/
+.wrap {
+  width: min(var(--maxw), calc(100% - (2 * var(--gutter))));
+  margin-inline: auto;
+  flex: 1;
+  min-width: 0;
+}

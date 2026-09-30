@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
-import { BrandLogo } from "@/components/shell/brand";
+import { AdminSidebar } from "../admin-sidebar";
+import "../admin-standard.css";
 
 type Status = "pending" | "approved" | "rejected";
 
@@ -173,16 +174,7 @@ export function SellerApprovalPanel() {
 
   return (
     <main className="admin-page">
-      <aside className="admin-sidebar">
-        <Link aria-label="alıcam.net ana sayfa" className="brand admin-brand" href="/"><BrandLogo /></Link>
-        <div className="admin-product"><span>YÖNETİM MERKEZİ</span><strong>Operasyon</strong></div>
-        <nav>
-          <Link href="/admin"><i>◇</i> Genel bakış</Link>
-          <Link href="/admin/anasayfa"><i>▤</i> Anasayfa</Link><Link href="/admin/kategoriler"><i>▦</i> Kategoriler</Link>
-          <Link className="active" href="/admin/satici-onaylari"><i>✓</i> Satıcı onayları <b>{status === "pending" ? total : ""}</b></Link><Link href="/admin/ayarlar"><i>⚙</i> Ayarlar</Link>
-        </nav>
-        <div className="admin-account"><span>{admin?.name.slice(0, 2).toLocaleUpperCase("tr-TR") ?? "AD"}</span><p><strong>{admin?.name ?? "Yönetici"}</strong><small>{admin?.email ?? "Oturum doğrulanıyor"}</small></p></div>
-      </aside>
+      <AdminSidebar active="satici-onaylari" pendingSellers={status === "pending" ? total : undefined} user={admin} />
 
       <section className="admin-content">
         <header className="admin-header">

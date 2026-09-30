@@ -1,8 +1,9 @@
 /* Favori talepler sayfasi. Renkler globals.css :root token'larindan gelir. */
 
-.page { min-height: 100vh; color: var(--ink); background: var(--bg); font-family: var(--font-inter), sans-serif; }
+.page { color: var(--ink); background: var(--bg); font-family: var(--font-inter), sans-serif; }
 
-.wrap { max-width: 1180px; margin: 0 auto; padding: 30px 20px 64px; }
+/* Genislik kabugun .wrap'inden gelir; burada yalnizca dikey bosluk kalir. */
+.body { padding: 30px 0 64px; }
 
 .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 24px; }
 .kicker { display: block; margin-bottom: 7px; color: var(--muted-2); font-size: 12px; font-weight: 800; letter-spacing: .12em; }

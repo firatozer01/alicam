@@ -1,7 +1,8 @@
 /* Hizmet veren mağazası: kapak, hizmet kartları, iş galerisi, yorumlar. */
 
 .page{min-height:100vh;background:var(--bg);color:var(--ink);padding-bottom:70px}
-.wrap{width:min(1320px,calc(100% - 40px));margin:0 auto}
+/* Ortak kapsayici formulu; ust cubuk ve alt bilgi ile ayni. */
+.wrap{width:min(var(--maxw),calc(100% - (2 * var(--gutter))));margin-inline:auto}
 
 .state{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:14px}
 .state i{width:26px;height:26px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--violet);animation:spin .8s linear infinite}
@@ -51,7 +52,9 @@
 .ghostCta:hover{border-color:var(--violet);background:#fff}
 
 /* ---- Mağaza şeridi ---- */
-.storeBar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:64px;z-index:25}
+/* Yapiskan serit ust cubugun ALTINA oturmali; sabit 64px gercek yukseklikten
+   (--header-h, 72px) 8px kisaydi ve serit cubugun altina giriyordu. */
+.storeBar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:var(--header-h);z-index:25}
 .storeBarInner{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:11px 0}
 .counts{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
 .counts>div{display:flex;flex-direction:column;gap:1px}

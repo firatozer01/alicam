@@ -17,7 +17,8 @@
   background: radial-gradient(circle, rgb(242 96 12 / .16), transparent 65%);
 }
 
-.wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); }
+/* Ust cubuk ve sayfa kabugu ile ayni formul. */
+.wrap { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; }
 
 /* ---------- 1) Kayan serit ---------- */
 .ticker {

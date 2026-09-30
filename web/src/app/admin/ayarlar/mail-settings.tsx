@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
-import { applyBranding, BrandLogo } from "@/components/shell/brand";
+import { applyBranding } from "@/components/shell/brand";
+import { AdminSidebar, type AdminSidebarUser } from "../admin-sidebar";
 import "../admin-standard.css";
 import styles from "./mail-settings.module.css";
 
@@ -94,6 +95,18 @@ export function MailSettings() {
   // tutmak, o yuvanin dugmelerini digerlerine dokunmadan kilitlemeye yetiyor.
   const [brandBusy, setBrandBusy] = useState<BrandKind | "">("");
   const brandInputs = useRef<Partial<Record<BrandKind, HTMLInputElement | null>>>({});
+  const [admin, setAdmin] = useState<AdminSidebarUser | null>(null);
+
+  // Kenar cubugundaki kullanici bloku icin. Ayri bir istek, cunku
+  // /admin/settings yaniti yoneticiyi tasimiyor. Sessizce yutuyoruz: oturum
+  // sorununu zaten asagidaki ana istek yakalayip girise yonlendiriyor.
+  useEffect(() => {
+    let active = true;
+    apiRequest<{ data: AdminSidebarUser }>("/me")
+      .then((response) => { if (active) setAdmin(response.data); })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -244,17 +257,8 @@ export function MailSettings() {
 
   const on = form["mail.enabled"] === "1";
 
-  return <main className="admin-shell">
-    <aside className="admin-sidebar">
-      <Link aria-label="alıcam.net ana sayfa" className="brand admin-brand" href="/"><BrandLogo /></Link>
-      <div className="admin-product"><span>YÖNETİM MERKEZİ</span><strong>Operasyon</strong></div>
-      <nav>
-        <Link href="/admin"><i>◇</i> Genel bakış</Link>
-        <Link href="/admin/anasayfa"><i>▤</i> Anasayfa</Link><Link href="/admin/kategoriler"><i>▦</i> Kategoriler</Link>
-        <Link href="/admin/satici-onaylari"><i>✓</i> Satıcı onayları</Link>
-        <Link className="active" href="/admin/ayarlar"><i>⚙</i> Ayarlar</Link>
-      </nav>
-    </aside>
+  return <main className="admin-page">
+    <AdminSidebar active="ayarlar" user={admin} />
 
     <section className="admin-content">
       <header className="admin-header">

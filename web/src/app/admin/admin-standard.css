@@ -4,6 +4,29 @@
   background: #f6f5fc;
 }
 
+/* Icerik kapsayicisinin tek genisligi.
+   globals.css 1120px veriyor, kategori ekrani ise kendi modulunde 1380px'e
+   cikiyordu; ayni kenar cubugunun yaninda iki farkli olcu duruyordu. Genis
+   olani ortak kural yapiyoruz, cunku kategori yonetimi iki kolonlu liste +
+   tablo tasiyor ve 1120px'te tablo yatay kayiyor; obur ekranlarin izgaralari
+   fazladan genisligi zaten esit paylasiyor.
+
+   Secici .admin-page ile iki parcali: bu dosya globals.css'ten sonra da once
+   de yuklenebilir (sayfalar kendileri iceri aliyor), kaynak sirasina
+   guvenmeyelim. Yalnizca width eziliyor; margin-left ve padding globals'tan
+   gelmeye devam ediyor. */
+.admin-page .admin-content {
+  width: min(1380px, calc(100% - 292px));
+}
+
+/* Kenar cubugu ust serite dondugunde kapsayici da ortalanir; globals.css'teki
+   dar ekran olcusunu aynen koruyoruz, yoksa ustteki kural onu da ezerdi. */
+@media (max-width: 930px) {
+  .admin-page .admin-content {
+    width: min(100% - 28px, 900px);
+  }
+}
+
 .admin-sidebar {
   color: #4b4a63;
   background: #f6f5fc;

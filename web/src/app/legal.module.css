@@ -8,7 +8,14 @@
 .skip { position: absolute; left: -999px; top: 8px; z-index: 200; background: var(--navy); color: #fff; padding: 8px 14px; border-radius: 8px; }
 .skip:focus { left: 8px; }
 
-.wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); }
+/* Kapsayici formulu page-shell.module.css ile AYNI; ikisi ayrisirsa
+   sayfa basligi ile ust cubuktaki logo yanda hizasiz kalir. Hero
+   seridin degradesi tam genislik olsun diye kabuk width="full" ile
+   kullaniliyor, sarmayi hero ile makale kendi .wrap'i ile yapiyor. */
+.wrap { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; }
+/* Kabuk .page'i sutun yonlu esnek kutu yapiyor; govde bosu doldurmazsa
+   alt bilgi kisa sayfada yukari kacar. */
+.main { flex: 1; }
 
 /* ---------- Hero serit ---------- */
 .hero { background: linear-gradient(180deg, var(--blue-50), var(--bg)); padding: 64px 0 40px; }

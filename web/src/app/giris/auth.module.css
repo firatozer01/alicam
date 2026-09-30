@@ -5,8 +5,15 @@
    tasarim belirtecleriyle.
    ========================================================== */
 
-.auth { min-height: calc(100vh - var(--header-h)); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); background: var(--bg); color: var(--ink); font-family: var(--f-body); }
-.formSide { display: flex; align-items: center; justify-content: center; padding: 56px var(--gutter); min-width: 0; }
+/* Izgara ust cubukla AYNI kapsayiciya oturur (page-shell.module.css .wrap
+   ile birebir ayni formul). Eskiden tam genislikti: 1920px'te cubugun
+   markasi x=120'de baslarken lacivert panel x=0'dan basliyor, arada
+   gorunur bir kayma oluyordu. */
+.auth { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; min-height: calc(100vh - var(--header-h)); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); background: var(--bg); color: var(--ink); font-family: var(--f-body); }
+/* Yanda dolgu YOK: kenar boslugunu artik kapsayici veriyor, burada da
+   verilirse form sutunu cubuktaki markadan bir gutter kadar iceri kayar.
+   Lacivert panelin kendi dolgusu (.visual) duruyor; o bir yuzey, bu degil. */
+.formSide { display: flex; align-items: center; justify-content: center; padding: 56px 0; min-width: 0; }
 .card { width: 100%; max-width: 480px; min-width: 0; }
 
 /* ---------- Sekmeler ---------- */
@@ -143,7 +150,7 @@
 }
 @media (max-width: 600px) {
   .rolePick, .social { grid-template-columns: 1fr; }
-  .formSide { padding: 36px 16px; }
+  .formSide { padding: 36px 0; }
   .title { font-size: 28px; }
   .visual { padding: 44px 16px 48px; }
   .visualText { margin-bottom: 24px; }

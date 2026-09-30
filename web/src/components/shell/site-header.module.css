@@ -18,7 +18,9 @@
   border-bottom: 1px solid var(--line);
 }
 .inner {
-  width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter);
+  /* Kapsayici formulu page-shell.module.css ile AYNI olmali; ikisi
+     ayrisirsa 1792px ustunde cubuk ile govde yanda 56px kayar. */
+  width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto;
   height: var(--header-h); display: flex; align-items: center; gap: clamp(16px, 2.4vw, 40px);
 }
 .barMinimal .inner { justify-content: space-between; }

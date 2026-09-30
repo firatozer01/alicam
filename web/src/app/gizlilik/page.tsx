@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "../legal.module.css";
-import { LegalShell, type LegalTocItem } from "./legal-shell";
+import { LegalShell, type LegalTocItem } from "../legal-shell";
 
 export const metadata: Metadata = {
   title: "Gizlilik politikası — alıcam.net",

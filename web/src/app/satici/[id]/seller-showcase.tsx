@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Modal } from "@/components/modal/modal";
-import { SiteHeader } from "@/components/shell/site-header";
+import { PageShell } from "@/components/shell/page-shell";
 import { QuoteModal, type QuoteCategory } from "./quote-modal";
 import { ListingDetail, placeOf, type ListingCard } from "./listing-detail";
 import { WorkViewer, workSpecs } from "@/components/portfolio/work-viewer";
@@ -97,8 +97,12 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
   }, [sellerId]);
 
   // Yukleme ve hata durumlarinda da ortak ust cubuk korunur.
-  if (loading) return <main className={styles.page}><SiteHeader activeKey="rehber" /><div className={styles.state}><i /><p>Vitrin hazırlanıyor…</p></div></main>;
-  if (error || !seller) return <main className={styles.page}><SiteHeader activeKey="rehber" /><div className={styles.state}><p>{error || "Hizmet veren bulunamadı."}</p><Link href="/">Ana sayfaya dön →</Link></div></main>;
+  if (loading) return <PageShell className={styles.page} header={{ activeKey: "rehber" }} width="full">
+    <main className={styles.state}><i /><p>Vitrin hazırlanıyor…</p></main>
+  </PageShell>;
+  if (error || !seller) return <PageShell className={styles.page} header={{ activeKey: "rehber" }} width="full">
+    <main className={styles.state}><p>{error || "Hizmet veren bulunamadı."}</p><Link href="/">Ana sayfaya dön →</Link></main>
+  </PageShell>;
 
   const title = seller.company_name || seller.name;
   const initials = title.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR");
@@ -122,8 +126,9 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
     document.getElementById(next)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  return <main className={styles.page}>
-    <SiteHeader activeKey="rehber" />
+  // width="full": magaza kapagi ve yapiskan serit tam genislik olmali,
+  // ic bloklar kendi .wrap kapsayicisini kullaniyor.
+  return <PageShell className={styles.page} header={{ activeKey: "rehber" }} width="full">
 
     {/* Magaza kapagi: fotograf varsa genis kapak, yoksa eski degrade. */}
     <header className={seller.banner_url ? `${styles.storeCover} ${styles.hasBanner}` : styles.storeCover} style={{ "--accent": accent } as React.CSSProperties}>
@@ -388,5 +393,5 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
     >
       <WorkViewer work={openWork} />
     </Modal>}
-  </main>;
+  </PageShell>;
 }

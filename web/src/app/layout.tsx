@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Mono, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import "./admin/admin-standard.css";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { MessagesDock } from "@/components/messages/messages-dock";
-import { PublicFooter } from "@/components/shell/site-footer";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter" });
 const fraunces = Fraunces({ subsets: ["latin", "latin-ext"], variable: "--font-fraunces" });
@@ -20,10 +18,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="tr" className={`${inter.variable} ${fraunces.variable} ${plexMono.variable} ${jakarta.variable}`} data-scroll-behavior="smooth">
-      {/* Ortak alt bilgi burada duruyor: sayfalar kendi ust cubugunu kurdugu
-          icin ortak bir "acik sayfa" yerlesimi yok. PublicFooter yalnizca
-          herkese acik yollarda kendini basar, panellere girmez. */}
-      <body>{children}<PublicFooter /><MessagesDock /><AssistantWidget /></body>
+      {/* Alt bilgi ARTIK BURADA DEGIL. Eskiden PublicFooter yol adina
+          bakan sabit bir listeden karar veriyordu ve yeni sayfa eklendiginde
+          o liste guncellenmedigi icin alt bilgi 21 rotanin 15'inde yoktu.
+          Karari artik sayfanin kendi PageShell'i veriyor.
+
+          admin-standard.css de buradan kalkti: admin renk kurallari her
+          genel sayfaya yukleniyordu, artik yalnizca admin sayfalari
+          kendileri iceri aliyor. */}
+      <body>{children}<MessagesDock /><AssistantWidget /></body>
     </html>
   );
 }

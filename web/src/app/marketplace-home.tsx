@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SiteHeader } from "@/components/shell/site-header";
+import { PageShell } from "@/components/shell/page-shell";
 import { apiRequest } from "@/lib/api";
 import { CategoryPanel } from "./(home)/category-panel";
 import { FaqSection } from "./(home)/faq-section";
@@ -111,23 +111,32 @@ export function MarketplaceHome() {
   const serviceRootsKey = (catalog?.groups ?? []).map((group) => group.slug).join(",");
   const example = PRO_EXAMPLES[who];
 
-  return <main className={styles.page}>
+  /*
+   * Duyuru bandi BILEREK yok: maket tasarimda hic yer almiyor ve hemen
+   * altindaki "Talep olusturmak her zaman ucretsiz" rozetiyle ayni seyi
+   * soyluyordu. Dar ekranda 44px'i bosa harciyordu.
+   *
+   * Dugme metni de maketin kisa hali: ust cubukta "Talep olustur", uzun
+   * hali yalnizca cekmece ayaginda. Uzun metin telefonda hamburgerin
+   * uzerine biniyordu.
+   */
+  const header = {
+    cta: isSeller ? { label: "Gelen talepler", href: "/satici-paneli" } : { label: "Talep oluştur", href: "/talep-olustur" },
+    sessionReady,
+    user,
+  };
+
+  /*
+   * width="full": her bolum kendi zeminini tam genislikte basiyor
+   * (hero degrade, koyu teklif veren seridi, son cagrinin iki renkli
+   * zemini). Kabuk govdeyi sarsaydi zeminler de kapsayiciya sigar,
+   * yanlarda beyaz serit kalirdi. Sarmayi bolumlerin icindeki .wrap
+   * yapiyor; o da kabugun kullandigi formulun aynisi.
+   */
+  return <PageShell className={styles.page} header={header} tone="public" width="full">
     <a className={styles.skip} href="#icerik">İçeriğe geç</a>
 
-    {/* Duyuru bandi BILEREK yok: maket tasarimda hic yer almiyor ve
-        hemen altindaki "Talep olusturmak her zaman ucretsiz" rozetiyle
-        ayni seyi soyluyordu. Dar ekranda 44px'i bosa harciyordu.
-
-        Dugme metni de maketin kisa hali: ust cubukta "Talep olustur",
-        uzun hali yalnizca cekmece ayaginda. Uzun metin telefonda
-        hamburgerin uzerine biniyordu. */}
-    <SiteHeader
-      cta={isSeller ? { label: "Gelen talepler", href: "/satici-paneli" } : { label: "Talep oluştur", href: "/talep-olustur" }}
-      sessionReady={sessionReady}
-      user={user}
-    />
-
-    <div id="icerik">
+    <main className={styles.main} id="icerik">
       {/* ================= HERO ================= */}
       <section className={styles.hero}>
         <div aria-hidden="true" className={styles.heroBg} />
@@ -336,10 +345,10 @@ export function MarketplaceHome() {
           </div>
         </div>
       </section>
-    </div>
+    </main>
 
     <Link className={`${styles.mobileCta}${stickyCta ? ` ${styles.mobileCtaShow}` : ""}`} href="/talep-olustur">
       ＋ Ücretsiz talep oluştur
     </Link>
-  </main>;
+  </PageShell>;
 }

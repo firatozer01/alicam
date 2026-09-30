@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { SiteHeader } from "@/components/shell/site-header";
+import { PageShell } from "@/components/shell/page-shell";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import styles from "./favorites.module.css";
 
@@ -87,10 +87,8 @@ export function FavoritesPage() {
     }
   };
 
-  return <main className={styles.page}>
-    <SiteHeader activeKey="favoriler" />
-
-    <div className={styles.wrap}>
+  return <PageShell className={styles.page} header={{ activeKey: "favoriler" }} tone="panel">
+    <div className={styles.body}>
       <header className={styles.head}>
         <div>
           <span className={styles.kicker}>TAKİP LİSTEN</span>
@@ -149,5 +147,5 @@ export function FavoritesPage() {
             ))}
           </div>}
     </div>
-  </main>;
+  </PageShell>;
 }

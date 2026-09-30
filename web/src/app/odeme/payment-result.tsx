@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/api";
 import { BrandLogo } from "@/components/shell/brand";
+import { PageShell } from "@/components/shell/page-shell";
 
 export function PaymentResult({ order, initialFailure = false }: { order: string; initialFailure?: boolean }) {
   const [status, setStatus] = useState(initialFailure ? "failed" : "pending");
@@ -25,5 +26,9 @@ export function PaymentResult({ order, initialFailure = false }: { order: string
 
   const paid = status === "paid";
   const failed = status === "failed";
-  return <main className="payment-result-page"><Link aria-label="alıcam.net ana sayfa" className="brand" href="/"><BrandLogo height={32} /></Link><section className={`payment-result-card ${paid ? "paid" : failed ? "failed" : "pending"}`}><span>{paid ? "✓" : failed ? "×" : "⌁"}</span><small>{paid ? "ÖDEME ONAYLANDI" : failed ? "ÖDEME TAMAMLANAMADI" : "ÖDEME DOĞRULANIYOR"}</small><h1>{paid ? "Kontörlerin hesabında." : failed ? "İşlem sonuçlanmadı." : "Banka bildirimi bekleniyor."}</h1><p>{paid ? "PayTR sunucu bildirimi doğrulandı ve paket bakiyene güvenle eklendi." : failed ? reason || "Ödeme alınmadı. Dilersen farklı bir kartla yeniden deneyebilirsin." : "Bu sayfayı kapatma; sonuç birkaç saniye içinde otomatik güncellenecek."}</p><div><Link href="/satici-paneli">Satıcı paneline dön</Link>{failed && <Link className="primary" href="/kontor-yukle">Yeniden dene</Link>}</div></section></main>;
+  // Odeme donusu tek isli bir ekran: kullanicinin burada yapacagi tek sey
+  // sonucu okuyup bir yone gitmek. Tam cerceve (menu + alt bilgi) o karari
+  // dagitirdi, bu yuzden tone="bare". Cikis yolu ortadaki logo baglantisi
+  // ile karttaki iki dugme.
+  return <PageShell tone="bare"><main className="payment-result-page"><Link aria-label="alıcam.net ana sayfa" className="brand" href="/"><BrandLogo height={32} /></Link><section className={`payment-result-card ${paid ? "paid" : failed ? "failed" : "pending"}`}><span>{paid ? "✓" : failed ? "×" : "⌁"}</span><small>{paid ? "ÖDEME ONAYLANDI" : failed ? "ÖDEME TAMAMLANAMADI" : "ÖDEME DOĞRULANIYOR"}</small><h1>{paid ? "Kontörlerin hesabında." : failed ? "İşlem sonuçlanmadı." : "Banka bildirimi bekleniyor."}</h1><p>{paid ? "PayTR sunucu bildirimi doğrulandı ve paket bakiyene güvenle eklendi." : failed ? reason || "Ödeme alınmadı. Dilersen farklı bir kartla yeniden deneyebilirsin." : "Bu sayfayı kapatma; sonuç birkaç saniye içinde otomatik güncellenecek."}</p><div><Link href="/satici-paneli">Satıcı paneline dön</Link>{failed && <Link className="primary" href="/kontor-yukle">Yeniden dene</Link>}</div></section></main></PageShell>;
 }

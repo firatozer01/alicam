@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
-import { BrandLogo } from "@/components/shell/brand";
+import { AdminSidebar, type AdminSidebarUser } from "../admin-sidebar";
 import "../admin-standard.css";
 import styles from "./home-editor.module.css";
 
@@ -88,6 +88,18 @@ export function HomeEditor() {
   const [working, setWorking] = useState<number | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const [uploadFor, setUploadFor] = useState<number | null>(null);
+  const [admin, setAdmin] = useState<AdminSidebarUser | null>(null);
+
+  // Kenar cubugundaki kullanici bloku icin. Ayri bir istek, cunku /admin/home
+  // yaniti yoneticiyi tasimiyor. Sessizce yutuyoruz: oturum sorununu zaten
+  // asagidaki ana istek yakalayip girise yonlendiriyor.
+  useEffect(() => {
+    let active = true;
+    apiRequest<{ data: AdminSidebarUser }>("/me")
+      .then((response) => { if (active) setAdmin(response.data); })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -220,18 +232,8 @@ export function HomeEditor() {
 
   const adiyla = (slug: string) => rows.find((row) => row.slug === slug)?.name ?? slug;
 
-  return <main className="admin-shell">
-    <aside className="admin-sidebar">
-      <Link aria-label="alıcam.net ana sayfa" className="brand admin-brand" href="/"><BrandLogo /></Link>
-      <div className="admin-product"><span>YÖNETİM MERKEZİ</span><strong>Operasyon</strong></div>
-      <nav>
-        <Link href="/admin"><i>◇</i> Genel bakış</Link>
-        <Link className="active" href="/admin/anasayfa"><i>▤</i> Anasayfa</Link>
-        <Link href="/admin/kategoriler"><i>▦</i> Kategoriler</Link>
-        <Link href="/admin/satici-onaylari"><i>✓</i> Satıcı onayları</Link>
-        <Link href="/admin/ayarlar"><i>⚙</i> Ayarlar</Link>
-      </nav>
-    </aside>
+  return <main className="admin-page">
+    <AdminSidebar active="anasayfa" user={admin} />
 
     <section className="admin-content">
       <header className="admin-header">

@@ -4,7 +4,14 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
-import { BrandLogo } from "@/components/shell/brand";
+import { PageShell } from "@/components/shell/page-shell";
+
+/**
+ * Basvuru tek isli bir ekran: ortak cubugun minimal kipi marka + tek cikis
+ * baglantisi basiyor. Uc ekran hali (yukleniyor, durum, sihirbaz) eskiden
+ * kendi ust cubugunu ayri ayri kuruyordu; artik uc yerde de bu gecirilir.
+ */
+const SELLER_HEADER = { minimal: "← Ana sayfa" };
 
 type Category = {
   id: number;
@@ -289,10 +296,13 @@ export function SellerWizard() {
 
   if (loading) {
     return (
-      <main className="seller-page seller-loading">
-        <Link aria-label="alıcam.net ana sayfa" className="brand" href="/"><BrandLogo height={32} /></Link>
-        <div className="seller-loader"><i /><p>Başvuru alanın hazırlanıyor…</p></div>
-      </main>
+      <PageShell className="seller-page" header={SELLER_HEADER} tone="panel" width="full">
+        {/* flex: 1 -> donen daire cubuk ile alt bilgi arasinda ortalansin;
+            .seller-loading yalnizca ortalamayi yapiyor, yer kaplamiyor. */}
+        <main className="seller-loading" style={{ flex: 1 }}>
+          <div className="seller-loader"><i /><p>Başvuru alanın hazırlanıyor…</p></div>
+        </main>
+      </PageShell>
     );
   }
 
@@ -301,36 +311,33 @@ export function SellerWizard() {
     const copy = statusCopy(profileStatus);
 
     return (
-      <main className={`seller-page seller-status-page status-${profileStatus}`}>
-        <nav className="seller-nav shell">
-          <Link aria-label="alıcam.net ana sayfa" className="brand" href="/"><BrandLogo height={32} /></Link>
-          <Link className="seller-home-link" href="/">Ana sayfaya dön <span>↗</span></Link>
-        </nav>
-        <section className="seller-status-card">
-          <div className="seller-status-icon">{copy.icon}</div>
-          <span className="seller-kicker">{copy.eyebrow}</span>
-          <h1>{copy.title}</h1>
-          <p>{copy.text}</p>
-          <div className="seller-status-meta">
-            <div><span>HESAP</span><strong>{workspace?.user.name}</strong></div>
-            <div><span>KATEGORİ</span><strong>{workspace?.categories.length ?? 0}</strong></div>
-            <div><span>HİZMET BÖLGESİ</span><strong>{workspace?.locations.length ?? 0}</strong></div>
-          </div>
-          <Link className="button button-primary button-large" href={profileStatus === "approved" ? "/satici-paneli" : "/"}>{profileStatus === "approved" ? "Gelen taleplere git" : "Ana sayfaya dön"} <span>→</span></Link>
-        </section>
-      </main>
+      // status-* sinifi kartin simgesini boyayan ata seciciler icin gerekli,
+      // bu yuzden en distaki sarmalayicida duruyor.
+      <PageShell className={`seller-page status-${profileStatus}`} header={SELLER_HEADER} tone="panel">
+        <main className="seller-status-page">
+          <section className="seller-status-card">
+            <div className="seller-status-icon">{copy.icon}</div>
+            <span className="seller-kicker">{copy.eyebrow}</span>
+            <h1>{copy.title}</h1>
+            <p>{copy.text}</p>
+            <div className="seller-status-meta">
+              <div><span>HESAP</span><strong>{workspace?.user.name}</strong></div>
+              <div><span>KATEGORİ</span><strong>{workspace?.categories.length ?? 0}</strong></div>
+              <div><span>HİZMET BÖLGESİ</span><strong>{workspace?.locations.length ?? 0}</strong></div>
+            </div>
+            <Link className="button button-primary button-large" href={profileStatus === "approved" ? "/satici-paneli" : "/"}>{profileStatus === "approved" ? "Gelen taleplere git" : "Ana sayfaya dön"} <span>→</span></Link>
+          </section>
+        </main>
+      </PageShell>
     );
   }
 
   return (
-    <main className="seller-page">
+    // width="full": ilerleme cubugu ve arkadaki isik lekeleri tam genislik
+    // olmak zorunda; kenar boslugunu icerideki .seller-shell .shell veriyor.
+    <PageShell className="seller-page" header={SELLER_HEADER} tone="panel" width="full">
       <div className="seller-glow seller-glow-one" />
       <div className="seller-glow seller-glow-two" />
-      <nav className="seller-nav shell">
-        <Link aria-label="alıcam.net ana sayfa" className="brand" href="/"><BrandLogo height={32} /></Link>
-        <span className="seller-nav-note"><b>HİZMET VEREN BAŞVURUSU</b> Ücretsiz katılım</span>
-        <Link className="seller-home-link" href="/">Çıkış <span>×</span></Link>
-      </nav>
 
       <div className="seller-progress"><span style={{ width: `${step * 25}%` }} /></div>
 
@@ -483,6 +490,6 @@ export function SellerWizard() {
           </div>
         </form>
       </div>
-    </main>
+    </PageShell>
   );
 }

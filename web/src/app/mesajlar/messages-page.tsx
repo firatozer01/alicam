@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { SiteHeader } from "@/components/shell/site-header";
+import { PageShell } from "@/components/shell/page-shell";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import { useConversation, type ConversationSummary } from "@/components/messages/use-conversation";
 import styles from "./messages.module.css";
@@ -90,97 +90,93 @@ export function MessagesPage({ initialConversationId }: { initialConversationId?
     }
   };
 
-  return <main className={styles.page}>
-    <SiteHeader />
-
-    <div className={styles.wrap}>
-      <header className={styles.head}>
-        <div>
-          <span className={styles.kicker}>MESAJLAR</span>
-          <h1>Konuşmalarım</h1>
-          <p>Alıcı ve hizmet verenlerle yazışmaların burada toplanır.</p>
-        </div>
-        <Link className={styles.ghost} href="/musteri-panel">Panelime dön →</Link>
-      </header>
-
-      <div className={styles.layout}>
-        <aside className={styles.list}>
-          {loadingList ? <p className={styles.hint}>Yükleniyor…</p>
-            : listError ? <p className={styles.error}>{listError}</p>
-              : list.length === 0 ? <p className={styles.hint}>Henüz bir konuşman yok. Bir hizmet verenin vitrininden mesaj başlatabilirsin.</p>
-                : list.map((item) => (
-                  <button
-                    className={`${styles.row} ${item.id === activeId ? styles.rowOn : ""}`}
-                    key={item.id}
-                    onClick={() => setActiveId(item.id)}
-                    type="button"
-                  >
-                    <span className={styles.avatar}>{item.counterpart.name.slice(0, 2).toLocaleUpperCase("tr-TR")}</span>
-                    <span className={styles.rowBody}>
-                      <strong>{item.counterpart.name}</strong>
-                      <small>{item.request ? item.request.title : item.role === "buyer" ? "Hizmet veren" : "Alıcı"}</small>
-                    </span>
-                    <span className={styles.rowMeta}>
-                      <em>{timeLabel(item.last_message_at)}</em>
-                      {item.unread > 0 && <b>{item.unread}</b>}
-                    </span>
-                  </button>
-                ))}
-        </aside>
-
-        <section className={styles.thread}>
-          {!activeId ? <p className={styles.hint}>Soldan bir konuşma seç.</p> : <>
-            <header className={styles.threadHead}>
-              <div>
-                <strong>{active?.counterpart.name ?? "Konuşma"}</strong>
-                {active?.request && <small>{active.request.reference} · {active.request.title}</small>}
-              </div>
-            </header>
-
-            <div className={styles.bubbles}>
-              {loading ? <p className={styles.hint}>Mesajlar yükleniyor…</p>
-                : messages.length === 0 ? <p className={styles.hint}>Henüz mesaj yok. İlk mesajı sen yaz.</p>
-                  : messages.map((message) => (
-                    <article className={message.mine ? styles.mine : styles.theirs} key={message.id}>
-                      {/* Kilitli konusmada govde sunucudan hic gelmez. */}
-                      {message.locked
-                        ? <p className={styles.masked}>🔒 Mesajı görmek için konuşmayı aç</p>
-                        : <p>{message.body}</p>}
-                      <time>{timeLabel(message.created_at)}{message.mine && message.read ? " · okundu" : ""}</time>
-                    </article>
-                  ))}
-            </div>
-
-            {compose.notice && <p className={styles.notice}>⚡ {compose.notice}</p>}
-            {sendError && <p className={styles.error}>{sendError}</p>}
-
-            {compose.locked ? (
-              <div className={styles.unlock}>
-                <p>Bu konuşmayı okumak ve yanıtlamak için açman gerekiyor.</p>
-                <button disabled={unlocking} onClick={() => void runUnlock()} type="button">
-                  {unlocking ? "Açılıyor…" : `Konuşmayı aç · ${compose.credit_cost} ⚡`}
-                </button>
-              </div>
-            ) : (
-              <form className={styles.composer} onSubmit={submit}>
-                <textarea
-                  disabled={!compose.can_send}
-                  onChange={(event) => setDraft(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void submit(event); }
-                  }}
-                  placeholder={compose.can_send ? "Mesajını yaz… (Enter ile gönder)" : "Yeni mesaj gönderemezsin"}
-                  rows={2}
-                  value={draft}
-                />
-                <button disabled={sending || !compose.can_send || draft.trim().length === 0} type="submit">
-                  {sending ? "…" : "Gönder"}
-                </button>
-              </form>
-            )}
-          </>}
-        </section>
+  return <PageShell className={styles.page} tone="panel">
+    <header className={styles.head}>
+      <div>
+        <span className={styles.kicker}>MESAJLAR</span>
+        <h1>Konuşmalarım</h1>
+        <p>Alıcı ve hizmet verenlerle yazışmaların burada toplanır.</p>
       </div>
+      <Link className={styles.ghost} href="/musteri-panel">Panelime dön →</Link>
+    </header>
+
+    <div className={styles.layout}>
+      <aside className={styles.list}>
+        {loadingList ? <p className={styles.hint}>Yükleniyor…</p>
+          : listError ? <p className={styles.error}>{listError}</p>
+            : list.length === 0 ? <p className={styles.hint}>Henüz bir konuşman yok. Bir hizmet verenin vitrininden mesaj başlatabilirsin.</p>
+              : list.map((item) => (
+                <button
+                  className={`${styles.row} ${item.id === activeId ? styles.rowOn : ""}`}
+                  key={item.id}
+                  onClick={() => setActiveId(item.id)}
+                  type="button"
+                >
+                  <span className={styles.avatar}>{item.counterpart.name.slice(0, 2).toLocaleUpperCase("tr-TR")}</span>
+                  <span className={styles.rowBody}>
+                    <strong>{item.counterpart.name}</strong>
+                    <small>{item.request ? item.request.title : item.role === "buyer" ? "Hizmet veren" : "Alıcı"}</small>
+                  </span>
+                  <span className={styles.rowMeta}>
+                    <em>{timeLabel(item.last_message_at)}</em>
+                    {item.unread > 0 && <b>{item.unread}</b>}
+                  </span>
+                </button>
+              ))}
+      </aside>
+
+      <section className={styles.thread}>
+        {!activeId ? <p className={styles.hint}>Soldan bir konuşma seç.</p> : <>
+          <header className={styles.threadHead}>
+            <div>
+              <strong>{active?.counterpart.name ?? "Konuşma"}</strong>
+              {active?.request && <small>{active.request.reference} · {active.request.title}</small>}
+            </div>
+          </header>
+
+          <div className={styles.bubbles}>
+            {loading ? <p className={styles.hint}>Mesajlar yükleniyor…</p>
+              : messages.length === 0 ? <p className={styles.hint}>Henüz mesaj yok. İlk mesajı sen yaz.</p>
+                : messages.map((message) => (
+                  <article className={message.mine ? styles.mine : styles.theirs} key={message.id}>
+                    {/* Kilitli konusmada govde sunucudan hic gelmez. */}
+                    {message.locked
+                      ? <p className={styles.masked}>🔒 Mesajı görmek için konuşmayı aç</p>
+                      : <p>{message.body}</p>}
+                    <time>{timeLabel(message.created_at)}{message.mine && message.read ? " · okundu" : ""}</time>
+                  </article>
+                ))}
+          </div>
+
+          {compose.notice && <p className={styles.notice}>⚡ {compose.notice}</p>}
+          {sendError && <p className={styles.error}>{sendError}</p>}
+
+          {compose.locked ? (
+            <div className={styles.unlock}>
+              <p>Bu konuşmayı okumak ve yanıtlamak için açman gerekiyor.</p>
+              <button disabled={unlocking} onClick={() => void runUnlock()} type="button">
+                {unlocking ? "Açılıyor…" : `Konuşmayı aç · ${compose.credit_cost} ⚡`}
+              </button>
+            </div>
+          ) : (
+            <form className={styles.composer} onSubmit={submit}>
+              <textarea
+                disabled={!compose.can_send}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void submit(event); }
+                }}
+                placeholder={compose.can_send ? "Mesajını yaz… (Enter ile gönder)" : "Yeni mesaj gönderemezsin"}
+                rows={2}
+                value={draft}
+              />
+              <button disabled={sending || !compose.can_send || draft.trim().length === 0} type="submit">
+                {sending ? "…" : "Gönder"}
+              </button>
+            </form>
+          )}
+        </>}
+      </section>
     </div>
-  </main>;
+  </PageShell>;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api";
 import { BrandLogo } from "./brand";
@@ -401,17 +401,3 @@ export function SiteFooter() {
   </footer>;
 }
 
-/**
- * Alt bilgi yalnizca herkese acik sayfalara iner. Paneller kendi
- * yerlesimlerini kurdugu icin oraya girmez.
- */
-const publicPaths = new Set(["/", "/gizlilik", "/kullanim-kosullari"]);
-
-export function PublicFooter() {
-  const pathname = usePathname();
-  const onPublicPage = publicPaths.has(pathname) || pathname.startsWith("/satici/");
-
-  if (!onPublicPage) return null;
-
-  return <SiteFooter />;
-}

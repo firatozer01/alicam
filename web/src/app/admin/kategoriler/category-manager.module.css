@@ -1,3 +1,8 @@
+/* Yalnizca bu ekranin kullandigi renk degiskenleri. Kenar cubugunun ve
+   .admin-page zemininin kurallari buradan silindi: admin-standard.css ile
+   bire bir ayni seyi yaziyorlardi (--violet zaten --blue'nun takma adi) ve
+   kategori ekranini obur dort admin sayfasindan gorsel olarak ayirma riski
+   tasiyorlardi. */
 .page {
   --violet: var(--blue);
   --indigo: var(--blue-700);
@@ -5,38 +10,7 @@
   --ink: #15162d;
   --muted: #6b7280;
   --line: #e7e5f5;
-  color: var(--ink);
-  background: #f6f5fc;
 }
-
-.page :global(.admin-sidebar) {
-  color: #4b4a63;
-  background: #f6f5fc;
-  border-right: 1px solid var(--line);
-}
-
-.page :global(.admin-brand) {
-  color: var(--ink);
-  font: 600 21px var(--font-fraunces);
-  letter-spacing: -.02em;
-}
-
-.page :global(.admin-brand span) { color: #a5a3bf; }
-.page :global(.admin-product) { border-color: #ddd7f4; background: linear-gradient(100deg, #f3ecfe, #eceffd); }
-.page :global(.admin-product span) { color: var(--violet); }
-.page :global(.admin-product strong) { color: var(--ink); }
-.page :global(.admin-sidebar nav a) { color: #5e5c70; }
-.page :global(.admin-sidebar nav i) { color: var(--violet); }
-.page :global(.admin-sidebar nav a:hover),
-.page :global(.admin-sidebar nav a.active) { color: var(--violet); background: linear-gradient(100deg, #f3ecfe, #eceffd); }
-.page :global(.admin-sidebar nav a.active) { box-shadow: inset 3px 0 var(--violet); }
-.page :global(.admin-sidebar nav b) { color: #fff; background: var(--violet); }
-.page :global(.admin-account) { border-color: var(--line); }
-.page :global(.admin-account > span) { color: #fff; background: linear-gradient(100deg, var(--cyan), var(--indigo)); }
-.page :global(.admin-account strong) { color: var(--ink); }
-.page :global(.admin-account small) { color: var(--muted); }
-
-.content { width: min(1380px, calc(100% - 292px)); }
 
 .header {
   display: flex;
@@ -372,8 +346,6 @@
 }
 
 @media (max-width: 930px) {
-  .content { width: min(100% - 28px, 900px); }
-  .page :global(.admin-sidebar nav a:not(.active)) { display: none; }
   .split { grid-template-columns: 240px minmax(0, 1fr); }
   .panelHead { align-items: flex-start; flex-direction: column; }
 }

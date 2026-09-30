@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
-import { BrandLogo } from "@/components/shell/brand";
+import { AdminSidebar } from "../admin-sidebar";
+import "../admin-standard.css";
 import styles from "./category-manager.module.css";
 
 type AdminUser = { name: string; email: string; roles: string[] };
@@ -129,8 +129,8 @@ export function CategoryManager() {
   };
 
   return <main className={`admin-page ${styles.page}`}>
-    <aside className="admin-sidebar"><Link aria-label="alıcam.net ana sayfa" className="brand admin-brand" href="/"><BrandLogo /></Link><div className="admin-product"><span>YÖNETİM MERKEZİ</span><strong>Operasyon</strong></div><nav><Link href="/admin"><i>◇</i> Genel bakış</Link><Link href="/admin/anasayfa"><i>▤</i> Anasayfa</Link><Link className="active" href="/admin/kategoriler"><i>▦</i> Kategoriler <b>{categories.length || ""}</b></Link><Link href="/admin/satici-onaylari"><i>✓</i> Satıcı onayları</Link><Link href="/admin/ayarlar"><i>⚙</i> Ayarlar</Link></nav><div className="admin-account"><span>{admin?.name.slice(0, 2).toLocaleUpperCase("tr-TR") ?? "AD"}</span><p><strong>{admin?.name ?? "Yönetici"}</strong><small>{admin?.email ?? "Oturum doğrulanıyor"}</small></p></div></aside>
-    <section className={`admin-content ${styles.content}`}>
+    <AdminSidebar active="kategoriler" user={admin} />
+    <section className="admin-content">
       <header className={styles.header}><div><span>KODSÜZ FORM ALTYAPISI</span><h1>Kategori yönetimi</h1><p>Kategorileri, talep formu alanlarını ve teklif vermenin kontör bedelini buradan yönet.</p></div><button className={styles.primary} onClick={() => startCategory()}>＋ Yeni kategori</button></header>
       {notice && <p className={styles.notice}>✓ {notice}</p>}{error && <p className={styles.error}>{error}</p>}
       {loading ? <div className={styles.empty}><i className="admin-spinner" /><h2>Kategoriler hazırlanıyor…</h2></div> : <>
