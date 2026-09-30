@@ -67,7 +67,14 @@ class AdminSettingsController extends Controller
             'social.linkedin' => ['sometimes', 'nullable', 'string', 'max:255'],
             // Kaldirilacak alanlar: gizli bir deger yalnizca boyle silinebilir.
             'clear' => ['sometimes', 'array', 'max:10'],
-            'clear.*' => ['string', Rule::in(array_keys(AppSettings::EDITABLE))],
+            // branding.* disarida: bu anahtarlar dosya adi ve surum sayaci
+            // tasiyor. Surum silinirse yuklenmis logonun adresi eskiye doner
+            // ve bir yil 'immutable' isaretli onbellege takilir. Marka
+            // gorselleri kendi ucundan kaldirilir.
+            'clear.*' => ['string', Rule::in(array_values(array_filter(
+                array_keys(AppSettings::EDITABLE),
+                fn (string $anahtar) => ! str_starts_with($anahtar, 'branding.'),
+            )))],
         ]);
 
         // Normalize silmeden once: gecersiz bir adres yuzunden 422 donerken

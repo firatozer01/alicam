@@ -41,6 +41,9 @@ let brandingCache: Branding | null = null;
  */
 let brandingPending: Promise<Branding> | null = null;
 
+/** Adresler degisince haberdar edilecek kancalar. */
+const dinleyiciler = new Set<(next: Branding) => void>();
+
 function loadBranding(): Promise<Branding> {
   if (!brandingPending) {
     brandingPending = apiRequest<SiteSettingsResponse>("/site-settings")
@@ -75,15 +78,35 @@ export function useBranding(): Branding {
   const [branding, setBranding] = useState<Branding>(() => brandingCache ?? embedded);
 
   useEffect(() => {
-    if (brandingCache) return;
-    let active = true;
-    loadBranding()
-      .then((next) => { if (active) setBranding(next); })
-      .catch(() => undefined);
-    return () => { active = false; };
+    // Onbellek dolu olsa bile dinleyici baglanir: yonetici panelde bir
+    // gorsel degistirdiginde ayni ekrandaki kenar cubugu logosu da yenilensin.
+    dinleyiciler.add(setBranding);
+    if (!brandingCache) {
+      loadBranding().then(setBranding).catch(() => undefined);
+    }
+
+    return () => { dinleyiciler.delete(setBranding); };
   }, []);
 
   return branding;
+}
+
+/**
+ * Yonetim paneli bir gorsel yukleyip kaldirdiginda cagirir.
+ *
+ * Onbellek modul duzeyinde oldugu icin yalnizca panelin kendi onizlemesi
+ * tazelenir, sayfadaki obur logolar tam yenileme yapilana kadar eski
+ * adreste kalirdi: yonetici degisikligin yarim islediğini sanardi.
+ */
+export function applyBranding(uploaded: { logo: string | null; logo_light: string | null; mark: string | null }): void {
+  brandingCache = {
+    logo: uploaded.logo || embedded.logo,
+    logoLight: uploaded.logo_light || embedded.logoLight,
+    mark: uploaded.mark || embedded.mark,
+  };
+
+  brandingPending = Promise.resolve(brandingCache);
+  dinleyiciler.forEach((bildir) => bildir(brandingCache as Branding));
 }
 
 /**
@@ -115,12 +138,19 @@ export function BrandLogo({ tone = "light", height = 32, className }: {
 }) {
   const { logo, logoLight } = useBranding();
 
+  // Olcuyu YUKSEKLIK belirler, genislik oranindan gelir. width/height
+  // oznitelikleri yalnizca dosya inmeden once yer ayirmak icin duruyor;
+  // stil onlari ezmezse yonetici baska oranda bir logo yukledigi anda
+  // gorsel sikisir -- markayi yonetim panelinden degistirebilmenin butun
+  // amaci da buydu. Stil satir ici, cunku logo sekiz ayri CSS dosyasindan
+  // olceklenen yerlerde basiliyor.
   // eslint-disable-next-line @next/next/no-img-element
   return <img
     alt="alıcam.net"
     className={className}
     height={height}
     src={tone === "dark" ? logoLight : logo}
+    style={{ height: `${height}px`, width: "auto" }}
     width={Math.round(height * logoRatio)}
   />;
 }

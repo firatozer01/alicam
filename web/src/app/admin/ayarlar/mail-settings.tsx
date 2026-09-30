@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
-import { BrandLogo } from "@/components/shell/brand";
+import { applyBranding, BrandLogo } from "@/components/shell/brand";
 import "../admin-standard.css";
 import styles from "./mail-settings.module.css";
 
@@ -54,7 +54,7 @@ const noBranding: Branding = { logo: null, logo_light: null, mark: null };
 const brandSlots: { kind: BrandKind; label: string; fallback: string; hint: string; dark?: boolean; square?: boolean }[] = [
   { kind: "logo", label: "Logo", fallback: "/logo.png", hint: "Üst bar ve panellerde kullanılır." },
   { kind: "logo_light", label: "Koyu zemin logosu", fallback: "/logo-light.png", hint: "Alt bilgi gibi koyu zeminlerde kullanılır.", dark: true },
-  { kind: "mark", label: "Simge", fallback: "/mark.png", hint: "Dar ekranda ve sekme simgesinde kullanılır.", square: true },
+  { kind: "mark", label: "Simge", fallback: "/mark.png", hint: "Dar ekranda, tam logonun sığmadığı yerlerde kullanılır.", square: true },
 ];
 
 const empty: Settings = {
@@ -217,6 +217,8 @@ export function MailSettings() {
       body.append("file", file);
       const response = await apiRequest<BrandingResponse>(`/admin/branding/${kind}`, { method: "POST", body });
       setBranding(response.data.branding);
+      // Kenar cubugu ve sayfadaki obur logolar da ayni anda yenilensin.
+      applyBranding(response.data.branding);
       setNotice(response.message ?? "Görsel yüklendi.");
     } catch (requestError: unknown) {
       setError(firstApiError(requestError));
@@ -230,6 +232,8 @@ export function MailSettings() {
     try {
       const response = await apiRequest<BrandingResponse>(`/admin/branding/${kind}`, { method: "DELETE" });
       setBranding(response.data.branding);
+      // Kenar cubugu ve sayfadaki obur logolar da ayni anda yenilensin.
+      applyBranding(response.data.branding);
       setNotice(response.message ?? "Varsayılan görsele dönüldü.");
     } catch (requestError: unknown) {
       setError(firstApiError(requestError));
@@ -426,7 +430,7 @@ export function MailSettings() {
           <header>
             <div>
               <strong>Logo ve marka</strong>
-              <small>Buradaki görseller sitenin her yerinde kullanılır: üst bar, alt bilgi, yönetim panelleri ve sekme simgesi. Yenisini yükleyince tamamı birden değişir.</small>
+              <small>Buradaki görseller sitenin her yerinde kullanılır: üst bar, alt bilgi, yönetim panelleri ve sihirbazlar. Yenisini yükleyince tamamı birden değişir. Tarayıcı sekmesindeki simge buraya dahil değil; o uygulamaya gömülüdür.</small>
             </div>
           </header>
           <div className={styles.brandGrid}>

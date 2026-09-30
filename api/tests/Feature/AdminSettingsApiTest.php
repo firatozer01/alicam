@@ -39,7 +39,9 @@ class AdminSettingsApiTest extends TestCase
         $this->assertStringNotContainsString('smtp.gizli.test', $response->getContent());
         $this->assertStringNotContainsString('gizli-kullanici', $response->getContent());
         $this->assertSame(['data'], array_keys($response->json()));
-        $this->assertSame(['social'], array_keys($response->json('data')));
+        // Uc yalnizca bu iki alani tasir; baska bir ayar grubu eklenirse
+        // bu iddia bilerek kirilir ve sizinti gozden kacmaz.
+        $this->assertSame(['social', 'branding'], array_keys($response->json('data')));
     }
 
     public function test_admin_can_update_social_links(): void

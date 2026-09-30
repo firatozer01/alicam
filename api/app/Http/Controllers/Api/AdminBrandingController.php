@@ -39,14 +39,20 @@ class AdminBrandingController extends Controller
             ],
         )->validate();
 
-        $this->forget($kind);
-
         // Dosya adi her yuklemede degisir: eski adres bir yerde
         // onbellekte kalmis olsa bile yeni gorsele carpmasin.
         $uzanti = strtolower($request->file('file')->extension() ?: 'png');
         $ad = $kind.'-'.Str::random(8).'.'.$uzanti;
 
-        Storage::disk(self::DISK)->putFileAs(self::DIR, $request->file('file'), $ad);
+        // ONCE yaz, SONRA eskisini sil. Ters sirada yazma hatasi sitenin
+        // logosunu tamamen goturuyordu: eski dosya gitmis, yenisi yok.
+        if (Storage::disk(self::DISK)->putFileAs(self::DIR, $request->file('file'), $ad) === false) {
+            return response()->json([
+                'message' => 'Görsel kaydedilemedi. Sunucu disk alanını kontrol edin.',
+            ], 500);
+        }
+
+        $this->forget($kind);
 
         AppSettings::put([
             'branding.'.$kind => $ad,
