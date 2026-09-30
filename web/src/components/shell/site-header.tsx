@@ -222,6 +222,24 @@ export function SiteHeader({
       className={`${styles.drawer} ${drawerOpen ? styles.drawerOpen : ""}`}
       id="site-drawer"
     >
+      {/* Kapatma dugmesi zorunlu: cekmece ust cubugun UZERINE biniyor, yani
+          onu acan hamburger altinda kaliyor. Dugme olmadan menuyu kapatmanin
+          tek yolu soldaki dar perde seridine dokunmakti. */}
+      <div className={styles.drawerHead}>
+        <Link
+          aria-label="alıcam.net ana sayfa"
+          className={styles.drawerBrand}
+          href="/"
+          onClick={() => setDrawerOpen(false)}
+        ><BrandLogo height={28} /></Link>
+        <button
+          aria-label="Menüyü kapat"
+          className={styles.drawerClose}
+          onClick={() => setDrawerOpen(false)}
+          type="button"
+        >×</button>
+      </div>
+
       {links.map((link) => <Link
         className={styles.drawerLink}
         href={link.href}

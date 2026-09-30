@@ -131,12 +131,27 @@
 .drawer {
   display: none; position: fixed; top: 0; right: 0; bottom: 0; z-index: 90;
   width: min(360px, 88vw); flex-direction: column; align-items: stretch; gap: 2px;
-  padding: 88px 18px 22px; overflow-y: auto;
+  padding: 14px 18px 22px; overflow-y: auto;
   background: var(--card); box-shadow: -24px 0 60px rgb(10 20 51 / .22);
   transform: translateX(105%); visibility: hidden;
   transition: transform .3s cubic-bezier(.2, .8, .2, 1), visibility .3s;
 }
 .drawer.drawerOpen { transform: none; visibility: visible; }
+
+/* Eskiden burada 88px'lik bos dolgu vardi: altta kalan ust cubuga yer
+   birakmak icindi ama cekmece onun uzerine bindigi icin yalnizca bosluk
+   olarak goruluyordu. Yerini marka ve kapatma dugmesi aldi. */
+.drawerHead {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 2px 4px 14px; margin-bottom: 6px; border-bottom: 1px solid var(--line-2);
+}
+.drawerBrand { display: flex; align-items: center; flex: none; }
+.drawerClose {
+  width: 40px; height: 40px; flex: none; display: grid; place-items: center;
+  border-radius: 12px; font-size: 26px; line-height: 1; color: var(--ink-2);
+  background: var(--blue-50); transition: background .15s ease, color .15s ease;
+}
+.drawerClose:hover { background: var(--blue-100); color: var(--blue-700); }
 
 .drawerLink {
   display: flex; align-items: center; gap: 10px; padding: 13px 12px; border-radius: 10px;
