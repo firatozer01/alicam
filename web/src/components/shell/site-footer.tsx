@@ -141,7 +141,18 @@ const prefersReducedMotion = () =>
  * baslatma kutusu, bag sutunlari, uygulama seridi, dev imza yazisi ve alt
  * cizgi. Serit gercek /marketplace ucundan beslenir.
  */
-export function SiteFooter() {
+/**
+ * Alt bilgi.
+ *
+ * compact: calisma ekranlarinda kullanilan kisa hal. Pazarlama bolumleri
+ * (kayan talep seridi, "Sen iste onlar teklif versin" bolumu, hizli
+ * baslatma kutusu, bag sutunlari, uygulama seridi ve dev imza) BASILMAZ.
+ * Satici kendi tekliflerini yonetirken ekranin altinda ona talep
+ * olusturmasini oneren bir tanitim blogu cikiyordu; calisma ekraniyla
+ * pazarlama sayfasi birbirine giriyordu. Geriye yasal baglantilar,
+ * iletisim ve telif satiri kaliyor.
+ */
+export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
   const router = useRouter();
   const [items, setItems] = useState<TickerItem[]>(() => tickerCache ?? fallbackTicker);
   const [social, setSocial] = useState<SocialLink[]>(() => socialCache ?? []);
@@ -258,128 +269,130 @@ export function SiteFooter() {
 
   return <footer className={styles.footer}>
     {/* 1) Kayan canli talep seridi */}
-    <div aria-label="Şu an açık talepler" className={styles.ticker}>
+    {!compact && <div aria-label="Şu an açık talepler" className={styles.ticker}>
       <div className={styles.tickerLabel}><i className={styles.tickerDot} />Şu an açık</div>
       <div className={styles.tickerTrack}>
         <div className={styles.tickerMove}>{strip(0)}</div>
         <div aria-hidden="true" className={styles.tickerMove}>{strip(1)}</div>
       </div>
-    </div>
+    </div>}
 
-    <div className={styles.wrap}>
-      {/* 2) Buyuk soz + hizli baslat */}
-      <div className={styles.hero}>
-        <div className={styles.heroCopy}>
-          <span className={styles.kicker}>Sen iste,</span>
-          <h2>onlar teklif<br /><em>versin.</em></h2>
-          <p>Usta, daire, araç ya da telefon. Ne istediğini bir kez yaz; gerisini alıcam.net halletsin.</p>
+    {!compact && <>
+      <div className={styles.wrap}>
+        {/* 2) Buyuk soz + hizli baslat */}
+        <div className={styles.hero}>
+          <div className={styles.heroCopy}>
+            <span className={styles.kicker}>Sen iste,</span>
+            <h2>onlar teklif<br /><em>versin.</em></h2>
+            <p>Usta, daire, araç ya da telefon. Ne istediğini bir kez yaz; gerisini alıcam.net halletsin.</p>
+          </div>
+
+          <form className={styles.quick} onSubmit={startRequest}>
+            <label htmlFor="footer-quick">Ne istiyorsun?</label>
+            <div className={styles.quickRow}>
+              <input
+                autoComplete="off"
+                id="footer-quick"
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Örn. 3+1 kiralık daire, kombi bakımı…"
+                value={query}
+              />
+              <button className={styles.quickGo} disabled={busy} type="submit">
+                {busy ? "Aranıyor…" : "Teklif al →"}
+              </button>
+            </div>
+            <div className={styles.chips}>
+              {verticals.map((vertical) => <Link
+                href={`/talep-olustur?kategori=${vertical.slug}`}
+                key={vertical.slug}
+                style={{ "--c": vertical.color } as React.CSSProperties}
+              ><i>{vertical.icon}</i>{vertical.name}</Link>)}
+            </div>
+          </form>
         </div>
 
-        <form className={styles.quick} onSubmit={startRequest}>
-          <label htmlFor="footer-quick">Ne istiyorsun?</label>
-          <div className={styles.quickRow}>
-            <input
-              autoComplete="off"
-              id="footer-quick"
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Örn. 3+1 kiralık daire, kombi bakımı…"
-              value={query}
-            />
-            <button className={styles.quickGo} disabled={busy} type="submit">
-              {busy ? "Aranıyor…" : "Teklif al →"}
-            </button>
+        {/* 3) Bag sutunlari */}
+        <div className={styles.columns}>
+          <div className={styles.about}>
+            {/* Zemin lacivert, o yuzden yazisi beyaz olan surum. */}
+            <Link className={styles.brand} href="/"><BrandLogo height={36} tone="dark" /></Link>
+            <p>Talep tabanlı pazaryeri. İlan aramak yok; ihtiyacını yaz, teklifler sana gelsin.</p>
+            {visibleSocial.length > 0 && <div className={styles.social}>
+              {visibleSocial.map((link) => <a
+                aria-label={socialLabels[link.platform]}
+                href={link.url}
+                key={link.platform}
+                rel="noopener noreferrer"
+                target="_blank"
+              >{socialIcons[link.platform]}</a>)}
+            </div>}
           </div>
-          <div className={styles.chips}>
-            {verticals.map((vertical) => <Link
-              href={`/talep-olustur?kategori=${vertical.slug}`}
-              key={vertical.slug}
-              style={{ "--c": vertical.color } as React.CSSProperties}
-            ><i>{vertical.icon}</i>{vertical.name}</Link>)}
+
+          <nav className={styles.column}>
+            <h3>Talep oluştur</h3>
+            <Link href="/talep-olustur?kategori=ustalar-hizmetler">Usta ve hizmet</Link>
+            <Link href="/talep-olustur?kategori=konut">Kiralık ve satılık konut</Link>
+            <Link href="/talep-olustur?kategori=tadilat-tamirat">Tadilat ve tamirat</Link>
+            <Link href="/talep-olustur?kategori=vasita">Araç</Link>
+            <Link href="/talep-olustur?kategori=elektronik-teknoloji">Ürün ve elektronik</Link>
+          </nav>
+
+          <nav className={styles.column}>
+            <h3>Teklif verenler</h3>
+            <Link href="/satici-ol">Teklif veren ol</Link>
+            <Link href="/#teklif-ver">Nasıl kazanırım?</Link>
+            <Link href="/kontor-yukle">Kontör paketleri</Link>
+            <Link href="/#son-talepler">Açık talepler</Link>
+          </nav>
+
+          <nav className={styles.column}>
+            <h3>alıcam.net</h3>
+            <Link href="/#nasil-calisir">Nasıl çalışır?</Link>
+            <Link href="/#guven">Neden alıcam.net?</Link>
+            <Link href="/#sss">Sık sorulanlar</Link>
+            <a href="mailto:destek@alicam.net">Destek</a>
+          </nav>
+
+          <nav className={styles.column}>
+            <h3>Hesabın</h3>
+            <Link href="/giris">Giriş yap</Link>
+            <Link href="/giris">Ücretsiz üye ol</Link>
+            <Link href="/talep-olustur">Talep oluştur</Link>
+          </nav>
+        </div>
+
+        {/* Uygulama seridi: magaza rozetleri henuz gercek bir baglanti degil. */}
+        <div className={styles.appStrip}>
+          <div className={styles.appCopy}>
+            <span aria-hidden="true">📱</span>
+            <div>
+              <strong>Talebin cebinde</strong>
+              <small>Yeni teklif gelince anında bildirim al, her yerden karşılaştır.</small>
+            </div>
           </div>
-        </form>
+          <div className={styles.stores}>
+            {stores.map((store) => <button
+              className={styles.store}
+              key={store.key}
+              onClick={() => setToast({ id: Date.now(), text: "alıcam.net uygulaması çok yakında mağazalarda!" })}
+              type="button"
+            >
+              {store.icon}
+              <span><b>{store.title}</b><small>{store.hint}</small></span>
+            </button>)}
+          </div>
+        </div>
       </div>
 
-      {/* 3) Bag sutunlari */}
-      <div className={styles.columns}>
-        <div className={styles.about}>
-          {/* Zemin lacivert, o yuzden yazisi beyaz olan surum. */}
-          <Link className={styles.brand} href="/"><BrandLogo height={36} tone="dark" /></Link>
-          <p>Talep tabanlı pazaryeri. İlan aramak yok; ihtiyacını yaz, teklifler sana gelsin.</p>
-          {visibleSocial.length > 0 && <div className={styles.social}>
-            {visibleSocial.map((link) => <a
-              aria-label={socialLabels[link.platform]}
-              href={link.url}
-              key={link.platform}
-              rel="noopener noreferrer"
-              target="_blank"
-            >{socialIcons[link.platform]}</a>)}
-          </div>}
-        </div>
-
-        <nav className={styles.column}>
-          <h3>Talep oluştur</h3>
-          <Link href="/talep-olustur?kategori=ustalar-hizmetler">Usta ve hizmet</Link>
-          <Link href="/talep-olustur?kategori=konut">Kiralık ve satılık konut</Link>
-          <Link href="/talep-olustur?kategori=tadilat-tamirat">Tadilat ve tamirat</Link>
-          <Link href="/talep-olustur?kategori=vasita">Araç</Link>
-          <Link href="/talep-olustur?kategori=elektronik-teknoloji">Ürün ve elektronik</Link>
-        </nav>
-
-        <nav className={styles.column}>
-          <h3>Teklif verenler</h3>
-          <Link href="/satici-ol">Teklif veren ol</Link>
-          <Link href="/#teklif-ver">Nasıl kazanırım?</Link>
-          <Link href="/kontor-yukle">Kontör paketleri</Link>
-          <Link href="/#son-talepler">Açık talepler</Link>
-        </nav>
-
-        <nav className={styles.column}>
-          <h3>alıcam.net</h3>
-          <Link href="/#nasil-calisir">Nasıl çalışır?</Link>
-          <Link href="/#guven">Neden alıcam.net?</Link>
-          <Link href="/#sss">Sık sorulanlar</Link>
-          <a href="mailto:destek@alicam.net">Destek</a>
-        </nav>
-
-        <nav className={styles.column}>
-          <h3>Hesabın</h3>
-          <Link href="/giris">Giriş yap</Link>
-          <Link href="/giris">Ücretsiz üye ol</Link>
-          <Link href="/talep-olustur">Talep oluştur</Link>
-        </nav>
-      </div>
-
-      {/* Uygulama seridi: magaza rozetleri henuz gercek bir baglanti degil. */}
-      <div className={styles.appStrip}>
-        <div className={styles.appCopy}>
-          <span aria-hidden="true">📱</span>
-          <div>
-            <strong>Talebin cebinde</strong>
-            <small>Yeni teklif gelince anında bildirim al, her yerden karşılaştır.</small>
-          </div>
-        </div>
-        <div className={styles.stores}>
-          {stores.map((store) => <button
-            className={styles.store}
-            key={store.key}
-            onClick={() => setToast({ id: Date.now(), text: "alıcam.net uygulaması çok yakında mağazalarda!" })}
-            type="button"
-          >
-            {store.icon}
-            <span><b>{store.title}</b><small>{store.hint}</small></span>
-          </button>)}
-        </div>
-      </div>
-    </div>
-
-    {/* 4) Dev imza yazisi: isik fareyi takip eder, yazi alttan yukselir. */}
-    <div
-      aria-hidden="true"
-      className={`${styles.mark} ${markUp ? styles.markUp : ""} ${markLive ? styles.markLive : ""}`}
-      onPointerLeave={() => setMarkLive(false)}
-      onPointerMove={trackPointer}
-      ref={markRef}
-    ><span>alıcam<em>.net</em></span></div>
+      {/* 4) Dev imza yazisi: isik fareyi takip eder, yazi alttan yukselir. */}
+      <div
+        aria-hidden="true"
+        className={`${styles.mark} ${markUp ? styles.markUp : ""} ${markLive ? styles.markLive : ""}`}
+        onPointerLeave={() => setMarkLive(false)}
+        onPointerMove={trackPointer}
+        ref={markRef}
+      ><span>alıcam<em>.net</em></span></div>
+    </>}
 
     {/* 5) Alt cizgi */}
     <div className={`${styles.wrap} ${styles.bottom}`}>

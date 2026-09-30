@@ -23,8 +23,10 @@ import styles from "./page-shell.module.css";
  * basilsin mi.
  *
  *  public -> ust cubuk + alt bilgi. Herkese acik sayfalar.
- *  panel  -> ust cubuk var, alt bilgi yok. Oturum ici calisma ekranlari;
- *            alt bilgi orada yalnizca dikkat dagitir.
+ *  panel  -> ust cubuk + KISA alt bilgi (yasal baglantilar, iletisim,
+ *            telif). Oturum ici calisma ekranlari: tam alt bilgideki
+ *            pazarlama bolumleri orada yeri yok, ama yasal baglantilar
+ *            her sayfada bulunmali.
  *  bare   -> ikisi de yok. Sayfa kendi cercevesini kuruyor (odeme donusu
  *            gibi tek isli ekranlar).
  */
@@ -62,6 +64,6 @@ export function PageShell({ tone = "public", width = "wrap", header, className, 
   return <div className={kok}>
     {tone !== "bare" && <SiteHeader {...header} />}
     {body}
-    {tone === "public" && <SiteFooter />}
+    {tone !== "bare" && <SiteFooter compact={tone === "panel"} />}
   </div>;
 }

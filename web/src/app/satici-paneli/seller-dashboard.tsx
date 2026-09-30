@@ -733,7 +733,7 @@ export function SellerDashboard() {
   };
 
   // Yukleme ekraninda da ortak kabuk durur; sayfa gecisinde zipla olmaz.
-  if (loading && !user) return <PageShell className={styles.page} header={{ workspace: "seller" }} tone="public"><div className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></div></PageShell>;
+  if (loading && !user) return <PageShell className={styles.page} header={{ workspace: "seller" }} tone="panel"><div className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></div></PageShell>;
 
   // Urun ekranindan turetilenler.
   const visibleListings = listingScope === "all" ? listings : listings.filter((item) => item.status === listingScope);
@@ -862,7 +862,7 @@ export function SellerDashboard() {
         },
       ],
     }}
-    tone="public"
+    tone="panel"
   >
     <div className={styles.layout}>
       <aside className={styles.sidebar}>

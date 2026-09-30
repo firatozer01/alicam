@@ -261,7 +261,7 @@ export function CustomerDashboard() {
   };
 
   // Yukleme ekraninda da ortak kabuk durur; sayfa gecisinde zipla olmaz.
-  if (loading) return <PageShell className={styles.page} header={{ workspace: "buyer" }} tone="public"><div className={styles.loading}><i /><p>Alıcı çalışma alanın hazırlanıyor…</p></div></PageShell>;
+  if (loading) return <PageShell className={styles.page} header={{ workspace: "buyer" }} tone="panel"><div className={styles.loading}><i /><p>Alıcı çalışma alanın hazırlanıyor…</p></div></PageShell>;
 
   const activeCount = requests.filter((item) => ["open", "in_negotiation"].includes(item.status)).length;
   const acceptedCount = requests.filter((item) => item.status === "accepted").length;
@@ -300,7 +300,7 @@ export function CustomerDashboard() {
         },
       ],
     }}
-    tone="public"
+    tone="panel"
   >
     <div className={styles.canvas} id="ozet">
       <section className={styles.welcome}><div><span>BUGÜNÜN ÖZETİ</span><h1>Merhaba {user?.name.split(" ")[0]},<br /><em>doğru teklifi birlikte seçelim.</em></h1><p>Taleplerindeki hareketleri, gelen teklifleri ve tamamlanan işleri tek ekrandan yönet.</p></div><aside><span>AKTİF TALEPLER</span><strong>{activeCount}</strong><p>{totalOffers} teklif karşılaştırılmayı bekliyor</p><a href="#taleplerim">Taleplere git ↓</a></aside></section>
