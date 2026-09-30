@@ -130,8 +130,8 @@
   font-family: var(--f-head); font-size: 23px; font-weight: 800; line-height: 1;
   letter-spacing: -.035em; color: #fff; text-decoration: none;
 }
-.brand span { color: #7EA2FF; }
-.brand svg { width: 30px; height: 30px; flex: none; }
+.brand span { color: var(--orange); }
+.brand img { width: 30px; height: 30px; flex: none; }
 
 .about p { margin: 16px 0 20px; font-size: 15px; max-width: 340px; }
 .social { display: flex; gap: 8px; }

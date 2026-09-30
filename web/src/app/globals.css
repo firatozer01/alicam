@@ -127,7 +127,7 @@ h1, h2, h3, h4 { font-family: var(--f-head); letter-spacing: -.02em; line-height
 .announcement-dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 5px #ffffff26; }
 .nav { height: 82px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 10; }
 .brand { font-family: var(--font-fraunces), serif; font-size: 27px; font-weight: 900; letter-spacing: -.05em; }
-.brand span { color: var(--violet); }
+.brand span { color: var(--orange); }
 .nav-links { display: flex; gap: 31px; font-size: 13px; font-weight: 650; color: #4f5065; }
 .nav-links a:hover { color: var(--violet); }
 .nav-actions, .hero-actions { display: flex; align-items: center; gap: 12px; }

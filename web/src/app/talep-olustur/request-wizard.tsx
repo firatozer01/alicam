@@ -220,13 +220,9 @@ const emptyForm: FormState = {
   contactPreferences: ["message"],
 };
 
-const BrandMark = () => (
-  <svg viewBox="0 0 30 30" fill="none" aria-hidden="true">
-    <path d="M4 10 L14 4 L14 10 Z" fill="#1B5CFF" />
-    <path d="M26 20 L16 26 L16 20 Z" fill="#F2600C" />
-    <path d="M14 7 H16 V23 H14 Z" fill="#0A1433" />
-  </svg>
-);
+// Gercek marka isareti; ortak kabuktaki BrandMark ile ayni dosya.
+// eslint-disable-next-line @next/next/no-img-element
+const BrandMark = () => <img alt="" aria-hidden="true" height={30} src="/mark.png" width={30} />;
 
 /* ==========================================================
    Bilesen

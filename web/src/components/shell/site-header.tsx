@@ -13,15 +13,16 @@ import styles from "./site-header.module.css";
  * (teklif), ortada lacivert govde. Aydinlik zeminde koyu, lacivert zeminde
  * (alt bilgi) acik tonlu cizilir.
  */
-export function BrandMark({ tone = "dark" }: { tone?: "dark" | "light" }) {
-  const light = tone === "light";
-
-  return <svg aria-hidden="true" fill="none" viewBox="0 0 30 30">
-    <path d="M4 10 L14 4 L14 10 Z" fill={light ? "#7EA2FF" : "#1B5CFF"} />
-    <path d="M26 20 L16 26 L16 20 Z" fill={light ? "#FF8A4C" : "#F2600C"} />
-    <path d="M14 7 H16 V23 H14 Z" fill={light ? "#FFFFFF" : "#0A1433"} />
-  </svg>;
+export function BrandMark() {
+  // Gercek marka isareti (el sikisma). Tek dosya hem koyu hem acik
+  // zeminde calisiyor: isaretin kendi renkleri var, tonlanmiyor.
+  //
+  // next/image kullanilmiyor: dosya /public'te duruyor ve zaten
+  // ikon olcusunde, iyilestiriciye girmesi kazanc getirmiyor.
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img alt="" aria-hidden="true" height={30} src="/mark.png" width={30} />;
 }
+
 
 /**
  * Sayfa kendi menusunu vermediginde gosterilen ortak kesif menusu. Boylece

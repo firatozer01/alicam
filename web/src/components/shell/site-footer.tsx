@@ -249,7 +249,7 @@ export function SiteFooter() {
       {/* 3) Bag sutunlari */}
       <div className={styles.columns}>
         <div className={styles.about}>
-          <Link className={styles.brand} href="/"><BrandMark tone="light" />alıcam<span>.net</span></Link>
+          <Link className={styles.brand} href="/"><BrandMark />alıcam<span>.net</span></Link>
           <p>Talep tabanlı pazaryeri. İlan aramak yok; ihtiyacını yaz, teklifler sana gelsin.</p>
           <div className={styles.social}>
             <a aria-label="Instagram" href="https://www.instagram.com/alicamnet" rel="noopener noreferrer" target="_blank">{socialIcons.instagram}</a>

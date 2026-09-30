@@ -14,7 +14,7 @@
 .header::before { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(255, 255, 255, .9); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--line); }
 .headerIn { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; height: var(--header-h); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .brand { display: inline-flex; align-items: center; gap: 9px; font: 800 23px/1 var(--f-head); letter-spacing: -.035em; color: var(--navy); flex: none; }
-.brand svg { width: 30px; height: 30px; }
+.brand img { width: 30px; height: 30px; }
 .brand b { font-weight: inherit; }
 .brand span { color: var(--blue); }
 
