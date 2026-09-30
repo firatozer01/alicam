@@ -167,7 +167,6 @@ export function AssistantWidget() {
       type="button"
     >
       <Image alt="" height={130} priority={false} src="/asistan.webp" unoptimized width={124} />
-      {!open && <span className={styles.ping} />}
     </button>
 
     {open && (

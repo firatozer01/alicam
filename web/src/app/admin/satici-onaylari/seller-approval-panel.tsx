@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SiteFooter } from "@/components/shell/site-footer";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
@@ -249,6 +250,10 @@ export function SellerApprovalPanel() {
             })}
           </div>
         )}
+      {/* Yonetim ekranlari PageShell kullanmiyor (kendi kenar cubuklu
+          yerlesimleri var), bu yuzden alt bilgi burada elle basiliyor.
+          Kisa hal: pazarlama bolumleri calisma ekranina ait degil. */}
+      <SiteFooter compact />
       </section>
     </main>
   );
