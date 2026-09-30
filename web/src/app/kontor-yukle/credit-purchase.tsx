@@ -38,7 +38,7 @@ export function CreditPurchase() {
   // ust cubugu kalkti; onun tasidigi iki sey de ortak cubugun kendi
   // alanlarina tasindi -- bakiye "credits" sayacina, satici paneli
   // baglantisi da eylem dugmesine. Boylece hizasi diger sayfalarla ayni.
-  return <PageShell header={{ credits: balance, cta: { label: "Satıcı paneli", href: "/satici-paneli" }, workspace: "seller" }} tone="public">
+  return <PageShell width="narrow" header={{ credits: balance, cta: { label: "Satıcı paneli", href: "/satici-paneli" }, workspace: "seller" }} tone="public">
     <main>
       <section className="credit-hero"><span>HİZMET VEREN BÜYÜME MERKEZİ</span><h1>Daha çok fırsata ulaş.<br /><em>Kontörünü seç.</em></h1><p>Teklif vermek istediğin talepleri güvenle aç. Paketlerin süresi dolmaz; bonuslar anında hesabına eklenir.</p></section>
       {!iframeUrl ? <section className="credit-content">

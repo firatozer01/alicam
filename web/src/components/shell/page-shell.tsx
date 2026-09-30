@@ -35,12 +35,15 @@ type Props = {
   /**
    * Govde ortak kapsayiciya alinsin mi.
    *
+   * "narrow" ayni kapsayiciyi daha dar bir tavanla kurar (calisma
+   * ekranlari icin); ust cubuk ve alt bilgi de onunla birlikte daralir.
+   *
    * "full" yalnizca sayfa kendi tam genislikli bolumlerini yonetiyorsa
    * kullanilir (vitrin kapak gorseli, girisin iki panelli yerlesimi).
    * O durumda sayfa kenar boslugunu KENDI vermeli ve ayni --gutter
    * degiskenini kullanmali, yoksa ust cubukla hizasi kayar.
    */
-  width?: "wrap" | "full";
+  width?: "wrap" | "narrow" | "full";
   /** Ust cubuga gecirilecekler; kabuk oldugu gibi aktarir. */
   header?: ComponentProps<typeof SiteHeader>;
   /** Dis sarmalayiciya eklenecek sinif; sayfaya ozel zemin icin. */
@@ -52,11 +55,15 @@ export function PageShell({ tone = "public", width = "wrap", header, className, 
   // Govde <main> olarak basiliyor: ekran okuyucu ve klavye kullanicisi icin
   // sayfanin ana bolgesi bu. width="full" veren sayfalar kendi <main>'ini
   // kuruyor (zeminleri tam genislik oldugu icin kapsayiciya giremiyorlar).
-  const body = width === "wrap"
-    ? <main className={styles.wrap}>{children}</main>
-    : children;
+  const body = width === "full"
+    ? children
+    : <main className={styles.wrap}>{children}</main>;
 
-  return <div className={className ? `${styles.page} ${className}` : styles.page}>
+  const kok = [styles.page, width === "narrow" ? styles.pageNarrow : "", className]
+    .filter(Boolean)
+    .join(" ");
+
+  return <div className={kok}>
     {tone !== "bare" && <SiteHeader {...header} />}
     {body}
     {tone === "public" && <SiteFooter />}

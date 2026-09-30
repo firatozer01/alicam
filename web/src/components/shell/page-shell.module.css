@@ -28,3 +28,22 @@
   flex: 1;
   min-width: 0;
 }
+
+/*
+  Calisma ekranlari icin daha dar kapsayici.
+
+  --maxw KABUK KOKUNDE yeniden tanimlaniyor; ust cubuk .inner, alt bilgi
+  .wrap ve govde .wrap ucu de ayni degiskeni okudugu icin uculu birlikte
+  daraliyor ve hizalari bozulmuyor.
+
+  Pazarlama sayfalari 1680px'te kaliyor: o olcuyu tasarim maketi belirledi
+  ve genis akis izgaralari ona gore kuruldu.
+*/
+.pageNarrow {
+  --maxw: 1440px;
+  /* Kenar boslugu da acilyor: yalniz --maxw daraltmak 1440px ve alti
+     ekranlarda hicbir sey degistirmezdi, cunku orada genisligi zaten
+     ekran belirliyor. Panel modulleri --gutter'i baska hicbir yerde
+     kullanmiyor, yani bu deger yalnizca kapsayiciyi etkiliyor. */
+  --gutter: clamp(20px, 6vw, 110px);
+}

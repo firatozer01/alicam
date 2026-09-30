@@ -261,13 +261,13 @@ export function CustomerDashboard() {
   };
 
   // Yukleme ekraninda da ortak kabuk durur; sayfa gecisinde zipla olmaz.
-  if (loading) return <PageShell className={styles.page} header={{ workspace: "buyer" }} tone="public"><div className={styles.loading}><i /><p>Alıcı çalışma alanın hazırlanıyor…</p></div></PageShell>;
+  if (loading) return <PageShell width="narrow" className={styles.page} header={{ workspace: "buyer" }} tone="public"><div className={styles.loading}><i /><p>Alıcı çalışma alanın hazırlanıyor…</p></div></PageShell>;
 
   const activeCount = requests.filter((item) => ["open", "in_negotiation"].includes(item.status)).length;
   const acceptedCount = requests.filter((item) => item.status === "accepted").length;
   const totalOffers = requests.reduce((sum, item) => sum + item.offer_count, 0);
 
-  return <PageShell
+  return <PageShell width="narrow"
     className={styles.page}
     header={{
       activeKey: section,

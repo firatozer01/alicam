@@ -114,13 +114,13 @@ export function AccountSettings() {
   };
 
   // Yukleme ve hata durumlarinda da ortak kabuk korunur.
-  if (loading) return <PageShell className={styles.page} tone="public"><div className={styles.state}><i /><p>Ayarlar yükleniyor…</p></div></PageShell>;
-  if (!user) return <PageShell className={styles.page} header={{ sessionReady: true, user: null }} tone="public"><div className={styles.state}><p>{error || "Hesap bulunamadı."}</p><Link href="/giris">Giriş yap →</Link></div></PageShell>;
+  if (loading) return <PageShell width="narrow" className={styles.page} tone="public"><div className={styles.state}><i /><p>Ayarlar yükleniyor…</p></div></PageShell>;
+  if (!user) return <PageShell width="narrow" className={styles.page} header={{ sessionReady: true, user: null }} tone="public"><div className={styles.state}><p>{error || "Hesap bulunamadı."}</p><Link href="/giris">Giriş yap →</Link></div></PageShell>;
 
   const initials = user.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("tr-TR");
   const isSeller = user.roles.includes("seller");
 
-  return <PageShell
+  return <PageShell width="narrow"
     className={styles.page}
     header={{
       cta: isSeller ? { label: "Satıcı paneli", href: "/satici-paneli" } : { label: "Alıcı paneli", href: "/musteri-panel" },
