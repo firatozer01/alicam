@@ -166,7 +166,7 @@ export function AssistantWidget() {
       onClick={() => setOpen((current) => !current)}
       type="button"
     >
-      <Image alt="" height={180} priority={false} src="/asistan.webp" unoptimized width={172} />
+      <Image alt="" height={130} priority={false} src="/asistan.webp" unoptimized width={124} />
       {!open && <span className={styles.ping} />}
     </button>
 
