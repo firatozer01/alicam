@@ -33,12 +33,30 @@ function cheapestIndex(prices: string[]): number {
 export function HeroVisual() {
   const reduced = useReducedMotion();
   const [index, setIndex] = useState(0);
+  const [cycle, setCycle] = useState(0);
   const [count, setCount] = useState(0);
   const [swap, setSwap] = useState(false);
-  const [toast, setToast] = useState("");
+  const [toastText, setToastText] = useState("");
+  const [toastOn, setToastOn] = useState(false);
 
   useEffect(() => {
     if (reduced) return;
+    // Sekme arka plandayken tarayici zamanlayicilari kisiyor, hatta
+    // donduruyor; geri donuldugunde bekleyen teklifler topluca
+    // atesleniyor ve baloncuk pesi sira yanip soniyordu. Maketteki
+    // gibi durdurup ayni ornegin basindan basliyoruz.
+    const onVisibility = () => {
+      setCount(0);
+      setToastOn(false);
+      setCycle((current) => current + 1);
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [reduced]);
+
+  useEffect(() => {
+    if (reduced || document.hidden) return;
 
     const sample = HERO_SAMPLES[index];
     const timers: number[] = [];
@@ -47,21 +65,29 @@ export function HeroVisual() {
       const at = FIRST_OFFER + order * OFFER_GAP;
       timers.push(window.setTimeout(() => {
         setCount(order + 1);
-        setToast(`${offer.name} — ${offer.price}`);
+        setToastText(`${offer.name} — ${offer.price}`);
+        setToastOn(true);
       }, at));
-      timers.push(window.setTimeout(() => setToast(""), at + TOAST_LIFE));
     });
+
+    // Baloncuk teklif basina acilip kapanmiyor: BIR KEZ aciliyor, metni
+    // her yeni teklifte degisiyor, son teklifin ardindan kapaniyor.
+    // Her teklife ayri kapatma zamanlayicisi verilirse (maketteki hali)
+    // o zamanlayici bir sonraki teklif ekrana geldikten 200ms sonra
+    // atesleniyor -- TOAST_LIFE 1600, teklif araligi 1400 -- ve
+    // baloncuk gidip geliyor.
+    const last = FIRST_OFFER + (sample.offers.length - 1) * OFFER_GAP;
+    timers.push(window.setTimeout(() => setToastOn(false), last + TOAST_LIFE));
 
     timers.push(window.setTimeout(() => setSwap(true), SWAP_AT));
     timers.push(window.setTimeout(() => {
       setSwap(false);
       setCount(0);
-      setToast("");
       setIndex((current) => (current + 1) % HERO_SAMPLES.length);
     }, NEXT_AT));
 
     return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [index, reduced]);
+  }, [cycle, index, reduced]);
 
   const sample = HERO_SAMPLES[index];
   const vertical = findVertical(sample.vertical);
@@ -109,8 +135,10 @@ export function HeroVisual() {
       ))}
     </div>
 
-    <div aria-live="polite" className={`${styles.hvToast}${toast ? ` ${styles.hvToastShow}` : ""}`}>
-      {toast && <><i>🔔</i> Yeni teklif: {toast}</>}
+    {/* Metin kapanirken SILINMIYOR: silinirse 0,4 sn'lik solmanin
+        tamami bos bir lacivert kutu olarak gorunuyor. */}
+    <div aria-live="polite" className={`${styles.hvToast}${toastOn ? ` ${styles.hvToastShow}` : ""}`}>
+      {toastText && <><i>🔔</i> Yeni teklif: {toastText}</>}
     </div>
   </div>;
 }
