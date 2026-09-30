@@ -181,7 +181,10 @@ export function SiteHeader({
           </NavMenuBar>
         </nav>
 
-        <div className={styles.actions}>
+        {/* Oturum acikken cubukta hesap menusu de duruyor; dar ekranda
+            marka + hesap + eylem + hamburger yan yana sigmiyor ve cubuk
+            tasiyordu. Isaret sinifi CSS'e bu durumu bildiriyor. */}
+        <div className={currentUser ? `${styles.actions} ${styles.actionsAuthed}` : styles.actions}>
           {typeof credits === "number" && <Link className={styles.credit} href="/kontor-yukle">⚡ {credits} kontör</Link>}
           {/* Favori talepler yalnizca hizmet vereni ilgilendirir. */}
           {ready && isSeller && (

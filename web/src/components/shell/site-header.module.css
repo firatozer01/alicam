@@ -209,6 +209,10 @@
      dusuyordu. Burada daraltiliyor. */
   .inner { gap: 10px; }
   .brandFull { --brand-h: 24px; }
+  /* Oturum acikken eylem dugmesi cubuktan kalkiyor: hesap menusu ve
+     hamburger yerini aliyor. "Ucretsiz talep olustur" cekmecenin
+     altinda zaten duruyor, yani yol kaybolmuyor. */
+  .actionsAuthed .cta { display: none; }
   .cta { height: 38px; padding: 0 10px; font-size: 13.5px; }
 }
 
