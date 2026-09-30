@@ -28,7 +28,13 @@
 
 /* Kart bağlamı: detay ve teklif formu kartın içinde tam genişlikte akar. */
 .details,.offerForm{margin:11px 0 0;border-radius:12px;border:1px solid var(--line);border-top:1px solid var(--line);padding:15px}
-.offerForm{grid-template-columns:1fr;background:var(--surface)}
+/* minmax(0,1fr) + min-width:0 IKISI birden gerekli: izgara ogeleri
+   varsayilan olarak min-width:auto tasir, yani icerigi kucultulemeyen
+   bir oge sutunu kendi en kucuk genisligine kadar geniletir.
+   Ilistirilmis urun satirinda 50px gorsel + uzun ilan basligi var;
+   form karttan 253px tasiyordu (scrollWidth 553 / clientWidth 300). */
+.offerForm{grid-template-columns:minmax(0,1fr);background:var(--surface)}
+.offerForm>*{min-width:0}
 .details{grid-template-columns:1fr;border-color:#bdebf0;background:#fbfeff}
 
 /* Sol sütundaki kartlar birbirine yapışmasın. */
