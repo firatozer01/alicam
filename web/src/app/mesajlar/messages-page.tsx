@@ -90,7 +90,7 @@ export function MessagesPage({ initialConversationId }: { initialConversationId?
     }
   };
 
-  return <PageShell width="narrow" className={styles.page} tone="public">
+  return <PageShell className={styles.page} tone="public">
     <header className={styles.head}>
       <div>
         <span className={styles.kicker}>MESAJLAR</span>

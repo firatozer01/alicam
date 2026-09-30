@@ -261,13 +261,13 @@ export function CustomerDashboard() {
   };
 
   // Yukleme ekraninda da ortak kabuk durur; sayfa gecisinde zipla olmaz.
-  if (loading) return <PageShell width="narrow" className={styles.page} header={{ workspace: "buyer" }} tone="public"><div className={styles.loading}><i /><p>Alıcı çalışma alanın hazırlanıyor…</p></div></PageShell>;
+  if (loading) return <PageShell className={styles.page} header={{ workspace: "buyer" }} tone="public"><div className={styles.loading}><i /><p>Alıcı çalışma alanın hazırlanıyor…</p></div></PageShell>;
 
   const activeCount = requests.filter((item) => ["open", "in_negotiation"].includes(item.status)).length;
   const acceptedCount = requests.filter((item) => item.status === "accepted").length;
   const totalOffers = requests.reduce((sum, item) => sum + item.offer_count, 0);
 
-  return <PageShell width="narrow"
+  return <PageShell
     className={styles.page}
     header={{
       activeKey: section,
@@ -329,7 +329,7 @@ export function CustomerDashboard() {
             <p>{item.description}</p>
             <div className={styles.requestMeta}><span>⌖ <b>{item.location.district.name}, {item.location.city.name}</b></span><span>₺ <b>{money(item.budget.min)} – {money(item.budget.max)}</b></span><span>◷ <b>{date(item.created_at)}</b></span></div>
             <div className={styles.progress}><span className={styles.done}>Talep yayınlandı</span><i /><span className={item.offer_count ? styles.done : ""}>{item.offer_count} teklif geldi</span><i /><span className={item.status === "accepted" ? styles.done : ""}>Hizmet veren seçildi</span></div>
-            <footer><p><strong>{item.offer_count}</strong><span>gelen teklif</span></p><div><button disabled={item.offer_count === 0} onClick={() => openCompare(item)}>{item.offer_count === 0 ? "Teklif bekleniyor" : "Teklifleri karşılaştır →"}</button>{["open", "in_negotiation"].includes(item.status) && <button className={styles.ghost} disabled={busy === -item.id} onClick={() => cancel(item)}>Talebi iptal et</button>}</div></footer>
+            <footer><p><strong>{item.offer_count}</strong><span>gelen teklif</span></p><div><button disabled={item.offer_count === 0} onClick={() => openCompare(item)}>{item.offer_count === 0 ? "Teklif bekleniyor" : "Teklifleri karşılaştır →"}</button>{["open", "in_negotiation"].includes(item.status) && <button className={styles.ghost} disabled={busy === -item.id} onClick={() => cancel(item)}>İptal et</button>}</div></footer>
           </article>)}</div>
         </div>
         <aside className={styles.rightRail}>

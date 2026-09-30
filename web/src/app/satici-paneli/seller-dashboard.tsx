@@ -733,7 +733,7 @@ export function SellerDashboard() {
   };
 
   // Yukleme ekraninda da ortak kabuk durur; sayfa gecisinde zipla olmaz.
-  if (loading && !user) return <PageShell width="narrow" className={styles.page} header={{ workspace: "seller" }} tone="public"><div className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></div></PageShell>;
+  if (loading && !user) return <PageShell className={styles.page} header={{ workspace: "seller" }} tone="public"><div className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></div></PageShell>;
 
   // Urun ekranindan turetilenler.
   const visibleListings = listingScope === "all" ? listings : listings.filter((item) => item.status === listingScope);
@@ -804,7 +804,7 @@ export function SellerDashboard() {
   const workHighlights = portfolioForm.highlights.split("\n").map((line) => line.trim()).filter(Boolean);
   const serviceCategory = profile.categories.find((item) => String(item.id) === serviceForm.category_id);
 
-  return <PageShell width="narrow"
+  return <PageShell
     className={styles.page}
     header={{
       activeKey: view === "requests" ? (filter === "all" ? "requests" : filter) : view,

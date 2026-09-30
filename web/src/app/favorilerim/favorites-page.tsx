@@ -87,7 +87,7 @@ export function FavoritesPage() {
     }
   };
 
-  return <PageShell width="narrow" className={styles.page} header={{ activeKey: "favoriler" }} tone="public">
+  return <PageShell className={styles.page} header={{ activeKey: "favoriler" }} tone="public">
     <div className={styles.body}>
       <header className={styles.head}>
         <div>
