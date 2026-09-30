@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AccountMenu } from "@/components/account-menu";
 import { NavMenuBar, type NavMenuDef } from "@/components/listing/nav-menu";
-import { BrandLogo, BrandMark } from "./brand";
+import { BrandLogo } from "./brand";
 import { NotificationBell } from "./notification-bell";
 import { useSession, type SessionUser } from "./use-session";
 import styles from "./site-header.module.css";
@@ -153,7 +153,6 @@ export function SiteHeader({
       <div className={styles.inner}>
         <Link aria-label="alıcam.net ana sayfa" className={styles.brand} href="/">
           <BrandLogo className={styles.brandFull} />
-          <span className={styles.brandMark}><BrandMark /></span>
         </Link>
         <Link className={styles.ghost} href="/">{minimal}</Link>
       </div>
@@ -164,13 +163,12 @@ export function SiteHeader({
     {announce && <div className={styles.announce}>{announce}</div>}
     <header className={styles.bar}>
       <div className={styles.inner}>
-        {/* Tam logo 32px yukseklikte ~203px genisliginde. Ust cubukta ayrica
-            eylem dugmesi ve hamburger var; 600px altinda bu genislik
-            sigmiyor. Bu yuzden ikisi de basilir, hangisinin gorunecegine
-            CSS karar verir. */}
+        {/* Tam logo 32px yukseklikte ~203px genisliginde ve 600px altinda
+            eylem dugmesiyle hamburgerin yanina sigmiyor; orada CSS onu
+            kucultuyor (bkz. --brand-h). Isarete dusulmuyor, marka yazisi
+            telefonda da gorunsun. */}
         <Link aria-label="alıcam.net ana sayfa" className={styles.brand} href="/">
           <BrandLogo className={styles.brandFull} />
-          <span className={styles.brandMark}><BrandMark /></span>
         </Link>
 
         <nav aria-label="Ana menü" className={styles.nav}>

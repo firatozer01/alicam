@@ -31,9 +31,10 @@
    gizlenip yalnizca isaret kaliyor. Ikisi de basildigi icin degisim
    anlik, yeniden cizim ya da ikinci istek gerektirmiyor. */
 .brand { display: inline-flex; align-items: center; flex: none; text-decoration: none; }
-.brandFull { display: block; height: 32px; width: auto; }
-.brandMark { display: none; }
-.brandMark img { display: block; width: 30px; height: 30px; }
+/* Yukseklik BrandLogo'nun yazdigi --brand-h'ten geliyor; dar ekranda
+   asagidaki kirilimlar onu kucultuyor. Genislik her zaman auto: logo
+   orani hicbir olcude bozulmaz. */
+.brandFull { display: block; width: auto; }
 
 /* ---------- Masaustu menusu ---------- */
 .nav { flex: 1; min-width: 0; display: flex; align-items: center; margin-right: auto; }
@@ -198,16 +199,24 @@
 }
 
 @media (max-width: 600px) {
-  .brandFull { display: none; }
-  .brandMark { display: block; }
-  .cta { height: 38px; padding: 0 12px; font-size: 13.5px; }
+  /* Tam logo 32px yukseklikte 203px genisliginde ve bu genislikte
+     eylem dugmesiyle hamburgerin yanina sigmiyor. Isarete dusmek
+     yerine logo kuculuyor: marka yazisi telefonda da gorunsun. */
+  /* Boslugu clamp(16px..) veriyor; telefonda 16px'lik iki bosluk logoyla
+     dugmeyi kenara sikistiriyor, sag kenar payi soldakinin yarisina
+     dusuyordu. Burada daraltiliyor. */
+  .inner { gap: 10px; }
+  .brandFull { --brand-h: 24px; }
+  .cta { height: 38px; padding: 0 10px; font-size: 13.5px; }
 }
 
-@media (max-width: 400px) {
-  .inner { gap: 10px; }
-  .brandMark img { width: 26px; height: 26px; }
-  .actions { gap: 8px; }
-  .cta { padding: 0 11px; font-size: 13px; }
+/* 360 ve alti: 375px telefonlarda logo 24px kaliyor, daha dar cihazlarda
+   (eski SE gibi) hem logo hem dugme bir tik daha kuculuyor. */
+@media (max-width: 360px) {
+  .inner { gap: 8px; }
+  .brandFull { --brand-h: 18px; }
+  .actions { gap: 6px; }
+  .cta { padding: 0 9px; font-size: 12.5px; }
   .fav { display: none; }
   .burger { width: 40px; height: 40px; }
   .burger span { left: 11px; right: 11px; }

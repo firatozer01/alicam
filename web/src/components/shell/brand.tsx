@@ -150,7 +150,12 @@ export function BrandLogo({ tone = "light", height = 32, className }: {
     className={className}
     height={height}
     src={tone === "dark" ? logoLight : logo}
-    style={{ height: `${height}px`, width: "auto" }}
+    // Yukseklik --brand-h'ten okunur, height prop'u YALNIZCA yedek deger.
+    // Degisken satir ici TANIMLANAMAZ: satir ici stil, modul CSS'indeki
+    // tanimi ezer ve kirilimlar hic islemezdi. Boyle yazilinca CSS degiskeni
+    // tanimladiginda o kazanir, tanimlamadiginda prop gecerli kalir.
+    // Genislik her zaman auto: logo orani hicbir olcude bozulmaz.
+    style={{ height: `var(--brand-h, ${height}px)`, width: "auto" }}
     width={Math.round(height * logoRatio)}
   />;
 }
