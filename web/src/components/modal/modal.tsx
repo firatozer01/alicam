@@ -22,7 +22,10 @@ export function Modal({ open, onClose, title, subtitle, size = "md", footer, chi
     if (!open) return;
 
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { onClose(); return; }
+      // Ic katman (orn. acik bir Select listesi) Escape'i tuketmisse modal
+      // kapanmaz; yoksa kullanici listeyi kapatmak isterken doldurdugu
+      // formu kaybediyordu.
+      if (event.key === "Escape") { if (!event.defaultPrevented) onClose(); return; }
       if (event.key !== "Tab") return;
 
       const focusable = panelRef.current?.querySelectorAll<HTMLElement>(

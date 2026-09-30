@@ -48,14 +48,26 @@
 .masked { opacity: .75; font-style: italic; }
 .unlock { display: grid; gap: 10px; justify-items: start; padding: 16px 18px; border-top: 1px solid var(--line-soft); background: var(--surface); }
 .unlock p { margin: 0; color: var(--muted); font-size: 13px; }
-.unlock button { border: 0; border-radius: 12px; padding: 11px 18px; font: inherit; font-size: 13.5px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); cursor: pointer; transition: filter .16s ease; }
+.unlock button { border: 0; border-radius: var(--r-sm); min-height: var(--control-h); padding: 0 18px; font: inherit; font-size: 13.5px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); cursor: pointer; transition: filter .16s ease; }
 .unlock button:hover:not(:disabled) { filter: brightness(1.07); }
 .unlock button:disabled { opacity: .5; cursor: default; }
 
 .composer { display: flex; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--line-soft); background: var(--surface); }
-.composer textarea { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 13px; font: inherit; font-size: 13.5px; line-height: 1.6; color: var(--ink); background: var(--card); outline: none; resize: none; transition: border-color .16s ease, box-shadow .16s ease; }
-.composer textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 58, 237, .12); }
-.composer button { flex: none; align-self: flex-end; border: 0; border-radius: var(--r-md); padding: 11px 20px; font: inherit; font-size: 13.5px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); cursor: pointer; transition: filter .16s ease, transform .16s ease; }
+/* Yazma kutusu: kenarlik, yaricap, yazi olcusu ve odak halkasi ortak
+   kontrol katmaniyla ayni -- sitede her alan ayni gorunsun.
+   BILEREK farkli olan iki sey:
+   1) resize:none -- seridin icindeki tutamak akisin yuksekligini bozuyor;
+   2) yukseklik rows=2'den gelir, ortak textarea'nin 116px'i serit
+      balonlarin ucte birini yiyordu.
+   NEDEN element secici: alana "control" sinifi vermek messages-page.tsx'i
+   degistirmeyi gerektiriyor, o dosya bu ise dahil degil. Sinif eklendigi
+   gun ".control.control" bu kurali yener ve yalnizca yukaridaki iki
+   ayrilik burada kalir. */
+.composer textarea { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 11px var(--control-px); font: 400 15px/1.65 var(--f-body); color: var(--ink); background: var(--card); outline: none; resize: none; transition: border-color .16s ease, box-shadow .16s ease; }
+.composer textarea::placeholder { color: var(--faint); opacity: 1; }
+.composer textarea:focus { border-color: var(--blue); box-shadow: var(--control-ring); }
+.composer textarea:disabled { color: var(--ink-3); background: var(--surface); cursor: not-allowed; opacity: .7; }
+.composer button { flex: none; align-self: flex-end; border: 0; border-radius: var(--r-sm); min-height: var(--control-h); padding: 0 20px; font: inherit; font-size: 13.5px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); cursor: pointer; transition: filter .16s ease, transform .16s ease; }
 .composer button:hover:not(:disabled) { filter: brightness(1.07); transform: translateY(-1px); }
 .composer button:disabled { opacity: .5; cursor: default; }
 

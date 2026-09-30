@@ -441,3 +441,134 @@ h1, h2, h3, p{ margin-top: 0; }
 .invited-seller small{ display: block; margin-top: 3px; color: var(--muted); font-size: 9.5px; line-height: 1.5; }
 .invited-seller button{ margin-left: auto; flex: none; border: 1px solid var(--violet-200); border-radius: var(--r-sm); padding: 7px 12px; background: var(--card); color: var(--indigo); font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
 .invited-seller button:hover{ border-color: var(--violet); }
+
+/* ==========================================================
+   ORTAK FORM KONTROL KATMANI
+   ----------------------------------------------------------
+   Site genelinde 125 input, 21 select ve 14 textarea vardi ve
+   olculeri 16 ayri CSS dosyasinda tekrar tanimlaniyordu: ayni
+   sayfada 44/45/38 px yukseklik, 12 ve 9 px yazi yan yana
+   cikiyordu. Bu bolum tek kaynak; bir alana .control verildiginde
+   olcu, kenarlik, odak, devre disi ve gecersiz gorunumu buradan
+   gelir.
+
+   NEDEN element secici (input, select) degil de sinif:
+   eski sayfalar goc edene kadar iki sistem yan yana yasayacak.
+   Element seciciyle yazilsa henuz gocmemis her ekran yarim
+   bicimlenir; sinif, sahipligi acikca bildirir.
+
+   NEDEN secicilerde .control iki kez yaziliyor:
+   eski kurallar ".field-label input" gibi sinif+element olarak
+   yazildigi icin tek sinifli yeni kuraldan daha guclu cikiyor.
+   Sinifi iki kez yazmak yeni katmani onlerin ustune tasir. Eski
+   kurallar silindiginde bu tekrar da kaldirilabilir.
+
+   NEDEN .control her zaman alanin KENDISINDE durur:
+   sarmalayiciya verilse kutu gorunumu hem sarmalayiciyi hem alani
+   boyardi. Sarmalayici icin .controlField var.
+   ========================================================== */
+:root{
+  --control-h: 44px;
+  --control-px: 14px;
+  /* Halka renkleri icin alfa tasiyan token yok; ikisi tek yerde dursun ki
+     odak gorunumu tum alanlarda ayni kalsin. */
+  --control-ring: 0 0 0 3px rgb(27 92 255 / .14);
+  --control-ring-danger: 0 0 0 3px rgb(229 72 77 / .14);
+}
+
+.control.control{
+  width: 100%;
+  min-width: 0;
+  display: block;
+  height: var(--control-h);
+  padding: 0 var(--control-px);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  outline: none;
+  color: var(--ink);
+  background: var(--card);
+  font: 400 15px/1.4 var(--f-body);
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+.control.control::placeholder{ color: var(--faint); opacity: 1; }
+/* Gecersiz alan disarida: bu secicinin ozgullugu (0,5,0), gecersizlik
+   kurallarininki (0,3,0). Disarida birakilmazsa hatali alanin uzerine
+   gelince kirmizi kenarlik maviye donuyor ve hata kayboluyordu. */
+.control.control:hover:not(:disabled):not(:focus):not([aria-invalid="true"]){ border-color: var(--blue-100); }
+/* Halka zaten gorunur oldugu icin genel :focus-visible anahati burada
+   kapatiliyor; anahat ile halka ust uste binmesin. */
+.control.control:focus, .control.control:focus-visible{ border-color: var(--blue); box-shadow: var(--control-ring); outline: none; }
+.control.control[aria-invalid="true"]{ border-color: var(--red); }
+.control.control[aria-invalid="true"]:focus{ border-color: var(--red); box-shadow: var(--control-ring-danger); }
+.control.control:disabled, .control.control[aria-disabled="true"]{
+  color: var(--ink-3); background-color: var(--surface); cursor: not-allowed; opacity: .7;
+}
+
+/* Cok satirli alan: yukseklik icerige gore buyur, dolgu dikeyde de olsun. */
+textarea.control.control{
+  height: auto;
+  min-height: 116px;
+  padding: 11px var(--control-px);
+  line-height: 1.65;
+  resize: vertical;
+}
+
+/* Yerel select: tarayicinin oku her platformda baska boyda cikiyor, bu
+   yuzden kapatilip iki cizgiyle kendi V isareti ciziliyor. Isaret arka
+   plan gradyaniyla yapiliyor ki sabit renk yerine token kullanabilelim. */
+select.control.control{
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px;
+  background-color: var(--card);
+  background-image:
+    linear-gradient(45deg, transparent 42%, var(--ink-3) 42% 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, var(--ink-3) 42% 58%, transparent 58%);
+  background-repeat: no-repeat;
+  background-position: calc(100% - 21px) center, calc(100% - 14px) center;
+  background-size: 7px 7px;
+  cursor: pointer;
+}
+select.control.control:disabled{ cursor: not-allowed; }
+/* Secim yapilmamis select'te yer tutucu rengi: bos degerli option
+   secili oldugunda alan soluk gorunsun. */
+select.control.control[data-placeholder="true"]{ color: var(--faint); }
+
+/* Alan gibi gorunen dugme: kendi yazdigimiz acilir liste tetikleyicisi
+   ve "tarih sec" gibi alan kiliginda dugmeler bunu kullanir. */
+button.control.control{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+button.control.control:disabled{ cursor: not-allowed; }
+
+/* Olcu secenekleri: filtre satirlari daralir, anasayfa arama seridi buyur. */
+.control.control.controlSm{ height: 36px; padding-inline: 11px; font-size: 14px; }
+.control.control.controlLg{ height: 52px; padding-inline: 16px; font-size: 16px; }
+select.control.control.controlSm{ padding-right: 32px; background-position: calc(100% - 19px) center, calc(100% - 12px) center; }
+select.control.control.controlLg{ padding-right: 40px; }
+
+/* Alan iskeleti: etiket, alan, ipucu. Dikey bosluk sayfaya ait oldugu
+   icin burada margin YOK. */
+.controlField{ display: grid; gap: 7px; min-width: 0; }
+.controlLabel{ display: block; color: var(--ink-2); font-family: var(--f-body); font-size: 13px; font-weight: 600; line-height: 1.35; }
+.controlHint{ display: block; color: var(--ink-3); font-size: 12.5px; font-weight: 400; line-height: 1.5; }
+.controlError{ display: block; color: var(--red); font-size: 12.5px; font-weight: 500; line-height: 1.5; }
+.controlReq{ margin-left: 3px; color: var(--red); font-style: normal; }
+
+/* Onay kutusu ve radyo: olcu degil renk ve tiklama alani sorunluydu. */
+.controlCheck{ width: 18px; height: 18px; flex: none; margin: 0; accent-color: var(--blue); cursor: pointer; }
+.controlCheck:disabled{ cursor: not-allowed; opacity: .6; }
+
+/* iOS 16 px'in altindaki alanlara odaklanildiginda sayfayi kendiliginden
+   buyutuyor; kucuk ekranda govde olcusu 16 px'e cikariliyor. */
+@media (max-width: 560px){
+  .control.control{ font-size: 16px; }
+  .control.control.controlSm{ font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .control.control{ transition: none; }
+}

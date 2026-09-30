@@ -53,18 +53,25 @@
   color: var(--ink-2);
 }
 .grid label small { color: var(--muted-2); font-size: 11px; font-weight: 500; }
+/* Olculer globals.css'teki ortak kontrol katmaninin degiskenlerinden
+   geliyor: yonetim ekrani da sitenin geri kalaniyla ayni yukseklik,
+   yaricap ve odak halkasini kullansin. Secici element bazli kaldi cunku
+   alanlara sinif vermek isaretlemeyi degistirmeyi gerektiriyor; alanlara
+   "control" eklendigi gun ".control.control" bu kurali kendiliginden
+   yener ve burasi silinebilir. */
 .grid input {
+  height: var(--control-h);
+  padding: 0 var(--control-px);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  padding: 10px 12px;
-  font: inherit;
-  font-size: 13px;
-  color: var(--ink);
-  background: var(--surface);
   outline: none;
-  transition: border-color .15s ease;
+  color: var(--ink);
+  background: var(--card);
+  font: 400 15px/1.4 var(--f-body);
+  transition: border-color .16s ease, box-shadow .16s ease;
 }
-.grid input:focus { border-color: var(--violet); }
+.grid input::placeholder { color: var(--faint); opacity: 1; }
+.grid input:focus { border-color: var(--blue); box-shadow: var(--control-ring); }
 .wide { grid-column: 1 / -1; }
 
 /* --- sabitlenen basliklar --- */
@@ -104,18 +111,23 @@
 
 /* --- arac cubugu --- */
 .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+/* Arac cubugundaki arama alani: ortak katmanin kucuk olcusu (.controlSm)
+   ile ayni, cubuktaki filtre dugmeleriyle ayni satirda kalmasi icin. */
 .toolbar > input {
   flex: 1;
   min-width: 180px;
+  height: 36px;
+  padding: 0 11px;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  padding: 9px 12px;
-  font: inherit;
-  font-size: 13px;
-  background: var(--surface);
   outline: none;
+  color: var(--ink);
+  background: var(--card);
+  font: 400 14px/1.4 var(--f-body);
+  transition: border-color .16s ease, box-shadow .16s ease;
 }
-.toolbar > input:focus { border-color: var(--violet); }
+.toolbar > input::placeholder { color: var(--faint); opacity: 1; }
+.toolbar > input:focus { border-color: var(--blue); box-shadow: var(--control-ring); }
 .check { display: flex; align-items: center; gap: 7px; color: var(--ink-2); font-size: 12.5px; font-weight: 650; cursor: pointer; }
 .count { color: var(--muted); font-size: 12px; }
 

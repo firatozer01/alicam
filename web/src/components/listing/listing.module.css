@@ -27,13 +27,21 @@
 .railActive b{color:var(--indigo)}
 
 .railSearch{padding:11px 15px;border-bottom:1px solid var(--line-soft)}
-.railSearch label{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:7px 10px}
-.railSearch input{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:13px;color:var(--ink);outline:none}
-.railSearch input::placeholder{color:var(--faint)}
+/* Gorunur kutu alanin kendisi degil onu saran etiket: buyutec simgesi iceride
+   duruyor. Bu yuzden ortak .controlSm olculeri (36px / --r-sm / --line) ve odak
+   halkasi sarmalayiciya verilip alan cercevesiz kaliyor. */
+.railSearch label{display:flex;align-items:center;gap:7px;height:36px;padding:0 11px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card);transition:border-color .16s ease,box-shadow .16s ease}
+.railSearch label:focus-within{border-color:var(--blue);box-shadow:var(--control-ring)}
+.railSearch input{flex:1;min-width:0;border:0;background:none;font:400 14px/1.4 var(--f-body);color:var(--ink);outline:none}
+.railSearch input::placeholder{color:var(--faint);opacity:1}
 
+/* Iki sayisal alan yan yana dar kenar cubuguna siginiyor: ortak katmanin
+   kucuk olcusu (.controlSm). Rakamlar hizali okunsun diye tek genislikli
+   yazi kaliyor -- ortak katmanda govde yazisi var. */
 .railRange{display:flex;align-items:center;gap:7px;padding:2px 6px 4px}
-.railRange input{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-family:var(--font-plex),ui-monospace,monospace;font-size:12px;color:var(--ink);outline:none;background:#fff}
-.railRange input:focus{border-color:var(--violet)}
+.railRange input{width:100%;min-width:0;height:36px;padding:0 11px;border:1px solid var(--line);border-radius:var(--r-sm);outline:none;color:var(--ink);background:var(--card);font:400 14px/1.4 var(--font-plex),ui-monospace,monospace;transition:border-color .16s ease,box-shadow .16s ease}
+.railRange input::placeholder{color:var(--faint);opacity:1}
+.railRange input:focus{border-color:var(--blue);box-shadow:var(--control-ring)}
 .railRange span{color:var(--faint);font-size:12px}
 .railHint{padding:0 15px 11px;font-size:11px;color:var(--muted-2);font-family:var(--font-plex),ui-monospace,monospace}
 
@@ -42,9 +50,12 @@
 .resultCount{font-size:13.5px;color:var(--ink-2)}
 .resultCount b{font-family:var(--font-plex),ui-monospace,monospace;font-size:15px;color:var(--ink)}
 .resultTools{display:flex;align-items:center;gap:10px}
-.resultTools label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted-2)}
-.resultTools select{border:1px solid var(--line);border-radius:9px;padding:6px 9px;font:inherit;font-size:13px;color:var(--ink);background:#fff;cursor:pointer;outline:none}
-.resultTools select:focus{border-color:var(--violet)}
+/* Kutu artik isaretlemedeki "control controlSm" sinifindan geliyor
+   (listing-chrome.tsx); burada yalnizca etiket ve genislik kaliyor. */
+.resultTools label{display:flex;align-items:center;gap:7px;color:var(--ink-2);font-size:13px;font-weight:600}
+/* Uc sinifli secici: ortak katmanin ".control.control" genislik kuralini
+   gecmesi gerekiyor, alan cubuga yayilmayip icerigi kadar dursun. */
+.resultTools .sortSelect.sortSelect{width:auto;min-width:168px}
 
 .chips{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px}
 .chip{display:inline-flex;align-items:center;gap:6px;background:var(--violet-100);color:var(--indigo);border:1px solid var(--violet-200);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700}

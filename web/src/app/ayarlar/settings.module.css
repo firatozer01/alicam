@@ -54,16 +54,27 @@
 .card>header p{margin:5px 0 0;font-size:13px;color:var(--muted)}
 
 .form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:20px 22px}
-.form label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted-2)}
-.form input{border:1px solid var(--line);border-radius:10px;padding:11px 13px;font:inherit;font-size:14px;font-weight:400;letter-spacing:normal;color:var(--ink);background:#fff;outline:none;transition:border-color .16s ease,box-shadow .16s ease}
-.form input:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
-.form input:disabled{background:var(--violet-50);color:var(--muted-2)}
-.form small{font-size:11.5px;font-weight:400;letter-spacing:normal;color:var(--muted-2)}
+/* ---- Alanlar ----
+   Olcu, renk ve odak halkasi globals.css'teki ortak kontrol katmaninin
+   degiskenlerinden geliyor: 44px yukseklik, var(--r-sm) yaricap, 15px
+   yazi, mavi halka. Eskiden burada 11px etiket + 14px alan + mor halka
+   vardi; ayni alan panelde bambaska gorunuyordu.
+   NEDEN seciciler hala element bazli: alanlara "control" sinifini vermek
+   account-settings.tsx'i degistirmeyi gerektiriyor, o dosya bu ise dahil
+   degil. Sinif eklendigi gun ".control.control" iki sinifli oldugu icin
+   bu kurallari kendiliginden yener, burada silinecek tek sey kalir. */
+.form label{display:grid;gap:7px;min-width:0;color:var(--ink-2);font-size:13px;font-weight:600;letter-spacing:normal;line-height:1.35}
+.form input{width:100%;min-width:0;height:var(--control-h);padding:0 var(--control-px);border:1px solid var(--line);border-radius:var(--r-sm);outline:none;color:var(--ink);background:var(--card);font:400 15px/1.4 var(--f-body);transition:border-color .16s ease,box-shadow .16s ease}
+.form input::placeholder{color:var(--faint);opacity:1}
+.form input:hover:not(:disabled):not(:focus){border-color:var(--blue-100)}
+.form input:focus{border-color:var(--blue);box-shadow:var(--control-ring)}
+.form input:disabled{color:var(--ink-3);background:var(--surface);cursor:not-allowed;opacity:.7}
+.form small{color:var(--ink-3);font-size:12.5px;font-weight:400;letter-spacing:normal;line-height:1.5}
 .wide{grid-column:1/-1}
 .readonly{grid-column:1/-1}
 
 .card>footer{display:flex;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--line-soft);background:var(--violet-50)}
-.card>footer button{border:0;border-radius:10px;padding:11px 20px;font:inherit;font-size:13.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--violet),var(--indigo));cursor:pointer;transition:filter .16s ease,transform .16s ease}
+.card>footer button{border:0;border-radius:var(--r-sm);min-height:var(--control-h);padding:0 20px;font:inherit;font-size:13.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--violet),var(--indigo));cursor:pointer;transition:filter .16s ease,transform .16s ease}
 .card>footer button:hover:not(:disabled){filter:brightness(1.07);transform:translateY(-1px)}
 .card>footer button:disabled{opacity:.55;cursor:default}
 

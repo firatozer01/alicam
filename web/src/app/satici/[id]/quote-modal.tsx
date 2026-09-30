@@ -255,29 +255,35 @@ export function QuoteModal({
         {error && <p className={styles.error}>{error}</p>}
 
         <div className={styles.grid}>
-          <label className={styles.wide}>
-            <span>Talep başlığı</span>
-            <input maxLength={120} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Örn. 2+1 daire için komple boya" value={form.title} />
+          <label className={`${styles.qField} ${styles.wide}`}>
+            <span className={styles.qLabel}>Talep başlığı</span>
+            <input className="control" maxLength={120} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Örn. 2+1 daire için komple boya" value={form.title} />
           </label>
-          <label className={styles.wide}>
-            <span>Ne yaptırmak istiyorsun?</span>
-            <textarea maxLength={3000} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Kapsamı ve beklentilerini kısaca anlat." rows={3} value={form.description} />
+          <label className={`${styles.qField} ${styles.wide}`}>
+            <span className={styles.qLabel}>Ne yaptırmak istiyorsun?</span>
+            <textarea className="control" maxLength={3000} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Kapsamı ve beklentilerini kısaca anlat." rows={3} value={form.description} />
           </label>
 
-          <label><span>Bütçe alt sınırı (₺)</span><input inputMode="numeric" onChange={(event) => setForm({ ...form, budgetMin: event.target.value })} placeholder="0" value={form.budgetMin} /></label>
-          <label><span>Bütçe üst sınırı (₺)</span><input inputMode="numeric" onChange={(event) => setForm({ ...form, budgetMax: event.target.value })} placeholder={money(50000)} value={form.budgetMax} /></label>
+          <label className={styles.qField}><span className={styles.qLabel}>Bütçe alt sınırı (₺)</span><input className="control" inputMode="numeric" onChange={(event) => setForm({ ...form, budgetMin: event.target.value })} placeholder="0" value={form.budgetMin} /></label>
+          <label className={styles.qField}><span className={styles.qLabel}>Bütçe üst sınırı (₺)</span><input className="control" inputMode="numeric" onChange={(event) => setForm({ ...form, budgetMax: event.target.value })} placeholder={money(50000)} value={form.budgetMax} /></label>
 
-          <label>
-            <span>Şehir</span>
-            <select onChange={(event) => setForm({ ...form, cityId: event.target.value, districtId: "" })} value={form.cityId}>
-              <option value="">Seç</option>
+          {/* BILEREK yerel <select>: modalin govdesi (modal.module.css .body)
+              overflow-y:auto, kabugu da overflow:hidden -- ortak Select'in
+              position:absolute paneli o kenarda kirpilirdi. Yerel acilir liste
+              tarayici katmaninda cizildigi icin kirpilmaz. Kutu gorunumu yine
+              ortak katmandan ("control"), yani alan sitenin geri kalaniyla ayni.
+              Kirpma kalktigi gun ikisi de Select'e cevrilmeli. */}
+          <label className={styles.qField}>
+            <span className={styles.qLabel}>Şehir</span>
+            <select className="control" data-placeholder={form.cityId === "" ? "true" : undefined} onChange={(event) => setForm({ ...form, cityId: event.target.value, districtId: "" })} value={form.cityId}>
+              <option value="">Şehir seçin</option>
               {cities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}
             </select>
           </label>
-          <label>
-            <span>İlçe</span>
-            <select disabled={!selectedCity} onChange={(event) => setForm({ ...form, districtId: event.target.value })} value={form.districtId}>
-              <option value="">Seç</option>
+          <label className={styles.qField}>
+            <span className={styles.qLabel}>İlçe</span>
+            <select className="control" data-placeholder={form.districtId === "" ? "true" : undefined} disabled={!selectedCity} onChange={(event) => setForm({ ...form, districtId: event.target.value })} value={form.districtId}>
+              <option value="">{selectedCity ? "İlçe seçin" : "Önce şehir seçin"}</option>
               {(selectedCity?.districts ?? []).map((district) => <option key={district.id} value={district.id}>{district.name}</option>)}
             </select>
           </label>
@@ -338,8 +344,9 @@ export function QuoteModal({
               if (attribute.type === "select") {
                 return (
                   <label className={styles.qField} key={attribute.key}>
-                    <span>{attribute.label}{attribute.unit ? ` (${attribute.unit})` : ""}</span>
-                    <select onChange={(event) => setValue(attribute.key, event.target.value)} value={String(value ?? "")}>
+                    <span className={styles.qLabel}>{attribute.label}{attribute.unit ? ` (${attribute.unit})` : ""}</span>
+                    {/* Il/ilce ile ayni sebep: modal govdesi ozel paneli kirpiyor. */}
+                    <select className="control" data-placeholder={String(value ?? "") === "" ? "true" : undefined} onChange={(event) => setValue(attribute.key, event.target.value)} value={String(value ?? "")}>
                       <option value="">Seç</option>
                       {options.map((option) => <option key={option}>{option}</option>)}
                     </select>
@@ -349,8 +356,9 @@ export function QuoteModal({
 
               return (
                 <label className={styles.qField} key={attribute.key}>
-                  <span>{attribute.label}{attribute.unit ? ` (${attribute.unit})` : ""}</span>
+                  <span className={styles.qLabel}>{attribute.label}{attribute.unit ? ` (${attribute.unit})` : ""}</span>
                   <input
+                    className="control"
                     onChange={(event) => setValue(attribute.key, event.target.value)}
                     placeholder={attribute.help_text ?? ""}
                     type={attribute.type === "number" || attribute.type === "range" ? "number" : attribute.type === "date" ? "date" : "text"}

@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import { PageShell } from "@/components/shell/page-shell";
+import { Select } from "@/components/form/select";
 
 /**
  * Basvuru tek isli bir ekran: ortak cubugun minimal kipi marka + tek cikis
@@ -163,6 +164,12 @@ export function SellerWizard() {
   const activeCity = useMemo(
     () => cities.find((city) => city.id === activeCityId) ?? null,
     [activeCityId, cities],
+  );
+
+  /** Select string deger ile calisir; il kimlikleri sayi geldigi icin donusturuluyor. */
+  const cityOptions = useMemo(
+    () => cities.map((city) => ({ value: String(city.id), label: city.name })),
+    [cities],
   );
 
   const selectedCategories = useMemo(
@@ -390,13 +397,16 @@ export function SellerWizard() {
                 </div>
                 {profileType === "company" && (
                   <div className="seller-field-grid">
-                    <label className="seller-field">Firma unvanı<input value={companyName} onChange={(event) => { setCompanyName(event.target.value); resetError(); }} placeholder="Örn. Ada Yapı Ltd. Şti." /></label>
-                    <label className="seller-field">Vergi / T.C. kimlik no<input value={taxNo} onChange={(event) => { setTaxNo(event.target.value.replace(/\D/g, "").slice(0, 11)); resetError(); }} inputMode="numeric" placeholder="10 veya 11 hane" /></label>
+                    <label className="seller-field controlField"><span className="controlLabel">Firma unvanı</span><input className="control" value={companyName} onChange={(event) => { setCompanyName(event.target.value); resetError(); }} placeholder="Örn. Ada Yapı Ltd. Şti." /></label>
+                    <label className="seller-field controlField"><span className="controlLabel">Vergi / T.C. kimlik no</span><input className="control" value={taxNo} onChange={(event) => { setTaxNo(event.target.value.replace(/\D/g, "").slice(0, 11)); resetError(); }} inputMode="numeric" placeholder="10 veya 11 hane" /></label>
                   </div>
                 )}
-                <label className="seller-field">Profil açıklaması
-                  <textarea rows={7} maxLength={2000} value={description} onChange={(event) => { setDescription(event.target.value); resetError(); }} placeholder="Deneyimini, çalışma biçimini ve sunduğun hizmetleri anlat…" />
-                  <small>{description.trim().length}/2000 · En az 50 karakter</small>
+                <label className="seller-field controlField">
+                  <span className="controlLabel">Profil açıklaması</span>
+                  <textarea className="control" rows={7} maxLength={2000} value={description} onChange={(event) => { setDescription(event.target.value); resetError(); }} placeholder="Deneyimini, çalışma biçimini ve sunduğun hizmetleri anlat…" />
+                  {/* <small> degil <span>: globals.css'teki ".seller-field>small" kurali
+                      7px yaziyi element seciciyle dayatiyor ve .controlHint'i yeniyor. */}
+                  <span className="controlHint">{description.trim().length}/2000 · En az 50 karakter</span>
                 </label>
               </>
             )}
@@ -423,11 +433,23 @@ export function SellerWizard() {
               <>
                 <legend>Nerelerde hizmet verirsin?</legend>
                 <p className="seller-field-help">81 il ve tüm ilçeler arasından çalışma bölgelerini seç. İstersen bir ilin tamamını ekleyebilirsin.</p>
-                <label className="seller-field seller-city-select">İl seç
-                  <select value={activeCityId ?? ""} onChange={(event) => { setActiveCityId(Number(event.target.value)); resetError(); }}>
-                    {cities.map((city) => <option value={city.id} key={city.id}>{city.name}</option>)}
-                  </select>
-                </label>
+                {/* 81 il: yerel <select> yerine ortak Select. Tarayicinin acilir
+                    listesi kutudan bagimsiz konumlaniyor, CSS ile bicimlendirilemiyor
+                    ve bu uzunlukta yazarak arama yapilamiyordu.
+                    .seller-card overflow:hidden oldugu icin panel kirpilabilir; bu
+                    alan adimin ILK alani ve .seller-fields min-height 490px, yani
+                    tetikleyicinin altinda panelin 306px'i icin yer garantili.
+                    Bu alani adimin asagisina tasirsan kartta overflow'u kaldir. */}
+                <div className="seller-field seller-city-select controlField">
+                  <label className="controlLabel" htmlFor="satici-il">İl seç</label>
+                  <Select
+                    id="satici-il"
+                    onChange={(deger) => { setActiveCityId(Number(deger)); resetError(); }}
+                    options={cityOptions}
+                    placeholder="İl seçin"
+                    value={activeCityId == null ? "" : String(activeCityId)}
+                  />
+                </div>
                 {activeCity && (
                   <div className="seller-district-panel">
                     <div className="seller-district-head">

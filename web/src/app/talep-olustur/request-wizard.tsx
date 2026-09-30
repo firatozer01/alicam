@@ -4,6 +4,7 @@ import { Fragment, FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
+import { Select, type SelectSecenek } from "@/components/form/select";
 import { PageShell } from "@/components/shell/page-shell";
 import styles from "./wizard.module.css";
 
@@ -551,6 +552,20 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
     [selectedCity, form.districtId],
   );
 
+  /**
+   * Il ve ilce listeleri ortak Select bileseninin bekledigi bicimde.
+   * 81 il ve Istanbul'un 39 ilcesi tarayicinin kendi acilir listesinde kutudan
+   * bagimsiz aciliyor ve yazarak aranamiyordu.
+   */
+  const cityChoices = useMemo<SelectSecenek[]>(
+    () => cities.map((city) => ({ value: String(city.id), label: city.name })),
+    [cities],
+  );
+  const districtChoices = useMemo<SelectSecenek[]>(
+    () => (selectedCity?.districts ?? []).map((district) => ({ value: String(district.id), label: district.name })),
+    [selectedCity],
+  );
+
   /** Baslik onerisi: kullanici yazana kadar secimlerden kurulur. */
   const suggestedTitle = useMemo(() => {
     if (!form.categoryName) return "";
@@ -907,9 +922,11 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
     const unit = field.unit ? ` (${field.unit})` : "";
     const options = field.options ?? [];
     const bad = invalid[`attr-${field.key}`];
-    const head = (
-      <span className={styles.label}>{field.label}{unit}{field.is_required && <em className={styles.req}>*</em>}</span>
-    );
+    const alanId = `attr-${field.key}`;
+    // Etiket metni iki kilikta gerekiyor: sarmalayici <label> ise span, alanin
+    // kendisi dugme (Select) ise htmlFor tasiyan gercek bir <label>.
+    const headText = <>{field.label}{unit}{field.is_required && <em className={styles.req}>*</em>}</>;
+    const head = <span className={styles.label}>{headText}</span>;
 
     if (field.type === "select" && options.length === 2) {
       return (
@@ -958,13 +975,36 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
     }
 
     if (field.type === "select") {
+      const secili = typeof value === "string" ? value : "";
+
+      // 12'den fazla secenekte tarayicinin kendi acilir listesi kutudan bagimsiz
+      // aciliyor ve yazarak aranamiyor; ortak Select bileseni ikisini de cozuyor.
+      if (options.length > 12) {
+        return (
+          <div className={cn(styles.field, bad && styles.invalid)} key={field.key}>
+            <label className={styles.label} htmlFor={alanId}>{headText}</label>
+            <Select
+              id={alanId}
+              onChange={(next) => updateAttribute(field.key, next)}
+              options={options.map((option) => ({ value: option, label: option }))}
+              placeholder="Seç"
+              value={secili}
+            />
+            {field.help_text && <small>{field.help_text}</small>}
+            <span className={styles.err}>Bu soruyu yanıtla.</span>
+          </div>
+        );
+      }
+
       return (
         <label className={cn(styles.field, bad && styles.invalid)} key={field.key}>
           {head}
           <select
-            className={styles.select}
+            className="control"
+            // Secim yapilmamis alanda "Seç" yazisi soluk gorunsun.
+            data-placeholder={secili === "" ? "true" : undefined}
             onChange={(event) => updateAttribute(field.key, event.target.value)}
-            value={typeof value === "string" ? value : ""}
+            value={secili}
           >
             <option value="">Seç</option>
             {options.map((option) => <option key={option} value={option}>{option}</option>)}
@@ -1030,7 +1070,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
         <label className={cn(styles.field, styles.full, bad && styles.invalid)} key={field.key}>
           {head}
           <textarea
-            className={styles.textarea}
+            className="control"
             maxLength={2000}
             onChange={(event) => updateAttribute(field.key, event.target.value)}
             placeholder={field.help_text ?? ""}
@@ -1049,7 +1089,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
         {field.unit ? (
           <div className={styles.inputGroup}>
             <input
-              className={styles.input}
+              className="control"
               inputMode={numeric ? "numeric" : undefined}
               onChange={(event) => updateAttribute(field.key, numeric ? event.target.value.replace(/[^\d.,]/g, "") : event.target.value)}
               placeholder={field.help_text ?? field.label}
@@ -1060,7 +1100,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
           </div>
         ) : (
           <input
-            className={styles.input}
+            className="control"
             inputMode={numeric ? "numeric" : undefined}
             onChange={(event) => updateAttribute(field.key, numeric ? event.target.value.replace(/[^\d.,]/g, "") : event.target.value)}
             placeholder={field.help_text ?? field.label}
@@ -1298,7 +1338,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
                   <label className={cn(styles.field, styles.full, invalid.title && styles.invalid)}>
                     <span>Talep başlığı<em className={styles.req}>*</em></span>
                     <input
-                      className={styles.input}
+                      className="control"
                       maxLength={120}
                       onChange={(event) => {
                         setForm((current) => ({ ...current, title: event.target.value, titleTouched: event.target.value.length > 0 }));
@@ -1318,7 +1358,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
                   <label className={cn(styles.field, styles.full, invalid.description && styles.invalid)}>
                     <span>Açıklama<em className={styles.req}>*</em></span>
                     <textarea
-                      className={styles.textarea}
+                      className="control"
                       maxLength={1000}
                       onChange={(event) => { update("description", event.target.value); clearInvalid("description"); }}
                       placeholder={DESCRIPTION_PLACEHOLDER[form.vertical] ?? ""}
@@ -1344,37 +1384,38 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
                 <p className={styles.stepLead}>Talebin yalnızca bu bölgedeki teklif verenlere gösterilir.</p>
 
                 <div className={styles.fgrid}>
-                  <label className={cn(styles.field, invalid.city && styles.invalid)}>
-                    <span>İl<em className={styles.req}>*</em></span>
-                    <select
-                      className={styles.select}
-                      onChange={(event) => {
-                        setForm((current) => ({ ...current, cityId: event.target.value, districtId: "" }));
+                  {/* Sarmalayici <label> degil <div>: alanin kendisi artik bir dugme,
+                      etiket htmlFor ile baglaniyor. */}
+                  <div className={cn(styles.field, invalid.city && styles.invalid)}>
+                    <label className={styles.label} htmlFor="wz-il">İl<em className={styles.req}>*</em></label>
+                    <Select
+                      id="wz-il"
+                      onChange={(next) => {
+                        setForm((current) => ({ ...current, cityId: next, districtId: "" }));
                         setError("");
                         clearInvalid("city");
                       }}
+                      options={cityChoices}
+                      placeholder="İl seç"
+                      searchable
                       value={form.cityId}
-                    >
-                      <option value="">İl seç</option>
-                      {cities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}
-                    </select>
+                    />
                     <span className={styles.err}>Bir il seç.</span>
-                  </label>
+                  </div>
 
-                  <label className={cn(styles.field, invalid.district && styles.invalid)}>
-                    <span>İlçe<em className={styles.req}>*</em></span>
-                    <select
-                      className={styles.select}
+                  <div className={cn(styles.field, invalid.district && styles.invalid)}>
+                    <label className={styles.label} htmlFor="wz-ilce">İlçe<em className={styles.req}>*</em></label>
+                    <Select
                       disabled={!selectedCity}
-                      onChange={(event) => { update("districtId", event.target.value); clearInvalid("district"); }}
+                      id="wz-ilce"
+                      onChange={(next) => { update("districtId", next); clearInvalid("district"); }}
+                      options={districtChoices}
+                      placeholder={selectedCity ? "İlçe seç" : "Önce il seç"}
                       value={form.districtId}
-                    >
-                      <option value="">{selectedCity ? "İlçe seç" : "Önce il seç"}</option>
-                      {(selectedCity?.districts ?? []).map((district) => <option key={district.id} value={district.id}>{district.name}</option>)}
-                    </select>
+                    />
                     <small>Tam adres istemiyoruz.</small>
                     <span className={styles.err}>Bir ilçe seç.</span>
-                  </label>
+                  </div>
 
                   <div className={cn(styles.field, styles.full, (invalid.budgetMin || invalid.budgetMax) && styles.invalid)}>
                     <span className={styles.label}>{budgetLabel}<em className={styles.req}>*</em></span>
@@ -1382,7 +1423,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
                       <div className={styles.inputGroup}>
                         <input
                           aria-label="En az bütçe"
-                          className={styles.input}
+                          className="control"
                           inputMode="numeric"
                           onChange={(event) => {
                             update("budgetMin", event.target.value.replace(/\D/g, "").slice(0, 11));
@@ -1397,7 +1438,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
                       <div className={styles.inputGroup}>
                         <input
                           aria-label="En fazla bütçe"
-                          className={styles.input}
+                          className="control"
                           inputMode="numeric"
                           onChange={(event) => {
                             update("budgetMax", event.target.value.replace(/\D/g, "").slice(0, 11));
@@ -1441,6 +1482,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
                     <label className={styles.check}>
                       <input
                         checked={form.budgetFlexible}
+                        className="controlCheck"
                         onChange={(event) => update("budgetFlexible", event.target.checked)}
                         type="checkbox"
                       />
@@ -1500,7 +1542,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
                         <span>Ad soyad<em className={styles.req}>*</em></span>
                         <input
                           autoComplete="name"
-                          className={styles.input}
+                          className="control"
                           onChange={(event) => { update("contactName", event.target.value); clearInvalid("contactName"); }}
                           placeholder="Adın ve soyadın"
                           value={form.contactName}
@@ -1512,7 +1554,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
                         <span>E-posta<em className={styles.req}>*</em></span>
                         <input
                           autoComplete="email"
-                          className={styles.input}
+                          className="control"
                           onChange={(event) => { update("contactEmail", event.target.value); clearInvalid("contactEmail"); }}
                           placeholder="ornek@eposta.com"
                           type="email"
@@ -1526,7 +1568,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
                         <span>Cep telefonu <em className={styles.opt}>(isteğe bağlı)</em></span>
                         <input
                           autoComplete="tel"
-                          className={styles.input}
+                          className="control"
                           inputMode="tel"
                           onChange={(event) => {
                             const digits = event.target.value.replace(/\D/g, "").slice(0, 11);
@@ -1574,6 +1616,7 @@ export function RequestWizard({ deepLink }: { deepLink: WizardDeepLink }) {
                   <label className={cn(styles.check, styles.full)}>
                     <input
                       checked={terms}
+                      className="controlCheck"
                       onChange={(event) => { setTerms(event.target.checked); clearInvalid("terms"); setError(""); }}
                       type="checkbox"
                     />

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api";
+import { Select, type SelectSecenek } from "@/components/form/select";
 import styles from "../marketplace.module.css";
 import {
   Catalog, CatalogChild, City, FINDER, FINDER_TABS, FinderField, FinderTabId,
@@ -107,6 +108,33 @@ export function HeroFinder({ catalog, cities, childrenByRoot, requestRoot }: Pro
     () => roots.flatMap((slug) => childrenByRoot[slug] ?? []),
     [roots, childrenByRoot],
   );
+
+  /**
+   * Il listesi Select'in bekledigi bicimde. Bos deger listenin BASINDA duruyor:
+   * yerel <select>'te "Tüm Türkiye" bir secenekti, secim geri alinabilsin diye
+   * burada da secenek olarak kaliyor.
+   */
+  const cityChoices = useMemo<SelectSecenek[]>(
+    () => [
+      { value: "", label: "Tüm Türkiye" },
+      ...cities.map((city) => ({ value: String(city.id), label: city.name })),
+    ],
+    [cities],
+  );
+
+  /**
+   * Kategori secenekleri. Bir sekmenin iki koku ayni alt basligi tasiyabiliyor;
+   * Select secenekleri degere gore anahtarladigi icin tekrar eden slug ayiklanir.
+   */
+  const categoryChoices = useMemo<SelectSecenek[]>(() => {
+    const esiz = new Map<string, string>();
+    categoryOptions.forEach((child) => { if (!esiz.has(child.slug)) esiz.set(child.slug, child.name); });
+
+    return [
+      { value: "", label: "Farketmez" },
+      ...Array.from(esiz, ([value, label]) => ({ value, label })),
+    ];
+  }, [categoryOptions]);
 
   /** "Sık istenenler" kisayollari: hizmette katalogun populeri, urunde kokun ilk basliklari. */
   const shortcuts = useMemo(() => {
@@ -225,44 +253,60 @@ export function HeroFinder({ catalog, cities, childrenByRoot, requestRoot }: Pro
       </div>;
     }
 
+    // 81 il tarayicinin kendi acilir listesinde kutudan bagimsiz, dar ve sola
+    // yasli aciliyordu; ustelik yazarak aranamiyordu. Ortak Select bileseni
+    // listeyi kutunun tam altina ve tam genisligine koyuyor.
     if (field.kind === "city") {
       return <div className={styles.ff} key={field.id}>
         <label htmlFor={id}>{field.label}</label>
-        <select
+        <Select
+          className={styles.ffSelect}
           disabled={cities.length === 0}
           id={id}
-          onChange={(event) => setField(field.id, event.target.value)}
+          onChange={(next) => setField(field.id, next)}
+          options={cityChoices}
+          placeholder={cities.length === 0 ? "İller yükleniyor…" : "Tüm Türkiye"}
+          searchable
           value={values[field.id] ?? ""}
-        >
-          <option value="">{cities.length === 0 ? "İller yükleniyor…" : "Tüm Türkiye"}</option>
-          {cities.map((city) => <option key={city.id} value={String(city.id)}>{city.name}</option>)}
-        </select>
+        />
       </div>;
     }
 
     if (field.kind === "category") {
       return <div className={styles.ff} key={field.id}>
         <label htmlFor={id}>{field.label}</label>
-        <select
+        <Select
+          className={styles.ffSelect}
           disabled={categoryOptions.length === 0}
           id={id}
-          onChange={(event) => setField(field.id, event.target.value)}
+          onChange={(next) => setField(field.id, next)}
+          options={categoryChoices}
+          placeholder={categoryOptions.length === 0 ? "Yükleniyor…" : "Farketmez"}
           value={values[field.id] ?? ""}
-        >
-          <option value="">{categoryOptions.length === 0 ? "Yükleniyor…" : "Farketmez"}</option>
-          {categoryOptions.map((child) => <option key={child.id} value={child.slug}>{child.name}</option>)}
-        </select>
+        />
       </div>;
     }
 
     if (field.kind === "select") {
+      const opts = field.opts ?? [];
+      // Ilk secenek ("Farketmez") "filtre yok" demek, o yuzden degeri bos kalir.
+      const choices: SelectSecenek[] = opts.map((option, index) => ({
+        value: index === 0 ? "" : option,
+        label: option,
+      }));
+
+      // searchable verilmiyor: marka (23) ve model yili (20) icin arama kutusu
+      // kendiliginden acilir, oda/durum gibi kisa listelerde cikmaz.
       return <div className={styles.ff} key={field.id}>
         <label htmlFor={id}>{field.label}</label>
-        <select id={id} onChange={(event) => setField(field.id, event.target.value)} value={values[field.id] ?? ""}>
-          {(field.opts ?? []).map((option, index) => (
-            <option key={option} value={index === 0 ? "" : option}>{option}</option>
-          ))}
-        </select>
+        <Select
+          className={styles.ffSelect}
+          id={id}
+          onChange={(next) => setField(field.id, next)}
+          options={choices}
+          placeholder={opts[0] ?? "Seçin"}
+          value={values[field.id] ?? ""}
+        />
       </div>;
     }
 

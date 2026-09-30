@@ -10,7 +10,9 @@ export function ResultBar({ total, noun = "talep", sort, sortOptions, onSort, ch
 }) {
   return <div className={styles.resultBar}>
     <p className={styles.resultCount}><b>{total.toLocaleString("tr-TR")}</b> {noun} bulundu</p>
-    <div className={styles.resultTools}>{children}<label>Sırala<select onChange={(event) => onSort(event.target.value)} value={sort}>{sortOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label></div>
+    {/* Siralama listesi kisa (5-6 secenek): ortak Select yerine yerel select
+        yeterli, ortak kontrol katmanindan "control controlSm" ile bicimleniyor. */}
+    <div className={styles.resultTools}>{children}<label>Sırala<select className={`control controlSm ${styles.sortSelect}`} onChange={(event) => onSort(event.target.value)} value={sort}>{sortOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label></div>
   </div>;
 }
 

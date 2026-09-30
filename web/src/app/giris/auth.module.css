@@ -24,22 +24,35 @@
 .title { font-size: clamp(30px, 3vw, 40px); margin: 28px 0 8px; font-weight: 800; }
 .lead { color: var(--ink-2); margin: 0 0 26px; font-size: 16px; }
 
-/* ---------- Form ---------- */
+/* ---------- Form ----------
+   Kutu, etiket ve ipucu gorunumu globals.css'teki ortak kontrol
+   katmanindan gelir; "composes ... from global" o sinifi elemana
+   ekledigi icin auth-panel.tsx'teki isaretleme degismeden ayni
+   yukseklik, yaricap, kenarlik ve odak halkasi elde edilir.
+   Eskiden bu ekran 50px/12px/16px, geri kalan site 44px/10px/15px
+   kullaniyordu. */
 .form { display: grid; gap: 18px; }
-.field { display: grid; gap: 7px; align-content: start; }
-.label { font-size: 14px; font-weight: 600; color: var(--ink); }
-.hint { font-size: 13px; color: var(--ink-3); }
-.err { display: none; font-size: 13px; color: var(--red); font-weight: 500; }
+.field { composes: controlField from global; align-content: start; }
+.label { composes: controlLabel from global; }
+.hint { composes: controlHint from global; }
+.input { composes: control from global; }
+
+/* Gecerlilik durumu alani degil SARMALAYICIYI isaretliyor (.field.invalid),
+   bu yuzden ortak katmanin [aria-invalid] kancasi devreye girmiyor; ayni
+   gorunum burada tekrar kuruluyor. */
+.field.invalid .input { border-color: var(--red); }
+.field.invalid .input:focus { border-color: var(--red); box-shadow: var(--control-ring-danger); }
+
+/* Hata satiri ortak .controlError ile ayni olcude ama gorunurlugu
+   .field.invalid ile acilip kapandigi icin yerel kaliyor: composes ile
+   gelen "display: block" ile kaynak sirasi yarisina girmesin. */
+.err { display: none; font-size: 12.5px; font-weight: 500; color: var(--red); line-height: 1.5; }
 .field.invalid .err { display: block; }
 
-.input { width: 100%; height: 50px; padding: 0 14px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; font-size: 16px; outline: none; transition: border-color .15s, box-shadow .15s; }
-.input:hover { border-color: #C9D2E4; }
-.input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgb(27 92 255 / .14); }
-.input::placeholder { color: #A1A9BD; }
-.field.invalid .input { border-color: var(--red); box-shadow: 0 0 0 4px rgb(229 72 77 / .12); }
-
 .inputGroup { position: relative; }
-.inputGroup .input { padding-right: 82px; }
+/* Iki sinifli secici: ortak katmanin ".control.control" kisayol dolgusunu
+   gecmesi gerekiyor, yoksa "Goster" dugmesi metnin ustune biner. */
+.inputGroup .input.input { padding-right: 82px; }
 .suffix { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); min-height: 40px; min-width: 52px; padding: 6px 10px; border: 0; border-radius: 10px; background: none; color: var(--blue); font-size: 14px; font-weight: 600; cursor: pointer; }
 .suffix:hover { background: var(--blue-50); }
 
@@ -47,7 +60,9 @@
 .rowLink { font-size: 14.5px; color: var(--blue); font-weight: 600; }
 
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; color: var(--ink-2); cursor: pointer; }
-.check input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--blue); flex: none; }
+/* Ortak .controlCheck ile ayni olcu; sinif isaretlemeden degil secicidan
+   verildigi icin degerler burada tekrarlaniyor. */
+.check input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--blue); flex: none; }
 .check a { color: var(--blue); font-weight: 600; }
 
 /* ---------- Butonlar (site.css .btn ailesi) ---------- */
@@ -117,7 +132,9 @@
 .verifyTitle strong { display: block; font-size: 15.5px; }
 .verifyTitle small { display: block; margin-top: 2px; color: var(--ink-3); font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .verifyInput { display: grid; grid-template-columns: minmax(0, 1fr) 110px; gap: 8px; }
-.verifyInput .btn { height: 50px; padding: 0 12px; font-size: 14.5px; }
+/* Yanindaki kod alaniyla ayni satirda duruyor: yukseklik ortak kontrol
+   olcusune baglandi, yoksa dugme bir tik uzun kaliyor. */
+.verifyInput .btn { height: var(--control-h); padding: 0 12px; font-size: 14.5px; }
 .resend { justify-self: start; padding: 0; border: 0; background: none; color: var(--blue); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .resend:disabled { opacity: .5; cursor: not-allowed; }
 .verified { color: var(--green); font-size: 13.5px; font-weight: 700; letter-spacing: .06em; }
@@ -162,6 +179,6 @@
   .verifyInput { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .btn, .tab, .role, .chip, .bar, .input { transition: none; }
+  .btn, .tab, .role, .chip, .bar { transition: none; }
   .btn:hover { transform: none; }
 }

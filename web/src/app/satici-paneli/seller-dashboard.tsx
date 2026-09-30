@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FilterRail } from "@/components/listing/filter-rail";
 import { PageShell } from "@/components/shell/page-shell";
 import { Modal } from "@/components/modal/modal";
+import { Select, type SelectSecenek } from "@/components/form/select";
 import { WorkViewer } from "@/components/portfolio/work-viewer";
 import { ActiveChips, ListSkeleton, Pagination, ResultBar } from "@/components/listing/listing-chrome";
 import list from "@/components/listing/listing.module.css";
@@ -335,8 +336,7 @@ export function SellerDashboard() {
     return chips;
   }, [appliedBudget, categoryFilter, cityFilter, facets, filter, search]);
 
-  // Kategori agaci duz listeye acilir; secim kutusunda kok basliklari
-  // optgroup, altlar tire ile girintilenir.
+  // Kategori agaci duz listeye acilir; her satir tire ile girintilenir.
   const flatCategories = useMemo(() => {
     const rows: { slug: string; name: string; icon: string; color: string; depth: number; root: string }[] = [];
     const walk = (nodes: CategoryNode[], depth: number, root: string) => {
@@ -349,15 +349,21 @@ export function SellerDashboard() {
     return rows;
   }, [catalog]);
 
-  const categoryGroups = useMemo(() => {
-    const groups: { root: string; rows: typeof flatCategories }[] = [];
-    for (const row of flatCategories) {
-      const last = groups[groups.length - 1];
-      if (last && last.root === row.root) last.rows.push(row);
-      else groups.push({ root: row.root, rows: [row] });
-    }
-    return groups;
-  }, [flatCategories]);
+  // Kategori ve sehir secimi kendi acilir listemize gecti: yuzlerce
+  // kategori ve 81 il tarayicinin kendi listesinde aranamiyordu ve o
+  // liste kutunun soluna hizalanip dar kaliyordu.
+  const listingCategoryOptions = useMemo<SelectSecenek[]>(() => [
+    { value: "", label: "Kategori seç" },
+    ...flatCategories.map((row) => ({
+      value: row.slug,
+      label: `${"— ".repeat(row.depth)}${row.icon ? `${row.icon} ` : ""}${row.name}`,
+    })),
+  ], [flatCategories]);
+
+  const cityOptions = useMemo<SelectSecenek[]>(() => [
+    { value: "", label: "Seçilmedi" },
+    ...(catalog?.cities ?? []).map((city) => ({ value: String(city.id), label: city.name })),
+  ], [catalog]);
 
   // Iki elek birden: is_private alanlar alicinin talebindeki ozel notlar
   // icindir, listing_label'i bos olanlar ise hic ilan alani degildir
@@ -743,6 +749,11 @@ export function SellerDashboard() {
   const listingCategory = flatCategories.find((row) => row.slug === listingForm.category_slug) ?? null;
   const listingCity = catalog?.cities.find((row) => String(row.id) === listingForm.city_id) ?? null;
   const listingDistrict = listingCity?.districts.find((row) => String(row.id) === listingForm.district_id) ?? null;
+  // listingCity erken donusten SONRA turetiliyor; bu yuzden useMemo degil.
+  const districtOptions: SelectSecenek[] = [
+    { value: "", label: "Seçilmedi" },
+    ...(listingCity?.districts ?? []).map((row) => ({ value: String(row.id), label: row.name })),
+  ];
   // Kategori alanlari yuklenmeden kaydetmek, onceki kategorinin
   // anahtarlarini gonderirdi ve sunucu tumunu reddederdi.
   const listingReady = Boolean(listingForm.category_slug) && listingFields.slug === listingForm.category_slug
@@ -760,7 +771,7 @@ export function SellerDashboard() {
     const required = field.is_required ? " *" : "";
 
     if (field.type === "boolean") return <label className={`${styles.wide} ${styles.toggleRow}`} key={field.key}>
-      <input checked={raw === true} onChange={(event) => updateListingValue(field.key, event.target.checked)} type="checkbox" /> {field.label}{required}
+      <input checked={raw === true} className="controlCheck" onChange={(event) => updateListingValue(field.key, event.target.checked)} type="checkbox" /> {field.label}{required}
     </label>;
 
     if (field.type === "multiselect") {
@@ -768,27 +779,38 @@ export function SellerDashboard() {
       return <div className={`${styles.wide} ${styles.checkField}`} key={field.key}>
         <span>{field.label}{suffix}{required}</span>
         <div>{options.map((option) => <label key={option}>
-          <input checked={values.includes(option)} onChange={(event) => updateListingValue(field.key, event.target.checked ? [...values, option] : values.filter((row) => row !== option))} type="checkbox" /> {option}
+          <input checked={values.includes(option)} className="controlCheck" onChange={(event) => updateListingValue(field.key, event.target.checked ? [...values, option] : values.filter((row) => row !== option))} type="checkbox" /> {option}
         </label>)}</div>
         {field.help_text && <small>{field.help_text}</small>}
       </div>;
     }
 
-    if (field.type === "select") return <label className={wide} key={field.key}>{field.label}{suffix}{required}
-      <select onChange={(event) => updateListingValue(field.key, event.target.value)} value={typeof raw === "string" ? raw : ""}>
-        <option value="">Seçilmedi</option>
-        {options.map((option) => <option key={option} value={option}>{option}</option>)}
-      </select>
-      {field.help_text && <small>{field.help_text}</small>}
-    </label>;
+    // Bu alanlarin secenek sayisi tanima gore degisiyor (marka listesi 100
+    // satir, oda sayisi 6). Ortak Select 12 ustunde arama kutusunu kendisi
+    // actigi icin hepsi ayni bilesenden geciyor.
+    if (field.type === "select") {
+      const alanId = `urun-alan-${field.key}`;
+      return <div className={wide ? `${styles.fieldBox} ${wide}` : styles.fieldBox} key={field.key}>
+        <label htmlFor={alanId}>{field.label}{suffix}{required}</label>
+        <Select
+          id={alanId}
+          onChange={(secim) => updateListingValue(field.key, secim)}
+          options={[{ value: "", label: "Seçilmedi" }, ...options.map((option) => ({ value: option, label: option }))]}
+          placeholder="Seçilmedi"
+          value={typeof raw === "string" ? raw : ""}
+        />
+        {field.help_text && <small>{field.help_text}</small>}
+      </div>;
+    }
 
     if (field.type === "textarea") return <label className={wide} key={field.key}>{field.label}{suffix}{required}
-      <textarea maxLength={2000} onChange={(event) => updateListingValue(field.key, event.target.value)} placeholder={field.help_text ?? ""} value={typeof raw === "string" ? raw : ""} />
+      <textarea className="control" maxLength={2000} onChange={(event) => updateListingValue(field.key, event.target.value)} placeholder={field.help_text ?? ""} value={typeof raw === "string" ? raw : ""} />
       {field.help_text && <small>{field.help_text}</small>}
     </label>;
 
     return <label className={wide} key={field.key}>{field.label}{suffix}{required}
       <input
+        className="control"
         inputMode={field.type === "number" || field.type === "range" ? "decimal" : undefined}
         onChange={(event) => updateListingValue(field.key, event.target.value)}
         placeholder={field.help_text ?? field.label}
@@ -892,7 +914,7 @@ export function SellerDashboard() {
           <div className={styles.listWithRail}>
           <div>
             <ResultBar noun="eşleşen talep" onSort={changeSort} sort={sort} sortOptions={sortOptions} total={meta.total}>
-              <label>Görünüm<select onChange={(event) => changeScope(event.target.value as Scope)} value={filter}><option value="all">Tümü</option><option value="unlocked">Açtıklarım</option><option value="favorite">Favorilerim</option></select></label>
+              <label>Görünüm<select className={`control controlSm ${list.sortSelect}`} onChange={(event) => changeScope(event.target.value as Scope)} value={filter}><option value="all">Tümü</option><option value="unlocked">Açtıklarım</option><option value="favorite">Favorilerim</option></select></label>
             </ResultBar>
             <ActiveChips chips={activeChips} />
 
@@ -931,7 +953,7 @@ export function SellerDashboard() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img alt="" loading="lazy" src={item.details.contact.avatar_url} />
                   </i>}<strong>{item.details.contact.name}</strong><a href={`tel:${item.details.contact.phone}`}>{item.details.contact.phone}</a><a href={`mailto:${item.details.contact.email}`}>{item.details.contact.email}</a><p>{item.details.full_address || "Açık adres belirtilmedi"}</p></aside></div>}
-                  {offerRequest === item.id && !existingOffer && <div className={styles.offerForm}><div><span>TEKLİFİNİ HAZIRLA</span><strong>Bu talep açıldı; teklif gönderirken ek kontör düşmez.</strong></div><label>Fiyat<input inputMode="decimal" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="Örn. 12500" /><button className={styles.attachButton} onClick={() => setPickerOpen(true)} type="button">🏷 {offerListing ? "Ürünü değiştir" : "Ürün ekle"}</button></label><label>Teklif notu<textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Kapsamı ve teslim süresini açıkla…" /></label>{offerListing && <div className={styles.offerAttach}>
+                  {offerRequest === item.id && !existingOffer && <div className={styles.offerForm}><div><span>TEKLİFİNİ HAZIRLA</span><strong>Bu talep açıldı; teklif gönderirken ek kontör düşmez.</strong></div><label>Fiyat<input className="control" inputMode="decimal" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="Örn. 12500" /><button className={styles.attachButton} onClick={() => setPickerOpen(true)} type="button">🏷 {offerListing ? "Ürünü değiştir" : "Ürün ekle"}</button></label><label>Teklif notu<textarea className="control" value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Kapsamı ve teslim süresini açıkla…" /></label>{offerListing && <div className={styles.offerAttach}>
                       {offerListing.cover_url
                         // eslint-disable-next-line @next/next/no-img-element
                         ? <img alt="" loading="lazy" src={offerListing.cover_url} />
@@ -1135,7 +1157,7 @@ export function SellerDashboard() {
                   ? <button className={`${list.act} ${list.actAccent}`} onClick={() => openOffer(item.id, offer)} type="button">Teklifi düzenle</button>
                   : <span className={`${list.act} ${list.actQuiet}`}>{statusLabel[offer.status]}</span>}
               </div>
-              {offerRequest === item.id && editingOffer === offer.id && <div className={styles.offerForm}><label>Fiyat<input inputMode="decimal" onChange={(event) => setPrice(event.target.value)} value={price} /><button className={styles.attachButton} onClick={() => setPickerOpen(true)} type="button">🏷 {offerListing ? "Ürünü değiştir" : "Ürün ekle"}</button></label><label>Teklif notu<textarea onChange={(event) => setMessage(event.target.value)} value={message} /></label>{offerListing && <div className={styles.offerAttach}>
+              {offerRequest === item.id && editingOffer === offer.id && <div className={styles.offerForm}><label>Fiyat<input className="control" inputMode="decimal" onChange={(event) => setPrice(event.target.value)} value={price} /><button className={styles.attachButton} onClick={() => setPickerOpen(true)} type="button">🏷 {offerListing ? "Ürünü değiştir" : "Ürün ekle"}</button></label><label>Teklif notu<textarea className="control" onChange={(event) => setMessage(event.target.value)} value={message} /></label>{offerListing && <div className={styles.offerAttach}>
                 {offerListing.cover_url
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img alt="" loading="lazy" src={offerListing.cover_url} />
@@ -1226,28 +1248,31 @@ export function SellerDashboard() {
           <section className={styles.formBlock}>
             <header><i>1</i><div><strong>Temel bilgiler</strong><small>Vitrin kartının üst kısmında görünür.</small></div></header>
             <div className={styles.formGrid}>
-              <label className={styles.wide}>Başlık<input data-autofocus maxLength={140} onChange={(event) => setPortfolioForm({ ...portfolioForm, title: event.target.value })} placeholder="Örn. Kadıköy 3+1 komple daire boyası" value={portfolioForm.title} /><small>{portfolioForm.title.length} / 140</small></label>
-              <label>Kategori<select onChange={(event) => setPortfolioForm({ ...portfolioForm, category_id: event.target.value })} value={portfolioForm.category_id}><option value="">Seçilmedi</option>{profile.categories.map((item) => <option key={item.id} value={item.id}>{item.icon} {item.name}</option>)}</select></label>
-              <label>Konum<input maxLength={120} onChange={(event) => setPortfolioForm({ ...portfolioForm, location: event.target.value })} placeholder="İstanbul, Kadıköy" value={portfolioForm.location} /></label>
-              <label>Tamamlanma<input onChange={(event) => setPortfolioForm({ ...portfolioForm, completed_at: event.target.value })} type="date" value={portfolioForm.completed_at} /></label>
+              <label className={styles.wide}>Başlık<input className="control" data-autofocus maxLength={140} onChange={(event) => setPortfolioForm({ ...portfolioForm, title: event.target.value })} placeholder="Örn. Kadıköy 3+1 komple daire boyası" value={portfolioForm.title} /><small>{portfolioForm.title.length} / 140</small></label>
+              {/* Yerel <select> BILEREK kaliyor: burada listelenen sey saticinin
+                  kendi kayitli kategorileri, bir elin parmaklarini gecmiyor.
+                  Kutu gorunumu yine ortak kontrol katmanindan geliyor. */}
+              <label>Kategori<select className="control" data-placeholder={portfolioForm.category_id === "" ? "true" : undefined} onChange={(event) => setPortfolioForm({ ...portfolioForm, category_id: event.target.value })} value={portfolioForm.category_id}><option value="">Seçilmedi</option>{profile.categories.map((item) => <option key={item.id} value={item.id}>{item.icon} {item.name}</option>)}</select></label>
+              <label>Konum<input className="control" maxLength={120} onChange={(event) => setPortfolioForm({ ...portfolioForm, location: event.target.value })} placeholder="İstanbul, Kadıköy" value={portfolioForm.location} /></label>
+              <label>Tamamlanma<input className="control" onChange={(event) => setPortfolioForm({ ...portfolioForm, completed_at: event.target.value })} type="date" value={portfolioForm.completed_at} /></label>
             </div>
           </section>
 
           <section className={styles.formBlock}>
             <header><i>2</i><div><strong>İş künyesi</strong><small>Müşteri kapsamı tek bakışta anlasın.</small></div></header>
             <div className={styles.formGrid}>
-              <label>Süre<input maxLength={60} onChange={(event) => setPortfolioForm({ ...portfolioForm, duration: event.target.value })} placeholder="Örn. 4 gün" value={portfolioForm.duration} /></label>
-              <label>Alan / ölçü<input maxLength={60} onChange={(event) => setPortfolioForm({ ...portfolioForm, area: event.target.value })} placeholder="Örn. 120 m²" value={portfolioForm.area} /></label>
-              <label>İş bedeli (₺)<input inputMode="decimal" onChange={(event) => setPortfolioForm({ ...portfolioForm, budget: event.target.value })} placeholder="Örn. 38000" value={portfolioForm.budget} /><small>Boş bırakabilirsin.</small></label>
-              <label>Müşteri tipi<input maxLength={60} onChange={(event) => setPortfolioForm({ ...portfolioForm, client_type: event.target.value })} placeholder="Örn. Konut / Ofis" value={portfolioForm.client_type} /></label>
+              <label>Süre<input className="control" maxLength={60} onChange={(event) => setPortfolioForm({ ...portfolioForm, duration: event.target.value })} placeholder="Örn. 4 gün" value={portfolioForm.duration} /></label>
+              <label>Alan / ölçü<input className="control" maxLength={60} onChange={(event) => setPortfolioForm({ ...portfolioForm, area: event.target.value })} placeholder="Örn. 120 m²" value={portfolioForm.area} /></label>
+              <label>İş bedeli (₺)<input className="control" inputMode="decimal" onChange={(event) => setPortfolioForm({ ...portfolioForm, budget: event.target.value })} placeholder="Örn. 38000" value={portfolioForm.budget} /><small>Boş bırakabilirsin.</small></label>
+              <label>Müşteri tipi<input className="control" maxLength={60} onChange={(event) => setPortfolioForm({ ...portfolioForm, client_type: event.target.value })} placeholder="Örn. Konut / Ofis" value={portfolioForm.client_type} /></label>
             </div>
           </section>
 
           <section className={styles.formBlock}>
             <header><i>3</i><div><strong>Anlatım</strong><small>Kapsam ve yapılan işlerin listesi.</small></div></header>
             <div className={styles.formGrid}>
-              <label className={styles.wide}>Açıklama<textarea maxLength={2000} onChange={(event) => setPortfolioForm({ ...portfolioForm, description: event.target.value })} placeholder="Kapsamı, kullanılan malzemeleri ve süreyi anlat…" value={portfolioForm.description} /><small>{portfolioForm.description.length} / 2000</small></label>
-              <label className={styles.wide}>Yapılan işler<textarea onChange={(event) => setPortfolioForm({ ...portfolioForm, highlights: event.target.value })} placeholder={"Her satıra bir madde yaz\nÖrn. Duvar hazırlığı ve astar\nÖrn. İki kat silikonlu boya"} rows={4} value={portfolioForm.highlights} /><small>{workHighlights.length} / 8 madde · her satır ayrı madde olur.</small></label>
+              <label className={styles.wide}>Açıklama<textarea className="control" maxLength={2000} onChange={(event) => setPortfolioForm({ ...portfolioForm, description: event.target.value })} placeholder="Kapsamı, kullanılan malzemeleri ve süreyi anlat…" value={portfolioForm.description} /><small>{portfolioForm.description.length} / 2000</small></label>
+              <label className={styles.wide}>Yapılan işler<textarea className="control" onChange={(event) => setPortfolioForm({ ...portfolioForm, highlights: event.target.value })} placeholder={"Her satıra bir madde yaz\nÖrn. Duvar hazırlığı ve astar\nÖrn. İki kat silikonlu boya"} rows={4} value={portfolioForm.highlights} /><small>{workHighlights.length} / 8 madde · her satır ayrı madde olur.</small></label>
             </div>
           </section>
         </div>
@@ -1308,18 +1333,21 @@ export function SellerDashboard() {
           <section className={styles.formBlock}>
             <header><i>1</i><div><strong>Hizmet tanımı</strong><small>Mağaza kartında görünen başlık ve kapsam.</small></div></header>
             <div className={styles.formGrid}>
-              <label>Kategori<select onChange={(event) => setServiceForm({ ...serviceForm, category_id: event.target.value })} value={serviceForm.category_id}>{profile.categories.map((item) => <option key={item.id} value={item.id}>{item.icon} {item.name}</option>)}</select></label>
-              <label>Hizmet başlığı<input data-autofocus onChange={(event) => setServiceForm({ ...serviceForm, title: event.target.value })} placeholder="Örn. Anahtar teslim banyo yenileme" value={serviceForm.title} /></label>
-              <label className={styles.wide}>Açıklama<textarea onChange={(event) => setServiceForm({ ...serviceForm, description: event.target.value })} placeholder="Hizmet kapsamını ve çalışma biçimini anlat…" value={serviceForm.description} /><small>{serviceForm.description.length} / 2000 · en az 30 karakter</small></label>
+              {/* Yerel <select> BILEREK kaliyor: burada listelenen sey saticinin
+                  kendi kayitli kategorileri, bir elin parmaklarini gecmiyor.
+                  Kutu gorunumu yine ortak kontrol katmanindan geliyor. */}
+              <label>Kategori<select className="control" onChange={(event) => setServiceForm({ ...serviceForm, category_id: event.target.value })} value={serviceForm.category_id}>{profile.categories.map((item) => <option key={item.id} value={item.id}>{item.icon} {item.name}</option>)}</select></label>
+              <label>Hizmet başlığı<input className="control" data-autofocus onChange={(event) => setServiceForm({ ...serviceForm, title: event.target.value })} placeholder="Örn. Anahtar teslim banyo yenileme" value={serviceForm.title} /></label>
+              <label className={styles.wide}>Açıklama<textarea className="control" onChange={(event) => setServiceForm({ ...serviceForm, description: event.target.value })} placeholder="Hizmet kapsamını ve çalışma biçimini anlat…" value={serviceForm.description} /><small>{serviceForm.description.length} / 2000 · en az 30 karakter</small></label>
             </div>
           </section>
 
           <section className={styles.formBlock}>
             <header><i>2</i><div><strong>Fiyat ve teslim</strong><small>Müşteri beklentisini baştan netleştirir.</small></div></header>
             <div className={styles.formGrid}>
-              <label>Başlangıç fiyatı (₺)<input inputMode="decimal" onChange={(event) => setServiceForm({ ...serviceForm, price_from: event.target.value })} placeholder="Örn. 5000" value={serviceForm.price_from} /><small>Kartta &quot;başlangıç&quot; olarak gösterilir.</small></label>
-              <label>Teslim süresi<input onChange={(event) => setServiceForm({ ...serviceForm, delivery_time: event.target.value })} placeholder="Örn. 3–5 gün" value={serviceForm.delivery_time} /></label>
-              <label className={`${styles.wide} ${styles.toggleRow}`}><input checked={serviceForm.is_active} onChange={(event) => setServiceForm({ ...serviceForm, is_active: event.target.checked })} type="checkbox" /> Vitrinde yayında</label>
+              <label>Başlangıç fiyatı (₺)<input className="control" inputMode="decimal" onChange={(event) => setServiceForm({ ...serviceForm, price_from: event.target.value })} placeholder="Örn. 5000" value={serviceForm.price_from} /><small>Kartta &quot;başlangıç&quot; olarak gösterilir.</small></label>
+              <label>Teslim süresi<input className="control" onChange={(event) => setServiceForm({ ...serviceForm, delivery_time: event.target.value })} placeholder="Örn. 3–5 gün" value={serviceForm.delivery_time} /></label>
+              <label className={`${styles.wide} ${styles.toggleRow}`}><input checked={serviceForm.is_active} className="controlCheck" onChange={(event) => setServiceForm({ ...serviceForm, is_active: event.target.checked })} type="checkbox" /> Vitrinde yayında</label>
             </div>
           </section>
         </div>
@@ -1359,26 +1387,47 @@ export function SellerDashboard() {
           <section className={styles.formSection}>
             <header><span>ÜRÜN BİLGİLERİ</span><small>Kategori seçimi hangi özelliklerin sorulacağını belirler.</small></header>
             <div className={styles.formGrid}>
-              <label className={styles.wide}>Kategori
-                <select data-autofocus onChange={(event) => { setListingForm({ ...listingForm, category_slug: event.target.value }); setListingValues({}); }} value={listingForm.category_slug}>
-                  <option value="">Kategori seç</option>
-                  {categoryGroups.map((group) => <optgroup key={group.root} label={group.root}>
-                    {group.rows.map((row) => <option key={row.slug} value={row.slug}>{`${"— ".repeat(row.depth)}${row.icon ? `${row.icon} ` : ""}${row.name}`}</option>)}
-                  </optgroup>)}
-                </select>
+              <div className={`${styles.fieldBox} ${styles.wide}`}>
+                <label htmlFor="urun-kategori">Kategori</label>
+                <Select
+                  id="urun-kategori"
+                  onChange={(secim) => { setListingForm({ ...listingForm, category_slug: secim }); setListingValues({}); }}
+                  options={listingCategoryOptions}
+                  placeholder="Kategori seç"
+                  value={listingForm.category_slug}
+                />
                 <small>{catalog ? `${flatCategories.length} kategori · daire, araç, mağaza ürünü hepsi buradan` : "Kategoriler yükleniyor…"}</small>
-              </label>
-              <label className={styles.wide}>Başlık<input maxLength={140} onChange={(event) => setListingForm({ ...listingForm, title: event.target.value })} placeholder="Örn. Kadıköy Moda'da 3+1 deniz manzaralı daire" value={listingForm.title} /><small>{listingForm.title.trim().length} / 140 · en az 10 karakter</small></label>
-              <label className={styles.wide}>Açıklama<textarea maxLength={5000} onChange={(event) => setListingForm({ ...listingForm, description: event.target.value })} placeholder="Ürünün durumunu, kapsamını ve teslim koşullarını anlat…" value={listingForm.description} /><small>{listingForm.description.trim().length} / 5000 · en az 20 karakter</small></label>
+              </div>
+              <label className={styles.wide}>Başlık<input className="control" data-autofocus maxLength={140} onChange={(event) => setListingForm({ ...listingForm, title: event.target.value })} placeholder="Örn. Kadıköy Moda'da 3+1 deniz manzaralı daire" value={listingForm.title} /><small>{listingForm.title.trim().length} / 140 · en az 10 karakter</small></label>
+              <label className={styles.wide}>Açıklama<textarea className="control" maxLength={5000} onChange={(event) => setListingForm({ ...listingForm, description: event.target.value })} placeholder="Ürünün durumunu, kapsamını ve teslim koşullarını anlat…" value={listingForm.description} /><small>{listingForm.description.trim().length} / 5000 · en az 20 karakter</small></label>
             </div>
           </section>
 
           <section className={styles.formSection}>
             <header><span>FİYAT VE KONUM</span><small>Fiyat alıcıya en büyük puntoyla görünür; konum eşleşmeyi belirler.</small></header>
             <div className={styles.formGrid}>
-              <label className={styles.wide}>Fiyat (₺)<input inputMode="decimal" onChange={(event) => setListingForm({ ...listingForm, price: event.target.value })} placeholder="Örn. 4750000" value={listingForm.price} /><small>Boş bırakırsan “Fiyat sorunuz” yazar.</small></label>
-              <label>Şehir<select onChange={(event) => setListingForm({ ...listingForm, city_id: event.target.value, district_id: "" })} value={listingForm.city_id}><option value="">Seçilmedi</option>{(catalog?.cities ?? []).map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}</select></label>
-              <label>İlçe<select disabled={!listingCity} onChange={(event) => setListingForm({ ...listingForm, district_id: event.target.value })} value={listingForm.district_id}><option value="">Seçilmedi</option>{(listingCity?.districts ?? []).map((district) => <option key={district.id} value={district.id}>{district.name}</option>)}</select></label>
+              <label className={styles.wide}>Fiyat (₺)<input className="control" inputMode="decimal" onChange={(event) => setListingForm({ ...listingForm, price: event.target.value })} placeholder="Örn. 4750000" value={listingForm.price} /><small>Boş bırakırsan “Fiyat sorunuz” yazar.</small></label>
+              <div className={styles.fieldBox}>
+                <label htmlFor="urun-sehir">Şehir</label>
+                <Select
+                  id="urun-sehir"
+                  onChange={(secim) => setListingForm({ ...listingForm, city_id: secim, district_id: "" })}
+                  options={cityOptions}
+                  placeholder="Seçilmedi"
+                  value={listingForm.city_id}
+                />
+              </div>
+              <div className={styles.fieldBox}>
+                <label htmlFor="urun-ilce">İlçe</label>
+                <Select
+                  disabled={!listingCity}
+                  id="urun-ilce"
+                  onChange={(secim) => setListingForm({ ...listingForm, district_id: secim })}
+                  options={districtOptions}
+                  placeholder="Seçilmedi"
+                  value={listingForm.district_id}
+                />
+              </div>
             </div>
           </section>
 

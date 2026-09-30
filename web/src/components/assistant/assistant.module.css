@@ -83,9 +83,12 @@
 /* Uye: hizli sorgulama kutusu. */
 .lookup { display: flex; flex-direction: column; gap: 7px; }
 .lookup form { display: flex; gap: 7px; }
-.lookup input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 11px; padding: 9px 11px; font: inherit; font-size: 12.5px; color: var(--ink); background: var(--card); outline: none; transition: border-color .16s ease, box-shadow .16s ease; }
-.lookup input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 58, 237, .12); }
-.lookup button { flex: none; border: 0; border-radius: 11px; padding: 0 15px; font: inherit; font-size: 12.5px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); cursor: pointer; }
+/* Asistan paneli dar (320px): ortak katmanin kucuk olcusu (.controlSm)
+   kullaniliyor, 44px alan yaninda dugmeye yer kalmiyor. */
+.lookup input { flex: 1; min-width: 0; height: 36px; padding: 0 11px; border: 1px solid var(--line); border-radius: var(--r-sm); outline: none; color: var(--ink); background: var(--card); font: 400 14px/1.4 var(--f-body); transition: border-color .16s ease, box-shadow .16s ease; }
+.lookup input::placeholder { color: var(--faint); opacity: 1; }
+.lookup input:focus { border-color: var(--blue); box-shadow: var(--control-ring); }
+.lookup button { flex: none; height: 36px; border: 0; border-radius: var(--r-sm); padding: 0 15px; font: inherit; font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); cursor: pointer; }
 .lookup button:disabled { opacity: .45; cursor: default; }
 
 /* Uye: gruplu konu kartlari. */
@@ -122,16 +125,20 @@
 /* ---- Yazma alanı ---- */
 .composer { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--line-soft); background: var(--surface); }
 .panel[data-guest="true"] .composer { border-top-color: #2a2b48; background: #16172c; }
+/* Yazma alani ortak kontrol olculerinde; gonder dugmesi de ayni yuksekligi
+   alir (asagida), yoksa iki oge satirda hizalanmiyor. */
 .composer input {
-  flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 11px; padding: 10px 13px;
-  font: inherit; font-size: 13px; color: var(--ink); background: var(--card); outline: none;
+  flex: 1; min-width: 0; height: var(--control-h); padding: 0 var(--control-px);
+  border: 1px solid var(--line); border-radius: var(--r-sm); outline: none;
+  color: var(--ink); background: var(--card); font: 400 15px/1.4 var(--f-body);
   transition: border-color .16s ease, box-shadow .16s ease;
 }
-.composer input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 58, 237, .12); }
+.composer input::placeholder { color: var(--faint); opacity: 1; }
+.composer input:focus { border-color: var(--blue); box-shadow: var(--control-ring); }
 .panel[data-guest="true"] .composer input { border-color: #33345a; background: #1c1d38; color: #fff; }
 .panel[data-guest="true"] .composer input::placeholder { color: #7d7ca4; }
 .composer button {
-  width: 40px; height: 40px; flex: none; display: grid; place-items: center; border: 0; border-radius: 11px;
+  width: var(--control-h); height: var(--control-h); flex: none; display: grid; place-items: center; border: 0; border-radius: var(--r-sm);
   color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); font-size: 13px; cursor: pointer;
   transition: filter .16s ease, transform .16s ease;
 }

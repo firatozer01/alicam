@@ -72,7 +72,12 @@
 @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(14, 159, 90, .5); } 70%, 100% { box-shadow: 0 0 0 8px rgba(14, 159, 90, 0); } }
 
 /* ================= HERO ================= */
-.hero { position: relative; isolation: isolate; padding: clamp(40px, 5vw, 80px) 0 clamp(36px, 4vw, 56px); overflow: hidden; }
+/* NEDEN yalnizca yatayda kirpiliyor: arka plandaki genis daireler ve gorsel
+   sutun sagdan tasip yatay kaydirma cubugu aciyordu. Dikey kirpma kalkti,
+   arama seridindeki il listesi seridin altina aciliyor ve hero'nun alt
+   kenarinda kesiliyordu. "clip" ile "visible" birlikte gecerli; biri "hidden"
+   olsa tarayici digerini de kirpmaya zorlardi. */
+.hero { position: relative; isolation: isolate; padding: clamp(40px, 5vw, 80px) 0 clamp(36px, 4vw, 56px); overflow-x: clip; overflow-y: visible; }
 .heroBg {
   position: absolute; inset: 0; z-index: -1;
   background:
@@ -111,12 +116,42 @@
 .ff:focus-within::before, .ff:focus-within + .ff::before { opacity: 0; }
 .ffGrow { flex-grow: 1.8; }
 .ff label, .segLabel { display: block; font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
-.ff input, .ff select { width: 100%; border: 0; outline: 0; background: transparent; font-size: 15.5px; color: var(--ink); padding: 3px 0; min-width: 0; }
-.ff select {
-  appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 16px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237A849C' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") right 0 center no-repeat;
+/* NEDEN ortak .control katmani DEGIL: arama seridinde her alanin kendi kutusu yok,
+   alanlar yalnizca .ff + .ff::before ayiricisiyla bolunuyor. Cerceve verilse serit
+   ic ice bes kutuya dagilirdi. Onun icin kenarlik/dolgu bilerek farkli.
+   NEDEN "> input": acilir listenin arama kutusu da .ff icinde yasiyor ve bu kural
+   dogrudan cocuk olmasa onu da cerceveden soyuyordu. */
+.ff > input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 15.5px; color: var(--ink); padding: 3px 0; min-width: 0; }
+.ff > input::placeholder { color: var(--faint); }
+
+/* Sehir/kategori/marka/yil alanlari artik ortak Select bileseni; seritte yerel
+   <select> kalmadigi icin onun appearance ve ok kurallari da kalkti. */
+/* .ff'in "cursor: text" degeri burada yanlis: tiklanip acilan bir liste. */
+.ffSelect { cursor: pointer; }
+/* NEDEN uc sinif: ortak katman secicisini ".control.control" diye iki kez
+   yaziyor, iki sinifli kural onunla esit cikip siralamaya kaliyordu. */
+.ff .ffSelect > button {
+  height: auto;
+  padding: 3px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 15.5px;
 }
-.ff input::placeholder { color: #9AA3B8; }
+/* Odak geri bildirimini .ff:focus-within'in arka plani veriyor; kutusu olmayan
+   alanda halka havada asili duruyordu. */
+.ff .ffSelect > button:focus,
+.ff .ffSelect > button[aria-expanded="true"] { box-shadow: none; }
+/* Veri gelene kadar alan devre disi; gri zemin yalnizca kutulu alanlarda
+   anlamli, burada solukluk ve imlec yeterli. */
+.ff .ffSelect > button:disabled { background: none; }
+/* Liste alanin sol kenari ve genisligiyle hizali; yalnizca bir ALT SINIR var:
+   serit yan yanayken alanlar ~100px'e kadar daraliyor ve "Mercedes-Benz" gibi
+   secenekler uc noktaya dusuyordu. Alt sinir devreye girdiginde liste saga
+   dogru genisler, sol kenar yerinde kalir. Ust sinir ekrandan tasmayi keser. */
+/* Panel artik portal ile <body>'de duruyor, yani bu secici ona ulasmiyor.
+   Asgari genislik ve ekrana kirpma Select bileseninin kendi konum
+   hesabinda yapiliyor. */
 .segMini { display: flex; gap: 4px; margin-top: 2px; }
 .segMini button { border: 0; padding: 4px 10px; border-radius: 8px; background: var(--line-2); font-size: 14px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
 .segMini button[aria-pressed="true"] { background: var(--navy); color: #fff; }
@@ -289,6 +324,9 @@
 .areaFree .areaHead i { background: rgba(255, 255, 255, .1); box-shadow: none; }
 .areaFree p { color: #B9C3E3; font-size: 14.5px; margin: 0; }
 .afInput { margin-top: auto; display: block; }
+/* Bilerek ortak katmanda degil: bu alan lacivert kartin uzerinde duruyor, orada
+   var(--line) kenarligi ve mavi odak halkasi gorunmuyor. Kenarlik yerine beyaz
+   zemin, halka yerine aciklastirilmis mavi kullaniliyor. */
 .afInput input { width: 100%; height: 48px; padding: 0 14px; border-radius: 12px; border: 0; outline: 0; font-size: 15px; color: var(--ink); background: #fff; }
 .afInput input:focus { box-shadow: 0 0 0 4px rgba(126, 162, 255, .45); }
 .areaFree .btn { width: 100%; }
@@ -495,11 +533,15 @@
 .faqSide { position: sticky; top: calc(var(--header-h) + 32px); display: grid; gap: 18px; min-width: 0; }
 .faqSide .secHead { margin-bottom: 6px; }
 .faqSearch { display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 12px 0 16px; border-radius: 16px; background: var(--bg); border: 1.5px solid transparent; transition: border-color .15s, background .15s, box-shadow .15s; cursor: text; }
-.faqSearch:focus-within { background: #fff; border-color: var(--blue); box-shadow: 0 0 0 4px rgba(27, 92, 255, .12); }
+/* Odak halkasi ortak belirtecten geliyor; burada ayni gorunumun ikinci bir
+   elle yazilmis kopyasi vardi. */
+.faqSearch:focus-within { background: #fff; border-color: var(--blue); box-shadow: var(--control-ring); }
 .faqSearch svg { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--ink-3); stroke-width: 2; stroke-linecap: round; }
 .faqSearch:focus-within svg { stroke: var(--blue); }
+/* Bilerek ortak katmanda degil: kutu (ikon + alan + kisayol tusu) sarmalayicinin
+   kendisi, alan onun icinde cercevesiz duruyor. Kenarligi .faqSearch tasiyor. */
 .faqSearch input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 16px; }
-.faqSearch input::placeholder { color: #9AA3B8; }
+.faqSearch input::placeholder { color: var(--faint); }
 .faqSearch kbd { flex: none; font: 600 12.5px/1 var(--f-body); color: var(--ink-3); background: #fff; border: 1px solid var(--line); padding: 6px 9px; border-radius: 8px; white-space: nowrap; }
 
 .faqTopics { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }

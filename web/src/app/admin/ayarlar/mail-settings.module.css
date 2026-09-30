@@ -9,22 +9,43 @@
 .card > header b { color: var(--indigo); }
 
 .toggle { display: inline-flex; align-items: center; gap: 8px; flex: none; padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); font-size: 12.5px; font-weight: 700; color: var(--ink-2); cursor: pointer; }
-.toggle input { accent-color: var(--violet); }
+.toggle input { width: 18px; height: 18px; margin: 0; accent-color: var(--blue); cursor: pointer; }
 
 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; padding: 18px 20px; }
 .wide { grid-column: 1 / -1; }
-.grid label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--muted-2); }
+/* ---- Alanlar ----
+   Olculer ve renkler globals.css'teki ortak kontrol katmaninin
+   degiskenlerinden geliyor: yonetim ekrani da sitenin geri kalaniyla ayni
+   44px yukseklik, ayni yaricap ve ayni odak halkasini kullaniyor. Eskiden
+   burada 11px etiket + 13.5px alan + mor halka vardi.
+   Seciciler element bazli kaldi cunku sinif vermek isaretlemeyi
+   degistirmeyi gerektiriyor; alanlara "control" eklendigi gun
+   ".control.control" bu kurallari kendiliginden yener. */
+.grid label { display: grid; gap: 7px; min-width: 0; color: var(--ink-2); font-size: 13px; font-weight: 600; letter-spacing: normal; line-height: 1.35; }
 .grid input, .grid select {
-  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 13.5px;
-  font-weight: 400; letter-spacing: normal; color: var(--ink); background: var(--card); outline: none;
+  width: 100%; min-width: 0; height: var(--control-h); padding: 0 var(--control-px);
+  border: 1px solid var(--line); border-radius: var(--r-sm); outline: none;
+  color: var(--ink); background: var(--card); font: 400 15px/1.4 var(--f-body);
   transition: border-color .16s ease, box-shadow .16s ease;
 }
-.grid input:focus, .grid select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 58, 237, .12); }
-.grid small { font-size: 11px; font-weight: 400; letter-spacing: normal; color: var(--muted); }
+.grid input::placeholder { color: var(--faint); opacity: 1; }
+.grid input:focus, .grid select:focus { border-color: var(--blue); box-shadow: var(--control-ring); }
+/* Yerel select oku her platformda baska boyda cikiyor: kapatilip iki
+   cizgiyle token renkli V ciziliyor -- select.control ile birebir ayni. */
+.grid select {
+  appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer;
+  background-image:
+    linear-gradient(45deg, transparent 42%, var(--ink-3) 42% 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, var(--ink-3) 42% 58%, transparent 58%);
+  background-repeat: no-repeat;
+  background-position: calc(100% - 21px) center, calc(100% - 14px) center;
+  background-size: 7px 7px;
+}
+.grid small { color: var(--ink-3); font-size: 12.5px; font-weight: 400; letter-spacing: normal; line-height: 1.5; }
 
 .card > footer { display: flex; gap: 10px; justify-content: flex-end; padding: 14px 20px; border-top: 1px solid var(--line-soft); background: var(--surface); }
 .card > footer button, .testRow button {
-  border: 0; border-radius: 10px; padding: 11px 19px; font: inherit; font-size: 13.5px; font-weight: 700;
+  border: 0; border-radius: var(--r-sm); min-height: var(--control-h); padding: 0 19px; font: inherit; font-size: 13.5px; font-weight: 700;
   color: #fff; background: linear-gradient(135deg, var(--violet), var(--indigo)); cursor: pointer;
   transition: filter .16s ease, transform .16s ease;
 }
@@ -36,8 +57,14 @@
 .card > footer button.unlink:hover:not(:disabled) { filter: brightness(.97); }
 
 .testRow { display: flex; gap: 10px; flex-wrap: wrap; padding: 18px 20px; }
-.testRow input { flex: 1; min-width: 220px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 13.5px; color: var(--ink); outline: none; }
-.testRow input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 58, 237, .12); }
+.testRow input {
+  flex: 1; min-width: 220px; height: var(--control-h); padding: 0 var(--control-px);
+  border: 1px solid var(--line); border-radius: var(--r-sm); outline: none;
+  color: var(--ink); background: var(--card); font: 400 15px/1.4 var(--f-body);
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+.testRow input::placeholder { color: var(--faint); opacity: 1; }
+.testRow input:focus { border-color: var(--blue); box-shadow: var(--control-ring); }
 
 .notice { margin: 0 0 14px; padding: 11px 15px; border-radius: var(--r-sm); background: var(--ok-bg); color: var(--ok-fg); font-size: 13px; font-weight: 650; }
 

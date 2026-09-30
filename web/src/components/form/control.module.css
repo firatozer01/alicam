@@ -1,0 +1,144 @@
+/* Kendi yazdigimiz acilir listenin stilleri.
+   Kapali haldeki kutu globals.css'teki .control katmanindan gelir; burada
+   yalnizca tetikleyicinin ic yerlesimi, panel ve liste tanimlanir.
+   Boylece alan gorunumu tek yerde kalir. */
+
+.root{
+  position: relative;
+  min-width: 0;
+}
+
+/* Secili metin ile ok arasindaki bosluk; kutu olculeri .control'dan gelir. */
+.trigger{
+  justify-content: space-between;
+}
+
+/* Acikken kenarlik odak rengini alir. NEDEN uc sinifli secici:
+   globals.css'teki .control.control kuralini gecmesi gerekiyor. */
+.root .trigger[aria-expanded="true"]{
+  border-color: var(--blue);
+  box-shadow: var(--control-ring);
+}
+
+.deger,
+.tutucu{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tutucu{ color: var(--faint); }
+
+/* Ok: iki kenarlikla cizilen ince V. Acilinca yukari doner. */
+.ok{
+  width: 8px;
+  height: 8px;
+  flex: none;
+  margin-top: -3px;
+  border-right: 1.6px solid var(--ink-3);
+  border-bottom: 1.6px solid var(--ink-3);
+  transform: rotate(45deg);
+  transition: transform .18s ease, border-color .18s ease;
+}
+.trigger[aria-expanded="true"] .ok{
+  margin-top: 3px;
+  border-color: var(--blue);
+  transform: rotate(-135deg);
+}
+
+/* Panel kutuyla TAM AYNI genislikte ve tam altinda duruyor: yerel select'in
+   acilir listesi kutudan bagimsiz konumlaniyor ve dar kaliyordu. */
+/* Panel PORTAL ile <body>'ye basiliyor; konum ve genislik tetikleyicinin
+   olcusunden hesaplanip satir ici veriliyor. NEDEN: position:absolute iken
+   modal govdesi (overflow-y:auto) paneli kirpiyordu ve ekranin altina yakin
+   kutularda liste gorus alaninin disina tasiyordu. */
+.panel{
+  position: fixed;
+  z-index: 90;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--card);
+  box-shadow: var(--shadow-md);
+  animation: controlPanelIn .16s ease both;
+}
+
+@keyframes controlPanelIn{
+  from{ opacity: 0; transform: translateY(-6px); }
+  to{ opacity: 1; transform: none; }
+}
+
+.aramaKutu{
+  padding: 8px;
+  border-bottom: 1px solid var(--line-2);
+  background: var(--surface);
+}
+
+.arama{
+  width: 100%;
+  height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  outline: none;
+  color: var(--ink);
+  background: var(--card);
+  font: 400 14px/1.4 var(--f-body);
+}
+.arama::placeholder{ color: var(--faint); }
+.arama:focus{ border-color: var(--blue); box-shadow: var(--control-ring); }
+
+.liste{
+  max-height: var(--liste-max, 300px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  overscroll-behavior: contain;
+}
+
+.oge{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: 14.5px;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.oge > span{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Fare ve klavye ayni isareti kullanir: gezinen oge her zaman tek. */
+.oge[data-aktif="true"]{
+  color: var(--blue-700);
+  background: var(--blue-50);
+}
+.oge[aria-selected="true"]{
+  font-weight: 650;
+  color: var(--blue-700);
+}
+.oge[aria-selected="true"]::after{
+  content: "✓";
+  flex: none;
+  font-size: 13px;
+}
+
+.bos{
+  padding: 18px 11px;
+  color: var(--ink-3);
+  font-size: 14px;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .panel{ animation: none; }
+  .ok{ transition: none; }
+}

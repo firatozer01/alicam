@@ -131,41 +131,73 @@
   gap: 10px;
 }
 
+/* ---- Alanlar ----
+   Etiket ve kutu olculeri globals.css'teki ortak kontrol katmaninin
+   degiskenlerinden geliyor: yonetim ekrani da sitenin geri kalaniyla ayni
+   44px yukseklik, ayni yaricap ve ayni odak halkasini kullaniyor. Eskiden
+   burada 39px kutu + 8px etiket + 9px alan yazisi ve eski paletten kalma
+   sabit renkler (#ddd8ed, #686579, mor halka) vardi.
+   Seciciler element bazli kaldi cunku sinif vermek isaretlemeyi
+   degistirmeyi gerektiriyor; alanlara "control" eklendigi gun
+   ".control.control" bu kurallari kendiliginden yener. */
 .categoryFields label,
 .attributeEditor label {
   display: grid;
-  gap: 6px;
-  color: #686579;
-  font-size: 8px;
-  font-weight: 750;
+  gap: 7px;
+  min-width: 0;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 .categoryFields input,
 .attributeEditor input,
 .attributeEditor select {
   width: 100%;
-  height: 39px;
-  padding: 0 10px;
-  border: 1px solid #ddd8ed;
-  border-radius: 8px;
+  min-width: 0;
+  height: var(--control-h);
+  padding: 0 var(--control-px);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
   outline: 0;
   color: var(--ink);
-  background: #fff;
-  font: 9px var(--font-inter);
+  background: var(--card);
+  font: 400 15px/1.4 var(--f-body);
+  transition: border-color .16s ease, box-shadow .16s ease;
 }
+.categoryFields input::placeholder,
+.attributeEditor input::placeholder { color: var(--faint); opacity: 1; }
 
 .categoryFields input:focus,
 .attributeEditor input:focus,
 .attributeEditor select:focus {
-  border-color: var(--violet);
-  box-shadow: 0 0 0 3px rgb(124 58 237 / 9%);
+  border-color: var(--blue);
+  box-shadow: var(--control-ring);
+}
+
+/* Yerel select oku her platformda baska boyda cikiyor: kapatilip iki
+   cizgiyle token renkli V ciziliyor -- select.control ile birebir ayni. */
+.attributeEditor select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px;
+  cursor: pointer;
+  background-image:
+    linear-gradient(45deg, transparent 42%, var(--ink-3) 42% 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, var(--ink-3) 42% 58%, transparent 58%);
+  background-repeat: no-repeat;
+  background-position: calc(100% - 21px) center, calc(100% - 14px) center;
+  background-size: 7px 7px;
 }
 
 .colorInput { display: grid; grid-template-columns: 40px 1fr; gap: 5px; }
 .colorInput input[type="color"] { padding: 4px; cursor: pointer; }
-.categoryFields .check { display: flex; align-items: center; min-height: 39px; white-space: nowrap; }
+/* Onay kutusu sutunu yanindaki alanlarla ayni satirda bitsin. */
+.categoryFields .check { display: flex; align-items: center; min-height: var(--control-h); white-space: nowrap; }
+/* Ortak .controlCheck ile ayni olcu ve renk. */
 .categoryFields .check input,
-.attributeEditor fieldset input { width: 15px; height: 15px; accent-color: var(--violet); }
+.attributeEditor fieldset input { width: 18px; height: 18px; margin: 0; accent-color: var(--blue); cursor: pointer; }
 
 .editor footer,
 .attributeEditor footer {
@@ -299,7 +331,8 @@
 }
 
 .attributeEditor .wide { grid-column: span 2; }
-.attributeEditor label small { color: #9a97a9; font-size: 7px; font-weight: 500; }
+/* Ortak .controlHint olcusu. */
+.attributeEditor label small { color: var(--ink-3); font-size: 12.5px; font-weight: 400; line-height: 1.5; }
 .attributeEditor fieldset { display: flex; flex-wrap: wrap; gap: 15px; margin: 14px 0 0; padding: 12px; border: 1px solid #e3def1; border-radius: 9px; background: #fff; }
 .attributeEditor fieldset label { display: flex; align-items: center; gap: 6px; }
 
