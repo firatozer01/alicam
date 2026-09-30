@@ -6,17 +6,23 @@
   /* Maskot 560x585; kutu da ayni oranda olmali yoksa gorsel uzuyor.
      Eski maskot yatiktı (400x322) ve kutu da oyleydi; yenisi neredeyse
      kare oldugu icin kutu yukseldi. */
-  width: 134px; height: 140px; padding: 0; border: 0;
+  width: 172px; height: 180px; padding: 0; border: 0;
   background: none; cursor: pointer; line-height: 0;
   filter: drop-shadow(0 14px 28px rgba(76, 60, 180, .28));
   transition: transform .22s cubic-bezier(.2, .8, .2, 1);
   animation: floatIn .5s cubic-bezier(.2, .8, .2, 1) both;
 }
-/* Yeni maskot TEK KARE bir gorsel; eskisi 16 kareli animasyonlu gif
-   idi. Kose bos bir resim gibi durmasin diye hafif bir salinim
-   CSS'ten veriliyor. Hareket kisitlandiginda asagida kapaniyor. */
-.launcher img { animation: mascotBob 3.4s ease-in-out .5s infinite; }
-@keyframes mascotBob { 0%, 100% { transform: none; } 50% { transform: translateY(-6px); } }
+/* Maskot TEK KARE bir gorsel; eskisi 16 kareli animasyonlu gif idi.
+   Hareket bu yuzden CSS'ten geliyor. Ilk surumde genlik 3,4 saniyede
+   6px'ti ve durgun gorunuyordu; gorselin kendisi zaten havada suzulen
+   bir robot oldugu icin suzulme hem belirginlestirildi hem de hafif
+   yalpayla desteklendi. Hareket kisitlandiginda asagida kapaniyor. */
+.launcher img { animation: mascotBob 2.6s ease-in-out .3s infinite; transform-origin: 50% 85%; }
+@keyframes mascotBob {
+  0%   { transform: translateY(0) rotate(-2.2deg); }
+  50%  { transform: translateY(-16px) rotate(2.2deg); }
+  100% { transform: translateY(0) rotate(-2.2deg); }
+}
 .launcher:hover { transform: translateY(-4px) scale(1.04); }
 .launcher[data-open="true"] { transform: scale(.88); opacity: .75; }
 @keyframes floatIn { from { opacity: 0; transform: translateY(20px) scale(.9); } to { opacity: 1; transform: none; } }
@@ -36,8 +42,8 @@
 
 /* ---- Panel ---- */
 .panel {
-  position: fixed; right: 20px; bottom: 186px; z-index: 81;
-  width: min(384px, calc(100vw - 32px)); max-height: min(620px, calc(100vh - 210px));
+  position: fixed; right: 20px; bottom: 226px; z-index: 81;
+  width: min(384px, calc(100vw - 32px)); max-height: min(620px, calc(100vh - 250px));
   display: flex; flex-direction: column; overflow: hidden;
   border: 1px solid var(--line); border-radius: var(--r-lg);
   background: var(--card); box-shadow: var(--shadow-lg);
@@ -144,6 +150,6 @@
 .composer button:disabled { opacity: .45; cursor: default; }
 
 @media (max-width: 520px) {
-  .launcher { width: 100px; height: 105px; right: 12px; bottom: 12px; }
-  .panel { right: 12px; bottom: 140px; max-height: calc(100vh - 172px); }
+  .launcher { width: 124px; height: 130px; right: 12px; bottom: 12px; }
+  .panel { right: 12px; bottom: 168px; max-height: calc(100vh - 200px); }
 }
