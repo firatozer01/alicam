@@ -135,6 +135,14 @@ export function SiteHeader({
     : { label: "Talep oluştur", href: "/talep-olustur" });
   const actionPlus = action.href === "/talep-olustur";
   const drawerMenus = menus && menus.length > 0 ? menus : [discoverMenu];
+  /**
+   * Cubuk uye duzeninde mi kurulsun.
+   *
+   * Oturum cozulmus ise cevabin kendisi, cozulmemis ise onceki ziyaretin
+   * izi karar verir. Tahmin yanlis cikarsa en fazla eski davranisa
+   * donulur: cubuk bir kere yerine oturur.
+   */
+  const uyeDuzeni = currentUser ? true : (!ready && session.wasSignedIn);
 
   // Cekmece acikken arka plan kaymasin, Escape kapatsin.
   useEffect(() => {
@@ -183,8 +191,13 @@ export function SiteHeader({
 
         {/* Oturum acikken cubukta hesap menusu de duruyor; dar ekranda
             marka + hesap + eylem + hamburger yan yana sigmiyor ve cubuk
-            tasiyordu. Isaret sinifi CSS'e bu durumu bildiriyor. */}
-        <div className={currentUser ? `${styles.actions} ${styles.actionsAuthed}` : styles.actions}>
+            tasiyordu. Isaret sinifi CSS'e bu durumu bildiriyor.
+
+            /me cevabini BEKLERKEN de isaret veriliyor: onceki ziyaret uye
+            ise cubuk bastan uye duzeninde kurulur. Yoksa once turuncu
+            eylem dugmesi basilip cevap gelince kaldiriliyor, yerine hesap
+            menusu geliyordu -- telefonda gozle gorulur bir sicrama. */}
+        <div className={uyeDuzeni ? `${styles.actions} ${styles.actionsAuthed}` : styles.actions}>
           {typeof credits === "number" && <Link className={styles.credit} href="/kontor-yukle">⚡ {credits} kontör</Link>}
           {/* Favori talepler yalnizca hizmet vereni ilgilendirir. */}
           {ready && isSeller && (
@@ -194,11 +207,15 @@ export function SiteHeader({
           {/* Zil yalnizca oturum acmis kullanicida; sayac kendi icinde okunur. */}
           {ready && currentUser && <NotificationBell userId={currentUser.id} />}
           {!ready
-            // Yer tutucu, yerine gececek ogenin kutusunda olmali; hangisi
-            // olacagini onceki ziyaretin sonucu soyluyor. Misafir kutusu
-            // 1260px altinda hic basilmiyor ("Giris yap" da basilmadigi
-            // icin) -- telefonda ilk acilistaki ziplama buradan geliyordu.
-            ? <span aria-hidden="true" className={`${styles.skeleton} ${session.wasSignedIn ? styles.skeletonUser : styles.skeletonGuest}`} />
+            // Yer tutucu YALNIZCA misafir beklenirken. Kutusu "Giris yap"
+            // baglantisiyla ayni (84x40) ve o baglanti gibi 1260px altinda
+            // hic basilmiyor; yani telefonda hicbir sey gorunup kaybolmuyor.
+            //
+            // Uye beklenirken hicbir sey basilmiyor: gelecek olan tek bir
+            // kutu degil, bir OBEK (favori yildizi + zil + hesap menusu).
+            // Tek kutuyla taklit edilemiyor, denendiginde 375px'lik cubugu
+            // 418px'e tasiriyordu. Yerini .actionsAuthed zaten aciyor.
+            ? (uyeDuzeni ? null : <span aria-hidden="true" className={`${styles.skeleton} ${styles.skeletonGuest}`} />)
             : currentUser
               ? <AccountMenu compact displayName={displayName} user={currentUser} workspace={workspace} />
               : <Link className={styles.line} href="/giris">Giriş yap</Link>}

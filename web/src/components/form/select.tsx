@@ -26,6 +26,20 @@ function aramaAnahtari(deger: string) {
 }
 
 /**
+ * Listenin ulasabilecegi en buyuk yukseklik.
+ *
+ * Once yalnizca "ne kadar yer varsa o kadar" yaziyordu. Panelin konumu her
+ * kaydirmada yeniden hesaplandigi icin kutu ekranin ustune dogru ciktikca
+ * altindaki bosluk buyuyor, liste de onunla birlikte uzuyordu: anasayfa
+ * seridindeki sehir secimi kaydirdikca ekranin yarisini kaplayan bir surune
+ * donusuyordu. Bir sinirdan sonra fazladan yer ISE YARAMIYOR zaten --
+ * sekiz secenekten uzun bir listeyi kimse gozle taramaz, arar.
+ *
+ * Deger CSS'teki varsayilanla (.liste max-height) ayni tutuluyor.
+ */
+const LISTE_TAVANI = 300;
+
+/**
  * Yerel <select> yerine kullanilan acilir liste.
  * NEDEN: tarayicinin kendi acilir listesi CSS ile bicimlendirilemiyor, kutudan
  * bagimsiz konumlaniyor ve 81 il gibi uzun listelerde yazarak arama yapilamiyor.
@@ -125,10 +139,11 @@ export function Select({
         ? { bottom: Math.round(window.innerHeight - kutu.top + BOSLUK) }
         : { top: Math.round(kutu.bottom + BOSLUK) }),
       // Arama kutusu da panelin icinde; liste ondan arta kalani kullanir.
-      "--liste-max": `${alan - 56}px`,
+      // Arama yoksa o 56px'i dusmek listeyi bosuna kisaltiyordu.
+      "--liste-max": `${Math.min(LISTE_TAVANI, alan - (aranabilir ? 56 : 0))}px`,
     };
     setKonum(yeri);
-  }, []);
+  }, [aranabilir]);
 
   const ac = useCallback(() => {
     if (disabled) return;

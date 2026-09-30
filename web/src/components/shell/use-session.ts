@@ -50,10 +50,16 @@ export function useSession(enabled = true) {
     return () => { active = false; };
   }, [enabled]);
 
-  // Sonuc bir sonraki acilis icin saklanir.
+  // Sonuc bir sonraki acilis icin saklanir; ayni anda <html> uzerindeki
+  // oznitelik de duzeltilir. Oznitelik layout.tsx'teki betikle ilk
+  // boyamadan once yaziliyor ve CSS ona bakip eylem dugmesini gizliyor:
+  // iz eskimisse (oturum baska yerde kapatilmis olabilir) burada
+  // temizlenmezse dugme misafire de bir daha hic gorunmezdi.
   useEffect(() => {
     if (!ready) return;
     try { window.localStorage.setItem(OTURUM_IZI, user ? "1" : "0"); } catch { /* yoksay */ }
+    if (user) document.documentElement.dataset.oturum = "1";
+    else delete document.documentElement.dataset.oturum;
   }, [ready, user]);
 
   return { user, ready, wasSignedIn };

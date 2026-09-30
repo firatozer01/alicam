@@ -85,8 +85,14 @@
   oturuyordu -- telefonda en kotusu, orada "Giris yap" hic basilmadigi
   icin 120px'lik parlayan blok gorunup yok oluyordu.
 
-  Artik yer tutucu YERINE GECECEK ogenin kutusunu aliyor: olcuyu onceki
-  ziyaretin sonucu (useSession -> wasSignedIn) seciyor.
+  Artik yalnizca MISAFIR beklenirken basiliyor (onceki ziyaretin izine
+  gore, useSession -> wasSignedIn) ve kutusu "Giris yap" baglantisiyla
+  birebir ayni. O baglanti gibi 1260px altinda hic basilmiyor, yani
+  telefonda gorunup kaybolan bir blok kalmiyor.
+
+  Uye beklenirken hic yer tutucu yok: gelecek olan tek kutu degil bir
+  obek (favori yildizi + zil + hesap menusu) ve tek kutuyla taklit etmek
+  cubugu tasiriyordu. Onun yerine cubuk bastan uye duzeninde kuruluyor.
 */
 .skeleton {
   border-radius: 10px;
@@ -95,8 +101,6 @@
 }
 /* "Giris yap" baglantisinin kutusu: 15px/600 metin + 10px yan dolgu. */
 .skeletonGuest { width: 84px; height: 40px; }
-/* Hesap menusu tetikleyicisi: 36px avatar + kimlik + ok, 14px kose. */
-.skeletonUser { width: 184px; height: 48px; border-radius: 14px; }
 @keyframes shine { to { background-position: -220% 0; } }
 
 /* Oturumsuz hal: "Giris yap" duz metin baglantisi, tek dugme turuncu kalsin. */
@@ -227,12 +231,6 @@
   .credit { display: none; }
 }
 
-/* Hesap menusu 760px altinda kimligi gizleyip yalnizca avatari birakiyor
-   (account-menu.module.css); yer tutucu da o kutuya inmeli. */
-@media (max-width: 760px) {
-  .skeletonUser { width: 51px; }
-}
-
 @media (max-width: 600px) {
   /* Tam logo 32px yukseklikte 203px genisliginde ve bu genislikte
      eylem dugmesiyle hamburgerin yanina sigmiyor. Isarete dusmek
@@ -249,6 +247,10 @@
      hamburger yerini aliyor. "Ucretsiz talep olustur" cekmecenin
      altinda zaten duruyor, yani yol kaybolmuyor. */
   .actionsAuthed .cta { display: none; }
+  /* Ayni kural, ama ILK KAREDEN itibaren: oznitelik layout.tsx'teki tek
+     satirlik betikle, React daha calismadan yaziliyor. Yoksa oturumu acik
+     kullanici turuncu dugmeyi bir gorup kaybediyordu. */
+  :global(html[data-oturum="1"]) .cta { display: none; }
   /* 38px dokunma hedefi icin dusuktu; 40px hem sigiyor hem parmakla tutuluyor. */
   .cta { height: 40px; padding: 0 10px; font-size: 13.5px; }
 }
