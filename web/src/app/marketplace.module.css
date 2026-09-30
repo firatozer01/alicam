@@ -169,7 +169,10 @@
 .offer.offerBest { border-color: rgba(14, 159, 90, .45); box-shadow: 0 0 0 3px rgba(14, 159, 90, .1), var(--shadow-sm); }
 .offer.offerBest > b { color: var(--green); }
 
-.hvToast { position: absolute; z-index: 4; right: 0; bottom: 6px; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 14px; background: var(--navy); color: #fff; font-size: 14px; font-weight: 550; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(10px); transition: opacity .4s, transform .4s; max-width: 320px; pointer-events: none; }
+.hvToast { position: absolute; z-index: 4; right: 0; bottom: 6px; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 14px; background: var(--navy); color: #fff; font-size: 14px; font-weight: 550; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(10px); transition: opacity .4s, transform .4s; white-space: nowrap; max-width: 100%; pointer-events: none; }
+/* Baloncuk TEK SATIR. Eski 320px sinir en uzun metne (342px) yetmiyordu
+   ve para birimi alt satira dusuyordu; hero sutunu 556px, yani yer var.
+   max-width yine de duruyor: metin bir gun uzarsa sutunu tasirmasin. */
 .hvToast.hvToastShow { opacity: 1; transform: none; }
 .hvToast i { font-style: normal; font-size: 18px; }
 
