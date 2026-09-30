@@ -113,7 +113,11 @@
 /* ---- Panel ---- */
 .panel {
   position: fixed; right: 20px; bottom: 176px; z-index: 81;
-  width: min(384px, calc(100vw - 32px)); max-height: min(620px, calc(100vh - 200px));
+  /* dvh: telefonda adres cubugu acilip kapandikca gorunur alan degisiyor,
+     100vh ise en buyuk hali varsayip paneli ekran disina tasiriyor. */
+  width: min(384px, calc(100vw - 32px));
+  max-height: min(620px, calc(100vh - 200px));
+  max-height: min(620px, calc(100dvh - 200px));
   display: flex; flex-direction: column; overflow: hidden;
   border: 1px solid var(--line); border-radius: var(--r-lg);
   background: var(--card); box-shadow: var(--shadow-lg);
@@ -228,5 +232,13 @@
 
 @media (max-width: 520px) {
   .launcher { width: 96px; height: 100px; right: 12px; bottom: 12px; }
-  .panel { right: 12px; bottom: 138px; max-height: calc(100vh - 170px); }
+  /* Panel telefonda ekranin %79'unu kapliyordu (642/812). Ust sinir
+     eklendi: sayfadan bir parca gorunur kalsin ki kullanici nereden
+     geldigini kaybetmesin. Genislik de iki yandan 12px paya oturuyor. */
+  .panel {
+    left: 12px; right: 12px; width: auto;
+    bottom: 138px;
+    max-height: min(520px, calc(100vh - 170px));
+    max-height: min(520px, calc(100dvh - 170px));
+  }
 }
