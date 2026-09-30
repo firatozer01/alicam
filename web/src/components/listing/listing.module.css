@@ -156,7 +156,10 @@
 }
 
 /* ---- Kart ızgarası (paneller) ---- */
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(304px,1fr));gap:12px}
+/* min(304px, 100%): 320px'lik telefonda kapsayici 288px kaliyor ve ciplak
+   minmax(304px,...) sutunu kapsayicidan genis yapip sayfayi yana kaydiriyordu.
+   min() sarmasi yalnizca dar ekranda devreye girer, genis ekranda 304px ayni. */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(304px,100%),1fr));gap:12px}
 .card{display:flex;flex-direction:column;gap:8px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 15px;box-shadow:0 8px 26px rgba(79,70,229,.05);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease;animation:tileIn .38s cubic-bezier(.2,.8,.2,1) both}
 .card:hover{border-color:var(--violet-200);box-shadow:0 16px 40px rgba(79,70,229,.11);transform:translateY(-2px)}
 .cardOpen{border-color:#a5f0f5;background:linear-gradient(180deg,#fbfeff,#fff)}
@@ -225,6 +228,38 @@
 .summaryItem small{font-size:11px;color:var(--muted-2)}
 .summaryLink{border:0;font:inherit;text-align:left;cursor:pointer}
 .summaryLink:hover strong{color:var(--indigo)}
+
+/* ---- Telefon: dokunma hedefleri ve okunurluk ----
+   Masaustunde oran dogru; telefonda ayni olculer parmakla tutulamiyor ve
+   ikincil metin okunmuyor. Bu blok yalnizca dar ekranda calisir. */
+@media(max-width:600px){
+  /* Sonuc cubugunda iki acilir liste yan yana duruyordu (her biri etiketiyle
+     ~237px) ve satir sarmadigi icin 320px'lik ekrani asiyordu; telefonda her
+     biri kendi satirini alip kapsayiciya gore genisliyor. */
+  .resultTools{flex-wrap:wrap}
+  .resultTools label{flex:1 1 100%}
+  .resultTools .sortSelect.sortSelect{flex:1;min-width:0}
+  /* 34px eylem dugmesi parmak hedefi icin dusuktu. */
+  .act{min-height:40px}
+  /* Sayfalama dugmeleri 34px yuksekligindeydi ve yan yana duruyor. */
+  .pagination button{min-height:40px;padding:0 14px}
+  /* Filtre rozetinin capraz isareti 13px'lik bir alandi; kutusu aciliyor. */
+  .chip{min-height:40px;gap:2px;padding:0 2px 0 12px}
+  .chip button{width:40px;height:40px;display:grid;place-items:center;border-radius:999px}
+  /* Ray satirlari ~30px idi, uc uce dizildiklerinde yanlis secim yapiliyordu. */
+  .railOption{min-height:40px}
+  .railHead{min-height:44px}
+  .railReset{min-height:40px;padding:0 4px}
+  /* iOS 16px altindaki alana odaklanildiginda sayfayi kendiliginden buyutuyor;
+     ayrica 36px'lik kutular telefonda dar hedef. */
+  .railSearch label{height:44px}
+  .railSearch input{font-size:16px}
+  .railRange input{height:44px;font-size:16px}
+  /* "Detay" gibi metin dugmeleri: hem 13px'in altindaydi hem de hedefi yoktu. */
+  .detailToggle{min-height:40px;padding:0 2px;font-size:13px}
+  /* Kart ozeti govde metni: 12.5px telefonda okunmuyor. */
+  .cardSummary{font-size:13.5px}
+}
 
 /* Vitrinden dogrudan gelen teklif istegi */
 .invited{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:3px 9px;font-size:10.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--violet),var(--indigo));box-shadow:0 4px 12px rgba(124,58,237,.26);flex:none}

@@ -194,7 +194,11 @@ export function SiteHeader({
           {/* Zil yalnizca oturum acmis kullanicida; sayac kendi icinde okunur. */}
           {ready && currentUser && <NotificationBell userId={currentUser.id} />}
           {!ready
-            ? <span className={styles.skeleton} />
+            // Yer tutucu, yerine gececek ogenin kutusunda olmali; hangisi
+            // olacagini onceki ziyaretin sonucu soyluyor. Misafir kutusu
+            // 1260px altinda hic basilmiyor ("Giris yap" da basilmadigi
+            // icin) -- telefonda ilk acilistaki ziplama buradan geliyordu.
+            ? <span aria-hidden="true" className={`${styles.skeleton} ${session.wasSignedIn ? styles.skeletonUser : styles.skeletonGuest}`} />
             : currentUser
               ? <AccountMenu compact displayName={displayName} user={currentUser} workspace={workspace} />
               : <Link className={styles.line} href="/giris">Giriş yap</Link>}

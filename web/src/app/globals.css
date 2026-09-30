@@ -567,8 +567,120 @@ select.control.control.controlLg{ padding-right: 40px; }
    buyutuyor; kucuk ekranda govde olcusu 16 px'e cikariliyor. */
 @media (max-width: 560px){
   .control.control{ font-size: 16px; }
-  .control.control.controlSm{ font-size: 15px; }
+  /* Kucuk olcu de 16px: 15px iOS'un esiginin ALTINDA kaldigi icin sayfa yine
+     kendiliginden buyuyordu, yani bu kirilimin amaci yarim kaliyordu. 36px'lik
+     kutu da parmak hedefi icin dusuk; telefonda alanlar zaten alt alta
+     diziliyor, yani yukseklikten baska bir seyden odun verilmiyor. */
+  .control.control.controlSm{ font-size: 16px; height: 44px; }
+  /* 18px onay kutusu parmakla isabet ettirilemiyor. */
+  .controlCheck{ width: 22px; height: 22px; }
 }
 @media (prefers-reduced-motion: reduce){
   .control.control{ transition: none; }
+}
+
+/* ==========================================================
+   Hizmet veren basvurusu (.seller-*), kontor (.credit-*) ve
+   odeme (.payment-*) ekranlari: telefon denetimi duzeltmeleri
+   Yukaridaki eski blok bu uc ekranin butun yazi olculerini 6-11px
+   araliginda birakiyor; telefonda okunmuyor. Olcu hatasi her
+   genislikte ayni oldugu icin duzeltme de ortak, yalnizca dizilimi
+   degistirenler telefon kirilimlarinda.
+   ========================================================== */
+
+/* Ust etiketler (buyuk harf, harf araligi olan kucuk basliklar) 6-8px'ti. */
+.seller-kicker,
+.seller-card-head span,
+.seller-aside li div small,
+.seller-location-summary>span,
+.seller-review-profile>span,
+.seller-review-grid span,
+.seller-status-meta span,
+.credit-hero>span,
+.credit-package>small,
+.credit-checkout>div:first-child span,
+.credit-iframe-wrap header span,
+.credit-iframe-wrap header small,
+.credit-popular,
+.payment-result-card>small{ font-size: 13px; }
+
+/* Govde ve aciklama metinleri 9-11px'ti. */
+.seller-aside>p,
+.seller-field-help,
+.seller-review-profile p,
+.seller-status-card>p,
+.credit-hero p,
+.payment-result-card p{ font-size: 15px; }
+
+/* Ikincil satirlar, degerler ve hata metinleri 6-10px'ti. */
+.seller-field,
+.seller-aside li>span,
+.seller-aside li div strong,
+.seller-trust-note strong, .seller-review-note strong,
+.seller-trust-note span, .seller-review-note span,
+.seller-rejection b, .seller-rejection span,
+.seller-profile-types span strong, .seller-profile-types span small,
+.seller-category-grid span small,
+.seller-selection-count strong, .seller-selection-count span,
+.seller-district-head span, .seller-district-head span strong,
+.seller-location-summary>p, .seller-location-summary strong, .seller-location-summary small,
+.seller-review-grid strong,
+.seller-verify-note b, .seller-verify-note span,
+.seller-error,
+.seller-loader p,
+.seller-status-meta strong,
+.credit-package>strong i, .credit-package>b, .credit-package>.credit-unit,
+.credit-error,
+.credit-checkout>div:first-child strong,
+.credit-checkout small,
+.credit-trust b, .credit-trust small{ font-size: 14px; }
+
+/* Secim isaretleri 6-9px'ti: kutunun icinde gorunmuyordu. */
+.seller-profile-types label>b, .seller-category-grid label>b, .credit-check{ font-size: 12px; }
+.seller-district-grid label>b{ font-size: 11px; }
+
+/* Uzun hesap adi 1 sutuna dusen ozet kutusunu tasirmasin. */
+.seller-status-meta strong{ overflow-wrap: anywhere; }
+
+/* <fieldset>'in tarayici varsayilani "min-inline-size: min-content": kutu
+   icerigin en dar halinden daha fazla DARALMIYOR, yani icerideki uzun bir
+   satir alani karttan tasiriyor. Sifirlanmazsa 320px'de adim govdesi kartin
+   disina cikiyor. */
+.seller-fields{ min-inline-size: 0; }
+
+/* Dugme ve baglantilar 9-35px yuksekligindeydi; parmak hedefi en az 44px. */
+.seller-district-head button{ min-height: 44px; padding-inline: 8px; font-size: 14px; }
+.seller-district-grid label{ min-height: 44px; font-size: 14px; }
+.seller-verify-note a{ display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; }
+.credit-checkout button{ min-height: 48px; font-size: 15px; }
+.credit-iframe-wrap header button{ min-height: 44px; padding: 0 14px; font-size: 14px; }
+.payment-result-card a{ display: inline-flex; align-items: center; justify-content: center; min-height: 44px; font-size: 15px; }
+
+/* Iki dugme buyuyen yazi olcusuyle 320px'de yan yana sigmiyor. */
+.payment-result-card>div{ flex-wrap: wrap; }
+
+/* Simge ile yazinin hizasi "margin-left: 20px + margin-top: -12px" ile
+   kuruluydu ve simgenin yazi olcusune bagliydi; izgara bu bagi kopariyor. */
+.credit-trust>span{ display: grid; grid-template-columns: 20px 1fr; align-items: start; gap: 0 8px; font-size: 15px; }
+.credit-trust b{ grid-column: 2; margin: 0; }
+.credit-trust small{ grid-column: 2; margin: 3px 0 0; }
+
+/* Telefonda adres cubugu acilip kapandikca gorunur alan degisiyor; 100vh en
+   buyuk hali varsayip karti ekran disina tasiriyor. Ustteki vh satiri dvh'yi
+   tanimayan tarayiciler icin yedek. */
+.payment-result-page{ min-height: 100vh; min-height: 100dvh; }
+
+@media (max-width: 640px){
+  /* 4 sutunda "Nerede calisirsin?" gibi uzun etiketler sutunu asip sayfaya
+     yatay kaydirma ekliyor; 2 sutunda her etikete yer var. */
+  .seller-aside ol{ grid-template-columns: repeat(2, 1fr); }
+  .seller-aside li div{ min-width: 0; overflow-wrap: anywhere; }
+  /* Ilce basligi ile "Tumunu sec / Temizle" dugmeleri tek satira sigmiyor. */
+  .seller-district-head{ flex-wrap: wrap; gap: 8px; }
+  /* 1fr sutunun alt siniri "min-content": "Kucukcekmece" gibi tek parca bir
+     ilce adi sutunu genisletip paneli karttan tasiriyordu. minmax(0, 1fr)
+     siniri kaldirir, kelimeyi de bolebilir yapmak gerekiyor. */
+  .seller-district-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .seller-district-grid label{ min-width: 0; }
+  .seller-district-grid label span{ overflow-wrap: anywhere; }
 }

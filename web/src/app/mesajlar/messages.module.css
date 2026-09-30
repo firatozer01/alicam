@@ -27,6 +27,11 @@
 
 /* ---- Akis ---- */
 .thread { display: flex; flex-direction: column; min-height: 72vh; max-height: 72vh; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--card); box-shadow: var(--shadow-sm); overflow: hidden; }
+/* Telefonda adres cubugu acilip kapandikca gorunur alan degisiyor; vh en
+   buyuk hali varsayip akisi ekran disina tasiriyor. Ustteki vh satirlari
+   dvh anlamayan tarayicilar icin yedek olarak duruyor. */
+.list { max-height: 72dvh; }
+.thread { min-height: 72dvh; max-height: 72dvh; }
 .threadHead { padding: 14px 18px; border-bottom: 1px solid var(--line-soft); background: linear-gradient(100deg, var(--violet-100), var(--cyan-50)); }
 .threadHead strong { display: block; font-family: var(--font-fraunces), Georgia, serif; font-size: 16px; color: var(--ink); }
 .threadHead small { display: block; margin-top: 3px; color: var(--muted); font-size: 11.5px; }
@@ -74,4 +79,25 @@
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
   .list { max-height: 260px; }
+}
+
+/* ---- Telefon ---- */
+@media (max-width: 600px) {
+  /* Sag alttaki asistan maskotu 124x130 ve 20px dipten yukarida: 60px'lik alt
+     bosluk gonder dugmesini maskotun altinda birakiyordu. */
+  .page { padding-bottom: 160px; }
+  /* Akis 72dvh + 260px liste + baslik telefonda tek ekrana sigmiyor; balonlar
+     icin kalan yer de daraliyordu. */
+  .thread { min-height: 58dvh; max-height: 58dvh; }
+  /* iOS 16px'in altindaki alana dokununca sayfayi kendiliginden yakinlastirir. */
+  .composer textarea { font-size: 16px; }
+  /* 40x40 altindaki hedef parmakla isabet ettirilemiyor. */
+  .ghost { display: inline-flex; align-items: center; min-height: 40px; }
+  /* 13px altindaki govde metni telefonda okunmuyor. */
+  .rowBody small, .threadHead small, .rowMeta em, .notice, .error { font-size: 13px; }
+  .mine time, .theirs time { font-size: 13px; }
+  .rowMeta b { min-width: 21px; height: 21px; font-size: 13px; }
+  /* 68% dar ekranda ~200px kaliyor; metin kelime kelime kirilip balon
+     gereksiz uzuyordu. */
+  .mine, .theirs { max-width: 88%; }
 }

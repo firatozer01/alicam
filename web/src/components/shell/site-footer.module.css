@@ -258,6 +258,17 @@
 
 @media (max-width: 600px) {
   .columns { grid-template-columns: 1fr 1fr; gap: 32px 20px; }
+  /* Bag satirlari 24px yuksekligindeydi ve aralarinda 11px bosluk vardi:
+     parmakla yanlis baglantiya basiliyordu. Satir 40px'e cikip bosluk 4px'e
+     iniyor, yani blogun toplam yuksekligi yerinde kaliyor. */
+  .column { gap: 4px; }
+  .column a { min-height: 40px; display: flex; align-items: center; }
+  .bottom nav { gap: 4px 20px; }
+  .bottom nav a { min-height: 40px; display: inline-flex; align-items: center; }
+  /* 38px dokunma hedefi icin dusuktu. */
+  .chips a { min-height: 40px; }
+  /* Logo 36px; kutusu parmaga aciliyor, gorsel ayni kaliyor. */
+  .brand { min-height: 44px; }
   .quickRow { flex-direction: column; background: none; padding: 0; }
   .quickRow input { flex: none; height: 52px; border-radius: 12px; background: #fff; }
   .quickGo { width: 100%; }

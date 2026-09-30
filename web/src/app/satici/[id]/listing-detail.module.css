@@ -73,7 +73,9 @@
 @media(max-width:520px){
   .block{padding:13px 14px}
   .block.photoBlock{padding:8px}
-  .arrow{width:34px;height:34px;font-size:14px}
+  /* Ok 34px'e kuculuyordu; tam da parmakla kullanildigi kirilimda 40px'in
+     altina dusuyordu. Sahne 4/3 oldugu icin 320px'de bile iki oka yer var. */
+  .arrow{font-size:14px}
   .thumb{width:72px;height:54px}
   .priceBlock strong{font-size:26px}
 }

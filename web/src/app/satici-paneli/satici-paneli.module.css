@@ -386,3 +386,74 @@
   .pickerGrid{grid-template-columns:repeat(auto-fill,minmax(166px,1fr));gap:10px}
   .formSection>header small{min-width:0}
 }
+
+/* ==================== Telefon denetimi ====================
+   Asagidaki bloklar yalnizca telefon kirilimlarinda calisir; masaustu
+   gorunumu yukaridaki kurallardan aynen devam eder. */
+
+/* Telefonda adres cubugu acilip kapandikca gorunur alan degisiyor; ustteki vh
+   satirlari en buyuk hali varsayiyor, dvh anlamayan tarayici icin yedek kaliyor. */
+.page{min-height:100dvh}
+.loading{min-height:calc(100dvh - 67px)}
+
+@media(max-width:640px){
+  /* minmax(364px,...) 360/375/390px'lik ekranlarda 328-358px'lik kabuga
+     sigmiyor ve sayfayi yatay tasiyordu; 396px altinda her zaman tasar. */
+  .portfolioGrid{grid-template-columns:1fr}
+  /* Ayni hata 324px'lik izlerde: 356px altindaki ekranda kabuktan genis. */
+  .serviceCards{grid-template-columns:1fr}
+  /* Uc sutunluk ozellik izgarasi 320px'lik ekranda hucre basina ~50px
+     birakiyor; "TLP-2024-0012" gibi bolunemeyen deger karttan tasiyordu. */
+  .details>section>div{grid-template-columns:repeat(auto-fit,minmax(104px,1fr))}
+  .details strong,.details small{overflow-wrap:anywhere}
+}
+
+@media(max-width:600px){
+  /* Sag alttaki asistan maskotu 124x130 ve 20px dipten yukarida: 80px'lik alt
+     bosluk son kartin eylemlerini maskotun altinda birakiyordu. */
+  .layout{padding-bottom:170px}
+
+  /* iOS 16px'in altindaki alana dokununca sayfayi kendiliginden yakinlastirir.
+     NEDEN :global(.control.control): ortak kontrol katmani da secicisini iki
+     kez yaziyor, tek sinifla yazilan kural onu yenemezdi. */
+  .page :global(.control.control){font-size:16px}
+
+  /* ---- Dokunma hedefi: 40x40 altindaki hedef parmakla isabet ettirilemiyor ----
+     Dolgusuz metin dugmeler ~22px yuksekligindeydi. */
+  .linkButton,.detailButton,.listingActions button,.serviceActions button,
+  .portfolioBody footer button,.widget>header button,.widget>header a{
+    display:inline-flex;align-items:center;min-height:40px
+  }
+  /* Dolgulu ama alcak kalan dugmeler: 29-39px arasi. */
+  .toolbar button,.offerTabs button,.offerList>article>footer button,
+  .serviceGrid>article>footer button,.contactBox>button,.shotCover{min-height:40px}
+  /* Dosya secen etiketler <label>: yuksekligi ancak esnek kutu ile alirlar. */
+  .coverAction,.brandUpload{display:inline-flex;align-items:center;min-height:40px}
+  /* Kart basligindaki yildiz 21x25 idi; satir zaten sarabiliyor. */
+  .favButton{min-width:40px;min-height:40px;display:grid;place-items:center;padding:0}
+  /* Gorsel uzerindeki kucuk yuvarlaklar: gorunen olcu korunup dokunma alani
+     gorunmez bir katmanla 40x40'a cikariliyor. Kapak ve logo yeterince
+     buyuk oldugu icin genisleyen alan kirpilmiyor. */
+  .coverRemove::after{content:"";position:absolute;inset:-5px}
+  .brandRemove::after,.logoUpload::after{content:"";position:absolute;inset:-4px}
+  .logoRemove::after{content:"";position:absolute;inset:-6px}
+  /* Kucuk resim ve fotograf karesinde gorunmez katman ISE YARAMAZ: kapsayici
+     overflow:hidden tasiyor, tasan alan kirpilinca dokunus da alinmiyor.
+     Bu ikisinde dugmenin kendisi buyuyor; altlarindaki gorsel tiklanabilir
+     degil, yani ortmesi bir eylemi engellemiyor. */
+  .thumb button{width:40px;height:40px;font-size:15px}
+  .shotRemove{width:40px;height:40px;font-size:15px}
+  /* Ilistirilen urunu kaldirma dugmesi esnek satirda: olcusu buyuyebilir. */
+  .offerForm .offerAttach button{width:40px;height:40px}
+
+  /* ---- Okunurluk: 13px altindaki metin telefonda okunmuyor ---- */
+  .offerList>article>header b,.serviceGrid>article>header small,
+  .serviceGrid>article>header b,.serviceGrid>article>div small,
+  .visibilityHero aside small,.packageGrid article>b,.packageGrid article>span,
+  .ledger>header span,.ledger>div>p small,.ledger>div>b small,
+  .details small,.offerForm>div span,.lockedPreview>aside small,
+  .profileHero>aside small,.profileHero>aside span,.profileHero>aside em,
+  .profileHero>div:nth-child(2)>div b,.profileGrid article>header span,
+  .profileGrid article>div b,.profileGrid article>button,
+  .formGrid small,.formGrid .checkField small,.shotGrid b{font-size:13px}
+}

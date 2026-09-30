@@ -686,6 +686,22 @@
   .faqTopics small { display: none; }
   .faqHelp { padding: 20px; }
   .heroCopy h1 { font-size: 38px; }
+  /* iOS 16px'in altindaki bir alana odaklanildiginda sayfayi kendiliginden
+     yakinlastiriyor; serit alani 15.5px, lacivert karttaki alan 15px'ti. */
+  .ff > input { font-size: 16px; min-height: 40px; }
+  .afInput input { font-size: 16px; }
+  /* Alan 31px, acilir liste tetigi 28px yuksekligindeydi: parmakla isabet
+     ettirilemiyordu. .ff'in dolgusu <div>'e ait, tiklama onu odaklamiyor. */
+  .ff .ffSelect > button { min-height: 40px; }
+  /* Iki dugmeli secim (Kiralik / Satilik) 24px'lik bir seritti. */
+  .segMini button { min-height: 40px; padding: 4px 14px; }
+  /* Baslik yanindaki baglanti 26px, populer arama cipsleri 38px yuksekligindeydi. */
+  .linkArrow, .heroPopular a { display: inline-flex; align-items: center; min-height: 40px; }
+  /* Kategori listesi baglantilari 38px'te kaliyordu; alt alta durduklari icin
+     yanlis satira basmak kolaydi. */
+  .area li a, .areaTop li a { min-height: 44px; }
+  /* "Tum N basligi gor" 34px yuksekligindeydi. */
+  .areaAll { align-items: center; min-height: 40px; }
   .hl { white-space: normal; }
   .finder { margin-top: 24px; border-radius: 18px; }
   .finderTabs button { padding: 10px 12px 12px; font-size: 14px; }
@@ -714,12 +730,19 @@
   .panelCta .btn { width: 100%; }
   .rootStrip { grid-template-columns: minmax(0, 1fr); }
   .page { padding-bottom: 76px; }
+  /* NEDEN sagda 150px bos: asistan maskotu (position: fixed, sag alt, z-index
+     80) tam genislikteki bu seridin ustune biniyor ve sag ucundaki dokunuslari
+     yutuyordu. Bosluk maskotun kendi olculerine gore: burada 124px + 20px. */
   .mobileCta {
-    display: flex; position: fixed; left: 16px; right: 16px; bottom: 14px; z-index: 70; height: 54px; border-radius: 14px;
-    align-items: center; justify-content: center; background: var(--orange); color: #fff; font-weight: 700;
+    display: flex; position: fixed; left: 16px; right: 150px; bottom: 14px; z-index: 70; height: 54px; border-radius: 14px;
+    align-items: center; justify-content: center; padding: 0 12px; background: var(--orange); color: #fff; font-weight: 700;
     box-shadow: 0 14px 30px -8px rgba(242, 96, 12, .7); transform: translateY(130%); transition: transform .3s cubic-bezier(.2, .8, .2, 1);
   }
   .mobileCta.mobileCtaShow { transform: none; }
+}
+/* Maskot 520px altinda 96px + 12px'e kuculuyor; serit de o kadar geri aliyor. */
+@media (max-width: 520px) {
+  .mobileCta { right: 114px; }
 }
 @media (max-width: 480px) {
   .tiles { --tc: 1; }
@@ -729,6 +752,8 @@
   .faqSearch kbd { display: none; }
   .faqTopics button { padding: 12px 10px; gap: 8px; }
   .faqTopics i { width: 36px; height: 36px; font-size: 18px; }
+  /* 320px'de seride 190px kaliyor; 16px'lik etiket tasiyordu. */
+  .mobileCta { font-size: 14.5px; }
 }
 
 /* Telefonda hizmet alanlari akordeon: basliga dokun, liste acilsin. */

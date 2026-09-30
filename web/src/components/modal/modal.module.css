@@ -3,7 +3,10 @@
 .overlay{position:fixed;inset:0;z-index:120;background:rgba(21,22,45,.52);backdrop-filter:blur(3px);display:grid;place-items:center;padding:24px;overflow-y:auto;animation:fade .16s ease both}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 
-.panel{width:100%;background:#fff;border:1px solid #e7e5f5;border-radius:18px;box-shadow:0 40px 90px rgba(21,22,45,.32);display:flex;flex-direction:column;max-height:calc(100vh - 48px);overflow:hidden;animation:rise .2s cubic-bezier(.2,.8,.2,1) both}
+/* dvh: telefonda adres cubugu acilip kapandikca gorunur alan degisiyor, 100vh
+   ise en buyuk hali varsayip katmanin alt kenarini ekran disinda birakiyor.
+   Ustteki vh satiri dvh'yi tanimayan tarayicilar icin yedek. */
+.panel{width:100%;background:#fff;border:1px solid #e7e5f5;border-radius:18px;box-shadow:0 40px 90px rgba(21,22,45,.32);display:flex;flex-direction:column;max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);overflow:hidden;animation:rise .2s cubic-bezier(.2,.8,.2,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.overlay,.panel{animation:none}}
 
@@ -22,6 +25,14 @@
 
 @media(max-width:640px){
   .overlay{padding:12px}
-  .panel{max-height:calc(100vh - 24px)}
+  .panel{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px)}
   .head,.body,.foot{padding-left:16px;padding-right:16px}
+  /* Parmakla kapatilabilsin: 32px hedef telefonda basliktaki metne cok yakin. */
+  .close{width:40px;height:40px;font-size:15px}
+  /* Alt satirda iki dugme yan yana 320px'e sigmiyordu; telefonda belge
+     sirasiyla alt alta ve tam genislikte duruyorlar: birincil eylem en altta,
+     yani basparmagin ulastigi yerde kaliyor. */
+  .foot{flex-direction:column;align-items:stretch;gap:8px}
+  /* Baslik altindaki aciklama govde metni: 12.5px telefonda okunmuyor. */
+  .head p{font-size:13.5px}
 }

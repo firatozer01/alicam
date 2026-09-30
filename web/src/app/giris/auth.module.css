@@ -9,7 +9,10 @@
    ile birebir ayni formul). Eskiden tam genislikti: 1920px'te cubugun
    markasi x=120'de baslarken lacivert panel x=0'dan basliyor, arada
    gorunur bir kayma oluyordu. */
-.auth { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; min-height: calc(100vh - var(--header-h)); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); background: var(--bg); color: var(--ink); font-family: var(--f-body); }
+/* Telefonda adres cubugu acilip kapandikca gorunur alan degisiyor; 100vh en
+   buyuk hali varsayip kabugu ekran disina tasiriyor. vh satiri eski tarayici
+   icin yedek, hemen ardindaki dvh satiri gercek gorunur yuksekligi veriyor. */
+.auth { width: min(var(--maxw), calc(100% - (2 * var(--gutter)))); margin-inline: auto; min-height: calc(100vh - var(--header-h)); min-height: calc(100dvh - var(--header-h)); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); background: var(--bg); color: var(--ink); font-family: var(--f-body); }
 /* Yanda dolgu YOK: kenar boslugunu artik kapsayici veriyor, burada da
    verilirse form sutunu cubuktaki markadan bir gutter kadar iceri kayar.
    Lacivert panelin kendi dolgusu (.visual) duruyor; o bir yuzey, bu degil. */
@@ -177,6 +180,13 @@
   .req:nth-child(3) { display: none; }
   .benefits { margin-top: 24px; }
   .verifyInput { grid-template-columns: 1fr; }
+  /* "Sifremi unuttum" ve "Ucretsiz uye ol" 22-23px yuksekligindeydi. */
+  .rowLink, .noteLink { display: inline-flex; align-items: center; min-height: 40px; }
+  /* Kodu yeniden gonder: satir ici gorunen ama dokunulmasi gereken bir dugme. */
+  .resend { min-height: 40px; }
+  /* Etiketin tamami onay kutusunun dokunma alani; 23px'ti. Cok satirli
+     kosul metni zaten daha uzun oldugu icin bu onu kisaltmiyor. */
+  .check { min-height: 40px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .btn, .tab, .role, .chip, .bar { transition: none; }

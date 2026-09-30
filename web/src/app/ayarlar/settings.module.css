@@ -4,6 +4,9 @@
 .page{background:var(--bg);color:var(--ink);padding-bottom:70px}
 
 .state{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:14px}
+/* Telefonda adres cubugu acilip kapandikca gorunur alan degisiyor; ustteki vh
+   satiri en buyuk hali varsayiyor, dvh anlamayan tarayici icin yedek kaliyor. */
+.state{min-height:60dvh}
 .state i{width:26px;height:26px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--violet);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .state a{color:var(--indigo);font-weight:700;text-decoration:none}
@@ -100,3 +103,29 @@
 
 /* Vitrinle ayni baslik dili: kicker + serif baslik */
 .kicker{display:block;margin-bottom:5px;font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--violet)}
+
+/* ---- Telefon ---- */
+@media(max-width:600px){
+  /* minmax(320px,...) 320px'lik ekranda 288px'lik kabuga sigmiyor ve sayfayi
+     yatay tasiyordu (scrollWidth 320 > clientWidth 288). */
+  .spaces{grid-template-columns:1fr}
+  /* Sag alttaki asistan maskotu 124x130 ve 20px dipten yukarida: 70px'lik alt
+     bosluk son kartin eylemlerini maskotun altinda birakiyordu. */
+  .page{padding-bottom:170px}
+  /* iOS 16px'in altindaki alana dokununca sayfayi kendiliginden yakinlastirir. */
+  .form input{font-size:16px}
+  /* 40x40 altindaki hedef parmakla isabet ettirilemiyor: sekmeler 38px,
+     eylem baglantilari 37px, "Kaldir" ise dolgusuz metindi. */
+  .tabs button{min-height:40px}
+  .spaceActions a{min-height:40px}
+  .avatarRemove{min-height:40px;padding:0 10px;font-size:13px}
+  /* Fotograf degistirme dugmesi 28px; gorsel olcu korunup dokunma alani
+     gorunmez bir katmanla 40x40'a cikariliyor -- 40px'lik daire 78px'lik
+     avatarin ustunde orantisiz duruyordu. */
+  .avatarAction::after{content:"";position:absolute;inset:-6px}
+  /* 13px altindaki govde metni telefonda okunmuyor. */
+  .roleChips span,.miniChips span{font-size:13px}
+  .verifyBox p,.verifyBox a{font-size:13.5px}
+  .form small{font-size:13px}
+  .muted{font-size:13px!important}
+}

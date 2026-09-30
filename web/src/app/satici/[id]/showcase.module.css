@@ -1,10 +1,13 @@
 /* Hizmet veren mağazası: kapak, hizmet kartları, iş galerisi, yorumlar. */
 
-.page{min-height:100vh;background:var(--bg);color:var(--ink);padding-bottom:70px}
+/* Telefonda adres cubugu acilip kapandikca gorunur alan degisiyor; 100vh en
+   buyuk hali varsayiyor. vh satiri eski tarayici icin yedek, dvh gercek olcu. */
+.page{min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--ink);padding-bottom:70px}
 /* Ortak kapsayici formulu; ust cubuk ve alt bilgi ile ayni. */
 .wrap{width:min(var(--maxw),calc(100% - (2 * var(--gutter))));margin-inline:auto}
 
-.state{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:14px}
+/* Yukleniyor/bos durum ortalanirken de gercek gorunur yukseklik kullaniliyor. */
+.state{min-height:60vh;min-height:60dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:14px}
 .state i{width:26px;height:26px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--violet);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .state a{color:var(--indigo);font-weight:700;text-decoration:none}
@@ -181,6 +184,13 @@
   .avatar{width:84px;height:84px;font-size:26px;border-radius:22px}
   .counts{gap:16px}
   .workGrid,.serviceGrid{grid-template-columns:1fr}
+  /* 320px'de blok govdesine 264px kaliyor; 280px'lik sutun sayfayi tasiriyordu.
+     Komsulari (.workGrid/.serviceGrid) zaten burada tek sutuna dusuyor. */
+  .reviewGrid{grid-template-columns:1fr}
+  /* Serit sekmeleri 31px, filtre dugmeleri 30px yuksekligindeydi. */
+  .tabs button,.filterRow button,.clearFilter,.workMore,.ghostCta,.serviceCta,.barCta,.modalPrimary{min-height:40px}
+  /* Puan dagilimi filtresi 20px'lik bir seritti: yanlis yildiza basmak kolaydi. */
+  .breakdown button{min-height:40px;padding:6px 4px}
 }
 
 /* Calisma kartinda kunye ozeti */

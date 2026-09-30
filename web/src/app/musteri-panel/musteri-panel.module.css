@@ -182,3 +182,39 @@
    o olcunun altinda ust uste biniyor. */
 @media(max-width:1280px){.requestList{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:820px){.requestList{grid-template-columns:minmax(0,1fr)}}
+
+/* Telefonda adres cubugu acilip kapandikca gorunur alan degisiyor; ustteki vh
+   satiri en buyuk hali varsayiyor, dvh anlamayan tarayici icin yedek kaliyor. */
+.loading{min-height:calc(100dvh - 67px)}
+
+/* ---- Telefon ---- */
+@media(max-width:600px){
+  /* Sag alttaki asistan maskotu 124x130 ve 20px dipten yukarida: 80px'lik alt
+     bosluk son kartin eylemlerini maskotun altinda birakiyordu. */
+  .canvas{padding-bottom:170px}
+  /* iOS 16px'in altindaki alana dokununca sayfayi kendiliginden yakinlastirir. */
+  .searchRow input,.searchRow select,.reviewForm textarea{font-size:16px}
+  /* 40x40 altindaki hedef parmakla isabet ettirilemiyor: kart dugmeleri 34px,
+     filtre sekmeleri 30px, yildizlar ise 23px idi. */
+  .requestCard button{min-height:40px;font-size:13.5px}
+  /* Karsilastir ve iptal dugmeleri 13.5px'te 282px istiyor, kartin
+     ici 320px'lik ekranda 250px: nowrap ile karttan tasiyordu. Telefonda tek
+     sutun oldugu icin alt alta tam genislik veriliyor. */
+  .requestCard>footer>div{width:100%;flex-direction:column}
+  .requestCard>footer button{white-space:normal}
+  .sectionHead button{min-height:40px;font-size:13.5px}
+  /* Buyuyen punto ile uc sekme 320px'lik ekranda sinirda kaliyor; sarabilsin. */
+  .sectionHead>div:last-child{flex-wrap:wrap}
+  .messageButton{min-height:40px}
+  .photoButton{min-height:40px}
+  .reviewForm>div button{min-width:40px;min-height:40px}
+  /* 13px altindaki govde metni telefonda okunmuyor. */
+  .metrics span,.metrics small{font-size:13px}
+  .requestCard header small{font-size:13px}
+  .offers>header span,.offers>header b{font-size:13px}
+  .requestMeta{font-size:13.5px}
+  .welcome>aside p{font-size:13.5px}
+  .messageHint,.messageError{font-size:13.5px}
+  .rightRail li,.rightRail a{font-size:13.5px}
+  .rightRail section>p,.rightRail section>small{font-size:13px}
+}

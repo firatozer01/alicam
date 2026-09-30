@@ -72,4 +72,14 @@
 @media (max-width: 640px) {
   .head h1 { font-size: 24px; }
   .grid { grid-template-columns: 1fr; }
+  /* Sag alttaki asistan maskotu 124x130 ve 20px dipten yukarida: 64px'lik alt
+     bosluk son kartin "Talebe git" dugmesini maskotun altinda birakiyordu. */
+  .body { padding-bottom: 160px; }
+  /* 40x40 altindaki hedef parmakla isabet ettirilemiyor; yildiz 21x25,
+     dugmeler ise 34-38px yuksekligindeydi. */
+  .star { min-width: 40px; min-height: 40px; display: grid; place-items: center; padding: 0; }
+  .action, .ghost { display: inline-flex; align-items: center; min-height: 40px; }
+  /* 13px altindaki govde metni telefonda okunmuyor. */
+  .summary { font-size: 13.5px; }
+  .tag, .meta, .cardFoot small, .action { font-size: 13px; }
 }

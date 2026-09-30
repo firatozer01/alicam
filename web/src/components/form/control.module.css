@@ -138,6 +138,16 @@
   text-align: center;
 }
 
+/* Telefon: liste parmakla kullanilir. */
+@media (max-width: 600px){
+  /* iOS 16px altindaki alana odaklanildiginda sayfayi kendiliginden buyutuyor;
+     panel acikken bu, listeyi kutunun altindan kaydiriyordu. Kutu da 36px'den
+     parmak hedefi olcusune cikiyor. */
+  .arama{ height: 44px; font-size: 16px; }
+  /* Secenek satirlari ~38px idi ve uc uce diziliyorlar. */
+  .oge{ min-height: 44px; }
+}
+
 @media (prefers-reduced-motion: reduce){
   .panel{ animation: none; }
   .ok{ transition: none; }

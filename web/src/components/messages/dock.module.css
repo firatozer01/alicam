@@ -96,6 +96,28 @@
 .composer button:disabled { opacity: .45; cursor: default; }
 
 @media (max-width: 640px) {
-  .dock { width: 100% !important; max-width: none; }
+  /* !important: genislik JS'ten satir ici geliyor (hatirlanan surukleme
+     olcusu); telefonda panel her zaman tam ekran. min-width de sifirlaniyor,
+     yoksa 320px'den dar bir gorus alaninda panel ekrani asar. */
+  .dock { width: 100% !important; min-width: 0; max-width: none; }
   .grip { display: none; }
+
+  /* 30px baslik dugmeleri ("geri", "tam sayfa", "kapat") yan yana duruyor ve
+     parmakla ayirt edilemiyordu. */
+  .back, .close, .expand { width: 40px; height: 40px; font-size: 17px; }
+  /* Kapali tutamak ~40px genisligindeydi; dolgu bir tik acilip kesinlesiyor.
+     Dikey ortadan da kalkiyor: yatay tutulan telefonda ekran alcaldikca
+     ortadaki tutamak sag alttaki asistan maskotunun ve selam baloncugunun
+     uzerine biniyordu. Alttan sabit pay ikisinin de ustunde kalmasini
+     garanti eder. */
+  .handle { padding: 16px 12px; top: auto; bottom: 200px; transform: none; }
+  /* Sekmeler dokunma hedefi olcusune cikiyor. */
+  .tab, .tabOn { min-height: 40px; padding-inline: 16px; }
+  /* iOS 16px altindaki bir alana odaklanildiginda sayfayi kendiliginden
+     buyutuyor; arama ve yazma alanlari telefonda 16px. */
+  .search input, .composer input { font-size: 16px; }
+  /* Govde metni telefonda 13px'in altina inmiyor. */
+  .empty p, .hint { font-size: 13.5px; }
+  .notice, .error { font-size: 13px; }
+  .rowBody small, .mine time, .theirs time { font-size: 12.5px; }
 }

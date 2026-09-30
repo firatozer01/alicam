@@ -205,7 +205,12 @@
 /* ---------- Alt bar ---------- */
 /* Kart artik altta kirpmadigi icin yapisik alt cubuk kendi alt koselerini
    yuvarliyor; yoksa kosesiz zemin yuvarlak kart koselerinin disina tasiyor. */
-.wzFoot { position: sticky; bottom: 0; display: flex; align-items: center; gap: 14px; padding: 16px clamp(24px, 3vw, 44px); background: rgba(255, 255, 255, .94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); border-radius: 0 0 23px 23px; }
+/* z-index 90: asistan maskotu (position: fixed, sag alt, z-index 80) bu
+   cubugun sag ucuyle cakisiyor ve "Devam et" dugmesinin sag tarafina gelen
+   dokunuslari yutuyordu -- telefonda maskot 96x100, cubuk ise tam genislik,
+   ikisini yan yana sigdirmak mumkun degil. Cubuk maskotun UZERINE ciziliyor;
+   maskotun cubugun ustunde kalan kismi hala gorunur ve tiklanabilir. */
+.wzFoot { position: sticky; bottom: 0; z-index: 90; display: flex; align-items: center; gap: 14px; padding: 16px clamp(24px, 3vw, 44px); background: rgba(255, 255, 255, .94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); border-radius: 0 0 23px 23px; }
 .wzFoot .next { margin-left: auto; min-width: 200px; }
 .draft { font-size: 13.5px; color: var(--ink-3); }
 .draft::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 7px; vertical-align: 1px; opacity: 0; transition: opacity .3s; }
@@ -276,7 +281,9 @@
      icerigi ust cubuktaki logodan 16px daha iceri itiyordu. */
   .wzSteps, .wzPreview { padding: 0; }
   .stepRow > b { width: 30px; height: 30px; font-size: 13px; }
-  .stepRow > span { font-size: 12px; }
+  /* 12px adim etiketi telefonda okunmuyordu; 13px govde alt sinirinda ve
+     dort sutunlu satira hala sigiyor. */
+  .stepRow > span { font-size: 13px; }
   .step { padding: 24px 16px; }
   .fgrid { grid-template-columns: 1fr; }
   .vpick { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -288,6 +295,12 @@
   .draft { display: none; }
   .budget { grid-template-columns: 1fr 1fr; }
   .budgetSep { display: none; }
+  /* Ortak .control katmani gibi 16px: iOS 16px'in altindaki bir alana
+     odaklaninca sayfayi kendiliginden buyutuyor. Bu kutu ortak katmani
+     kullanmadigi icin oradaki telefon kurali buraya ulasmiyor. */
+  .catSearch input { font-size: 16px; }
+  /* 7px dolgu bu cipleri 38px'de birakiyordu; parmak hedefi icin 44px. */
+  .budgetQuick .chip { min-height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .step, .doneCard, .doneIco, .catpick { animation: none; }

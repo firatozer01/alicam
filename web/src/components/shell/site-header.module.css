@@ -76,11 +76,27 @@
 }
 .fav:hover { border-color: var(--blue); transform: translateY(-1px); }
 
+/*
+  Oturum cozulene kadar duran yer tutucu.
+
+  Tek olcude (120x40) basiliyordu ve yerine gecen sey her zaman baska
+  boydaydi: misafirde "Giris yap" baglantisi 84x40, uyede hesap menusu
+  tetikleyicisi 48px yuksek. Cubuk bu yuzden ilk acilista bir ziplayip
+  oturuyordu -- telefonda en kotusu, orada "Giris yap" hic basilmadigi
+  icin 120px'lik parlayan blok gorunup yok oluyordu.
+
+  Artik yer tutucu YERINE GECECEK ogenin kutusunu aliyor: olcuyu onceki
+  ziyaretin sonucu (useSession -> wasSignedIn) seciyor.
+*/
 .skeleton {
-  width: 120px; height: 40px; border-radius: 10px;
+  border-radius: 10px;
   background: linear-gradient(100deg, var(--blue-50) 30%, var(--blue-100) 50%, var(--blue-50) 70%);
   background-size: 220% 100%; animation: shine 1.3s linear infinite;
 }
+/* "Giris yap" baglantisinin kutusu: 15px/600 metin + 10px yan dolgu. */
+.skeletonGuest { width: 84px; height: 40px; }
+/* Hesap menusu tetikleyicisi: 36px avatar + kimlik + ok, 14px kose. */
+.skeletonUser { width: 184px; height: 48px; border-radius: 14px; }
 @keyframes shine { to { background-position: -220% 0; } }
 
 /* Oturumsuz hal: "Giris yap" duz metin baglantisi, tek dugme turuncu kalsin. */
@@ -149,8 +165,10 @@
   padding: 2px 4px 14px; margin-bottom: 6px; border-bottom: 1px solid var(--line-2);
 }
 .drawerBrand { display: flex; align-items: center; flex: none; }
+/* 44px: cekmecenin genisligi bol, kuculterek kazanilacak bir sey yok ve bu
+   dugme menuyu kapatmanin tek yolu (hamburger cekmecenin altinda kaliyor). */
 .drawerClose {
-  width: 40px; height: 40px; flex: none; display: grid; place-items: center;
+  width: 44px; height: 44px; flex: none; display: grid; place-items: center;
   border-radius: 12px; font-size: 26px; line-height: 1; color: var(--ink-2);
   background: var(--blue-50); transition: background .15s ease, color .15s ease;
 }
@@ -190,6 +208,10 @@
 @media (max-width: 1260px) {
   .nav { display: none; }
   .line { display: none; }
+  /* Yer tutucu .line ile ayni kaderi paylasmali: baglanti basilmayacaksa
+     yerine ayrilan bosluk da olmamali, yoksa cubuk oturum cozulunce
+     kendiliginden daraliyor. */
+  .skeletonGuest { display: none; }
   .burger { display: block; }
   .scrim { display: block; }
   .drawer { display: flex; }
@@ -198,6 +220,12 @@
 
 @media (max-width: 820px) {
   .credit { display: none; }
+}
+
+/* Hesap menusu 760px altinda kimligi gizleyip yalnizca avatari birakiyor
+   (account-menu.module.css); yer tutucu da o kutuya inmeli. */
+@media (max-width: 760px) {
+  .skeletonUser { width: 51px; }
 }
 
 @media (max-width: 600px) {
@@ -209,11 +237,15 @@
      dusuyordu. Burada daraltiliyor. */
   .inner { gap: 10px; }
   .brandFull { --brand-h: 24px; }
+  /* Logo 24/18px yuksekligine dustugu icin baglantinin tiklanabilir kutusu da
+     o kadar kaliyordu; yukseklik burada parmaga acilir, gorsel buyumez. */
+  .brand, .drawerBrand { min-height: 44px; }
   /* Oturum acikken eylem dugmesi cubuktan kalkiyor: hesap menusu ve
      hamburger yerini aliyor. "Ucretsiz talep olustur" cekmecenin
      altinda zaten duruyor, yani yol kaybolmuyor. */
   .actionsAuthed .cta { display: none; }
-  .cta { height: 38px; padding: 0 10px; font-size: 13.5px; }
+  /* 38px dokunma hedefi icin dusuktu; 40px hem sigiyor hem parmakla tutuluyor. */
+  .cta { height: 40px; padding: 0 10px; font-size: 13.5px; }
 }
 
 /* 360 ve alti: 375px telefonlarda logo 24px kaliyor, daha dar cihazlarda
@@ -224,11 +256,9 @@
   .actions { gap: 6px; }
   .cta { padding: 0 9px; font-size: 12.5px; }
   .fav { display: none; }
-  .burger { width: 40px; height: 40px; }
-  .burger span { left: 11px; right: 11px; }
-  .burger span:nth-child(1) { top: 13px; }
-  .burger span:nth-child(2) { top: 19px; }
-  .burger span:nth-child(3) { top: 25px; }
+  /* Dugme 44px kaliyor: 320px'te olculdu, logo 18px'e inip .fav gizlenince
+     satirda 12px bosluk artiyor, yani 4px'i kuculterek kazanmaya gerek yok.
+     Menuyu acmanin tek yolu bu dugme; parmak olcusunun altina dusmemeli. */
 }
 
 @media (prefers-reduced-motion: reduce) {
