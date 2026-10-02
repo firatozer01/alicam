@@ -118,6 +118,41 @@ imzalı sunucu bildirimi doğrulandıktan sonra, aynı sipariş için bir kez y�
 kaydı oluşturulmuştur. Seed kaynağı ve üretim özeti
 `api/database/data/turkey_locations.json` dosyasının `_meta` alanında tutulur.
 
+## Yayına alma
+
+`main` dalına push edildiği an iş biter: sunucu dakikada bir GitHub'ı kontrol
+eder, yeni commit görürse kendisi çeker, imajları derler ve yayına alır.
+Sunucuya elle bağlanmak gerekmez.
+
+Zincir şöyle işler:
+
+```text
+git push origin main
+  └─ alicam-dagit.timer   (sunucuda, dakikada bir)
+       └─ otomatik-dagit.sh   yeni commit var mı?
+            └─ deploy.sh      veritabanı yedeği → kod çek → imaj derle
+                              → yayına al → sağlık kontrolü
+```
+
+Sağlık kontrolü (`/api/health` ve ana sayfa, 200 beklenir) düşerse dağıtım
+otomatik olarak bir önceki sürüme döner ve o commit "düşen sürüm" diye
+işaretlenir; yeni bir commit gelene kadar aynı sürüm tekrar denenmez. Böylece
+bozuk bir commit her dakika yeniden derlenmeye çalışılmaz.
+
+Sunucuda durum ve elle müdahale:
+
+```bash
+systemctl list-timers alicam-dagit.timer    # sıradaki kontrol
+journalctl -u alicam-dagit -n 50            # son dağıtımların kaydı
+cat /var/lib/alicam/son-dagitim             # son sonuç ve zamanı
+/opt/alicam/deploy.sh                       # beklemeden elle dağıt
+/opt/alicam/deploy.sh --rollback            # önceki sürüme dön
+```
+
+`deploy.sh` ve `otomatik-dagit.sh` bilerek depoda tutulmaz; yalnızca sunucuda
+`/opt/alicam/` altında dururlar. Dağıtım betiğinin kendisi dağıtım sırasında
+`git reset` ile değişirse çalışan kabuk yarıda kalabilir.
+
 ## Sonraki iş paketi
 
 - Talep ve teklif durum değişikliği bildirimleri
