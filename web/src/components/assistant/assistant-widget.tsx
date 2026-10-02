@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api";
 import styles from "./assistant.module.css";
@@ -76,6 +77,9 @@ type Turn = { id: number; role: "bot" | "user"; text: string };
  * açıkça yazar. Giriş yapmamış ziyaretçiye koyu, sade bir sürüm gösterilir.
  */
 export function AssistantWidget() {
+  // Musteri asistani yonetim ekranlarinda isi olmayan bir bilesen; ustelik
+  // robot gorseli icerik sutununun sag alt kosesine biniyordu.
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [selam, setSelam] = useState<string | null>(null);
   const [intro, setIntro] = useState<Intro | null>(null);
@@ -213,6 +217,9 @@ export function AssistantWidget() {
   // Uyenin acilis gorunumu: gruplu kartlar. Sohbet basladiktan sonra yerini
   // kisa oneri ciplerine birakir, yoksa panel her cevapta bastan sisecekti.
   const grouped = !guest && turns.length === 0 && (intro?.groups.length ?? 0) > 0;
+
+  // Tum kancalardan SONRA: erken cikis kancalarin sirasini bozmamali.
+  if (pathname?.startsWith("/admin")) return null;
 
   return <>
     <button

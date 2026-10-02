@@ -146,7 +146,9 @@ export function MessagesDock() {
       : "Bu alanda alıcam.net üzerindeki tüm özel mesajlarını yönetebilirsin.";
 
   // Mesajlar sayfasinda panel gizlenir: ayni liste zaten sayfanin kendisi.
-  if (!ready || pathname?.startsWith("/mesajlar")) return null;
+  // Yonetim ekranlarinda da cikmaz: alici/satici rihtimi orada isi olmayan
+  // bir bilesen ve icerik sutununun sag alt kosesini ortuyordu.
+  if (!ready || pathname?.startsWith("/mesajlar") || pathname?.startsWith("/admin")) return null;
 
   return <>
     {!open && (
