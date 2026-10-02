@@ -366,7 +366,6 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
               orada alt cizgide kalmaya devam ediyorlar. */}
           <nav className={styles.column}>
             <h3>Kurumsal</h3>
-            <span className={styles.unvan}>SMN LIFE İnş. Tic. Ltd. Şti.</span>
             <Link href="/iletisim">İletişim</Link>
             <Link href="/kullanim-kosullari">Kullanım koşulları</Link>
             <Link href="/gizlilik">Gizlilik politikası</Link>
