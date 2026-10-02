@@ -748,7 +748,11 @@
      bilginin ALTINDA, kabugun acik zemini uzerinde duruyordu: telefonda
      sayfanin en altinda beyaz bir serit. Dolgu alt bilginin icine
      tasindi, serit artik koyu zeminden yer aliyor. */
-  .page > footer { padding-bottom: 76px; }
+  /* Yapisik serit dipten 14px yukarida ve 54px yuksek, yani alttaki 68px'i
+     kapatiyor. Alt bilginin kendi 26px dolgusu zaten var; fark kadarini
+     ekliyoruz. 76px eklenince alt bilginin altinda kocaman bos bir alan
+     kaliyordu. */
+  .page > footer { padding-bottom: 44px; }
   /* NEDEN sagda 150px bos: asistan maskotu (position: fixed, sag alt, z-index
      80) tam genislikteki bu seridin ustune biniyor ve sag ucundaki dokunuslari
      yutuyordu. Bosluk maskotun kendi olculerine gore: burada 124px + 20px. */

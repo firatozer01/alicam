@@ -408,22 +408,22 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
     </>}
 
     {/* 5) Guven rozetleri: alt cizginin hemen ustunde, saga yasli.
-           Once Kurumsal sutununun icindeydiler; sutun ~200px oldugu icin
-           hepsi minicik kaliyordu. Burada kendi olculerinde duruyorlar.
-           Odeme bandi bir alttaki cizgide, en sagda. */}
+           Baslik ustte, UC rozet tek sirada: ETBIS, SSL ve kart bandi. */}
     <div className={`${styles.wrap} ${styles.guvenlik}`}>
       <h4 className={styles.guvenlikBaslik}>Güvenli alışveriş</h4>
+      <div className={styles.rozetler}>
       <a href="https://etbis.ticaret.gov.tr/" rel="noopener noreferrer" target="_blank">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img alt="ETBİS'e kayıtlıdır" className={styles.etbis} height={120} loading="lazy" src="/odeme-marka/etbis.jpg" width={104} />
       </a>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img alt="SSL ile şifrelenmiş bağlantı" className={styles.ssl} height={52} loading="lazy" src="/odeme-marka/ssl.png" width={160} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="Visa, Mastercard, troy ve PayTR ile ödeme" className={styles.kartBandi} height={26} loading="lazy" src="/odeme-marka/kart-bandi.png" width={349} />
+      </div>
     </div>
 
-    {/* 6) Alt cizgi: telif, yasal baglantilar ve odeme bandi TEK satirda.
-           Rozetler once ayri bir serit olarak duruyordu ve alt bilgi masaustunde
-           iki satira cikiyordu. */}
+    {/* 6) Alt cizgi: telif ve (kisa alt bilgide) yasal baglantilar. */}
     <div className={`${styles.wrap} ${styles.bottom}`}>
       <span>© 2026 alıcam.net · SMN LIFE İnş. Tic. Ltd. Şti. Her hakkı saklıdır.</span>
       {/* Yasal baglantilar tam alt bilgide Kurumsal sutununda duruyor; burada
@@ -434,10 +434,6 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
         <Link href="/gizlilik">Gizlilik politikası</Link>
         <a href="mailto:destek@alicam.net">destek@alicam.net</a>
       </nav>}
-      {/* Kart bandi alt satirin SON ogesi: en sagda. Yukari dugmesi bir
-          ustteki guven satirina tasindi, yoksa bandin sagina dusuyordu. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img alt="Visa, Mastercard, troy ve PayTR ile ödeme" className={styles.kartBandi} height={26} loading="lazy" src="/odeme-marka/kart-bandi.png" width={349} />
       <button
         aria-label="Sayfanın başına dön"
         className={styles.toTop}

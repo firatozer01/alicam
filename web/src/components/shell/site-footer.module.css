@@ -421,22 +421,36 @@
    bir obek. Baslik once "margin-right: auto" ile en sola itiliyordu ve
    arada kocaman bir bosluk kaliyordu; rozetler de farkli yuksekliklerde
    oldugu icin dengesiz duruyordu. Artik ortak bir eksende, yan yana. */
-.guvenlik {
-  display: flex; align-items: center; justify-content: flex-end;
-  flex-wrap: wrap; gap: 12px 16px; padding-bottom: 20px;
-}
-.guvenlikBaslik { margin: 0; color: #fff; font: 700 15px var(--font-inter), sans-serif; }
+
+
 /* Karekod taranabilir kalmali; SSL rozeti onun optik agirligina yakin. */
-.etbis { height: 82px; width: auto; display: block; border-radius: 6px; }
-.ssl { height: 52px; width: auto; display: block; }
+
+
 /* Bant alt cizgide ve en sagda. 349x26 raster; 1,2 kattan fazla
    buyutulurse bulaniklasir. */
-.kartBandi { width: min(420px, 100%); height: auto; display: block; margin-left: auto; }
+
 
 @media (max-width: 760px) {
-  .guvenlik { justify-content: flex-start; }
-  .guvenlikBaslik { flex: 1 1 100%; }
-  .etbis { height: 70px; }
-  .ssl { height: 44px; }
-  .kartBandi { width: 100%; margin-left: 0; }
+  
+  
+  
+  
+  
+}
+
+/* ---------- Guven rozetleri ----------
+   Alt cizginin ustunde, saga yasli: baslik bir satir, altinda UC rozet
+   yan yana. ETBIS ve SSL bandin yanina sigsin diye kucuk; karekod
+   taranamayacak kadar kuculmesin diye 44px taban. */
+.guvenlik { display: grid; justify-content: end; justify-items: end; gap: 10px; padding-bottom: 18px; }
+.guvenlikBaslik { margin: 0; color: #fff; font: 700 14px var(--font-inter), sans-serif; }
+.rozetler { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.etbis { height: 44px; width: auto; display: block; border-radius: 4px; }
+.ssl { height: 30px; width: auto; display: block; }
+/* Bant 349x26 raster; dogal olcusunun ustune cikilmiyor. */
+.kartBandi { width: min(300px, 100%); height: auto; display: block; }
+
+@media (max-width: 760px) {
+  .guvenlik { justify-content: start; justify-items: start; }
+  .rozetler { gap: 10px; }
 }
