@@ -200,65 +200,65 @@
 
 .admin-page .admin-kicker,
 .admin-sidebar .admin-kicker {
-  font-size: 11px;
+  font-size: 12.5px;
   letter-spacing: .1em;
 }
 
 .admin-page .admin-header h1 {
-  font-size: 30px;
+  font-size: 32px;
   letter-spacing: -.02em;
 }
 
 .admin-page .admin-header p {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 15.5px;
   line-height: 1.55;
 }
 
 .admin-page .admin-home-button {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 650;
 }
 
 .admin-sidebar nav a {
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 600;
 }
 
 .admin-sidebar nav b {
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .admin-sidebar .admin-product span {
-  font-size: 10.5px;
+  font-size: 12px;
 }
 
 .admin-sidebar .admin-product strong {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .admin-sidebar .admin-account strong {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .admin-sidebar .admin-account small {
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 13px;
 }
 
 .admin-page .admin-data-card header span,
 .admin-page .admin-metric-grid article > span {
-  font-size: 11px;
+  font-size: 12.5px;
   letter-spacing: .08em;
 }
 
 .admin-page .admin-metric-grid article strong {
-  font-size: 30px;
+  font-size: 32px;
 }
 
 .admin-page .admin-metric-grid article small,
 .admin-page .admin-data-card small {
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
 
 .admin-page .admin-notice,
@@ -271,7 +271,7 @@
 .admin-page .admin-tabs button,
 .admin-page .admin-toolbar,
 .admin-page .admin-decision-bar {
-  font-size: 13.5px;
+  font-size: 15px;
 }
 
 /* ==========================================================================
@@ -319,26 +319,26 @@
    govde 13-13.5px, aciklama 14px. */
 
 .admin-page .admin-toolbar > span {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .admin-page .admin-toolbar > span strong {
-  font-size: 14px;
+  font-size: 15.5px;
 }
 
 .admin-page .admin-avatar {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .admin-sidebar .admin-account > span {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .admin-page .admin-application-head > div:nth-child(2) > span,
 .admin-page .admin-main-info section > span,
 .admin-page .admin-contact-card > span,
 .admin-page .admin-old-reason > span {
-  font-size: 11px;
+  font-size: 12.5px;
   letter-spacing: .08em;
 }
 
@@ -346,11 +346,11 @@
 .admin-page .admin-location-list small,
 .admin-page .admin-contact-card small,
 .admin-page .admin-contact-card > div {
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .admin-page .admin-status {
-  font-size: 11.5px;
+  font-size: 13px;
 }
 
 .admin-page .admin-main-info section > p,
@@ -359,52 +359,52 @@
 .admin-page .admin-location-list strong,
 .admin-page .admin-contact-card strong,
 .admin-page .admin-category-tags i {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .admin-page .admin-category-tags b,
 .admin-page .admin-decision-bar > span,
 .admin-page .admin-metric-grid article > small {
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
 
 .admin-page .admin-empty p,
 .admin-page .admin-data-empty,
 .admin-page .admin-request-row div strong,
 .admin-page .admin-payment-row div strong {
-  font-size: 13.5px;
+  font-size: 15px;
 }
 
 .admin-page .admin-access-card p,
 .admin-page .admin-metric-grid article > a {
-  font-size: 14px;
+  font-size: 15.5px;
 }
 
 .admin-page .admin-request-row div small,
 .admin-page .admin-payment-row div small,
 .admin-page .admin-request-row > p small {
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 /* Durum rozetleri 6px'ti: okunamiyordu. font kisayolu kullanildigi icin
    yalnizca font-size yazmak yetmez, ailesiyle birlikte veriliyor. */
 .admin-page .admin-request-row > em,
 .admin-page .admin-payment-row em {
-  font-size: 11.5px;
+  font-size: 13px;
   letter-spacing: .04em;
 }
 
 /* Veri kartlarindaki son kucuk parcalar: kart basligi yanindaki sayac,
    satir basindaki bas harf rozeti ve teklif sayaci. */
 .admin-page .admin-data-card > header b {
-  font-size: 11.5px;
+  font-size: 13px;
 }
 
 .admin-page .admin-request-row > span,
 .admin-page .admin-payment-row > span {
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .admin-page .admin-request-row > p b {
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
