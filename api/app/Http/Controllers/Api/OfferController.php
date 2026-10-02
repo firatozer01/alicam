@@ -115,7 +115,11 @@ class OfferController extends Controller
             ], 409);
         }
 
-        [$offer, $unlock] = DB::transaction(function () use ($seller, $buyerRequest, $data): array {
+        // $listing kapanisa ACIKCA verilmeli: PHP kapanislari dis kapsamdaki
+        // degiskenleri kendiliginden gormuyor. Yoksa govdedeki $listing?->id
+        // "Undefined variable" veriyor ve teklif gonderme uctan uca 500
+        // donuyordu -- urun iliktirilmemis olsa bile.
+        [$offer, $unlock] = DB::transaction(function () use ($seller, $buyerRequest, $data, $listing): array {
             $unlock = $this->credits->unlock($seller, $buyerRequest);
             $offer = Offer::query()->create([
                 'request_id' => $buyerRequest->id,

@@ -146,7 +146,11 @@ export function SellerDashboard() {
   const [uploadingFor, setUploadingFor] = useState<number | null>(null);
   const [openWork, setOpenWork] = useState<PortfolioItem | null>(null);
   const [coverUploading, setCoverUploading] = useState<number | null>(null);
-  const [expanded, setExpanded] = useState<number | null>(null);
+  // Talep detayi ve teklif formu artik karti buyutmuyor, modal olarak
+  // aciliyor: kart icinde acilinca sayfa altina dogru uzuyor ve
+  // kullanicinin baktigi yer kayiyordu. Burada ID tutuluyor, icerik
+  // listeden okunuyor; boylece liste tazelendiginde modal da tazeleniyor.
+  const [detayId, setDetayId] = useState<number | null>(null);
   const [offerRequest, setOfferRequest] = useState<number | null>(null);
   const [editingOffer, setEditingOffer] = useState<number | null>(null);
   const [price, setPrice] = useState("");
@@ -423,7 +427,9 @@ export function SellerDashboard() {
 
   const unlock = async (item: SellerRequest) => {
     setBusy(true); setUnlockingId(item.id); setError(""); setNotice("");
-    try { const response = await apiRequest<{ message: string }>(`/seller/requests/${item.id}/unlock`, { method: "POST" }); setNotice(response.message); await refreshWorkspace(); setExpanded(item.id); }
+    // Kredi harcandi; satin alinan detay hemen aciliyor. Eskiden kart
+    // icinde aciliyordu, artik modal olarak.
+    try { const response = await apiRequest<{ message: string }>(`/seller/requests/${item.id}/unlock`, { method: "POST" }); setNotice(response.message); await refreshWorkspace(); setDetayId(item.id); }
     catch (requestError: unknown) { setError(firstApiError(requestError)); }
     finally { setBusy(false); setUnlockingId(null); }
   };
@@ -912,8 +918,7 @@ export function SellerDashboard() {
               {requests.map((item, index) => {
                 const existingOffer = offerByRequest.get(item.id);
                 const competition = item.offer_count > 7 ? "compHigh" : item.offer_count > 3 ? "compMid" : "compLow";
-                const open = expanded === item.id || (offerRequest === item.id && !existingOffer);
-                return <article className={`${list.card} ${item.is_invited ? list.cardInvited : ""} ${item.is_unlocked ? list.cardOpen : ""} ${open ? list.cardExtra : ""}`} key={item.id} style={{ animationDelay: `${Math.min(index, 10) * 30}ms` }}>
+                return <article className={`${list.card} ${item.is_invited ? list.cardInvited : ""} ${item.is_unlocked ? list.cardOpen : ""}`} key={item.id} style={{ animationDelay: `${Math.min(index, 10) * 30}ms` }}>
                   <div className={list.cardTop}>
                     <span className={list.cat} style={{ color: item.category.color, background: `${item.category.color}15` }}>{item.category.icon} {item.category.name}</span>
                     {item.is_invited && <span className={list.invited}>◈ Sana özel</span>}
@@ -938,19 +943,7 @@ export function SellerDashboard() {
                       : item.is_unlocked ? <button className={`${list.act} ${list.actAccent}`} onClick={() => openOffer(item.id)} type="button">Teklif ver</button>
                       : <button className={`${list.act} ${list.actPrimary}`} disabled={busy} onClick={() => unlock(item)} type="button">{unlockingId === item.id ? "Açılıyor…" : `Aç · ${item.unlock_cost} ⚡`}</button>}
                   </div>
-                  {item.is_unlocked && item.details && <button className={list.detailToggle} onClick={() => setExpanded(expanded === item.id ? null : item.id)} type="button">{expanded === item.id ? "Detayı kapat" : "Tüm detayı gör"}</button>}
-                  {expanded === item.id && item.details && <div className={styles.details}><section><span>TALEP DETAYI</span><p>{item.details.description}</p><div>{item.details.attributes.map((attribute) => <p key={attribute.key}><small>{attribute.label}</small><strong>{attributeValue(attribute)}</strong></p>)}</div></section><aside><span>İLETİŞİM VE ADRES</span>{item.details.contact.avatar_url && <i className={styles.contactAvatar}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img alt="" loading="lazy" src={item.details.contact.avatar_url} />
-                  </i>}<strong>{item.details.contact.name}</strong><a href={`tel:${item.details.contact.phone}`}>{item.details.contact.phone}</a><a href={`mailto:${item.details.contact.email}`}>{item.details.contact.email}</a><p>{item.details.full_address || "Açık adres belirtilmedi"}</p></aside></div>}
-                  {offerRequest === item.id && !existingOffer && <div className={styles.offerForm}><div><span>TEKLİFİNİ HAZIRLA</span><strong>Bu talep açıldı; teklif gönderirken ek kredi düşmez.</strong></div><label>Fiyat<input className="control" inputMode="decimal" value={price} onChange={(event) => setPrice(event.target.value)} placeholder="Örn. 12500" /><button className={styles.attachButton} onClick={() => setPickerOpen(true)} type="button">🏷 {offerListing ? "Ürünü değiştir" : "Ürün ekle"}</button></label><label>Teklif notu<textarea className="control" value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Kapsamı ve teslim süresini açıkla…" /></label>{offerListing && <div className={styles.offerAttach}>
-                      {offerListing.cover_url
-                        // eslint-disable-next-line @next/next/no-img-element
-                        ? <img alt="" loading="lazy" src={offerListing.cover_url} />
-                        : <i>🏷</i>}
-                      <span>Ürün: <b>{offerListing.title}</b> — {offerListing.price ? money(offerListing.price) : "Fiyat sorunuz"}</span>
-                      <button aria-label="Ürünü tekliften çıkar" onClick={() => setOfferListing(null)} type="button">✕</button>
-                    </div>}<aside><button onClick={closeOffer}>Vazgeç</button><button disabled={busy} onClick={() => submitOffer(item.id)}>{busy ? "Gönderiliyor…" : "Teklifi gönder"}</button></aside></div>}
+                  {item.is_unlocked && item.details && <button className={list.detailToggle} onClick={() => setDetayId(item.id)} type="button">Tüm detayı gör</button>}
                 </article>;
               })}</div>}
             <Pagination lastPage={meta.last_page} onPage={setPage} page={meta.current_page} />
@@ -1148,14 +1141,6 @@ export function SellerDashboard() {
                   ? <button className={`${list.act} ${list.actAccent}`} onClick={() => openOffer(item.id, offer)} type="button">Teklifi düzenle</button>
                   : <span className={`${list.act} ${list.actQuiet}`}>{statusLabel[offer.status]}</span>}
               </div>
-              {offerRequest === item.id && editingOffer === offer.id && <div className={styles.offerForm}><label>Fiyat<input className="control" inputMode="decimal" onChange={(event) => setPrice(event.target.value)} value={price} /><button className={styles.attachButton} onClick={() => setPickerOpen(true)} type="button">🏷 {offerListing ? "Ürünü değiştir" : "Ürün ekle"}</button></label><label>Teklif notu<textarea className="control" onChange={(event) => setMessage(event.target.value)} value={message} /></label>{offerListing && <div className={styles.offerAttach}>
-                {offerListing.cover_url
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img alt="" loading="lazy" src={offerListing.cover_url} />
-                  : <i>🏷</i>}
-                <span>Ürün: <b>{offerListing.title}</b> — {offerListing.price ? money(offerListing.price) : "Fiyat sorunuz"}</span>
-                <button aria-label="Ürünü tekliften çıkar" onClick={() => setOfferListing(null)} type="button">✕</button>
-              </div>}<aside><button onClick={closeOffer}>Vazgeç</button><button disabled={busy} onClick={() => submitOffer(item.id)}>{busy ? "Güncelleniyor…" : "Güncelle"}</button></aside></div>}
             </article>)}
           </div>}
         </section>}
@@ -1522,6 +1507,85 @@ export function SellerDashboard() {
             {openListing.attributes.map((row) => <div key={row.key}><dt>{row.label}</dt><dd>{attributeValue(row)}</dd></div>)}
           </dl>}
         </aside>
+      </div>
+    </Modal>}
+
+    {/*
+      Talep detayi. Eskiden kartin ALTINA aciliyordu: kart buyuyor, altindaki
+      kartlar asagi kayiyor ve kullanicinin baktigi yer ekrandan cikiyordu.
+      Icerik listeden ID ile okunuyor, kopyalanmiyor -- liste tazelenince
+      modal de tazeleniyor, talep listeden dusunce kendiliginden kapaniyor.
+    */}
+    {(() => {
+      const talep = detayId === null ? null : requests.find((row) => row.id === detayId) ?? null;
+      if (!talep?.details) return null;
+
+      return <Modal
+        onClose={() => setDetayId(null)}
+        open
+        size="lg"
+        subtitle={`${talep.category.icon} ${talep.category.name} · ${talep.location.city.name}, ${talep.location.district.name} · № ${talep.reference}`}
+        title={talep.title}
+        footer={<>
+          <button className={styles.modalGhost} onClick={() => setDetayId(null)} type="button">Kapat</button>
+          {!offerByRequest.get(talep.id) && <button className={styles.modalPrimary} onClick={() => { setDetayId(null); openOffer(talep.id); }} type="button">Teklif ver</button>}
+        </>}
+      >
+        <div className={styles.details}>
+          <section>
+            <span>TALEP DETAYI</span>
+            <p>{talep.details.description}</p>
+            <div>{talep.details.attributes.map((attribute) => <p key={attribute.key}><small>{attribute.label}</small><strong>{attributeValue(attribute)}</strong></p>)}</div>
+          </section>
+          <aside>
+            <span>İLETİŞİM VE ADRES</span>
+            {talep.details.contact.avatar_url && <i className={styles.contactAvatar}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt="" loading="lazy" src={talep.details.contact.avatar_url} />
+            </i>}
+            <strong>{talep.details.contact.name}</strong>
+            <a href={`tel:${talep.details.contact.phone}`}>{talep.details.contact.phone}</a>
+            <a href={`mailto:${talep.details.contact.email}`}>{talep.details.contact.email}</a>
+            <p>{talep.details.full_address || "Açık adres belirtilmedi"}</p>
+          </aside>
+        </div>
+      </Modal>;
+    })()}
+
+    {/*
+      Teklif formu. Iki satir ici kopya vardi -- "Gelen talepler"de yeni
+      teklif, "Tekliflerim"de duzenleme -- ve ikisi de karti buyutuyordu.
+      Tek modalda birlestiler; hangisi oldugunu editingOffer soyluyor.
+    */}
+    {offerRequest !== null && <Modal
+      onClose={closeOffer}
+      open
+      size="md"
+      subtitle={editingOffer === null ? "Talep açık; teklif gönderirken ek kredi düşmez." : "Alıcı güncellenmiş teklifi görür."}
+      title={editingOffer === null ? "Teklifini hazırla" : "Teklifini güncelle"}
+      footer={<>
+        <button className={styles.modalGhost} onClick={closeOffer} type="button">Vazgeç</button>
+        <button className={styles.modalPrimary} disabled={busy} onClick={() => submitOffer(offerRequest)} type="button">
+          {busy ? (editingOffer === null ? "Gönderiliyor…" : "Güncelleniyor…") : editingOffer === null ? "Teklifi gönder" : "Güncelle"}
+        </button>
+      </>}
+    >
+      <div className={styles.offerForm}>
+        <label>Fiyat
+          <input className="control" data-autofocus inputMode="decimal" onChange={(event) => setPrice(event.target.value)} placeholder="Örn. 12500" value={price} />
+          <button className={styles.attachButton} onClick={() => setPickerOpen(true)} type="button">🏷 {offerListing ? "Ürünü değiştir" : "Ürün ekle"}</button>
+        </label>
+        <label>Teklif notu
+          <textarea className="control" onChange={(event) => setMessage(event.target.value)} placeholder="Kapsamı ve teslim süresini açıkla…" value={message} />
+        </label>
+        {offerListing && <div className={styles.offerAttach}>
+          {offerListing.cover_url
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img alt="" loading="lazy" src={offerListing.cover_url} />
+            : <i>🏷</i>}
+          <span>Ürün: <b>{offerListing.title}</b> — {offerListing.price ? money(offerListing.price) : "Fiyat sorunuz"}</span>
+          <button aria-label="Ürünü tekliften çıkar" onClick={() => setOfferListing(null)} type="button">✕</button>
+        </div>}
       </div>
     </Modal>}
 
