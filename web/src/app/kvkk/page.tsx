@@ -3,6 +3,7 @@ import Link from "next/link";
 import styles from "../legal.module.css";
 import { LegalShell, type LegalTocItem } from "../legal-shell";
 import { KurumsalKart } from "../iletisim/kurumsal-kart";
+import { kurumsalOku } from "@/lib/company-server";
 
 export const metadata: Metadata = {
   title: "KVKK aydınlatma metni — alıcam.net",
@@ -20,7 +21,9 @@ const TOC: LegalTocItem[] = [
   { id: "basvuru", label: "Başvuru yolu" },
 ];
 
-export default function KvkkPage() {
+export default async function KvkkPage() {
+  const kurumsal = await kurumsalOku();
+
   return <LegalShell
     aside={<>
       <div className={styles.asideCard}>
@@ -55,7 +58,7 @@ export default function KvkkPage() {
     <section id="sorumlu">
       <h2><small>01</small>Veri sorumlusu</h2>
       <p>Kişisel verilerin, veri sorumlusu sıfatıyla aşağıdaki şirket tarafından işlenmektedir.</p>
-      <KurumsalKart />
+      <KurumsalKart kurumsal={kurumsal} />
     </section>
 
     <section id="veriler">

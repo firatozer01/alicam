@@ -3,6 +3,7 @@ import Link from "next/link";
 import styles from "../legal.module.css";
 import { LegalShell, type LegalTocItem } from "../legal-shell";
 import { KurumsalKart } from "./kurumsal-kart";
+import { kurumsalOku } from "@/lib/company-server";
 
 export const metadata: Metadata = {
   title: "İletişim — alıcam.net",
@@ -16,7 +17,9 @@ const TOC: LegalTocItem[] = [
   { id: "sure", label: "Yanıt süresi" },
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const kurumsal = await kurumsalOku();
+
   return <LegalShell
     aside={<>
       <div className={styles.asideCard}>
@@ -57,7 +60,7 @@ export default function ContactPage() {
     <section id="kurumsal">
       <h2><small>02</small>İşletme bilgileri</h2>
       <p>alıcam.net, aşağıdaki şirket tarafından işletilmektedir.</p>
-      <KurumsalKart />
+      <KurumsalKart kurumsal={kurumsal} />
     </section>
 
     <section id="konular">
