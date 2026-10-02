@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api";
 import { BrandLogo } from "./brand";
 import styles from "./site-footer.module.css";
@@ -49,55 +49,6 @@ const storeIcons = {
 };
 
 /* ================= Veri ================= */
-
-/**
- * Alt bilgideki odeme seridi.
- *
- * Odemeler PayTR uzerinden aliniyor; PayTR Visa, Mastercard ve Troy
- * kartlarini isliyor ve islemi 3D Secure ile dogruluyor. Kullanici
- * kart bilgisini girmeden once hangi semalarin kabul edildigini ve
- * dogrulamanin yapildigini gormeli.
- *
- * Gorseller marka dosyalari: PayTR uye isyeri panelinden indirilip
- * web/public/odeme/ altina konuyor. Dosya yoksa rozet marka ADIYLA
- * basiliyor (asagidaki onError), yani serit hicbir zaman kirik ikon
- * gostermiyor ve dosyalar eklendiginde kod degismeden gorsele geciyor.
- */
-const ODEME_MARKALARI = [
-  // "kart": semanin kendi zeminli kart doseme gorseli, kutuyu tamamen
-  // dolduruyor. "yazi": saydam kelime markasi, beyaz kutunun icinde
-  // dolguyla duruyor.
-  { ad: "Visa", dosya: "/odeme-marka/visa.svg", tur: "kart" },
-  { ad: "Mastercard", dosya: "/odeme-marka/mastercard.svg", tur: "kart" },
-  { ad: "Troy", dosya: "/odeme-marka/troy.png", tur: "yazi" },
-  { ad: "PayTR", dosya: "/odeme-marka/paytr.png", tur: "yazi" },
-] as const;
-
-function OdemeRozeti({ ad, dosya, tur }: { ad: string; dosya: string; tur: "kart" | "yazi" | "etbis" }) {
-  const [gorselVar, setGorselVar] = useState(true);
-
-  /**
-   * onError TEK BASINA yetmiyor: <img> sunucu cizimiyle zaten belgede
-   * duruyor ve dosya yoksa tarayici hatayi React dinleyiciyi baglamadan
-   * once veriyor. O durumda olay kacirilip kirik ikon ekranda kaliyordu.
-   * Geri cagrimli ref DOM'a baglanirken durumu ayrica okuyor: yuklenmis
-   * ama genisligi sifirsa dosya gelmemistir.
-   */
-  const olcu = useCallback((dugum: HTMLImageElement | null) => {
-    if (dugum?.complete && dugum.naturalWidth === 0) setGorselVar(false);
-  }, []);
-
-  const kutuSinifi = tur === "kart" ? styles.odemeKart : tur === "etbis" ? styles.odemeEtbis : styles.odemeYazi;
-
-  return <span className={`${styles.odemeRozet} ${kutuSinifi}`}>
-    {gorselVar
-      // next/image kullanilmiyor: dosya yoksa yaziya dusmek gerekiyor ve
-      // bunlar zaten kucuk, sabit olculu marka dosyalari.
-      // eslint-disable-next-line @next/next/no-img-element
-      ? <img alt={ad} onError={() => setGorselVar(false)} ref={olcu} src={dosya} />
-      : <b>{ad}</b>}
-  </span>;
-}
 
 type TickerItem = { key: string; icon: string; title: string; district: string; offers: number };
 
@@ -420,23 +371,23 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
             <Link href="/kullanim-kosullari">Kullanım koşulları</Link>
             <Link href="/gizlilik">Gizlilik politikası</Link>
 
-            {/* Guvenlik rozetleri. ETBIS karekodu isletmeye OZEL ve Ticaret
-                Bakanligi'nin sisteminden aliniyor; dosya gelene kadar rozet
-                yerine dogrulama baglantisi duruyor (OdemeRozeti ile ayni
-                dusme mantigi). SSL rozeti kendi cizimimiz: ucuncu bir
-                markanin isaretini taklit etmiyoruz. */}
+            {/*
+              Rozetlerin hepsi isletmenin kendi dosyalari: ETBIS karekodu
+              Ticaret Bakanligi'nin sisteminden, SSL rozeti sertifika
+              saglayicisindan, kart bandi ise odeme kurulusundan geliyor.
+              Hicbiri burada cizilmiyor.
+            */}
+            <h4 className={styles.guvenlikBaslik}>Güvenli alışveriş</h4>
             <div className={styles.guvenlik}>
-              <a
-                className={styles.etbis}
-                href="https://etbis.ticaret.gov.tr/"
-                rel="noopener noreferrer"
-                target="_blank"
-              ><OdemeRozeti ad="ETBİS'e kayıtlıdır" dosya="/odeme-marka/etbis.png" tur="etbis" /></a>
-              <span className={styles.ssl}>
-                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 4 5.2v6.1c0 4.7 3.3 9 8 10.7 4.7-1.7 8-6 8-10.7V5.2L12 2Z" /><path className={styles.sslTik} d="m8.4 12.1 2.5 2.5 4.7-5" /></svg>
-                <b>SSL ile şifreli</b>
-              </span>
+              <a href="https://etbis.ticaret.gov.tr/" rel="noopener noreferrer" target="_blank">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img alt="ETBİS'e kayıtlıdır" className={styles.etbis} height={120} loading="lazy" src="/odeme-marka/etbis.jpg" width={104} />
+              </a>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img alt="SSL ile şifrelenmiş bağlantı" className={styles.ssl} height={52} loading="lazy" src="/odeme-marka/ssl.png" width={160} />
             </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img alt="Visa, Mastercard, troy ve PayTR ile ödeme" className={styles.kartBandi} height={26} loading="lazy" src="/odeme-marka/kart-bandi.png" width={349} />
           </nav>
         </div>
 
@@ -478,15 +429,11 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
            iki satira cikiyordu. */}
     <div className={`${styles.wrap} ${styles.bottom}`}>
       <span>© 2026 alıcam.net · SMN LIFE İnş. Tic. Ltd. Şti. Her hakkı saklıdır.</span>
-      {compact && <nav>
+      <nav>
         <Link href="/kullanim-kosullari">Kullanım koşulları</Link>
         <Link href="/gizlilik">Gizlilik politikası</Link>
         <a href="mailto:destek@alicam.net">destek@alicam.net</a>
-      </nav>}
-      <div className={styles.odeme}>
-        <small>3D Secure</small>
-        {ODEME_MARKALARI.map((marka) => <OdemeRozeti ad={marka.ad} dosya={marka.dosya} key={marka.ad} tur={marka.tur} />)}
-      </div>
+      </nav>
       <button
         aria-label="Sayfanın başına dön"
         className={styles.toTop}

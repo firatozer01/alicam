@@ -124,7 +124,7 @@
 .chips i { font-style: normal; }
 
 /* ---------- 3) Bag sutunlari ---------- */
-.columns { display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: 40px; padding: 56px 0 24px; }
+.columns { display: grid; grid-template-columns: 1.5fr repeat(5, minmax(0, 1fr)); gap: 40px 28px; padding: 56px 0 24px; }
 
 /* Marka gercek logo gorseli oldugu icin eski yazi tipi kurallari kalkti.
    Alt bilgide sutun genis, logo ust cubuktakinden biraz buyuk (36px) durur.
@@ -245,26 +245,17 @@
    degil, her sayfada gorunmesi gereken bir bilgi. */
 /* Satirin sagina yaslanir: telif solda, yasal baglantilar ortada,
    odeme rozetleri sagda. */
-.odeme { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
-.odeme > small { color: rgb(255 255 255 / .5); font-size: 12px; letter-spacing: .04em; }
-.odemeRozet {
-  display: inline-flex; align-items: center; justify-content: center;
-  height: 30px; overflow: hidden;
-  border: 1px solid rgb(255 255 255 / .16); border-radius: 6px;
-  background: #fff;
-}
+
+
 /* Kart dosemesi kendi zeminini tasiyor: kutuyu bastan basa doldurur. */
-.odemeKart { width: 47px; }
-.odemeKart img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+
 /* Kelime markasi saydam: beyaz kutunun icinde nefes payiyla durur. */
-.odemeYazi { padding: 0 9px; }
-.odemeYazi img { height: 14px; width: auto; display: block; }
+
+
 /* Gorsel yoksa marka ADI yaziyla duruyor: kutu bos ya da kirik ikonlu
    kalmiyor, dosya eklenince kendiliginden gorsele donuyor. */
-.odemeRozet b {
-  color: var(--navy); font: 800 12px/1 var(--font-inter), sans-serif;
-  letter-spacing: .02em; white-space: nowrap;
-}
+
 .toTop {
   width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
   background: #fff; color: var(--navy); font-size: 18px; font-weight: 800;
@@ -337,12 +328,23 @@
 /* ---------- Kurumsal sutunundaki guvenlik rozetleri ---------- */
 .guvenlik { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
 /* ETBIS karekodu kare; kutusu da oyle. */
-.odemeEtbis { width: 56px; height: 56px; padding: 5px; }
-.odemeEtbis img { width: 100%; height: 100%; object-fit: contain; display: block; }
-.odemeEtbis b { font-size: 10px; line-height: 1.25; text-align: center; white-space: normal; }
-.etbis { display: inline-flex; }
 
-.ssl { display: inline-flex; align-items: center; gap: 7px; color: rgb(255 255 255 / .72); }
-.ssl svg { width: 22px; height: 22px; flex: none; fill: none; stroke: var(--green); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.sslTik { stroke: var(--green); }
-.ssl b { font-size: 13px; font-weight: 700; letter-spacing: .01em; }
+
+
+
+
+
+
+
+
+
+.guvenlikBaslik { margin: 22px 0 0; color: #fff; font: 700 14px var(--font-inter), sans-serif; }
+
+/* ---------- Kurumsal: guvenlik rozetleri ---------- */
+.guvenlikBaslik { margin: 22px 0 0; color: #fff; font: 700 14px var(--font-inter), sans-serif; }
+.guvenlik { display: flex; align-items: center; gap: 14px; margin-top: 12px; flex-wrap: wrap; }
+/* Karekod okunabilir kalmali: kucultulmuyor, kendi olcusunde duruyor. */
+.etbis { height: 76px; width: auto; display: block; border-radius: 4px; }
+.ssl { height: 38px; width: auto; display: block; }
+/* Kart bandi 349x26; sutuna sigdigi kadar, orani bozulmadan. */
+.kartBandi { display: block; width: 100%; max-width: 240px; height: auto; margin-top: 14px; }
