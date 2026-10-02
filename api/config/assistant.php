@@ -310,16 +310,6 @@ return [
             'answer' => "Satıcı panelinde talep kartının üstündeki yıldıza (☆) basmak talebi favorilerine ekler. Bunun için kredi harcamazsın; detayı açmadan önce ilgini çekenleri bir kenara ayırman için var.\n\nListenin üstündeki “Görünüm” seçiminden ya da Talepler menüsündeki “Favorilerim” başlığından yalnızca işaretlediklerini görebilirsin.\n\nYıldıza tekrar basarsan favorilerden çıkar.",
         ],
         [
-            'key' => 'one-cik',
-            'title' => 'Vitrinde nasıl öne çıkarım?',
-            'audience' => 'user',
-            'group' => 'hizmet-veren',
-            'icon' => '✨',
-            'summary' => 'Krediyle ana sayfa vitrinine gir',
-            'keywords' => ['öne çık', 'öne çıkmak', 'öne çıkar', 'öne çıkan', 'vitrin paketi', 'görünürlük', 'tanıtım', 'reklam', 'paket', 'üst sıra'],
-            'answer' => "Satıcı panelinde Firma menüsündeki “Öne çık” bölümünde krediyle alınan vitrin paketleri var: 7, 14 ve 30 günlük. Her paketin kredi bedeli kendi kartında yazar.\n\nPaketi etkinleştirdiğinde bedel bakiyenden düşer ve profilin ana sayfadaki öne çıkan hizmet verenler bölümünde “★ ÖNE ÇIKAN” rozetiyle görünür; hizmet verenler listesinde de öne çıkanlar sıralamasında üst sıralara gelir.\n\nSüren dolmadan yeni paket alırsan gün sayısı mevcut sürenin üzerine eklenir; sayfanın üstündeki rozette vitrinde kalacağın son tarih yazar.\n\nBakiyen pakete yetmiyorsa düğme “Bakiye yetersiz” der; aynı sayfadaki bağlantıdan kredi yükleyebilirsin.",
-        ],
-        [
             'key' => 'hizmet-veren-bul',
             'title' => 'Hizmet verenleri nasıl incelerim?',
             'audience' => 'all',

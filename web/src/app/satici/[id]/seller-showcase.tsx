@@ -24,7 +24,7 @@ type Review = { id: number; rating: number; comment: string | null; buyer_name: 
 type Service = { id: number; title: string; description: string; price_from: string | null; delivery_time: string | null; cover_url: string | null; category: MiniCategory | null };
 type Seller = {
   id: number; name: string; company_name: string | null; profile_type: string | null;
-  description: string | null; is_featured: boolean; member_since: string | null;
+  description: string | null; member_since: string | null;
   // Magazanin genis kapagi, firma logosu ve kullanicinin profil resmi.
   banner_url: string | null; logo_url: string | null; avatar_url: string | null;
   categories: SellerCategory[];
@@ -145,13 +145,13 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
             // eslint-disable-next-line @next/next/no-img-element
             ? <img alt={title} className={styles.avatarImage} src={badge} />
             : initials || "A"}
-          {seller.is_featured && <b>★</b>}
+          
         </span>
 
         <div className={styles.identity}>
           <div className={styles.nameRow}>
             <h1>{title}</h1>
-            {seller.is_featured && <b className={styles.featured}>★ ÖNE ÇIKAN</b>}
+            
             <span className={styles.verified}>✓ Doğrulanmış</span>
           </div>
           <p className={styles.meta}>

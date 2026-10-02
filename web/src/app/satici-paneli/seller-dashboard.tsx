@@ -29,7 +29,6 @@ type SellerOfferItem = { offer: Offer; request: SellerRequest };
 type CreditTransaction = { id: number; type: string; amount: number; balance_after: number; reference_type: string | null; metadata: { public_reference?: string; merchant_oid?: string; days?: number } | null; created_at: string };
 type CreditWorkspace = { balance: number; spent_this_month: number; transactions: CreditTransaction[] };
 type SellerService = { id: number; title: string; description: string; price_from: string | null; delivery_time: string | null; cover_url: string | null; is_active: boolean; category: Category };
-type FeaturedWorkspace = { is_featured: boolean; featured_until: string | null; packages: Record<string, { label: string; days: number; credits: number }> };
 type ProfileWorkspace = {
   categories: Category[];
   locations: { city_id: number; city_name: string; district_id: number; district_name: string }[];
@@ -82,7 +81,7 @@ type OfferListing = {
 };
 type OfferAttachment = { id: number; title: string; price: string | null; cover_url: string | null };
 type Scope = "all" | "unlocked" | "favorite";
-type View = "requests" | "performance" | "offers" | "services" | "visibility" | "profile" | "portfolio" | "listings";
+type View = "requests" | "performance" | "offers" | "services" | "profile" | "portfolio" | "listings";
 
 const sortOptions = [
   { value: "latest", label: "En yeni" },
@@ -123,7 +122,6 @@ export function SellerDashboard() {
   const [offers, setOffers] = useState<SellerOfferItem[]>([]);
   const [credits, setCredits] = useState<CreditWorkspace>({ balance: 0, spent_this_month: 0, transactions: [] });
   const [services, setServices] = useState<SellerService[]>([]);
-  const [featured, setFeatured] = useState<FeaturedWorkspace>({ is_featured: false, featured_until: null, packages: {} });
   const [profile, setProfile] = useState<ProfileWorkspace>({ categories: [], locations: [], profile: null });
   const [view, setView] = useState<View>("requests");
   const [filter, setFilter] = useState<Scope>("all");
@@ -202,21 +200,20 @@ export function SellerDashboard() {
   const listLoading = loadedQuery !== requestQuery;
 
   const fetchWorkspace = useCallback(async () => {
-    const [offerResponse, creditResponse, serviceResponse, featuredResponse, profileResponse, portfolioResponse, listingResponse] = await Promise.all([
+    const [offerResponse, creditResponse, serviceResponse, profileResponse, portfolioResponse, listingResponse] = await Promise.all([
       apiRequest<{ data: SellerOfferItem[] }>("/seller/offers"),
       apiRequest<{ data: CreditWorkspace }>("/seller/credits"),
       apiRequest<{ data: SellerService[] }>("/seller/services"),
-      apiRequest<{ data: FeaturedWorkspace }>("/seller/featured"),
       apiRequest<{ data: ProfileWorkspace }>("/seller/profile"),
       apiRequest<{ data: PortfolioItem[] }>("/seller/portfolio"),
       apiRequest<{ data: ListingCard[]; meta: ListingMeta }>("/seller/listings"),
     ]);
-    return { offerResponse, creditResponse, serviceResponse, featuredResponse, profileResponse, portfolioResponse, listingResponse };
+    return { offerResponse, creditResponse, serviceResponse, profileResponse, portfolioResponse, listingResponse };
   }, []);
 
   const applyWorkspace = useCallback((workspace: Awaited<ReturnType<typeof fetchWorkspace>>) => {
     setOffers(workspace.offerResponse.data); setCredits(workspace.creditResponse.data);
-    setServices(workspace.serviceResponse.data); setFeatured(workspace.featuredResponse.data);
+    setServices(workspace.serviceResponse.data);
     setProfile(workspace.profileResponse.data); setPortfolio(workspace.portfolioResponse.data);
     setListings(workspace.listingResponse.data); setListingMeta(workspace.listingResponse.meta);
   }, []);
@@ -731,12 +728,6 @@ export function SellerDashboard() {
     finally { mark(false); }
   };
 
-  const buyPromotion = async (packageKey: string) => {
-    setBusy(true); setError(""); setNotice("");
-    try { const response = await apiRequest<{ message: string }>("/seller/featured", { method: "POST", body: JSON.stringify({ package: packageKey }) }); setNotice(response.message); await refreshWorkspace(); }
-    catch (requestError: unknown) { setError(firstApiError(requestError)); }
-    finally { setBusy(false); }
-  };
 
   // Yukleme ekraninda da ortak kabuk durur; sayfa gecisinde zipla olmaz.
   if (loading && !user) return <PageShell className={styles.page} header={{ workspace: "seller" }} tone="panel"><div className={styles.loading}><i /><p>Hizmet veren çalışma alanı hazırlanıyor…</p></div></PageShell>;
@@ -870,10 +861,9 @@ export function SellerDashboard() {
               { key: "services", label: "Hizmetlerim", icon: "▦", hint: "Kapak görselli hizmet kartları", count: services.length, onSelect: () => selectView("services") },
               { key: "portfolio", label: "Galerim", icon: "🖼", hint: "Yaptığın işler ve fotoğrafları", badge: "Yeni", tone: "new", count: portfolio.length, onSelect: () => selectView("portfolio") },
             ], footer: { label: "Vitrini düzenle", onSelect: () => selectView("services") } },
-            { key: "profile", title: "PROFİL VE GÖRÜNÜRLÜK", icon: "🏢", color: "#4F46E5", description: "Firma bilgileri ve öne çıkma.", items: [
+            { key: "profile", title: "FİRMA PROFİLİ", icon: "🏢", color: "#4F46E5", description: "Firma bilgileri, kategori ve bölge.", items: [
               { key: "profile", label: "Firma profilim", icon: "🏢", hint: "Bilgiler, kategori ve bölge", onSelect: () => selectView("profile") },
-              { key: "visibility", label: "Öne çık", icon: "⭐", hint: featured.is_featured ? "Vitrindesin" : "Vitrin paketleri", badge: featured.is_featured ? "Aktif" : undefined, tone: "hot", onSelect: () => selectView("visibility") },
-            ], footer: { label: "Görünürlüğü yönet", onSelect: () => selectView("visibility") } },
+            ], footer: { label: "Firma profilini düzenle", onSelect: () => selectView("profile") } },
           ],
           quickLinks: [
             { key: "add-listing", label: "Ürün ekle", icon: "🏷", onSelect: () => { selectView("listings"); openListingForm(); } },
@@ -997,14 +987,6 @@ export function SellerDashboard() {
               </div>
             </section>
 
-            <section className={styles.widget}>
-              <div className={styles.promoBox}>
-                <span>{featured.is_featured ? "VİTRİNDESİN" : "GÖRÜNÜRLÜĞÜNÜ ARTIR"}</span>
-                <strong>{featured.is_featured ? "Profilin öne çıkanlarda" : "Öne çıkanlara katıl"}</strong>
-                <p>{featured.is_featured ? `${featured.featured_until ? new Date(featured.featured_until).toLocaleDateString("tr-TR") : "Süresiz"} tarihine kadar ana sayfa vitrinindesin.` : "Ana sayfa vitrininde görünerek daha çok talebe ilk sen ulaş."}</p>
-                <button onClick={() => selectView("visibility")} type="button">{featured.is_featured ? "Vitrini yönet" : "Paketleri gör"}</button>
-              </div>
-            </section>
           </aside>
           </div>
         </section>}
@@ -1013,6 +995,15 @@ export function SellerDashboard() {
           <header><div><span>ÖLÇÜM VE ANALİZ</span><h1>Performansın</h1><p>Teklif üretimini, kabul oranını ve kredi harcamanı takip et.</p></div><button onClick={() => { changeScope("all"); selectView("requests"); }}>Talepleri gör →</button></header>
           <section className={styles.stats}><article><i>📥</i><div><strong>{meta.total}</strong><span>eşleşen talep</span></div><b>+{Math.min(5, meta.total)}</b></article><article><i>📨</i><div><strong>{offers.length}</strong><span>verilen teklif</span></div><b>toplam</b></article><article><i>✅</i><div><strong>%{successRate}</strong><span>kabul oranı</span></div><b>+{acceptedOffers}</b></article><article><i>⚡</i><div><strong>{monthSpend}</strong><span>bu ay harcanan</span></div><Link href="/kredi-yukle">yükle</Link></article></section>
           <section className={styles.dashboard} ref={chartRef}><article><header><strong>📊 Teklif performansın</strong><span>Son 6 hafta</span></header><div className={styles.bars}>{barPairs.map((height, index) => <div key={index}><span><i className={styles.barOffer} style={{ height: chartsReady ? `${height}%` : 0 }} /><i className={styles.barAccepted} style={{ height: chartsReady ? `${Math.max(8, Math.round(height * (successRate || 28) / 100))}%` : 0 }} /></span><small>{index + 1}. hafta</small></div>)}</div><footer><span><i className={styles.offerSwatch} /> Verilen teklif</span><span><i className={styles.acceptedSwatch} /> Kabul edilen</span></footer></article><article><header><strong>🎯 Kategori dağılımın</strong><span>Tekliflerin</span></header><div className={styles.donutWrap}><div className={styles.donut}><svg viewBox="0 0 120 120"><defs><linearGradient id="seller-donut" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#7C3AED" /><stop offset="1" stopColor="#06B6D4" /></linearGradient></defs><circle className={styles.donutTrack} cx="60" cy="60" r="50" /><circle className={styles.donutProgress} cx="60" cy="60" r="50" style={{ strokeDashoffset: chartsReady ? 314 - (314 * topCategoryShare) : 314 }} /></svg><span><b>{offers.length}</b><small>teklif</small></span></div><div className={styles.donutLegend}>{categoryDistribution.length ? categoryDistribution.map(([name, data]) => <p key={name}><i style={{ background: data.color }} /><span><b>{name}</b><small>{data.count} teklif</small></span></p>) : <p><i /><span><b>Henüz veri yok</b><small>İlk teklifinle oluşur</small></span></p>}</div></div></article></section>
+          {/* "seller_promotion" etiketi duruyor: vitrinde one cikarma
+              ozelligi kaldirildi ama onu satin almis hesaplarin ESKI
+              hareketleri defterde duruyor ve dogru okunmali. */}
+          {/* Kredi defteri eskiden "One cik" gorunumunun altindaydi; o
+              gorunum kaldirilinca saticinin TAM kredi gecmisine ulasacagi
+              tek yer kalmiyordu (yan paneldeki kutu son dort hareketi
+              gosteriyor). Performans bu defterin dogal yeri: basliginda
+              zaten "kredi harcamani takip et" yaziyor. */}
+          <section className={styles.ledger}><header><div><span>HESAP HAREKETLERİ</span><h2>Kredi geçmişi</h2></div><Link href="/kredi-yukle">Kredi yükle →</Link></header>{credits.transactions.length === 0 ? <p>Henüz kredi hareketi bulunmuyor.</p> : credits.transactions.map((transaction) => <div key={transaction.id}><i className={transaction.amount < 0 ? styles.spend : ""}>{transaction.amount < 0 ? "−" : "+"}</i><p><strong>{transaction.reference_type === "seller_promotion" ? "Vitrinde öne çıkarma" : transaction.type === "spend" ? "Teklif / detay bedeli" : transaction.type === "bonus" ? "Paket bonusu" : "Kredi yükleme"}</strong><small>{transaction.metadata?.public_reference ?? transaction.metadata?.merchant_oid ?? (transaction.metadata?.days ? `${transaction.metadata.days} gün` : "Hesap hareketi")} · {date(transaction.created_at)}</small></p><b>{transaction.amount > 0 ? "+" : ""}{transaction.amount}<small>kalan {transaction.balance_after}</small></b></div>)}</section>
         </section>}
 
         {view === "portfolio" && <section className={`${styles.workspaceView} ${styles.viewEnter}`}>
@@ -1234,9 +1225,8 @@ export function SellerDashboard() {
               <span>{logoUploading ? "…" : "✎"}</span>
             </label>
             {profile.profile?.logo_url && <button aria-label="Logoyu kaldır" className={styles.logoRemove} disabled={logoUploading} onClick={() => removeBranding("logo")} type="button">✕</button>}
-          </div><div><span>{profile.profile?.profile_type === "company" ? "FİRMA HESABI" : "BİREYSEL PROFESYONEL"}</span><h2>{profile.profile?.company_name || user?.name}</h2><p>{profile.profile?.description || "Firma açıklaması henüz eklenmedi."}</p><div><b>✓ Kimlik doğrulandı</b><b>✓ Yönetici onaylı</b></div></div><aside><small>HESAP SAHİBİ</small><strong>{user?.name}</strong><span>{user?.email}</span>{profile.profile?.reviewed_at && <em>Onay: {new Date(profile.profile.reviewed_at).toLocaleDateString("tr-TR")}</em>}</aside></div><div className={styles.profileGrid}><article><header><i>▦</i><div><span>HİZMET KATEGORİLERİ</span><strong>{profile.categories.length} kategori</strong></div></header><div>{profile.categories.map((item) => <b key={item.id} style={{ color: item.color, background: `${item.color}14` }}>{item.icon} {item.name}</b>)}</div><button onClick={() => selectView("services")}>Hizmet kataloğunu yönet →</button></article><article><header><i>📍</i><div><span>HİZMET BÖLGELERİ</span><strong>{new Set(profile.locations.map((item) => item.city_id)).size} il · {profile.locations.length} ilçe</strong></div></header><div>{profile.locations.slice(0, 8).map((item) => <b key={item.district_id}>📍 {item.city_name}, {item.district_name}</b>)}</div><button onClick={() => { setFilter("all"); selectView("requests"); }}>Bölgedeki talepleri gör →</button></article><article><header><i>✦</i><div><span>VİTRİN DURUMU</span><strong>{featured.is_featured ? "Öne çıkan profil" : "Standart görünürlük"}</strong></div></header><p>{featured.is_featured ? "Profilin ana sayfa vitrininde daha görünür durumda." : "Kredi kullanarak profilini ana sayfadaki öne çıkanlara taşıyabilirsin."}</p><button onClick={() => selectView("visibility")}>Görünürlüğü yönet →</button></article></div></section>}
+          </div><div><span>{profile.profile?.profile_type === "company" ? "FİRMA HESABI" : "BİREYSEL PROFESYONEL"}</span><h2>{profile.profile?.company_name || user?.name}</h2><p>{profile.profile?.description || "Firma açıklaması henüz eklenmedi."}</p><div><b>✓ Kimlik doğrulandı</b><b>✓ Yönetici onaylı</b></div></div><aside><small>HESAP SAHİBİ</small><strong>{user?.name}</strong><span>{user?.email}</span>{profile.profile?.reviewed_at && <em>Onay: {new Date(profile.profile.reviewed_at).toLocaleDateString("tr-TR")}</em>}</aside></div><div className={styles.profileGrid}><article><header><i>▦</i><div><span>HİZMET KATEGORİLERİ</span><strong>{profile.categories.length} kategori</strong></div></header><div>{profile.categories.map((item) => <b key={item.id} style={{ color: item.color, background: `${item.color}14` }}>{item.icon} {item.name}</b>)}</div><button onClick={() => selectView("services")}>Hizmet kataloğunu yönet →</button></article><article><header><i>📍</i><div><span>HİZMET BÖLGELERİ</span><strong>{new Set(profile.locations.map((item) => item.city_id)).size} il · {profile.locations.length} ilçe</strong></div></header><div>{profile.locations.slice(0, 8).map((item) => <b key={item.district_id}>📍 {item.city_name}, {item.district_name}</b>)}</div><button onClick={() => { setFilter("all"); selectView("requests"); }}>Bölgedeki talepleri gör →</button></article></div></section>}
 
-        {view === "visibility" && <section className={`${styles.workspaceView} ${styles.viewEnter}`}><header><div><span>VİTRİN VE GÖRÜNÜRLÜK</span><h1>Öne çıkanlarda yer al</h1><p>Profilini ana sayfadaki öne çıkan profesyoneller bölümüne taşı.</p></div>{featured.is_featured && <b className={styles.featuredBadge}>★ {featured.featured_until ? new Date(featured.featured_until).toLocaleDateString("tr-TR") : "Aktif"} tarihine kadar</b>}</header><div className={styles.visibilityHero}><div><span>KREDİYLE GÖRÜNÜRLÜK</span><h2>Daha çok müşteri tarafından keşfedil.</h2><p>Öne çıkarılan profiller ana sayfa vitrininde sponsorlu etiketiyle gösterilir.</p><ul><li>✓ Ana sayfa profesyonel vitrini</li><li>✓ Şeffaf sponsorlu ibaresi</li><li>✓ Puan ve hizmet görünürlüğü</li></ul></div><aside><small>MEVCUT BAKİYE</small><strong>⚡ {credits.balance}</strong><Link href="/kredi-yukle">Kredi yükle →</Link></aside></div><div className={styles.packageGrid}>{Object.entries(featured.packages).map(([key, item], index) => <article className={index === 1 ? styles.popular : ""} key={key}>{index === 1 && <b>EN AVANTAJLI</b>}<span>{item.label.toUpperCase()}</span><strong>{item.credits}<small> kredi</small></strong><p>{item.days} gün boyunca vitrin görünürlüğü</p><button disabled={busy || credits.balance < item.credits} onClick={() => buyPromotion(key)}>{credits.balance < item.credits ? "Bakiye yetersiz" : "Paketi etkinleştir"}</button></article>)}</div><section className={styles.ledger}><header><div><span>HESAP HAREKETLERİ</span><h2>Kredi geçmişi</h2></div><Link href="/kredi-yukle">Kredi yükle →</Link></header>{credits.transactions.length === 0 ? <p>Henüz kredi hareketi bulunmuyor.</p> : credits.transactions.map((transaction) => <div key={transaction.id}><i className={transaction.amount < 0 ? styles.spend : ""}>{transaction.amount < 0 ? "−" : "+"}</i><p><strong>{transaction.reference_type === "seller_promotion" ? "Vitrinde öne çıkarma" : transaction.type === "spend" ? "Teklif / detay bedeli" : transaction.type === "bonus" ? "Paket bonusu" : "Kredi yükleme"}</strong><small>{transaction.metadata?.public_reference ?? transaction.metadata?.merchant_oid ?? (transaction.metadata?.days ? `${transaction.metadata.days} gün` : "Hesap hareketi")} · {date(transaction.created_at)}</small></p><b>{transaction.amount > 0 ? "+" : ""}{transaction.amount}<small>kalan {transaction.balance_after}</small></b></div>)}</section></section>}
       </section>
     </div>
     <Modal onClose={() => setShowPortfolioForm(false)} open={showPortfolioForm} size="xl" subtitle="Müşteriler bu bilgileri vitrininde görür." title={portfolioForm.id ? "Çalışmayı düzenle" : "Yeni çalışma ekle"} footer={<>

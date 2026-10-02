@@ -26,7 +26,6 @@ const KREDI = [
   { step: "1", title: "Talep özetini gör", hint: "Kategori, ilçe, bütçe ve kısa açıklama", tag: "Ücretsiz", free: true },
   { step: "2", title: "Detayı aç", hint: "Maliyet, açmadan önce gösterilir", tag: "Kredi", free: false },
   { step: "3", title: "Teklif gönder, güncelle", hint: "Aynı talebi tekrar açmak da ücretsiz", tag: "Ücretsiz", free: true },
-  { step: "★", title: "Öne çık (isteğe bağlı)", hint: "7, 14 veya 30 gün vitrinde yer al", tag: "Kredi", free: false },
 ];
 
 /**

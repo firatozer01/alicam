@@ -37,7 +37,6 @@
 .identity{min-width:0}
 .nameRow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .nameRow h1{margin:0;font-family:var(--font-fraunces),Georgia,serif;font-size:clamp(26px,3vw,34px);font-weight:700;line-height:1.15}
-.featured{background:var(--warn-bg);color:var(--warn-fg);border-radius:7px;padding:4px 10px;font-size:10.5px;font-weight:800;letter-spacing:.06em}
 .verified{background:var(--ok-bg);color:var(--ok-fg);border-radius:7px;padding:4px 10px;font-size:11.5px;font-weight:700}
 .meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:9px 0 0;font-size:12.5px;color:var(--muted)}
 .about{margin:10px 0 0;font-size:14px;line-height:1.65;color:var(--ink-2);max-width:64ch}

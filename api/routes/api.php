@@ -17,7 +17,6 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\SellerCreditController;
 use App\Http\Controllers\Api\SellerProfileController;
-use App\Http\Controllers\Api\SellerPromotionController;
 use App\Http\Controllers\Api\SellerRequestController;
 use App\Http\Controllers\Api\SellerReviewController;
 use App\Http\Controllers\Api\SellerServiceController;
@@ -221,8 +220,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/services', [SellerServiceController::class, 'store']);
             Route::put('/services/{sellerService}', [SellerServiceController::class, 'update']);
             Route::delete('/services/{sellerService}', [SellerServiceController::class, 'destroy']);
-            Route::get('/featured', [SellerPromotionController::class, 'show']);
-            Route::post('/featured', [SellerPromotionController::class, 'store']);
         });
     });
 

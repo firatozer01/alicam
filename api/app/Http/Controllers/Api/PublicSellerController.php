@@ -90,7 +90,6 @@ class PublicSellerController extends Controller
                 'banner_url' => $user->sellerProfile?->banner_url,
                 'logo_url' => $user->sellerProfile?->logo_url,
                 'avatar_url' => $user->avatar_url,
-                'is_featured' => $user->activeSellerPromotions()->exists(),
                 'member_since' => $user->created_at?->toIso8601String(),
                 // Vitrindeki teklif modali bu agaci gosterir: saticinin
                 // calistigi kategoriler ve altindaki basliklar.

@@ -11,7 +11,6 @@ use App\Models\Role;
 use App\Models\SellerCredit;
 use App\Models\SellerLocation;
 use App\Models\SellerProfile;
-use App\Models\SellerPromotion;
 use App\Models\SellerReview;
 use App\Models\SellerService;
 use App\Models\User;
@@ -116,7 +115,6 @@ class DemoMarketplaceSeeder extends Seeder
                 }
             }
 
-            $this->seedPromotions($sellers);
             $this->seedRequestsAndOffers($buyers, $sellers, $categories);
         });
     }
@@ -135,30 +133,6 @@ class DemoMarketplaceSeeder extends Seeder
         ])->save();
 
         return $user;
-    }
-
-    private function seedPromotions($sellers): void
-    {
-        foreach ($sellers->take(4) as $index => $definition) {
-            $seller = $definition['user'];
-            $promotion = SellerPromotion::query()->updateOrCreate(
-                ['seller_id' => $seller->id, 'starts_at' => now()->startOfDay()],
-                [
-                    'credit_cost' => 25,
-                    'expires_at' => now()->addDays(7 + $index)->endOfDay(),
-                ],
-            );
-            $wallet = SellerCredit::query()->where('user_id', $seller->id)->firstOrFail();
-            CreditTransaction::query()->updateOrCreate(
-                ['user_id' => $seller->id, 'reference_type' => 'seller_promotion', 'reference_id' => $promotion->id],
-                [
-                    'type' => 'spend',
-                    'amount' => -25,
-                    'balance_after' => $wallet->balance,
-                    'metadata' => ['package' => 'week', 'demo' => true],
-                ],
-            );
-        }
     }
 
     private function seedRequestsAndOffers($buyers, $sellers, $categories): void

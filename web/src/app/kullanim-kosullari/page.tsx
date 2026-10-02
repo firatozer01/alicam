@@ -69,7 +69,7 @@ export default function TermsPage() {
 
     <section id="kredi">
       <h2><small>04</small>Teklif ve kredi</h2>
-      <p>Teklif verenler talep özetlerini ücretsiz görür. Talep detayını açmak ve platformun belirlediği görünürlük işlemleri (ör. vitrinde öne çıkma) krediyle ücretlendirilebilir; işlem öncesinde maliyet gösterilir.</p>
+      <p>Teklif verenler talep özetlerini ücretsiz görür. Talep detayını açmak krediyle ücretlendirilir; maliyet işlem öncesinde gösterilir.</p>
       <p>Teklif göndermek, güncellemek ve daha önce açılmış bir talebi tekrar görüntülemek ek kredi gerektirmez.</p>
     </section>
 

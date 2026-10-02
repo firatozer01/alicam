@@ -61,32 +61,6 @@ class MarketplaceDiscoveryApiTest extends TestCase
         $this->assertDatabaseMissing('seller_services', ['id' => $serviceId]);
     }
 
-    public function test_featured_package_spends_credits_and_creates_ledger_entry(): void
-    {
-        $this->seed(DatabaseSeeder::class);
-        [$seller] = $this->marketplace();
-        SellerCredit::query()->create(['user_id' => $seller->id, 'balance' => 100]);
-
-        $this->actingAs($seller)->postJson('/api/seller/featured', ['package' => 'week'])
-            ->assertCreated()
-            ->assertJsonPath('data.balance', 75)
-            ->assertJsonPath('data.credit_spent', 25);
-
-        $this->assertDatabaseHas('seller_credits', ['user_id' => $seller->id, 'balance' => 75]);
-        $this->assertDatabaseHas('seller_promotions', ['seller_id' => $seller->id, 'credit_cost' => 25]);
-        $this->assertDatabaseHas('credit_transactions', [
-            'user_id' => $seller->id,
-            'type' => 'spend',
-            'amount' => -25,
-            'reference_type' => 'seller_promotion',
-        ]);
-
-        $this->actingAs($seller)->getJson('/api/seller/credits')
-            ->assertOk()
-            ->assertJsonPath('data.balance', 75)
-            ->assertJsonPath('data.spent_this_month', 25);
-    }
-
     public function test_buyer_can_review_accepted_offer_and_rating_appears_publicly(): void
     {
         $this->seed(DatabaseSeeder::class);
