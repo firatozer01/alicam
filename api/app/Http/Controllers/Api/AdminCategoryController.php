@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Category;
+use App\Services\CategoryUnlockCost;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +46,9 @@ class AdminCategoryController extends Controller
             return $category;
         });
 
+        // Bedel agacin tamamina miras gecer; onbellegi tazele.
+        CategoryUnlockCost::forget();
+
         return response()->json([
             'message' => 'Kategori oluşturuldu.',
             'data' => $this->loadCategory($category),
@@ -71,6 +75,9 @@ class AdminCategoryController extends Controller
                 'unlock_cost' => $unlockCost,
             ]);
         });
+
+        // Bedel agacin tamamina miras gecer; onbellegi tazele.
+        CategoryUnlockCost::forget();
 
         return response()->json([
             'message' => 'Kategori güncellendi.',

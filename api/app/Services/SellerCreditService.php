@@ -59,7 +59,7 @@ class SellerCreditService
             // ilan icin gercek kredi odemesi kabul edilemez.
             $cost = $lockedRequest->is_demo
                 ? 0
-                : (int) ($lockedRequest->category->creditCost?->unlock_cost ?? 0);
+                : CategoryUnlockCost::forId($lockedRequest->category_id);
 
             if ($wallet->balance < $cost) {
                 throw new InsufficientCreditsException($wallet->balance, $cost);

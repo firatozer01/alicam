@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Services\CategoryUnlockCost;
 use App\Support\Text;
 use Illuminate\Support\Str;
 
@@ -60,7 +61,7 @@ class SellerRequestResource extends JsonResource
             'is_favorite' => (bool) $this->getAttribute('favorited_by_seller'),
             'unlock_cost' => $isUnlocked
                 ? null
-                : ($this->is_demo ? 0 : (int) ($this->category->creditCost?->unlock_cost ?? 0)),
+                : ($this->is_demo ? 0 : CategoryUnlockCost::forId($this->category_id)),
             // Arayuz bunu rozetle gosterir; ornek talep gercek isle
             // karistirilmasin.
             'is_demo' => (bool) $this->is_demo,
