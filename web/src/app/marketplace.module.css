@@ -743,7 +743,12 @@
   .areaShot { width: 56px; height: 56px; border-radius: 13px; }
   .panelCta .btn { width: 100%; }
   .rootStrip { grid-template-columns: minmax(0, 1fr); }
-  .page { padding-bottom: 76px; }
+  /* Yapisik "Ucretsiz talep olustur" seridinin yeri. Dolgu KABUGUN
+     kendisindeydi; kabuk alt bilgiyi de iceriyor, yani 76px koyu alt
+     bilginin ALTINDA, kabugun acik zemini uzerinde duruyordu: telefonda
+     sayfanin en altinda beyaz bir serit. Dolgu alt bilginin icine
+     tasindi, serit artik koyu zeminden yer aliyor. */
+  .page > footer { padding-bottom: 76px; }
   /* NEDEN sagda 150px bos: asistan maskotu (position: fixed, sag alt, z-index
      80) tam genislikteki bu seridin ustune biniyor ve sag ucundaki dokunuslari
      yutuyordu. Bosluk maskotun kendi olculerine gore: burada 124px + 20px. */

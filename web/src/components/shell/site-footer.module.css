@@ -224,7 +224,7 @@
 .bottom {
   position: relative; display: flex; justify-content: space-between; align-items: center;
   flex-wrap: wrap; gap: 12px 18px; padding-top: 22px; padding-bottom: 26px;
-  border-top: 1px solid rgb(255 255 255 / .1); font-size: 14px;
+  padding-right: 60px; border-top: 1px solid rgb(255 255 255 / .1); font-size: 14px;
 }
 /* Telif + rozetler + yasal baglantilar + yukari dugmesi masaustunde TEK
    satir. Dort parca birlikte ~1200px istiyor; sigdigi genislikten itibaren
@@ -256,13 +256,17 @@
 /* Gorsel yoksa marka ADI yaziyla duruyor: kutu bos ya da kirik ikonlu
    kalmiyor, dosya eklenince kendiliginden gorsele donuyor. */
 
+/* Satir akisindan CIKARILDI ve katmanlandi: akista kalirsa kart bandinin
+   sagina dusuyor ve bant "en sagdaki" oge olmuyordu. .bottom'un sag
+   dolgusu dugmenin yerini ayiriyor, yani bandin altina da girmiyor. */
 .toTop {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 2;
   width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
   background: #fff; color: var(--navy); font-size: 18px; font-weight: 800;
   box-shadow: 0 10px 24px -8px rgb(0 0 0 / .5);
   transition: transform .2s ease, background .2s ease, color .2s ease;
 }
-.toTop:hover { transform: translateY(-4px); background: var(--orange); color: #fff; }
+.toTop:hover { transform: translateY(calc(-50% - 4px)); background: var(--orange); color: #fff; }
 
 /* ---------- Bildirim balonu ---------- */
 .toast {
@@ -302,7 +306,6 @@
   .quick { padding: 18px; }
   .tickerLabel { padding: 14px; font-size: 0; gap: 0; }
   .bottom { flex-direction: column; align-items: flex-start; padding-right: calc(var(--gutter) + 56px); }
-  .toTop { position: absolute; right: var(--gutter); top: 18px; }
   .stores { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
   .store { min-width: 0; padding: 0 10px; gap: 9px; }
   .store:last-child { grid-column: 1 / -1; justify-self: start; }
@@ -348,26 +351,92 @@
 
 /* Kart bandi 349x26; sutuna sigdigi kadar, orani bozulmadan. */
 
-/* ---------- Guven rozetleri ----------
-   Alt cizginin hemen ustunde, saga yasli. Daha once Kurumsal sutununun
-   icindeydiler ve sutun ~200px oldugu icin hepsi okunamayacak kadar
-   kuculuyordu; burada kendi olculerinde duruyorlar. */
-.guvenlik {
-  display: flex; align-items: center; justify-content: flex-end;
-  flex-wrap: wrap; gap: 14px 18px; padding-bottom: 18px;
-}
-.guvenlikBaslik { margin: 0 auto 0 0; color: #fff; font: 700 15px var(--font-inter), sans-serif; }
+
+
 /* Karekod taranabilir kalmali; beyaz zeminli JPEG oldugu icin koyu alt
    bilgide kendi kutusuyla duruyor. */
-.etbis { height: 92px; width: auto; display: block; border-radius: 6px; }
-.ssl { height: 46px; width: auto; display: block; }
+
+
 /* Kart bandi 349x26 raster: buyutulurse bulaniklasir, dogal olcusu tavan. */
-.kartBandi { display: block; width: min(349px, 100%); height: auto; margin-left: auto; }
+
 
 @media (max-width: 760px) {
-  .guvenlik { justify-content: flex-start; gap: 12px; }
-  .guvenlikBaslik { flex: 1 1 100%; margin: 0; }
-  .etbis { height: 74px; }
-  .ssl { height: 38px; }
-  .kartBandi { margin-left: 0; }
+  
+  
+  
+  
+  
+}
+
+/* ---------- Guven rozetleri ----------
+   Alt cizginin hemen ustunde, SAGA yasli bir blok: baslik solda, rozetler
+   sagda, kart bandi da onlarin altinda ve en sagda. Daha once Kurumsal
+   sutununun icindeydiler; sutun ~200px oldugu icin bant 223px'e iniyor,
+   karekod okunamiyordu. */
+/* Uc sutun ACIKCA tanimli: ETBIS ve SSL ucuncu sutunu kendiliginden
+   olusturunca "grid-column: 1 / -1" ACIK izgaranin sonuna, yani ikinci
+   sutunun bittigi yere kadar uzaniyordu ve bant saga yaslanmiyordu. */
+
+
+
+
+/* Karekod taranabilir kalmali. */
+
+
+/* Bant 349x26 raster; 1,2 kattan fazla buyutulurse bulaniklasir. */
+
+
+@media (max-width: 760px) {
+  
+  
+  
+  
+  
+  
+  
+}
+
+/* ---------- Guven rozetleri ----------
+   Alt cizginin USTUNDEKI satir: baslik solda, ETBIS + SSL + yukari
+   dugmesi sagda. Kart bandi burada DEGIL, bir alttaki cizgide ve orada
+   en sagda duruyor. */
+
+
+/* Karekod taranabilir kalmali. */
+
+
+/* Bant 349x26 raster; 1,2 kattan fazla buyutulurse bulaniklasir. */
+
+
+@media (max-width: 760px) {
+  
+  
+  
+  
+  
+}
+
+/* ---------- Guven rozetleri ----------
+   Alt cizginin USTUNDEKI satir: baslik ve iki rozet SAGA yasli, sikisik
+   bir obek. Baslik once "margin-right: auto" ile en sola itiliyordu ve
+   arada kocaman bir bosluk kaliyordu; rozetler de farkli yuksekliklerde
+   oldugu icin dengesiz duruyordu. Artik ortak bir eksende, yan yana. */
+.guvenlik {
+  display: flex; align-items: center; justify-content: flex-end;
+  flex-wrap: wrap; gap: 12px 16px; padding-bottom: 20px;
+}
+.guvenlikBaslik { margin: 0; color: #fff; font: 700 15px var(--font-inter), sans-serif; }
+/* Karekod taranabilir kalmali; SSL rozeti onun optik agirligina yakin. */
+.etbis { height: 82px; width: auto; display: block; border-radius: 6px; }
+.ssl { height: 52px; width: auto; display: block; }
+/* Bant alt cizgide ve en sagda. 349x26 raster; 1,2 kattan fazla
+   buyutulurse bulaniklasir. */
+.kartBandi { width: min(420px, 100%); height: auto; display: block; margin-left: auto; }
+
+@media (max-width: 760px) {
+  .guvenlik { justify-content: flex-start; }
+  .guvenlikBaslik { flex: 1 1 100%; }
+  .etbis { height: 70px; }
+  .ssl { height: 44px; }
+  .kartBandi { width: 100%; margin-left: 0; }
 }

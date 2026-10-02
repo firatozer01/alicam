@@ -434,6 +434,8 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
         <Link href="/gizlilik">Gizlilik politikası</Link>
         <a href="mailto:destek@alicam.net">destek@alicam.net</a>
       </nav>}
+      {/* Kart bandi alt satirin SON ogesi: en sagda. Yukari dugmesi bir
+          ustteki guven satirina tasindi, yoksa bandin sagina dusuyordu. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img alt="Visa, Mastercard, troy ve PayTR ile ödeme" className={styles.kartBandi} height={26} loading="lazy" src="/odeme-marka/kart-bandi.png" width={349} />
       <button
