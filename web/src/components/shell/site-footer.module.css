@@ -326,7 +326,7 @@
 .unvan { color: rgb(255 255 255 / .62); font-size: 14.5px; line-height: 1.5; }
 
 /* ---------- Kurumsal sutunundaki guvenlik rozetleri ---------- */
-.guvenlik { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+
 /* ETBIS karekodu kare; kutusu da oyle. */
 
 
@@ -338,13 +338,36 @@
 
 
 
-.guvenlikBaslik { margin: 22px 0 0; color: #fff; font: 700 14px var(--font-inter), sans-serif; }
+
 
 /* ---------- Kurumsal: guvenlik rozetleri ---------- */
-.guvenlikBaslik { margin: 22px 0 0; color: #fff; font: 700 14px var(--font-inter), sans-serif; }
-.guvenlik { display: flex; align-items: center; gap: 14px; margin-top: 12px; flex-wrap: wrap; }
+
+
 /* Karekod okunabilir kalmali: kucultulmuyor, kendi olcusunde duruyor. */
-.etbis { height: 76px; width: auto; display: block; border-radius: 4px; }
-.ssl { height: 38px; width: auto; display: block; }
+
+
 /* Kart bandi 349x26; sutuna sigdigi kadar, orani bozulmadan. */
-.kartBandi { display: block; width: 100%; max-width: 240px; height: auto; margin-top: 14px; }
+
+/* ---------- Guven rozetleri ----------
+   Alt cizginin hemen ustunde, saga yasli. Daha once Kurumsal sutununun
+   icindeydiler ve sutun ~200px oldugu icin hepsi okunamayacak kadar
+   kuculuyordu; burada kendi olculerinde duruyorlar. */
+.guvenlik {
+  display: flex; align-items: center; justify-content: flex-end;
+  flex-wrap: wrap; gap: 14px 18px; padding-bottom: 18px;
+}
+.guvenlikBaslik { margin: 0 auto 0 0; color: #fff; font: 700 15px var(--font-inter), sans-serif; }
+/* Karekod taranabilir kalmali; beyaz zeminli JPEG oldugu icin koyu alt
+   bilgide kendi kutusuyla duruyor. */
+.etbis { height: 92px; width: auto; display: block; border-radius: 6px; }
+.ssl { height: 46px; width: auto; display: block; }
+/* Kart bandi 349x26 raster: buyutulurse bulaniklasir, dogal olcusu tavan. */
+.kartBandi { display: block; width: min(349px, 100%); height: auto; margin-left: auto; }
+
+@media (max-width: 760px) {
+  .guvenlik { justify-content: flex-start; gap: 12px; }
+  .guvenlikBaslik { flex: 1 1 100%; margin: 0; }
+  .etbis { height: 74px; }
+  .ssl { height: 38px; }
+  .kartBandi { margin-left: 0; }
+}

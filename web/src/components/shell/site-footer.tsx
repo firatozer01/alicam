@@ -371,23 +371,6 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
             <Link href="/kullanim-kosullari">Kullanım koşulları</Link>
             <Link href="/gizlilik">Gizlilik politikası</Link>
 
-            {/*
-              Rozetlerin hepsi isletmenin kendi dosyalari: ETBIS karekodu
-              Ticaret Bakanligi'nin sisteminden, SSL rozeti sertifika
-              saglayicisindan, kart bandi ise odeme kurulusundan geliyor.
-              Hicbiri burada cizilmiyor.
-            */}
-            <h4 className={styles.guvenlikBaslik}>Güvenli alışveriş</h4>
-            <div className={styles.guvenlik}>
-              <a href="https://etbis.ticaret.gov.tr/" rel="noopener noreferrer" target="_blank">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img alt="ETBİS'e kayıtlıdır" className={styles.etbis} height={120} loading="lazy" src="/odeme-marka/etbis.jpg" width={104} />
-              </a>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img alt="SSL ile şifrelenmiş bağlantı" className={styles.ssl} height={52} loading="lazy" src="/odeme-marka/ssl.png" width={160} />
-            </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img alt="Visa, Mastercard, troy ve PayTR ile ödeme" className={styles.kartBandi} height={26} loading="lazy" src="/odeme-marka/kart-bandi.png" width={349} />
           </nav>
         </div>
 
@@ -424,16 +407,35 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
       ><span>alıcam<em>.net</em></span></div>
     </>}
 
-    {/* 5) Alt cizgi: telif, odeme rozetleri ve yasal baglantilar TEK satirda.
+    {/* 5) Guven rozetleri: alt cizginin hemen ustunde, saga yasli.
+           Once Kurumsal sutununun icindeydiler; sutun ~200px oldugu icin
+           hepsi minicik kaliyordu. Burada kendi olculerinde duruyorlar.
+           Odeme bandi bir alttaki cizgide, en sagda. */}
+    <div className={`${styles.wrap} ${styles.guvenlik}`}>
+      <h4 className={styles.guvenlikBaslik}>Güvenli alışveriş</h4>
+      <a href="https://etbis.ticaret.gov.tr/" rel="noopener noreferrer" target="_blank">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img alt="ETBİS'e kayıtlıdır" className={styles.etbis} height={120} loading="lazy" src="/odeme-marka/etbis.jpg" width={104} />
+      </a>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="SSL ile şifrelenmiş bağlantı" className={styles.ssl} height={52} loading="lazy" src="/odeme-marka/ssl.png" width={160} />
+    </div>
+
+    {/* 6) Alt cizgi: telif, yasal baglantilar ve odeme bandi TEK satirda.
            Rozetler once ayri bir serit olarak duruyordu ve alt bilgi masaustunde
            iki satira cikiyordu. */}
     <div className={`${styles.wrap} ${styles.bottom}`}>
       <span>© 2026 alıcam.net · SMN LIFE İnş. Tic. Ltd. Şti. Her hakkı saklıdır.</span>
-      <nav>
+      {/* Yasal baglantilar tam alt bilgide Kurumsal sutununda duruyor; burada
+          tekrar basmak ayni uc baglantiyi iki kez gostermek olurdu. Kisa alt
+          bilgide sutun YOK, orada tek yerleri bu satir. */}
+      {compact && <nav>
         <Link href="/kullanim-kosullari">Kullanım koşulları</Link>
         <Link href="/gizlilik">Gizlilik politikası</Link>
         <a href="mailto:destek@alicam.net">destek@alicam.net</a>
-      </nav>
+      </nav>}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="Visa, Mastercard, troy ve PayTR ile ödeme" className={styles.kartBandi} height={26} loading="lazy" src="/odeme-marka/kart-bandi.png" width={349} />
       <button
         aria-label="Sayfanın başına dön"
         className={styles.toTop}
