@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { apiRequest } from "@/lib/api";
 import { BrandLogo } from "./brand";
 import styles from "./site-footer.module.css";
@@ -49,6 +49,51 @@ const storeIcons = {
 };
 
 /* ================= Veri ================= */
+
+/**
+ * Alt bilgideki odeme seridi.
+ *
+ * Odemeler PayTR uzerinden aliniyor; PayTR Visa, Mastercard ve Troy
+ * kartlarini isliyor ve islemi 3D Secure ile dogruluyor. Kullanici
+ * kart bilgisini girmeden once hangi semalarin kabul edildigini ve
+ * dogrulamanin yapildigini gormeli.
+ *
+ * Gorseller marka dosyalari: PayTR uye isyeri panelinden indirilip
+ * web/public/odeme/ altina konuyor. Dosya yoksa rozet marka ADIYLA
+ * basiliyor (asagidaki onError), yani serit hicbir zaman kirik ikon
+ * gostermiyor ve dosyalar eklendiginde kod degismeden gorsele geciyor.
+ */
+const ODEME_MARKALARI = [
+  { ad: "Visa", dosya: "/odeme/visa.svg" },
+  { ad: "Mastercard", dosya: "/odeme/mastercard.svg" },
+  { ad: "Troy", dosya: "/odeme/troy.svg" },
+  { ad: "3D Secure", dosya: "/odeme/3d-secure.svg" },
+  { ad: "PayTR", dosya: "/odeme/paytr.svg" },
+];
+
+function OdemeRozeti({ ad, dosya }: { ad: string; dosya: string }) {
+  const [gorselVar, setGorselVar] = useState(true);
+
+  /**
+   * onError TEK BASINA yetmiyor: <img> sunucu cizimiyle zaten belgede
+   * duruyor ve dosya yoksa tarayici hatayi React dinleyiciyi baglamadan
+   * once veriyor. O durumda olay kacirilip kirik ikon ekranda kaliyordu.
+   * Geri cagrimli ref DOM'a baglanirken durumu ayrica okuyor: yuklenmis
+   * ama genisligi sifirsa dosya gelmemistir.
+   */
+  const olcu = useCallback((dugum: HTMLImageElement | null) => {
+    if (dugum?.complete && dugum.naturalWidth === 0) setGorselVar(false);
+  }, []);
+
+  return <span className={styles.odemeRozet}>
+    {gorselVar
+      // next/image kullanilmiyor: dosya yoksa yaziya dusmek gerekiyor ve
+      // bunlar zaten kucuk, sabit olculu marka dosyalari.
+      // eslint-disable-next-line @next/next/no-img-element
+      ? <img alt={ad} height={18} onError={() => setGorselVar(false)} ref={olcu} src={dosya} />
+      : <b>{ad}</b>}
+  </span>;
+}
 
 type TickerItem = { key: string; icon: string; title: string; district: string; offers: number };
 
@@ -394,9 +439,15 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
       ><span>alıcam<em>.net</em></span></div>
     </>}
 
-    {/* 5) Alt cizgi */}
+    {/* 5) Odeme seridi — tam ve kisa alt bilgide ayni */}
+    <div className={`${styles.wrap} ${styles.odeme}`}>
+      <small>GÜVENLİ ÖDEME</small>
+      {ODEME_MARKALARI.map((marka) => <OdemeRozeti ad={marka.ad} dosya={marka.dosya} key={marka.ad} />)}
+    </div>
+
+    {/* 6) Alt cizgi */}
     <div className={`${styles.wrap} ${styles.bottom}`}>
-      <span>© 2026 alıcam.net · Sen iste, onlar teklif versin.</span>
+      <span>© 2026 alıcam.net · SMN LIFE İnş. Tic. Ltd. Şti. Her hakkı saklıdır.</span>
       <nav>
         <Link href="/kullanim-kosullari">Kullanım koşulları</Link>
         <Link href="/gizlilik">Gizlilik politikası</Link>

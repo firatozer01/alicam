@@ -97,10 +97,10 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
   }, [sellerId]);
 
   // Yukleme ve hata durumlarinda da ortak ust cubuk korunur.
-  if (loading) return <PageShell className={styles.page} header={{ activeKey: "rehber" }} width="full">
+  if (loading) return <PageShell className={styles.page} header={{ activeKey: "rehber" }} tone="panel" width="full">
     <main className={styles.state}><i /><p>Vitrin hazırlanıyor…</p></main>
   </PageShell>;
-  if (error || !seller) return <PageShell className={styles.page} header={{ activeKey: "rehber" }} width="full">
+  if (error || !seller) return <PageShell className={styles.page} header={{ activeKey: "rehber" }} tone="panel" width="full">
     <main className={styles.state}><p>{error || "Hizmet veren bulunamadı."}</p><Link href="/">Ana sayfaya dön →</Link></main>
   </PageShell>;
 
@@ -128,7 +128,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
 
   // width="full": magaza kapagi ve yapiskan serit tam genislik olmali,
   // ic bloklar kendi .wrap kapsayicisini kullaniyor.
-  return <PageShell className={styles.page} header={{ activeKey: "rehber" }} width="full">
+  return <PageShell className={styles.page} header={{ activeKey: "rehber" }} tone="panel" width="full">
 
     {/* Magaza kapagi: fotograf varsa genis kapak, yoksa eski degrade. */}
     <header className={seller.banner_url ? `${styles.storeCover} ${styles.hasBanner}` : styles.storeCover} style={{ "--accent": accent } as React.CSSProperties}>

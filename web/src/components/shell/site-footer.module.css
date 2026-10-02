@@ -229,6 +229,34 @@
 .bottom nav { display: flex; gap: 20px; flex-wrap: wrap; }
 .bottom a { color: inherit; text-decoration: none; }
 .bottom a:hover { color: #fff; }
+
+/* ---------- Odeme seridi ----------
+   PayTR uzerinden Visa, Mastercard ve Troy kartlari isleniyor; islem
+   3D Secure ile dogrulaniyor. Serit alt cizginin USTUNDE, hem tam hem
+   kisa alt bilgide duruyor: odeme guvenligi isareti pazarlama bolumu
+   degil, her sayfada gorunmesi gereken bir bilgi. */
+.odeme {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px;
+  padding-top: 20px; padding-bottom: 2px;
+  border-top: 1px solid rgb(255 255 255 / .1);
+}
+.odeme > small {
+  margin-right: 4px; color: rgb(255 255 255 / .55);
+  font-size: 12.5px; letter-spacing: .04em;
+}
+.odemeRozet {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 30px; min-width: 50px; padding: 0 10px;
+  border: 1px solid rgb(255 255 255 / .16); border-radius: 7px;
+  background: rgb(255 255 255 / .96);
+}
+.odemeRozet img { height: 18px; width: auto; display: block; }
+/* Gorsel yoksa marka ADI yaziyla duruyor: kutu bos ya da kirik ikonlu
+   kalmiyor, dosya eklenince kendiliginden gorsele donuyor. */
+.odemeRozet b {
+  color: var(--navy); font: 800 12px/1 var(--font-inter), sans-serif;
+  letter-spacing: .02em; white-space: nowrap;
+}
 .toTop {
   width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
   background: #fff; color: var(--navy); font-size: 18px; font-weight: 800;
