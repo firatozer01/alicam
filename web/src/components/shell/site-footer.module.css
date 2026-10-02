@@ -328,70 +328,22 @@
 
 .unvan { color: rgb(255 255 255 / .62); font-size: 14.5px; line-height: 1.5; }
 
-/* ---------- Kurumsal sutunundaki guvenlik rozetleri ---------- */
-
-/* ETBIS karekodu kare; kutusu da oyle. */
-
-
-
-
-
-
-
-
-
-
-
-
-/* ---------- Kurumsal: guvenlik rozetleri ---------- */
-
-
-/* Karekod okunabilir kalmali: kucultulmuyor, kendi olcusunde duruyor. */
-
-
-/* Kart bandi 349x26; sutuna sigdigi kadar, orani bozulmadan. */
-
-
-
-/* Karekod taranabilir kalmali; beyaz zeminli JPEG oldugu icin koyu alt
-   bilgide kendi kutusuyla duruyor. */
-
-
-/* Kart bandi 349x26 raster: buyutulurse bulaniklasir, dogal olcusu tavan. */
-
-
-@media (max-width: 760px) {
-  
-  
-  
-  
-  
-}
-
-
-
-
-
-
-/* Bant 349x26 raster; dogal olcusunun ustune cikilmiyor. */
-
-
-@media (max-width: 760px) {
-  
-  
-}
-
 /* ---------- Guven rozetleri ----------
-   Alt cizginin SAG ucunda, telif yazisiyla AYNI satirda: ETBIS, SSL ve
-   kart bandi yan yana. Bandin yanina sigsinlar diye kucukler; karekod
-   taranamayacak kadar kuculmesin diye 40px taban. */
+   Alt cizginin SAG ucunda, telif yazisiyla AYNI satirda. Soldan saga
+   sira: kart markalari, PayTR, SSL, en sagda ETBIS.
+   Yuksekligi her marka icin AYRI veriyoruz, cunku dosyalarin ic dolgusu
+   ayni degil: esit yukseklik verirsek esit GORUNMUYORLAR. */
 .rozetler { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.etbis { height: 34px; width: auto; display: block; border-radius: 4px; }
-.ssl { height: 24px; width: auto; display: block; }
-/* Bant 349x26 raster; dogal olcusunun ustune cikilmiyor. */
-/* Dosyanin DOGAL olcusu 349x26: ne kuculuyor (okunmaz oluyor)
-   ne buyuyor (raster, bulaniklasir). */
-.kartBandi { width: 349px; max-width: 100%; height: auto; display: block; }
+/* Kart markalari kendi beyaz kutusuyla geliyor; kutunun icinde zaten
+   nefes payi var, o yuzden kutu en yuksek olculu olan. */
+.kart { height: 26px; width: auto; display: block; }
+/* PayTR cizimi kutusuz ve bastan basa dolu. Kart kutulariyla ayni
+   yuksekligi verirsek yaninda devasa durur; 18px, kutularin ICINDEKI
+   markalarla ayni optik boyu veriyor. */
+.paytr { height: 13px; width: auto; display: block; }
+.ssl { height: 26px; width: auto; display: block; }
+/* Karekod taranabilir kalmali, bu yuzden en buyuk olan o. */
+.etbis { height: 36px; width: auto; display: block; border-radius: 4px; }
 
 @media (max-width: 1059px) {
   /* Dar ekranda rozetler telifin altina gecer, yine saga yasli kalmaz:

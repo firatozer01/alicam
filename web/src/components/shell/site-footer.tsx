@@ -429,15 +429,25 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
       {/* Guven rozetleri telif yazisinin SAGINDA, ayni satirda. Yukari
           dugmesi akistan cikarilip katmanlandi (.toTop), yani rozetlerin
           sagina dusmuyor; satirin sag dolgusu ona yer ayiriyor. */}
+      {/* Sira SOLDAN SAGA: kart markalari, PayTR, SSL, en sagda ETBIS.
+          Kart markalari kendi beyaz kutulariyla geliyor; PayTR beyaz
+          cizim oldugu icin koyu zemine dogrudan oturuyor, bu yuzden
+          kutululardan daha alcak ayarlandi — optik olarak esitlensin. */}
       <div className={styles.rozetler}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="Visa" className={styles.kart} height={28} loading="lazy" src="/odeme-marka/visa.svg" width={49} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="Mastercard" className={styles.kart} height={28} loading="lazy" src="/odeme-marka/mastercard.svg" width={49} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="troy" className={styles.kart} height={28} loading="lazy" src="/odeme-marka/troy.svg" width={49} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="PayTR ile ödeme" className={styles.paytr} height={24} loading="lazy" src="/odeme-marka/paytr.svg" width={135} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="SSL ile şifrelenmiş bağlantı" className={styles.ssl} height={52} loading="lazy" src="/odeme-marka/ssl.png" width={160} />
       <a href="https://etbis.ticaret.gov.tr/" rel="noopener noreferrer" target="_blank">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img alt="ETBİS'e kayıtlıdır" className={styles.etbis} height={120} loading="lazy" src="/odeme-marka/etbis.jpg" width={104} />
       </a>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img alt="SSL ile şifrelenmiş bağlantı" className={styles.ssl} height={52} loading="lazy" src="/odeme-marka/ssl.png" width={160} />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img alt="Visa, Mastercard, troy ve PayTR ile ödeme" className={styles.kartBandi} height={26} loading="lazy" src="/odeme-marka/kart-bandi.png" width={349} />
       </div>
     </div>
 
