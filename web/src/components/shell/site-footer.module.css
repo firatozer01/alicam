@@ -246,13 +246,19 @@
 /* Satirin sagina yaslanir: telif solda, yasal baglantilar ortada,
    odeme rozetleri sagda. */
 .odeme { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.odeme > small { color: rgb(255 255 255 / .5); font-size: 12px; letter-spacing: .04em; }
 .odemeRozet {
   display: inline-flex; align-items: center; justify-content: center;
-  height: 28px; min-width: 46px; padding: 0 9px;
-  border: 1px solid rgb(255 255 255 / .16); border-radius: 7px;
-  background: rgb(255 255 255 / .96);
+  height: 30px; overflow: hidden;
+  border: 1px solid rgb(255 255 255 / .16); border-radius: 6px;
+  background: #fff;
 }
-.odemeRozet img { height: 18px; width: auto; display: block; }
+/* Kart dosemesi kendi zeminini tasiyor: kutuyu bastan basa doldurur. */
+.odemeKart { width: 47px; }
+.odemeKart img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Kelime markasi saydam: beyaz kutunun icinde nefes payiyla durur. */
+.odemeYazi { padding: 0 9px; }
+.odemeYazi img { height: 14px; width: auto; display: block; }
 /* Gorsel yoksa marka ADI yaziyla duruyor: kutu bos ya da kirik ikonlu
    kalmiyor, dosya eklenince kendiliginden gorsele donuyor. */
 .odemeRozet b {
@@ -325,3 +331,18 @@
   .toast { animation: none; }
   .store:hover, .social a:hover, .toTop:hover, .quickGo:hover { transform: none; }
 }
+
+.unvan { color: rgb(255 255 255 / .62); font-size: 14.5px; line-height: 1.5; }
+
+/* ---------- Kurumsal sutunundaki guvenlik rozetleri ---------- */
+.guvenlik { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+/* ETBIS karekodu kare; kutusu da oyle. */
+.odemeEtbis { width: 56px; height: 56px; padding: 5px; }
+.odemeEtbis img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.odemeEtbis b { font-size: 10px; line-height: 1.25; text-align: center; white-space: normal; }
+.etbis { display: inline-flex; }
+
+.ssl { display: inline-flex; align-items: center; gap: 7px; color: rgb(255 255 255 / .72); }
+.ssl svg { width: 22px; height: 22px; flex: none; fill: none; stroke: var(--green); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.sslTik { stroke: var(--green); }
+.ssl b { font-size: 13px; font-weight: 700; letter-spacing: .01em; }

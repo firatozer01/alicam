@@ -64,14 +64,16 @@ const storeIcons = {
  * gostermiyor ve dosyalar eklendiginde kod degismeden gorsele geciyor.
  */
 const ODEME_MARKALARI = [
-  { ad: "Visa", dosya: "/odeme/visa.svg" },
-  { ad: "Mastercard", dosya: "/odeme/mastercard.svg" },
-  { ad: "Troy", dosya: "/odeme/troy.svg" },
-  { ad: "3D Secure", dosya: "/odeme/3d-secure.svg" },
-  { ad: "PayTR", dosya: "/odeme/paytr.svg" },
-];
+  // "kart": semanin kendi zeminli kart doseme gorseli, kutuyu tamamen
+  // dolduruyor. "yazi": saydam kelime markasi, beyaz kutunun icinde
+  // dolguyla duruyor.
+  { ad: "Visa", dosya: "/odeme-marka/visa.svg", tur: "kart" },
+  { ad: "Mastercard", dosya: "/odeme-marka/mastercard.svg", tur: "kart" },
+  { ad: "Troy", dosya: "/odeme-marka/troy.png", tur: "yazi" },
+  { ad: "PayTR", dosya: "/odeme-marka/paytr.png", tur: "yazi" },
+] as const;
 
-function OdemeRozeti({ ad, dosya }: { ad: string; dosya: string }) {
+function OdemeRozeti({ ad, dosya, tur }: { ad: string; dosya: string; tur: "kart" | "yazi" | "etbis" }) {
   const [gorselVar, setGorselVar] = useState(true);
 
   /**
@@ -85,12 +87,14 @@ function OdemeRozeti({ ad, dosya }: { ad: string; dosya: string }) {
     if (dugum?.complete && dugum.naturalWidth === 0) setGorselVar(false);
   }, []);
 
-  return <span className={styles.odemeRozet}>
+  const kutuSinifi = tur === "kart" ? styles.odemeKart : tur === "etbis" ? styles.odemeEtbis : styles.odemeYazi;
+
+  return <span className={`${styles.odemeRozet} ${kutuSinifi}`}>
     {gorselVar
       // next/image kullanilmiyor: dosya yoksa yaziya dusmek gerekiyor ve
       // bunlar zaten kucuk, sabit olculu marka dosyalari.
       // eslint-disable-next-line @next/next/no-img-element
-      ? <img alt={ad} height={18} onError={() => setGorselVar(false)} ref={olcu} src={dosya} />
+      ? <img alt={ad} onError={() => setGorselVar(false)} ref={olcu} src={dosya} />
       : <b>{ad}</b>}
   </span>;
 }
@@ -404,6 +408,36 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
             <Link href="/giris">Ücretsiz üye ol</Link>
             <Link href="/talep-olustur">Talep oluştur</Link>
           </nav>
+
+          {/* Kurumsal: isletme kimligi, iletisim ve yasal metinler bir arada.
+              Yasal baglantilar eskiden en alttaki ince cizgideydi; tam alt
+              bilgide artik burada duruyorlar. Kisa alt bilgide sutun yok,
+              orada alt cizgide kalmaya devam ediyorlar. */}
+          <nav className={styles.column}>
+            <h3>Kurumsal</h3>
+            <span className={styles.unvan}>SMN LIFE İnş. Tic. Ltd. Şti.</span>
+            <a href="mailto:destek@alicam.net">destek@alicam.net</a>
+            <Link href="/kullanim-kosullari">Kullanım koşulları</Link>
+            <Link href="/gizlilik">Gizlilik politikası</Link>
+
+            {/* Guvenlik rozetleri. ETBIS karekodu isletmeye OZEL ve Ticaret
+                Bakanligi'nin sisteminden aliniyor; dosya gelene kadar rozet
+                yerine dogrulama baglantisi duruyor (OdemeRozeti ile ayni
+                dusme mantigi). SSL rozeti kendi cizimimiz: ucuncu bir
+                markanin isaretini taklit etmiyoruz. */}
+            <div className={styles.guvenlik}>
+              <a
+                className={styles.etbis}
+                href="https://etbis.ticaret.gov.tr/"
+                rel="noopener noreferrer"
+                target="_blank"
+              ><OdemeRozeti ad="ETBİS'e kayıtlıdır" dosya="/odeme-marka/etbis.png" tur="etbis" /></a>
+              <span className={styles.ssl}>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2 4 5.2v6.1c0 4.7 3.3 9 8 10.7 4.7-1.7 8-6 8-10.7V5.2L12 2Z" /><path className={styles.sslTik} d="m8.4 12.1 2.5 2.5 4.7-5" /></svg>
+                <b>SSL ile şifreli</b>
+              </span>
+            </div>
+          </nav>
         </div>
 
         {/* Uygulama seridi: magaza rozetleri henuz gercek bir baglanti degil. */}
@@ -444,13 +478,14 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
            iki satira cikiyordu. */}
     <div className={`${styles.wrap} ${styles.bottom}`}>
       <span>© 2026 alıcam.net · SMN LIFE İnş. Tic. Ltd. Şti. Her hakkı saklıdır.</span>
-      <nav>
+      {compact && <nav>
         <Link href="/kullanim-kosullari">Kullanım koşulları</Link>
         <Link href="/gizlilik">Gizlilik politikası</Link>
         <a href="mailto:destek@alicam.net">destek@alicam.net</a>
-      </nav>
+      </nav>}
       <div className={styles.odeme}>
-        {ODEME_MARKALARI.map((marka) => <OdemeRozeti ad={marka.ad} dosya={marka.dosya} key={marka.ad} />)}
+        <small>3D Secure</small>
+        {ODEME_MARKALARI.map((marka) => <OdemeRozeti ad={marka.ad} dosya={marka.dosya} key={marka.ad} tur={marka.tur} />)}
       </div>
       <button
         aria-label="Sayfanın başına dön"
