@@ -368,8 +368,10 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
             <h3>Kurumsal</h3>
             <span className={styles.unvan}>SMN LIFE İnş. Tic. Ltd. Şti.</span>
             <a href="mailto:destek@alicam.net">destek@alicam.net</a>
+            <Link href="/iletisim">İletişim</Link>
             <Link href="/kullanim-kosullari">Kullanım koşulları</Link>
             <Link href="/gizlilik">Gizlilik politikası</Link>
+            <Link href="/kvkk">KVKK aydınlatma metni</Link>
 
           </nav>
         </div>

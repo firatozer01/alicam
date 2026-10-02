@@ -40,6 +40,9 @@ class SiteSettingsController extends Controller
                 // Yuklenmemis her tur null doner; arayuz o zaman gomulu
                 // dosyayi kullanir.
                 'branding' => AppSettings::branding(),
+                // Iletisim sayfasi ve aydinlatma metni bunlari basiyor;
+                // yalnizca DOLU alanlar donuyor.
+                'company' => AppSettings::company(),
             ]])
             ->header('Cache-Control', 'private, max-age=0, must-revalidate');
     }

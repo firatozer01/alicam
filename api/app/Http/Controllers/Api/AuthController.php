@@ -31,14 +31,26 @@ class AuthController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['required', 'string', 'regex:/^\+90[1-9][0-9]{9}$/', 'unique:users,phone'],
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
+            // Ticari elektronik ileti onayi: istege bagli, gonderilmezse
+            // onay YOK sayilir. Uyelik icin sart kosulamaz (6563 s.k.).
+            'marketing_consent' => ['sometimes', 'boolean'],
         ], [
             'phone.regex' => 'Telefon numarası +90 ile başlayan uluslararası formatta olmalıdır.',
         ]);
 
         $data['email'] = Str::lower($data['email']);
 
-        $user = DB::transaction(function () use ($data): User {
+        // Onay zaman damgasi olarak saklanir; kolon toplu atamaya acik
+        // degil, bu yuzden create()'ten once diziden ayriliyor.
+        $iletiOnayi = (bool) ($data['marketing_consent'] ?? false);
+        unset($data['marketing_consent']);
+
+        $user = DB::transaction(function () use ($data, $iletiOnayi): User {
             $user = User::query()->create($data);
+
+            if ($iletiOnayi) {
+                $user->forceFill(['marketing_consent_at' => now()])->save();
+            }
             $buyerRole = Role::query()->where('name', 'buyer')->firstOrFail();
             $user->roles()->attach($buyerRole);
 

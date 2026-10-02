@@ -65,6 +65,16 @@ class AdminSettingsController extends Controller
             'social.x' => ['sometimes', 'nullable', 'string', 'max:255'],
             'social.facebook' => ['sometimes', 'nullable', 'string', 'max:255'],
             'social.linkedin' => ['sometimes', 'nullable', 'string', 'max:255'],
+            // Kurumsal kimlik: iletisim sayfasi ve KVKK aydinlatma metni
+            // bunlari basiyor. Bos birakilan alan sayfada hic gorunmez.
+            'company.unvan' => ['sometimes', 'nullable', 'string', 'max:190'],
+            'company.adres' => ['sometimes', 'nullable', 'string', 'max:400'],
+            'company.telefon' => ['sometimes', 'nullable', 'string', 'max:40'],
+            'company.eposta' => ['sometimes', 'nullable', 'email', 'max:190'],
+            'company.mersis' => ['sometimes', 'nullable', 'string', 'max:40'],
+            'company.vergi_dairesi' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'company.vergi_no' => ['sometimes', 'nullable', 'string', 'max:40'],
+            'company.kep' => ['sometimes', 'nullable', 'email', 'max:190'],
             // Kaldirilacak alanlar: gizli bir deger yalnizca boyle silinebilir.
             'clear' => ['sometimes', 'array', 'max:10'],
             // branding.* disarida: bu anahtarlar dosya adi ve surum sayaci
@@ -86,7 +96,7 @@ class AdminSettingsController extends Controller
         AppSettings::clear($data['clear'] ?? []);
 
         $flat = [];
-        foreach (['mail', 'assistant', 'images', 'social'] as $group) {
+        foreach (['mail', 'assistant', 'images', 'social', 'company'] as $group) {
             foreach ($data[$group] ?? [] as $key => $value) {
                 $flat[$group.'.'.$key] = is_bool($value) ? ($value ? '1' : '0') : (string) ($value ?? '');
             }

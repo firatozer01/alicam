@@ -29,6 +29,14 @@ class AppSettings
     /** Yonetilebilen marka gorselleri. */
     public const BRANDING_KEYS = ['logo', 'logo_light', 'mark'];
 
+    /**
+     * Kurumsal kimlik alanlari: iletisim sayfasi ve KVKK aydinlatma metni
+     * bunlari basiyor. Hicbiri gomulu DEGIL -- uydurulmus bir adres ya da
+     * MERSIS numarasi yayinlamaktansa alan bos kalir ve sayfa o satiri hic
+     * gostermez.
+     */
+    public const COMPANY_KEYS = ['unvan', 'adres', 'telefon', 'eposta', 'mersis', 'vergi_dairesi', 'vergi_no', 'kep'];
+
     /** Panelden yonetilebilen alanlar ve varsayilanlari. */
     public const EDITABLE = [
         'mail.enabled' => '0',
@@ -71,6 +79,17 @@ class AppSettings
         // Alt bilgide gorunen sosyal medya baglantilari. Bos birakilan
         // hesabin simgesi hic basilmaz, yani bir hesabi kaldirmanin yolu
         // alani bosaltmaktir.
+        // Kurumsal kimlik. Varsayilanlar bos: yonetici doldurana kadar
+        // iletisim sayfasi ve aydinlatma metni o alanlari hic basmaz.
+        'company.unvan' => 'SMN LIFE İNŞAAT TİCARET LİMİTED ŞİRKETİ',
+        'company.adres' => 'Küçükbakkalköy Mah. Barış Sk. No: 4-6 İç Kapı No: 8 Ataşehir / İstanbul',
+        'company.telefon' => '',
+        'company.eposta' => 'destek@alicam.net',
+        'company.mersis' => '',
+        'company.vergi_dairesi' => 'Kozyatağı',
+        'company.vergi_no' => '7721513073',
+        'company.kep' => '',
+
         'social.instagram' => 'https://www.instagram.com/alicamnet',
         'social.youtube' => 'https://www.youtube.com/@alicamnet',
         'social.tiktok' => 'https://www.tiktok.com/@alicamnet',
@@ -272,6 +291,33 @@ class AppSettings
             // Damga adreste: dosya adi degisse de degismese de tarayici
             // yeni surumu yeniden ister.
             $out[$tur] = $ad === '' ? null : '/api/branding/'.$tur.'?v='.$surum;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Kurumsal kimlik alanlari. Yalnizca DOLU olanlar doner; cagiran taraf
+     * da yalnizca donenleri basar, boylece "Adres: —" gibi bos satirlar
+     * ekrana cikmaz.
+     *
+     * @return array<string, string>
+     */
+    public static function company(): array
+    {
+        $all = self::all();
+        $out = [];
+
+        foreach (self::COMPANY_KEYS as $alan) {
+            $anahtar = 'company.'.$alan;
+
+            $deger = trim((string) (array_key_exists($anahtar, $all)
+                ? $all[$anahtar]
+                : (self::EDITABLE[$anahtar] ?? '')));
+
+            if ($deger !== '') {
+                $out[$alan] = $deger;
+            }
         }
 
         return $out;

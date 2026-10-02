@@ -110,3 +110,14 @@
   .btn, .tocLink { transition: none; }
   .btn:hover { transform: none; }
 }
+
+/* Kurumsal kimlik satirlari (iletisim ve aydinlatma metni). Yalnizca dolu
+   alanlar basildigi icin satir sayisi degisken; tanim listesi olarak
+   duruyor ki ekran okuyucu etiket-deger esini anlasin. */
+.kurumsal { display: grid; gap: 10px; margin: 16px 0 0; }
+.kurumsal > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 16px; }
+.kurumsal dt { color: var(--ink-3); font-size: 13.5px; font-weight: 700; }
+.kurumsal dd { margin: 0; color: var(--ink-2); font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .kurumsal > div { grid-template-columns: minmax(0, 1fr); }
+}

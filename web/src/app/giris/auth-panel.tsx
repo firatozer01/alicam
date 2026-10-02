@@ -147,6 +147,11 @@ export function AuthPanel({
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [terms, setTerms] = useState(false);
+  // Ticari elektronik ileti izni AYRI bir onay ve varsayilan KAPALI.
+  // 6563 sayili kanun ve Ticari Iletisim Yonetmeligi geregi bu onay
+  // uyelik sozlesmesinin icine gomulemez, onceden isaretli gelemez ve
+  // uyelik icin zorunlu tutulamaz -- kutu isaretlenmeden de kayit olur.
+  const [ileti, setIleti] = useState(false);
   const [invalid, setInvalid] = useState<Record<string, string>>({});
 
   const strength = passwordStrength(password);
@@ -253,6 +258,7 @@ export function AuthPanel({
           phone: toApiPhone(phone),
           password,
           password_confirmation: password,
+          marketing_consent: ileti,
         }),
       });
       setUser(response.data);
@@ -598,14 +604,35 @@ export function AuthPanel({
                 <span className={styles.err}>{invalid.password}</span>
               </label>
 
+              {/* Zorunlu onay: sozlesme ve gizlilik. */}
               <label className={`${styles.field} ${invalid.terms ? styles.invalid : ""}`}>
                 <span className={styles.check}>
                   <input checked={terms} onChange={(event) => { setTerms(event.target.checked); clearField("terms"); }} type="checkbox" />
                   <span>
-                    <Link href="/kullanim-kosullari" target="_blank">Kullanım koşullarını</Link> ve <Link href="/gizlilik" target="_blank">gizlilik politikasını</Link> kabul ediyorum.
+                    <Link href="/kullanim-kosullari" target="_blank">Kullanım koşullarını</Link> ve <Link href="/gizlilik" target="_blank">gizlilik politikasını</Link> okudum, kabul ediyorum.
                   </span>
                 </span>
                 <span className={styles.err}>{invalid.terms}</span>
+              </label>
+
+              {/*
+                Aydinlatma BILGILENDIRMEDIR, onay degil: KVKK m. 10 veri
+                sorumlusuna bildirme yukumlulugu getiriyor, kullanicidan
+                bunun icin kutu isaretlemesi istenmez. Bu yuzden metne
+                baglanti var ama onay kutusu YOK.
+              */}
+              <p className={styles.consentNote}>
+                Kişisel verilerinin nasıl işlendiğini <Link href="/kvkk" target="_blank">KVKK aydınlatma metninde</Link> bulabilirsin.
+              </p>
+
+              {/* Istege bagli onay: isaretlenmese de kayit tamamlanir. */}
+              <label className={styles.field}>
+                <span className={styles.check}>
+                  <input checked={ileti} onChange={(event) => setIleti(event.target.checked)} type="checkbox" />
+                  <span>
+                    Kampanya ve duyurulardan e-posta ile haberdar olmak istiyorum. <b className={styles.consentOptional}>İsteğe bağlı</b>
+                  </span>
+                </span>
               </label>
 
               <button className={`${styles.btn} ${styles.cta} ${styles.lg} ${styles.block}`} disabled={busy || !hydrated} type="submit">

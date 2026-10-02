@@ -192,3 +192,13 @@
   .btn, .tab, .role, .chip, .bar { transition: none; }
   .btn:hover { transform: none; }
 }
+
+/* Aydinlatma satiri onay DEGIL, bilgilendirme; onay kutularindan ayri
+   dursun diye daha sonuk ve kutusuz. */
+.consentNote { margin: -4px 0 0; color: var(--ink-3); font-size: 13.5px; line-height: 1.55; }
+.consentNote a { color: var(--blue); font-weight: 600; }
+/* Zorunlu olmadigini kutuyu okumadan da belli eden kucuk etiket. */
+.consentOptional {
+  display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: 999px;
+  background: var(--blue-50); color: var(--blue-700); font-size: 11.5px; font-weight: 700;
+}
