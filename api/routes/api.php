@@ -235,6 +235,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/settings', [AdminSettingsController::class, 'update']);
         Route::post('/settings/mail-test', [AdminSettingsController::class, 'test'])
             ->middleware('throttle:5,1');
+        // PayTR magaza bilgilerini sinar: gercek token istegi atar, siparis
+        // olusturmaz. Dis servise gittigi icin kisitli.
+        Route::post('/settings/paytr-test', [AdminSettingsController::class, 'paytrTest'])
+            ->middleware('throttle:5,1');
         Route::get('/home', [App\Http\Controllers\Api\AdminHomeController::class, 'show']);
         Route::put('/home', [App\Http\Controllers\Api\AdminHomeController::class, 'update']);
         Route::post('/home/categories/{category}/image', [App\Http\Controllers\Api\AdminHomeController::class, 'uploadImage']);

@@ -30,6 +30,21 @@ type Settings = {
   "social.x": string;
   "social.facebook": string;
   "social.linkedin": string;
+  "paytr.enabled": string;
+  "paytr.merchant_id": string;
+  "paytr.merchant_key": string;
+  "paytr.merchant_key_set"?: boolean;
+  "paytr.merchant_salt": string;
+  "paytr.merchant_salt_set"?: boolean;
+  "paytr.test_mode": string;
+  "company.unvan": string;
+  "company.adres": string;
+  "company.telefon": string;
+  "company.eposta": string;
+  "company.mersis": string;
+  "company.vergi_dairesi": string;
+  "company.vergi_no": string;
+  "company.kep": string;
 };
 
 type Meta = { active_mailer: string; sms_ready: boolean; assistant_mode: "ai" | "knowledge"; image_source: "pexels" | "acik-kaynak" };
@@ -76,6 +91,19 @@ const empty: Settings = {
   "social.x": "",
   "social.facebook": "",
   "social.linkedin": "",
+  "paytr.enabled": "0",
+  "paytr.merchant_id": "",
+  "paytr.merchant_key": "",
+  "paytr.merchant_salt": "",
+  "paytr.test_mode": "1",
+  "company.unvan": "",
+  "company.adres": "",
+  "company.telefon": "",
+  "company.eposta": "",
+  "company.mersis": "",
+  "company.vergi_dairesi": "",
+  "company.vergi_no": "",
+  "company.kep": "",
 };
 
 export function MailSettings() {
@@ -84,6 +112,9 @@ export function MailSettings() {
   const [passwordSet, setPasswordSet] = useState(false);
   const [geminiSet, setGeminiSet] = useState(false);
   const [pexelsSet, setPexelsSet] = useState(false);
+  const [paytrKeySet, setPaytrKeySet] = useState(false);
+  const [paytrSaltSet, setPaytrSaltSet] = useState(false);
+  const [paytrBusy, setPaytrBusy] = useState(false);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -113,10 +144,12 @@ export function MailSettings() {
     apiRequest<{ data: Settings; meta: Meta }>("/admin/settings")
       .then((response) => {
         if (!active) return;
-        setForm({ ...empty, ...response.data, "mail.password": "", "assistant.gemini_key": "", "images.pexels_key": "" });
+        setForm({ ...empty, ...response.data, "mail.password": "", "assistant.gemini_key": "", "images.pexels_key": "", "paytr.merchant_key": "", "paytr.merchant_salt": "" });
         setPasswordSet(Boolean(response.data["mail.password_set"]));
         setGeminiSet(Boolean(response.data["assistant.gemini_key_set"]));
         setPexelsSet(Boolean(response.data["images.pexels_key_set"]));
+        setPaytrKeySet(Boolean(response.data["paytr.merchant_key_set"]));
+        setPaytrSaltSet(Boolean(response.data["paytr.merchant_salt_set"]));
         setMeta(response.meta);
       })
       .catch((requestError: unknown) => {
@@ -177,6 +210,23 @@ export function MailSettings() {
             facebook: form["social.facebook"],
             linkedin: form["social.linkedin"],
           },
+          paytr: {
+            enabled: form["paytr.enabled"] === "1",
+            merchant_id: form["paytr.merchant_id"],
+            merchant_key: form["paytr.merchant_key"],
+            merchant_salt: form["paytr.merchant_salt"],
+            test_mode: form["paytr.test_mode"] === "1",
+          },
+          company: {
+            unvan: form["company.unvan"],
+            adres: form["company.adres"],
+            telefon: form["company.telefon"],
+            eposta: form["company.eposta"],
+            mersis: form["company.mersis"],
+            vergi_dairesi: form["company.vergi_dairesi"],
+            vergi_no: form["company.vergi_no"],
+            kep: form["company.kep"],
+          },
           ...(clear.length > 0 ? { clear } : {}),
         }),
       });
@@ -184,6 +234,8 @@ export function MailSettings() {
       setPasswordSet(Boolean(response.data["mail.password_set"]));
       setGeminiSet(Boolean(response.data["assistant.gemini_key_set"]));
       setPexelsSet(Boolean(response.data["images.pexels_key_set"]));
+      setPaytrKeySet(Boolean(response.data["paytr.merchant_key_set"]));
+      setPaytrSaltSet(Boolean(response.data["paytr.merchant_salt_set"]));
       // Sunucu sosyal adresleri normalize ediyor ("tiktok.com/@x" ->
       // "https://tiktok.com/@x"); kaydedilen hali geri yazilmazsa ekranda
       // yazan ile sitede gorunen farkli kalir.
@@ -198,11 +250,32 @@ export function MailSettings() {
         "mail.password": "",
         "assistant.gemini_key": "",
         "images.pexels_key": "",
+        "paytr.merchant_key": "",
+        "paytr.merchant_salt": "",
       }));
     } catch (requestError: unknown) {
       setError(firstApiError(requestError));
     } finally {
       setBusy(false);
+    }
+  };
+
+  /**
+   * PayTR baglantisini sinar.
+   *
+   * Uc gercek bir token istegi gonderiyor: PayTR bilgileri ve imzayi
+   * dogrulamadan token vermez, dolayisiyla olumlu yanit bilgilerin
+   * CALISTIGININ kanitidir. Siparis olusmaz, para cekilmez.
+   */
+  const testPaytr = async () => {
+    setPaytrBusy(true); setNotice(""); setError("");
+    try {
+      const response = await apiRequest<{ message: string }>("/admin/settings/paytr-test", { method: "POST" });
+      setNotice(response.message);
+    } catch (requestError: unknown) {
+      setError(firstApiError(requestError));
+    } finally {
+      setPaytrBusy(false);
     }
   };
 
@@ -399,6 +472,114 @@ export function MailSettings() {
               </button>
             )}
             <button disabled={busy} onClick={() => void save()} type="button">{busy ? "Kaydediliyor…" : "Görsel ayarını kaydet"}</button>
+          </footer>
+        </section>
+
+        {/* PayTR odeme kurulusu. Bilgiler daha once yalnizca sunucudaki .env
+            dosyasindan okunuyordu; artik SMTP parolasiyla ayni sifreli
+            depoda. Alanlar bos birakilirsa .env gecerli kalir. */}
+        <section className={styles.card}>
+          <header>
+            <div>
+              <strong>PayTR ödeme bağlantısı</strong>
+              <small>
+                Kredi satın alma bu bağlantı üzerinden çalışır. Mağaza bilgilerini
+                PayTR panelindeki <b>Bilgi</b> sayfasından alırsın.
+              </small>
+            </div>
+            <label className={styles.toggle}>
+              <input
+                checked={form["paytr.enabled"] === "1"}
+                onChange={(event) => set("paytr.enabled", event.target.checked ? "1" : "0")}
+                type="checkbox"
+              />
+              {form["paytr.enabled"] === "1" ? "Panelden yönetiliyor" : "Panel kapalı"}
+            </label>
+          </header>
+
+          <div className={styles.grid}>
+            <label>
+              Mağaza no (merchant_id)
+              <input autoComplete="off" inputMode="numeric" onChange={(event) => set("paytr.merchant_id", event.target.value)} placeholder="123456" value={form["paytr.merchant_id"]} />
+            </label>
+            <label>
+              Mağaza parola (merchant_key)
+              <input
+                autoComplete="off"
+                onChange={(event) => set("paytr.merchant_key", event.target.value)}
+                placeholder={paytrKeySet ? "•••••••• (kayıtlı)" : "PayTR panelinden alınır"}
+                type="password"
+                value={form["paytr.merchant_key"]}
+              />
+            </label>
+            <label>
+              Mağaza gizli anahtar (merchant_salt)
+              <input
+                autoComplete="off"
+                onChange={(event) => set("paytr.merchant_salt", event.target.value)}
+                placeholder={paytrSaltSet ? "•••••••• (kayıtlı)" : "PayTR panelinden alınır"}
+                type="password"
+                value={form["paytr.merchant_salt"]}
+              />
+            </label>
+            <label className={styles.toggle}>
+              <input
+                checked={form["paytr.test_mode"] === "1"}
+                onChange={(event) => set("paytr.test_mode", event.target.checked ? "1" : "0")}
+                type="checkbox"
+              />
+              Test kipi {form["paytr.test_mode"] === "1" ? "açık — karttan para çekilmez" : "KAPALI — gerçek tahsilat yapılır"}
+            </label>
+            <label className={styles.wide}>
+              Bildirim (callback) adresi
+              <input onChange={() => undefined} readOnly value="https://alicam.net/api/payments/paytr/callback" />
+              <small>
+                Bu adresi PayTR panelindeki <b>Bildirim URL</b> alanına yapıştır. Ödeme ancak
+                PayTR bu adrese imzalı bildirimi gönderdikten sonra krediye dönüşür; tarayıcının
+                başarı sayfası ödeme kanıtı sayılmaz.
+              </small>
+            </label>
+          </div>
+
+          <footer>
+            {(paytrKeySet || paytrSaltSet) && (
+              <button
+                className={styles.unlink}
+                disabled={busy}
+                onClick={() => void save(["paytr.merchant_key", "paytr.merchant_salt"])}
+                type="button"
+              >
+                Kayıtlı anahtarları sil
+              </button>
+            )}
+            <button disabled={paytrBusy || busy} onClick={() => void testPaytr()} type="button">
+              {paytrBusy ? "Deneniyor…" : "Bağlantıyı dene"}
+            </button>
+            <button disabled={busy} onClick={() => void save()} type="button">{busy ? "Kaydediliyor…" : "PayTR ayarlarını kaydet"}</button>
+          </footer>
+        </section>
+
+        {/* Kurumsal kimlik: iletisim sayfasi ve KVKK aydinlatma metni bu
+            alanlari basiyor. Bos birakilan alan o sayfalarda hic gorunmez. */}
+        <section className={styles.card}>
+          <header>
+            <div>
+              <strong>Kurumsal kimlik</strong>
+              <small>İletişim sayfası ve KVKK aydınlatma metni bu bilgileri yayımlar. Boş bıraktığın alan o sayfalarda hiç görünmez.</small>
+            </div>
+          </header>
+          <div className={styles.grid}>
+            <label className={styles.wide}>Unvan<input onChange={(event) => set("company.unvan", event.target.value)} placeholder="SMN LIFE İNŞAAT TİCARET LİMİTED ŞİRKETİ" value={form["company.unvan"]} /></label>
+            <label className={styles.wide}>Adres<input onChange={(event) => set("company.adres", event.target.value)} placeholder="Mahalle, sokak, no, ilçe / il" value={form["company.adres"]} /></label>
+            <label>Telefon<input inputMode="tel" onChange={(event) => set("company.telefon", event.target.value)} placeholder="+90 216 000 00 00" value={form["company.telefon"]} /></label>
+            <label>E-posta<input inputMode="email" onChange={(event) => set("company.eposta", event.target.value)} placeholder="destek@alicam.net" value={form["company.eposta"]} /></label>
+            <label>Vergi dairesi<input onChange={(event) => set("company.vergi_dairesi", event.target.value)} placeholder="Kozyatağı" value={form["company.vergi_dairesi"]} /></label>
+            <label>Vergi no<input inputMode="numeric" onChange={(event) => set("company.vergi_no", event.target.value)} placeholder="7721513073" value={form["company.vergi_no"]} /></label>
+            <label>MERSİS no<input inputMode="numeric" onChange={(event) => set("company.mersis", event.target.value)} placeholder="0000000000000000" value={form["company.mersis"]} /></label>
+            <label>KEP adresi<input inputMode="email" onChange={(event) => set("company.kep", event.target.value)} placeholder="sirket@hs01.kep.tr" value={form["company.kep"]} /></label>
+          </div>
+          <footer>
+            <button disabled={busy} onClick={() => void save()} type="button">{busy ? "Kaydediliyor…" : "Kurumsal bilgileri kaydet"}</button>
           </footer>
         </section>
 
