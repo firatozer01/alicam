@@ -407,22 +407,6 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
       ><span>alıcam<em>.net</em></span></div>
     </>}
 
-    {/* 5) Guven rozetleri: alt cizginin hemen ustunde, saga yasli.
-           Baslik ustte, UC rozet tek sirada: ETBIS, SSL ve kart bandi. */}
-    <div className={`${styles.wrap} ${styles.guvenlik}`}>
-      <h4 className={styles.guvenlikBaslik}>Güvenli alışveriş</h4>
-      <div className={styles.rozetler}>
-      <a href="https://etbis.ticaret.gov.tr/" rel="noopener noreferrer" target="_blank">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img alt="ETBİS'e kayıtlıdır" className={styles.etbis} height={120} loading="lazy" src="/odeme-marka/etbis.jpg" width={104} />
-      </a>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img alt="SSL ile şifrelenmiş bağlantı" className={styles.ssl} height={52} loading="lazy" src="/odeme-marka/ssl.png" width={160} />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img alt="Visa, Mastercard, troy ve PayTR ile ödeme" className={styles.kartBandi} height={26} loading="lazy" src="/odeme-marka/kart-bandi.png" width={349} />
-      </div>
-    </div>
-
     {/* 6) Alt cizgi: telif ve (kisa alt bilgide) yasal baglantilar. */}
     <div className={`${styles.wrap} ${styles.bottom}`}>
       <span>© 2026 alıcam.net · SMN LIFE İnş. Tic. Ltd. Şti. Her hakkı saklıdır.</span>
@@ -440,6 +424,19 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
         onClick={() => window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" })}
         type="button"
       >↑</button>
+      {/* Guven rozetleri telif yazisinin SAGINDA, ayni satirda. Yukari
+          dugmesi akistan cikarilip katmanlandi (.toTop), yani rozetlerin
+          sagina dusmuyor; satirin sag dolgusu ona yer ayiriyor. */}
+      <div className={styles.rozetler}>
+      <a href="https://etbis.ticaret.gov.tr/" rel="noopener noreferrer" target="_blank">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img alt="ETBİS'e kayıtlıdır" className={styles.etbis} height={120} loading="lazy" src="/odeme-marka/etbis.jpg" width={104} />
+      </a>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="SSL ile şifrelenmiş bağlantı" className={styles.ssl} height={52} loading="lazy" src="/odeme-marka/ssl.png" width={160} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img alt="Visa, Mastercard, troy ve PayTR ile ödeme" className={styles.kartBandi} height={26} loading="lazy" src="/odeme-marka/kart-bandi.png" width={349} />
+      </div>
     </div>
 
     {toast && <div className={styles.toast} role="status">{toast.text}</div>}

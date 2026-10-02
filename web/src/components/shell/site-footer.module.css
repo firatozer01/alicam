@@ -229,7 +229,7 @@
 /* Telif + rozetler + yasal baglantilar + yukari dugmesi masaustunde TEK
    satir. Dort parca birlikte ~1200px istiyor; sigdigi genislikten itibaren
    satir sarmasi kapatiliyor, altinda dogal olarak alt alta diziliyorlar. */
-@media (min-width: 1240px) {
+@media (min-width: 1060px) {
   .bottom { flex-wrap: nowrap; }
   .bottom > span { flex: none; }
   .bottom nav { flex: none; }
@@ -368,89 +368,33 @@
   
 }
 
-/* ---------- Guven rozetleri ----------
-   Alt cizginin hemen ustunde, SAGA yasli bir blok: baslik solda, rozetler
-   sagda, kart bandi da onlarin altinda ve en sagda. Daha once Kurumsal
-   sutununun icindeydiler; sutun ~200px oldugu icin bant 223px'e iniyor,
-   karekod okunamiyordu. */
-/* Uc sutun ACIKCA tanimli: ETBIS ve SSL ucuncu sutunu kendiliginden
-   olusturunca "grid-column: 1 / -1" ACIK izgaranin sonuna, yani ikinci
-   sutunun bittigi yere kadar uzaniyordu ve bant saga yaslanmiyordu. */
 
 
 
 
-/* Karekod taranabilir kalmali. */
 
-
-/* Bant 349x26 raster; 1,2 kattan fazla buyutulurse bulaniklasir. */
-
-
-@media (max-width: 760px) {
-  
-  
-  
-  
-  
-  
-  
-}
-
-/* ---------- Guven rozetleri ----------
-   Alt cizginin USTUNDEKI satir: baslik solda, ETBIS + SSL + yukari
-   dugmesi sagda. Kart bandi burada DEGIL, bir alttaki cizgide ve orada
-   en sagda duruyor. */
-
-
-/* Karekod taranabilir kalmali. */
-
-
-/* Bant 349x26 raster; 1,2 kattan fazla buyutulurse bulaniklasir. */
-
-
-@media (max-width: 760px) {
-  
-  
-  
-  
-  
-}
-
-/* ---------- Guven rozetleri ----------
-   Alt cizginin USTUNDEKI satir: baslik ve iki rozet SAGA yasli, sikisik
-   bir obek. Baslik once "margin-right: auto" ile en sola itiliyordu ve
-   arada kocaman bir bosluk kaliyordu; rozetler de farkli yuksekliklerde
-   oldugu icin dengesiz duruyordu. Artik ortak bir eksende, yan yana. */
-
-
-/* Karekod taranabilir kalmali; SSL rozeti onun optik agirligina yakin. */
-
-
-/* Bant alt cizgide ve en sagda. 349x26 raster; 1,2 kattan fazla
-   buyutulurse bulaniklasir. */
-
-
-@media (max-width: 760px) {
-  
-  
-  
-  
-  
-}
-
-/* ---------- Guven rozetleri ----------
-   Alt cizginin ustunde, saga yasli: baslik bir satir, altinda UC rozet
-   yan yana. ETBIS ve SSL bandin yanina sigsin diye kucuk; karekod
-   taranamayacak kadar kuculmesin diye 44px taban. */
-.guvenlik { display: grid; justify-content: end; justify-items: end; gap: 10px; padding-bottom: 18px; }
-.guvenlikBaslik { margin: 0; color: #fff; font: 700 14px var(--font-inter), sans-serif; }
-.rozetler { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-.etbis { height: 44px; width: auto; display: block; border-radius: 4px; }
-.ssl { height: 30px; width: auto; display: block; }
 /* Bant 349x26 raster; dogal olcusunun ustune cikilmiyor. */
-.kartBandi { width: min(300px, 100%); height: auto; display: block; }
+
 
 @media (max-width: 760px) {
-  .guvenlik { justify-content: start; justify-items: start; }
-  .rozetler { gap: 10px; }
+  
+  
+}
+
+/* ---------- Guven rozetleri ----------
+   Alt cizginin SAG ucunda, telif yazisiyla AYNI satirda: ETBIS, SSL ve
+   kart bandi yan yana. Bandin yanina sigsinlar diye kucukler; karekod
+   taranamayacak kadar kuculmesin diye 40px taban. */
+.rozetler { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.etbis { height: 34px; width: auto; display: block; border-radius: 4px; }
+.ssl { height: 24px; width: auto; display: block; }
+/* Bant 349x26 raster; dogal olcusunun ustune cikilmiyor. */
+/* Dosyanin DOGAL olcusu 349x26: ne kuculuyor (okunmaz oluyor)
+   ne buyuyor (raster, bulaniklasir). */
+.kartBandi { width: 349px; max-width: 100%; height: auto; display: block; }
+
+@media (max-width: 1059px) {
+  /* Dar ekranda rozetler telifin altina gecer, yine saga yasli kalmaz:
+     okuma yonunde soldan baslar. */
+  .rozetler { margin-left: 0; flex-wrap: wrap; }
 }
