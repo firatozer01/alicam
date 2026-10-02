@@ -17,9 +17,9 @@ export async function kurumsalOku(): Promise<Kurumsal> {
   try {
     const cevap = await fetch(`${UC}/api/site-settings`, {
       headers: { Accept: "application/json" },
-      // Ayarlar panelden degisiyor; bir dakikalik tazelik yeterli ve
-      // her istekte uca gitmeyi engelliyor.
-      next: { revalidate: 60 },
+      // Sayfa zaten istek aninda uretiliyor; burada da onbellek yok ki
+      // yoneticinin panelden yaptigi degisiklik beklemeden gorunsun.
+      cache: "no-store",
     });
 
     if (!cevap.ok) return {};

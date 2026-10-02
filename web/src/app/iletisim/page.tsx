@@ -5,6 +5,17 @@ import { LegalShell, type LegalTocItem } from "../legal-shell";
 import { KurumsalKart } from "./kurumsal-kart";
 import { kurumsalOku } from "@/lib/company-server";
 
+/**
+ * Istek aninda uretilir.
+ *
+ * Varsayilan davranis bu sayfayi DERLEME sirasinda onceden uretiyordu;
+ * derleme sirasinda API konteynerine erisim yok, dolayisiyla kurumsal
+ * kimlik bos donuyor ve o bos hal statik cikti olarak yayina giriyordu.
+ * Unvan, adres ve vergi bilgisi veritabanindan geliyor ve yoneticinin
+ * degisikligi aninda gorunmeli.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "İletişim — alıcam.net",
   description: "alıcam.net'e nasıl ulaşacağın, işletme bilgileri ve hangi konuda nereye yazman gerektiği.",

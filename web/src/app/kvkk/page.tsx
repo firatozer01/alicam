@@ -5,6 +5,17 @@ import { LegalShell, type LegalTocItem } from "../legal-shell";
 import { KurumsalKart } from "../iletisim/kurumsal-kart";
 import { kurumsalOku } from "@/lib/company-server";
 
+/**
+ * Istek aninda uretilir.
+ *
+ * Varsayilan davranis bu sayfayi DERLEME sirasinda onceden uretiyordu;
+ * derleme sirasinda API konteynerine erisim yok, dolayisiyla kurumsal
+ * kimlik bos donuyor ve o bos hal statik cikti olarak yayina giriyordu.
+ * Unvan, adres ve vergi bilgisi veritabanindan geliyor ve yoneticinin
+ * degisikligi aninda gorunmeli.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "KVKK aydınlatma metni — alıcam.net",
   description: "Kişisel verilerinin hangi amaçla, hangi hukuki sebebe dayanarak işlendiğini ve haklarını nasıl kullanacağını anlatır.",
