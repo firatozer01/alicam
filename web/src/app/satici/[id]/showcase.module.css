@@ -2,7 +2,14 @@
 
 /* Telefonda adres cubugu acilip kapandikca gorunur alan degisiyor; 100vh en
    buyuk hali varsayiyor. vh satiri eski tarayici icin yedek, dvh gercek olcu. */
-.page{min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--ink);padding-bottom:70px}
+/* Dolgu DEGIL, alt bilgiye verilen UST BOSLUK.
+   padding-bottom kabugun dibindeydi; kabuk alt bilgiyi de iceriyor, yani
+   70px koyu alt bilginin ALTINDA, kabugun acik zemini uzerinde duruyordu:
+   sayfanin en altinda acik bir serit. Ustelik icerikle alt bilgi arasinda
+   hic bosluk kalmiyordu, mor cagri bloku alt bilgiye yapisik duruyordu.
+   Bosluk yer degistirdi: artik ikisinin ARASINDA. */
+.page{min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--ink)}
+.page>footer{margin-top:70px}
 /* Ortak kapsayici formulu; ust cubuk ve alt bilgi ile ayni. */
 .wrap{width:min(var(--maxw),calc(100% - (2 * var(--gutter))));margin-inline:auto}
 
