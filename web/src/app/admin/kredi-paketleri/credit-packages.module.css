@@ -1,0 +1,245 @@
+/* Kredi paketleri ekrani. Olcek yonetim panelinin geri kalaniyla ayni:
+   govde 15px, etiket 12.5px — sitenin kendi olcegi. */
+
+.duzenleyici {
+  margin-bottom: 18px;
+  padding: 20px;
+  border: 1px solid #e1dfe5;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.duzenleyici > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.duzenleyici > header h2 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.duzenleyici > header button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e1dfe5;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.alanlar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+.alanlar label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.alanlar input[type="text"],
+.alanlar input:not([type]) {
+  font-size: 15px;
+}
+
+.alanlar input {
+  padding: 10px 12px;
+  border: 1px solid #dad7de;
+  border-radius: 9px;
+  color: var(--ink);
+  background: #fff;
+  /* 16px alti deger iOS'ta alana girince sayfayi yakinlastirir. */
+  font-size: 16px;
+}
+
+.onay {
+  align-content: center;
+  grid-auto-flow: column;
+  grid-template-columns: auto 1fr;
+  justify-content: start;
+  align-items: center;
+  gap: 9px;
+}
+
+.onay input {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+}
+
+.duzenleyici > footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.duzenleyici > footer button {
+  padding: 11px 16px;
+  border: 1px solid #dad7de;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.birincil {
+  border-color: transparent !important;
+  color: #fff !important;
+  background: var(--blue) !important;
+}
+
+.birincil:disabled {
+  opacity: .6;
+  cursor: progress;
+}
+
+.liste {
+  border: 1px solid #e1dfe5;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* Alti kolon: paket, kredi, fiyat, kredi basi, satis, islem. */
+.satirBasi,
+.satir {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, .9fr) minmax(0, .9fr) minmax(0, .9fr) minmax(0, .9fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+}
+
+.satirBasi {
+  border-bottom: 1px solid #ece9f3;
+  background: #faf9ff;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .07em;
+}
+
+.satir + .satir {
+  border-top: 1px solid #f1eff6;
+}
+
+.satir[data-pasif="true"] {
+  background: #fbfbfc;
+}
+
+.satir[data-pasif="true"] .ad strong,
+.satir[data-pasif="true"] .fiyat strong {
+  color: var(--muted);
+}
+
+.ad {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ad strong {
+  font-size: 15.5px;
+}
+
+.ad small,
+.kredi small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.kredi {
+  display: grid;
+  gap: 3px;
+}
+
+.kredi strong,
+.fiyat strong {
+  font-size: 16px;
+}
+
+.birim {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.acik,
+.kapali {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.acik {
+  color: #0b6b3e;
+  background: #e2f6ec;
+}
+
+.kapali {
+  color: var(--muted);
+  background: #eeedf2;
+}
+
+.islem {
+  display: flex;
+  gap: 8px;
+}
+
+.islem button {
+  padding: 8px 12px;
+  border: 1px solid #dad7de;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.islem button:hover:not(:disabled) {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.dipnot {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+/* Dar ekranda tablo kolonlari anlamsizlasiyor: her paket kendi karti olur. */
+@media (max-width: 900px) {
+  .satirBasi {
+    display: none;
+  }
+
+  .satir {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 8px;
+  }
+
+  .ad {
+    grid-column: 1 / 3;
+  }
+
+  .islem {
+    grid-column: 1 / 3;
+    flex-wrap: wrap;
+  }
+}

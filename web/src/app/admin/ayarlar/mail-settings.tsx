@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import { applyBranding } from "@/components/shell/brand";
-import { SiteFooter } from "@/components/shell/site-footer";
 import { AdminSidebar, type AdminSidebarUser } from "../admin-sidebar";
 import "../admin-standard.css";
 import styles from "./mail-settings.module.css";
@@ -487,10 +486,6 @@ export function MailSettings() {
           </p>
         </section>
       </>}
-    {/* Yonetim ekranlari PageShell kullanmiyor (kendi kenar cubuklu
-        yerlesimleri var), bu yuzden alt bilgi burada elle basiliyor.
-        Kisa hal: pazarlama bolumleri calisma ekranina ait degil. */}
-    <SiteFooter compact />
     </section>
   </main>;
 }

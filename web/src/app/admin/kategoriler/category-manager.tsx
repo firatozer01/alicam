@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { SiteFooter } from "@/components/shell/site-footer";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
 import { AdminSidebar } from "../admin-sidebar";
@@ -147,10 +146,6 @@ export function CategoryManager() {
           </section> : <div className={styles.empty}><h2>Henüz kategori bulunmuyor.</h2><button className={styles.primary} onClick={() => startCategory()}>İlk kategoriyi oluştur</button></div>}
         </div>
       </>}
-    {/* Yonetim ekranlari PageShell kullanmiyor (kendi kenar cubuklu
-        yerlesimleri var), bu yuzden alt bilgi burada elle basiliyor.
-        Kisa hal: pazarlama bolumleri calisma ekranina ait degil. */}
-    <SiteFooter compact />
     </section>
   </main>;
 }

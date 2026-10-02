@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { SiteFooter } from "@/components/shell/site-footer";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -389,10 +388,6 @@ export function HomeEditor() {
           <small>Fotoğraf işlemleri anında kaydedilir, bu düğmeyi beklemez.</small>
         </div>
       </>}
-    {/* Yonetim ekranlari PageShell kullanmiyor (kendi kenar cubuklu
-        yerlesimleri var), bu yuzden alt bilgi burada elle basiliyor.
-        Kisa hal: pazarlama bolumleri calisma ekranina ait degil. */}
-    <SiteFooter compact />
     </section>
   </main>;
 }

@@ -15,7 +15,7 @@ import { BrandLogo } from "@/components/shell/brand";
  */
 
 /** Menude hangi satirin isaretlenecegi. Serbest metin yerine birlik kume. */
-export type AdminNavKey = "genel" | "anasayfa" | "kategoriler" | "satici-onaylari" | "ayarlar";
+export type AdminNavKey = "genel" | "anasayfa" | "kategoriler" | "kredi-paketleri" | "satici-onaylari" | "ayarlar";
 
 /**
  * Kullanici blokunun ihtiyaci olan asgari alanlar. Sayfalarin kendi kullanici
@@ -27,6 +27,7 @@ const NAV: { key: AdminNavKey; href: string; icon: string; label: string }[] = [
   { key: "genel", href: "/admin", icon: "◇", label: "Genel bakış" },
   { key: "anasayfa", href: "/admin/anasayfa", icon: "▤", label: "Anasayfa" },
   { key: "kategoriler", href: "/admin/kategoriler", icon: "▦", label: "Kategoriler" },
+  { key: "kredi-paketleri", href: "/admin/kredi-paketleri", icon: "₺", label: "Kredi paketleri" },
   { key: "satici-onaylari", href: "/admin/satici-onaylari", icon: "✓", label: "Satıcı onayları" },
   { key: "ayarlar", href: "/admin/ayarlar", icon: "⚙", label: "Ayarlar" },
 ];

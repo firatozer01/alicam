@@ -56,6 +56,13 @@ class AdminSettingsController extends Controller
             'assistant.gemini_key' => ['sometimes', 'nullable', 'string', 'max:200'],
             'assistant.model' => ['sometimes', 'nullable', 'string', 'max:60'],
             'images.pexels_key' => ['sometimes', 'nullable', 'string', 'max:200'],
+            // PayTR magaza bilgileri. Anahtar ve salt sifrelenerek saklanir
+            // ve panelde bir daha gosterilmez; silmek icin 'clear' kullanilir.
+            'paytr.enabled' => ['sometimes', 'boolean'],
+            'paytr.merchant_id' => ['sometimes', 'nullable', 'string', 'max:40'],
+            'paytr.merchant_key' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'paytr.merchant_salt' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'paytr.test_mode' => ['sometimes', 'boolean'],
             // Sosyal adresler burada yalnizca duz metin olarak dogrulanir;
             // "url" kurali konulmadi ki asagida sema eksigini tamamlayip
             // "instagram.com/alicamnet" gibi bir girisi de kabul edebilelim.

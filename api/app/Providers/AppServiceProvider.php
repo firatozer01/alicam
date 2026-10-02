@@ -35,9 +35,13 @@ class AppServiceProvider extends ServiceProvider
         try {
             if (Schema::hasTable('app_settings')) {
                 AppSettings::applyMailConfig();
+                // PayTR de ayni yolu izliyor: panelden girilen bilgi .env'i
+                // ezer, panel bos ise .env gecerli kalir.
+                AppSettings::applyPaytrConfig();
             }
         } catch (\Throwable) {
-            // Veritabani hazir degil: .env'deki mail ayarlari gecerli kalir.
+            // Veritabani hazir degil: .env'deki mail ve odeme ayarlari
+            // gecerli kalir.
         }
 
         //

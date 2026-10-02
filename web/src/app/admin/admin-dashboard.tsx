@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { SiteFooter } from "@/components/shell/site-footer";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, apiRequest, firstApiError } from "@/lib/api";
@@ -47,10 +46,6 @@ export function AdminDashboard() {
         <div className="admin-overview-grid"><section className="admin-data-card"><header><div><span>SON HAREKETLER</span><h2>Yeni talepler</h2></div><b>{data.stats.active_requests} aktif</b></header>{data.recent_requests.length === 0 ? <p className="admin-data-empty">Henüz talep yok.</p> : data.recent_requests.map((item) => <article className="admin-request-row" key={item.id}><span>{item.category.slice(0, 2).toLocaleUpperCase("tr-TR")}</span><div><strong>{item.title}</strong><small>{item.reference} · {item.buyer} · {item.location}</small></div><p><b>{item.offer_count}</b><small>teklif</small></p><em className={item.status}>{status[item.status] ?? item.status}</em></article>)}</section>
           <section className="admin-data-card"><header><div><span>KREDİ EKONOMİSİ</span><h2>Son ödemeler</h2></div></header>{data.recent_payments.length === 0 ? <p className="admin-data-empty">Henüz ödeme siparişi yok.</p> : data.recent_payments.map((item) => <article className="admin-payment-row" key={item.merchant_oid}><div><strong>{item.user}</strong><small>{item.package || "Silinmiş paket"} · {date(item.created_at)}</small></div><p><strong>{money(item.price)}</strong><em className={item.status}>{status[item.status] ?? item.status}</em></p></article>)}</section></div>
       </>}
-    {/* Yonetim ekranlari PageShell kullanmiyor (kendi kenar cubuklu
-        yerlesimleri var), bu yuzden alt bilgi burada elle basiliyor.
-        Kisa hal: pazarlama bolumleri calisma ekranina ait degil. */}
-    <SiteFooter compact />
     </section>
   </main>;
 }

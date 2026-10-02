@@ -245,6 +245,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/branding/{kind}', [App\Http\Controllers\Api\AdminBrandingController::class, 'store'])
             ->middleware('throttle:20,1');
         Route::delete('/branding/{kind}', [App\Http\Controllers\Api\AdminBrandingController::class, 'destroy']);
+        // Kredi paketleri: ad, kredi, bonus ve FIYAT. Daha once yalnizca
+        // tohumlama dosyasindan degisiyordu.
+        Route::get('/credit-packages', [App\Http\Controllers\Api\AdminCreditPackageController::class, 'index']);
+        Route::post('/credit-packages', [App\Http\Controllers\Api\AdminCreditPackageController::class, 'store']);
+        Route::put('/credit-packages/{creditPackage}', [App\Http\Controllers\Api\AdminCreditPackageController::class, 'update']);
+        Route::delete('/credit-packages/{creditPackage}', [App\Http\Controllers\Api\AdminCreditPackageController::class, 'destroy']);
         Route::get('/seller-approvals', [AdminSellerApprovalController::class, 'index']);
         Route::patch('/seller-approvals/{seller}', [AdminSellerApprovalController::class, 'update']);
     });

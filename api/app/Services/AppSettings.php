@@ -21,7 +21,7 @@ class AppSettings
     private const CACHE_TTL = 300;
 
     /** Gizli alanlar sifrelenerek saklanir ve panele maskelenmis doner. */
-    public const SECRET_KEYS = ['mail.password', 'sms.api_key', 'sms.password', 'assistant.gemini_key', 'images.pexels_key'];
+    public const SECRET_KEYS = ['mail.password', 'sms.api_key', 'sms.password', 'assistant.gemini_key', 'images.pexels_key', 'paytr.merchant_key', 'paytr.merchant_salt'];
 
     /** Alt bilgideki sosyal medya simgelerinin kanonik sirasi. */
     public const SOCIAL_KEYS = ['instagram', 'youtube', 'tiktok', 'x', 'facebook', 'linkedin'];
@@ -89,6 +89,19 @@ class AppSettings
         'company.vergi_dairesi' => 'Kozyatağı',
         'company.vergi_no' => '7721513073',
         'company.kep' => '',
+
+        // PayTR odeme kurulusu bilgileri. Daha once YALNIZCA sunucudaki
+        // .env dosyasindan okunuyordu: bagalamak icin sunucuya girip dosya
+        // duzenlemek ve konteyneri yeniden baslatmak gerekiyordu. Artik
+        // SMTP parolasi ve Gemini anahtariyla ayni yolu izliyor; anahtar
+        // ve salt sifrelenerek saklaniyor. Buradaki alanlar bos birakilirsa
+        // .env degerleri gecerli kalir.
+        'paytr.enabled' => '0',
+        'paytr.merchant_id' => '',
+        'paytr.merchant_key' => '',
+        'paytr.merchant_salt' => '',
+        // Test kipinde PayTR gercek para cekmez; canliya gecerken kapatilir.
+        'paytr.test_mode' => '1',
 
         'social.instagram' => 'https://www.instagram.com/alicamnet',
         'social.youtube' => 'https://www.youtube.com/@alicamnet',
@@ -321,6 +334,37 @@ class AppSettings
         }
 
         return $out;
+    }
+
+    /**
+     * Kayitli PayTR bilgisi varsa odeme yapilandirmasina uygular.
+     *
+     * Panelden girilen deger .env'i EZER; panel bos birakilirsa .env
+     * gecerli kalir. Boylece sunucuda hali hazirda calisan bir kurulum
+     * panel doldurulana kadar bozulmaz.
+     */
+    public static function applyPaytrConfig(): void
+    {
+        if (! self::enabled('paytr.enabled')) {
+            return;
+        }
+
+        $kimlik = self::get('paytr.merchant_id');
+        $anahtar = self::get('paytr.merchant_key');
+        $tuz = self::get('paytr.merchant_salt');
+
+        // Ucu birden dolu degilse imza uretilemez; yarim yapilandirmayla
+        // .env'i ezmek calisan kurulumu bozar.
+        if (! $kimlik || ! $anahtar || ! $tuz) {
+            return;
+        }
+
+        config([
+            'services.paytr.merchant_id' => $kimlik,
+            'services.paytr.merchant_key' => $anahtar,
+            'services.paytr.merchant_salt' => $tuz,
+            'services.paytr.test_mode' => self::enabled('paytr.test_mode'),
+        ]);
     }
 
     /** Kayitli SMTP bilgisi varsa mail yapilandirmasina uygular. */
