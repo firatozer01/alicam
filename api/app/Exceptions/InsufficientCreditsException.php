@@ -12,7 +12,7 @@ class InsufficientCreditsException extends Exception
         public readonly int $balance,
         public readonly int $required,
     ) {
-        parent::__construct('Bu talebi açmak için yeterli kontörünüz bulunmuyor.');
+        parent::__construct('Bu talebi açmak için yeterli krediniz bulunmuyor.');
     }
 
     public function render(Request $request): JsonResponse

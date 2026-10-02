@@ -128,7 +128,7 @@ class ConversationController extends Controller
             $message = $this->messaging->send($conversation, $user, trim($data['body']));
         } catch (InsufficientCreditsException $exception) {
             return response()->json([
-                'message' => 'Bu konuşmayı açmak için yeterli kontörün yok.',
+                'message' => 'Bu konuşmayı açmak için yeterli kredin yok.',
                 'required' => $exception->required ?? null,
                 'balance' => $exception->balance ?? null,
             ], 402);
@@ -143,9 +143,9 @@ class ConversationController extends Controller
     }
 
     /**
-     * Hizmet veren konusmayi acar: kontor duser, govdeler gorunur olur.
+     * Hizmet veren konusmayi acar: kredi duser, govdeler gorunur olur.
      *
-     * Tekrar cagrilirsa kontor bir daha dusmez; "zaten acik" doner.
+     * Tekrar cagrilirsa kredi bir daha dusmez; "zaten acik" doner.
      */
     public function unlock(Request $request, Conversation $conversation): JsonResponse
     {
@@ -157,7 +157,7 @@ class ConversationController extends Controller
             $result = $this->messaging->unlock($conversation, $user);
         } catch (InsufficientCreditsException $exception) {
             return response()->json([
-                'message' => 'Bu konuşmayı açmak için yeterli kontörün yok.',
+                'message' => 'Bu konuşmayı açmak için yeterli kredin yok.',
                 'code' => 'insufficient_credits',
                 'required' => $exception->required,
                 'balance' => $exception->balance,
@@ -222,7 +222,7 @@ class ConversationController extends Controller
                 'credit_cost' => $cost,
                 'locked' => true,
                 'can_send' => false,
-                'notice' => "Bu konuşmayı okumak ve yanıtlamak için {$cost} kontör düşer. "
+                'notice' => "Bu konuşmayı okumak ve yanıtlamak için {$cost} kredi düşer. "
                     .'Açtıktan sonra aynı konuşmada sınırsız yazışırsın.',
             ];
         }
@@ -249,7 +249,7 @@ class ConversationController extends Controller
      * Tek mesajin disariya donen sekli.
      *
      * $canRead false ise govde GONDERILMEZ: hizmet veren konusmayi acmadan
-     * metni goremez. Kimden ve ne zaman geldigi yine gorunur ki neye kontor
+     * metni goremez. Kimden ve ne zaman geldigi yine gorunur ki neye kredi
      * harcayacagina karar verebilsin. Kendi yazdigini her zaman gorur.
      *
      * @return array<string, mixed>

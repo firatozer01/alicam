@@ -52,7 +52,7 @@ export function MessagesPage({ initialConversationId }: { initialConversationId?
 
   const active = useMemo(() => list.find((item) => item.id === activeId) ?? summary, [list, activeId, summary]);
 
-  /** Hizmet veren kontor odeyip konusmayi acar. */
+  /** Hizmet veren kredi odeyip konusmayi acar. */
   const runUnlock = async () => {
     if (unlocking) return;
     setUnlocking(true);
@@ -61,7 +61,7 @@ export function MessagesPage({ initialConversationId }: { initialConversationId?
       await unlock();
     } catch (error: unknown) {
       setSendError(error instanceof ApiError && error.status === 402
-        ? "Konuşmayı açmak için yeterli kontörün yok. Kontör yükleyip tekrar dene."
+        ? "Konuşmayı açmak için yeterli kredin yok. Kredi yükleyip tekrar dene."
         : firstApiError(error));
     } finally {
       setUnlocking(false);
@@ -83,7 +83,7 @@ export function MessagesPage({ initialConversationId }: { initialConversationId?
         : item));
     } catch (error: unknown) {
       setSendError(error instanceof ApiError && error.status === 402
-        ? "Konuşmayı açmak için yeterli kontörün yok. Kontör yükleyip tekrar dene."
+        ? "Konuşmayı açmak için yeterli kredin yok. Kredi yükleyip tekrar dene."
         : firstApiError(error));
     } finally {
       setSending(false);

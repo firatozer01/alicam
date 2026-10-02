@@ -88,7 +88,7 @@ class SellerRequestResource extends JsonResource
                     'preferences' => $this->contact_preferences ?? [],
                     // Fotograf da kimliktir ve bu blok KILIT ACILINCA
                     // doluyor. Kilit oncesi alicinin adi bile donmuyor;
-                    // avatari yukari tasimak, satici kontor odemeden
+                    // avatari yukari tasimak, satici kredi odemeden
                     // aliciyi taniyabilsin demek olurdu.
                     //
                     // Adres kullanici id'si tasidigi icin ayrica onemli:

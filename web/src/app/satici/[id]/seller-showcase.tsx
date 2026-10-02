@@ -59,7 +59,7 @@ export function SellerShowcase({ sellerId }: { sellerId: string }) {
    * Vitrinden dogrudan yazisma baslatir.
    *
    * Konusmayi acmak ucretsizdir ve tekrar tiklansa da ayni konusma doner;
-   * kontoru hizmet veren, mesaji okuyup yanitlamak istediginde oder.
+   * krediyi hizmet veren, mesaji okuyup yanitlamak istediginde oder.
    */
   const startConversation = async () => {
     if (messaging || !seller) return;

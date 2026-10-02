@@ -108,8 +108,8 @@ export function AccountMenu({ user, displayName, compact = false, workspace }: {
       <nav>
         <Link href="/ayarlar" onClick={() => setOpen(false)} role="menuitem"><span>⚙</span><div><strong>Hesap ayarları</strong><small>Bilgiler, güvenlik ve çalışma alanları</small></div><b>→</b></Link>
         <Link href="/talep-olustur" onClick={() => setOpen(false)} role="menuitem"><span>＋</span><div><strong>Yeni talep oluştur</strong><small>Ücretsiz teklif almaya başla</small></div><b>→</b></Link>
-        {user.roles.includes("seller") && <Link href="/kontor-yukle" onClick={() => setOpen(false)} role="menuitem"><span>⚡</span><div><strong>Kontör işlemleri</strong><small>Bakiye ve paketleri görüntüle</small></div><b>→</b></Link>}
-        {user.roles.includes("admin") && <Link href="/admin/kategoriler" onClick={() => setOpen(false)} role="menuitem"><span>▦</span><div><strong>Kategori yönetimi</strong><small>Form alanları ve kontör bedelleri</small></div><b>→</b></Link>}
+        {user.roles.includes("seller") && <Link href="/kredi-yukle" onClick={() => setOpen(false)} role="menuitem"><span>⚡</span><div><strong>Kredi işlemleri</strong><small>Bakiye ve paketleri görüntüle</small></div><b>→</b></Link>}
+        {user.roles.includes("admin") && <Link href="/admin/kategoriler" onClick={() => setOpen(false)} role="menuitem"><span>▦</span><div><strong>Kategori yönetimi</strong><small>Form alanları ve kredi bedelleri</small></div><b>→</b></Link>}
       </nav>
       {error && <p className={styles.error}>{error}</p>}
       <button className={styles.logout} disabled={busy} onClick={logout} role="menuitem" type="button"><span>↪</span>{busy ? "Oturum kapatılıyor…" : "Güvenli çıkış yap"}</button>

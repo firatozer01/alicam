@@ -292,11 +292,11 @@ export type FaqItem = { id: string; topics: string[]; q: string; a: string };
 
 export const FAQ: FaqItem[] = [
   { id: "nedir", topics: ["kategori"], q: "alıcam.net nedir, ilan sitelerinden farkı ne?", a: "İlan sitelerinde sen satıcıları ararsın. alıcam.net'te ise sen ne istediğini yazarsın, satıcılar seni bulur. Bir usta, kiralık bir daire, ikinci el bir araç ya da yeni bir telefon; ihtiyacını bir kez yazman yeterli." },
-  { id: "ucretsiz", topics: ["ucret"], q: "Talep oluşturmak gerçekten ücretsiz mi?", a: "Evet. Talep oluşturmak, teklif almak ve teklifleri karşılaştırmak tamamen ücretsizdir. Ücreti yalnızca teklif verenler, ilgilendikleri talebin detayını açarken kontör olarak öder." },
+  { id: "ucretsiz", topics: ["ucret"], q: "Talep oluşturmak gerçekten ücretsiz mi?", a: "Evet. Talep oluşturmak, teklif almak ve teklifleri karşılaştırmak tamamen ücretsizdir. Ücreti yalnızca teklif verenler, ilgilendikleri talebin detayını açarken kredi olarak öder." },
   { id: "gizlilik", topics: ["gizlilik"], q: "Telefon numaram ve adresim kimlere görünür?", a: "Hiç kimseye otomatik olarak görünmez. Talep özetinde yalnızca kategori, ilçe, bütçe ve kısa açıklama yer alır. İletişim bilgilerin yalnızca talebini açan onaylı teklif verenle, platform kurallarına göre paylaşılır." },
   { id: "kapsam", topics: ["kategori"], q: "Daire, araç veya ürün için de talep açabilir miyim?", a: "Evet. Hizmetin yanında kiralık/satılık emlak, vasıta, elektronik, beyaz eşya, mobilya, iş makinesi, eleman ve evcil hayvan için de talep oluşturabilirsin. Her kategori için sana özel birkaç kısa soru sorarız." },
   { id: "kabul", topics: ["ucret"], q: "Bir teklifi kabul etmek zorunda mıyım?", a: "Hayır. Teklifler seni hiçbir şekilde bağlamaz. Birini kabul edebilir, diğerlerini reddedebilir ya da hiçbirini seçmeyebilirsin." },
-  { id: "kontor", topics: ["veren", "ucret"], q: "Teklif veren olarak kontör nasıl çalışır?", a: "Talep özetlerini ücretsiz görürsün. İlgilendiğin talebin detayını açarken kategoriye göre belirlenen kontör düşer; maliyet işlemden önce gösterilir. Teklif göndermek, güncellemek ve aynı talebi tekrar görmek ek ücret gerektirmez." },
+  { id: "kredi", topics: ["veren", "ucret"], q: "Teklif veren olarak kredi nasıl çalışır?", a: "Talep özetlerini ücretsiz görürsün. İlgilendiğin talebin detayını açarken kategoriye göre belirlenen kredi düşer; maliyet işlemden önce gösterilir. Teklif göndermek, güncellemek ve aynı talebi tekrar görmek ek ücret gerektirmez." },
   { id: "veren-ol", topics: ["veren"], q: "Teklif veren olmak için ne gerekiyor?", a: "Ücretsiz üye olup firma ya da kişisel profilini, hizmet verdiğin veya sattığın kategorileri ve çalıştığın il/ilçeleri eklemen yeterli. Başvurun incelenip onaylandıktan sonra bölgendeki talepleri görmeye başlarsın." },
   { id: "duzenle", topics: ["gizlilik"], q: "Talebimi sonradan düzenleyebilir veya kapatabilir miyim?", a: "Evet. Hesabından talebinin açıklamasını, bütçesini ve tarihini güncelleyebilir; ihtiyacın kalmadığında talebi kapatabilirsin. Kapatılan talep yeni teklif almaz." },
 ];
@@ -305,7 +305,7 @@ export const FAQ_TOPICS: { id: string; emoji: string; title: string; hint: strin
   { id: "ucret", emoji: "💸", title: "Ücretler", hint: "Ne ödersin, ne ödemezsin" },
   { id: "gizlilik", emoji: "🔒", title: "Gizlilik", hint: "Numaran kime görünür" },
   { id: "kategori", emoji: "🏠", title: "Emlak ve araç", hint: "Hizmet dışı talepler" },
-  { id: "veren", emoji: "💼", title: "Teklif verenler", hint: "Kontör ve onay süreci" },
+  { id: "veren", emoji: "💼", title: "Teklif verenler", hint: "Kredi ve onay süreci" },
 ];
 
 /* ================= YARDIMCILAR ================= */

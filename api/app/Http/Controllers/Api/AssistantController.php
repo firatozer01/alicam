@@ -273,9 +273,14 @@ class AssistantController extends Controller
     }
 
     /**
-     * Turkce aksanlari sadelestirir. Kullanicilarin cogu "kontör" yerine
-     * "kontor", "ücret" yerine "ucret" yaziyor; aksi halde bu sorular
+     * Turkce aksanlari sadelestirir. Kullanicilarin cogu "ödeme" yerine
+     * "odeme", "ücret" yerine "ucret" yaziyor; aksi halde bu sorular
      * bilgi bankasinda hic eslesmiyordu.
+     *
+     * Ayni sey eski urun adi icin de gecerliydi ("kontör"/"kontor"). Ad
+     * "kredi" olarak degisti ama eski kelime config/assistant.php'deki
+     * keywords dizilerinde BILEREK duruyor: eski adi bilen kullanici
+     * sordugunda da dogru cevabi bulsun diye.
      */
     private function fold(string $value): string
     {

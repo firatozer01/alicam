@@ -11,17 +11,17 @@ return new class extends Migration
     {
         Schema::table('conversations', function (Blueprint $table) {
             // Hizmet veren bir konusmayi okumak ve yanitlamak icin bir kez
-            // kontor oder. Odenene kadar gelen mesajlarin govdesi ona
+            // kredi oder. Odenene kadar gelen mesajlarin govdesi ona
             // gosterilmez; kimden ve ne zaman geldigi gorunur.
             $table->timestamp('unlocked_at')->nullable()->after('seller_unread');
             $table->unsignedInteger('unlock_cost')->nullable()->after('unlocked_at');
 
             // Kilitliyken alicinin ust uste yazabilecegi mesaj sayisi burada
-            // sayilir; kontor odemeye zorlayan bir duvar metin olusmasin.
+            // sayilir; kredi odemeye zorlayan bir duvar metin olusmasin.
             $table->unsignedInteger('locked_message_count')->default(0)->after('unlock_cost');
         });
 
-        // Eski kural "saticinin ilk mesaji kontor duser" seklindeydi. O bedeli
+        // Eski kural "saticinin ilk mesaji kredi duser" seklindeydi. O bedeli
         // zaten odemis konusmalar acik sayilir, yoksa satici ayni konusma icin
         // ikinci kez oderdi.
         DB::statement("

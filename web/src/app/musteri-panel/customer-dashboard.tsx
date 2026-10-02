@@ -189,7 +189,7 @@ export function CustomerDashboard() {
    *
    * Konusma talebe baglanir; boylece hizmet veren hangi is icin
    * yazildigini gorur. Ayni satici icin tekrar tiklansa da sunucu ayni
-   * konusmayi dondurur. Alici hicbir sey odemez; kontoru hizmet veren,
+   * konusmayi dondurur. Alici hicbir sey odemez; krediyi hizmet veren,
    * mesaji okuyup yanitlamak istediginde oder ve bunu sunucu uygular.
    */
   const startConversation = async (offer: Offer) => {
@@ -394,7 +394,7 @@ export function CustomerDashboard() {
                   {messaging === offer.id ? "Açılıyor…" : "✉ Mesaj gönder"}
                 </button>}
               </div>
-              {canMessage && <em className={styles.messageHint}>Hizmet veren mesajını okumak ve yanıtlamak için kontör harcar.</em>}
+              {canMessage && <em className={styles.messageHint}>Hizmet veren mesajını okumak ve yanıtlamak için kredi harcar.</em>}
               {messageError?.offer === offer.id && <p className={styles.messageError}>{messageError.text}</p>}
               <p>{offer.message}</p>
               {offer.listing && <AttachedListing listing={offer.listing} sellerId={offer.seller.id} />}

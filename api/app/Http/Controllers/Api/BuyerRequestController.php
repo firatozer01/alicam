@@ -26,7 +26,7 @@ class BuyerRequestController extends Controller
     {
         $base = $request->validate([
             'category_slug' => ['required', 'string', 'exists:categories,slug'],
-            // Ek kategoriler talebin erisimini genisletir; form ve kontor
+            // Ek kategoriler talebin erisimini genisletir; form ve kredi
             // bedeli her zaman birincil kategoriden gelir.
             'extra_category_slugs' => ['sometimes', 'array', 'max:4'],
             'extra_category_slugs.*' => ['string', 'distinct', 'exists:categories,slug'],

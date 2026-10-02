@@ -53,7 +53,7 @@ export async function proxy(request: NextRequest) {
     }
 
     if (request.nextUrl.pathname.startsWith("/satici-paneli")
-      || request.nextUrl.pathname.startsWith("/kontor-yukle")
+      || request.nextUrl.pathname.startsWith("/kredi-yukle")
       || request.nextUrl.pathname.startsWith("/odeme/")) {
       if (!currentUser.data?.roles?.includes("seller")) {
         return NextResponse.redirect(new URL("/satici-ol", request.url));
@@ -79,5 +79,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/panel/:path*", "/musteri-panel/:path*", "/satici-paneli/:path*", "/kontor-yukle/:path*", "/odeme/:path*"],
+  matcher: ["/admin/:path*", "/panel/:path*", "/musteri-panel/:path*", "/satici-paneli/:path*", "/kredi-yukle/:path*", "/odeme/:path*"],
 };

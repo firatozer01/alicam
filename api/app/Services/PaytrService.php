@@ -23,7 +23,7 @@ class PaytrService
         $this->ensureConfigured();
 
         if (! $package->is_active) {
-            throw new PaymentProviderException('Bu kontör paketi satışa açık değil.', 'credit_package_inactive', 422);
+            throw new PaymentProviderException('Bu kredi paketi satışa açık değil.', 'credit_package_inactive', 422);
         }
 
         if (! filter_var($user->email, FILTER_VALIDATE_EMAIL) || preg_match('/[^\x20-\x7E]/', $user->email)) {
@@ -34,7 +34,7 @@ class PaytrService
         $amount = (int) round((float) $package->price * 100);
         $price = number_format((float) $package->price, 2, '.', '');
         $basket = base64_encode(json_encode([
-            [$package->name.' Kontör Paketi', $price, 1],
+            [$package->name.' Kredi Paketi', $price, 1],
         ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
 
         $order = PaymentOrder::query()->create([

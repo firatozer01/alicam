@@ -33,7 +33,7 @@ export default function PrivacyPage() {
       </div>
       <Link className={styles.asideCard} href="/kullanim-kosullari">
         <h4>Kullanım koşulları →</h4>
-        <p className={styles.flush}>Platform kuralları ve kontör sistemi</p>
+        <p className={styles.flush}>Platform kuralları ve kredi sistemi</p>
       </Link>
     </>}
     eyebrow="Veri ve gizlilik"
@@ -63,7 +63,7 @@ export default function PrivacyPage() {
       <ul>
         <li>Hesap güvenliği ve kimlik doğrulama</li>
         <li>Talebin doğru kategori ve bölgedeki teklif verenlerle eşleştirilmesi</li>
-        <li>İşlem geçmişi, kontör hareketleri ve ödeme kayıtları</li>
+        <li>İşlem geçmişi, kredi hareketleri ve ödeme kayıtları</li>
         <li>Kullanıcı desteği, suistimal önleme ve yasal yükümlülükler</li>
       </ul>
     </section>

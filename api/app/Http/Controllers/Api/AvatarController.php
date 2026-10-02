@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * bilerek dar tutuldu.
  *
  * Neden herkese acik degil: bu pazaryerinde satici, bir talebin SAHIBINI
- * ogrenmek icin kontor oduyor. Kilit acilana kadar alicinin adi bile
+ * ogrenmek icin kredi oduyor. Kilit acilana kadar alicinin adi bile
  * donmuyor (SellerRequestResource). Fotograf da kimliktir; /avatars/{id}
  * herkese acik olsaydi satici kullanici id'lerini sirayla deneyerek
  * odemeden yuz gorebilirdi.

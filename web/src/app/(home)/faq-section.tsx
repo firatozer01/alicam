@@ -72,7 +72,7 @@ export function FaqSection() {
           aria-label="Sık sorulanlarda ara"
           autoComplete="off"
           onChange={(event) => onSearch(event.target.value)}
-          placeholder="Sorunu yaz… örn. ücret, numara, kontör"
+          placeholder="Sorunu yaz… örn. ücret, numara, kredi"
           type="search"
           value={query}
         />

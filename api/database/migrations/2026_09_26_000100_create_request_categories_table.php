@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('request_categories', function (Blueprint $table) {
             // Bir talep birden fazla kategoride yer alabilir: "mutfak yenileme"
             // hem tadilat hem mutfak dolabi altinda gorunsun, iki taraftaki
-            // saticilar da gorsun. Form ve kontor bedeli birincil kategoriden
+            // saticilar da gorsun. Form ve kredi bedeli birincil kategoriden
             // gelir; digerleri yalnizca erisimi genisletir.
             $table->foreignId('request_id')->constrained('requests')->cascadeOnDelete();
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();

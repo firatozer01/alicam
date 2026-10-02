@@ -50,11 +50,19 @@ export function useSession(enabled = true) {
     return () => { active = false; };
   }, [enabled]);
 
+  // Isareti geri koyar. Uretimde islemsiz: oznitelik zaten layout.tsx'teki
+  // betikle ilk boyamadan once yazildi. Gelistirmede ise React Strict Mode
+  // bileseni bir kez yeniden bagliyor ve o sirada <html>'in JSX disindan
+  // gelen oznitelikleri siliniyor; betik tekrar calismadigi icin isaret
+  // kayboluyor ve turuncu dugme bir anligina geri geliyordu.
+  useEffect(() => {
+    if (wasSignedIn) document.documentElement.dataset.oturum = "1";
+  }, [wasSignedIn]);
+
   // Sonuc bir sonraki acilis icin saklanir; ayni anda <html> uzerindeki
-  // oznitelik de duzeltilir. Oznitelik layout.tsx'teki betikle ilk
-  // boyamadan once yaziliyor ve CSS ona bakip eylem dugmesini gizliyor:
-  // iz eskimisse (oturum baska yerde kapatilmis olabilir) burada
-  // temizlenmezse dugme misafire de bir daha hic gorunmezdi.
+  // oznitelik de duzeltilir. Iz eskimisse (oturum baska yerde kapatilmis
+  // olabilir) burada temizlenmezse eylem dugmesi misafire de bir daha hic
+  // gorunmezdi.
   useEffect(() => {
     if (!ready) return;
     try { window.localStorage.setItem(OTURUM_IZI, user ? "1" : "0"); } catch { /* yoksay */ }

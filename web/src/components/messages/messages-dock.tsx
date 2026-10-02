@@ -119,13 +119,13 @@ export function MessagesDock() {
       await send(body);
       setDraft("");
     } catch {
-      setSendError("Gönderilemedi. Kontörün yetmiyor olabilir.");
+      setSendError("Gönderilemedi. Kredin yetmiyor olabilir.");
     } finally {
       setSending(false);
     }
   };
 
-  /** Hizmet veren kontor odeyip konusmayi acar. */
+  /** Hizmet veren kredi odeyip konusmayi acar. */
   const runUnlock = async () => {
     if (unlocking) return;
     setUnlocking(true);
@@ -133,7 +133,7 @@ export function MessagesDock() {
     try {
       await unlock();
     } catch {
-      setSendError("Açılamadı. Kontörün yetmiyor olabilir.");
+      setSendError("Açılamadı. Kredin yetmiyor olabilir.");
     } finally {
       setUnlocking(false);
     }

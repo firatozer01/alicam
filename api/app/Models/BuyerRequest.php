@@ -38,7 +38,7 @@ class BuyerRequest extends Model
         return $this->belongsTo(User::class);
     }
 
-    /** Birincil kategori: form alanlari ve kontor bedeli buradan gelir. */
+    /** Birincil kategori: form alanlari ve kredi bedeli buradan gelir. */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

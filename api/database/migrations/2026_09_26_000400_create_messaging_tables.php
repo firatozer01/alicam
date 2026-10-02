@@ -38,7 +38,7 @@ return new class extends Migration
             $table->foreignId('conversation_id')->constrained()->cascadeOnDelete();
             $table->foreignId('sender_id')->constrained('users')->cascadeOnDelete();
             $table->text('body');
-            // Saticinin bir konusmadaki ILK mesaji kontor dusurur; ne kadar
+            // Saticinin bir konusmadaki ILK mesaji kredi dusurur; ne kadar
             // dustugu burada saklanir, sonraki mesajlar ucretsizdir.
             $table->unsignedInteger('credit_spent')->default(0);
             $table->timestamp('read_at')->nullable();

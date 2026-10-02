@@ -156,9 +156,9 @@
 .noOffer{padding:26px 20px;font-size:14.5px;line-height:1.6}
 
 /* ---- Teklif kartindan dogrudan yazisma ----
-   Profil baglantisi ile mesaj dugmesi ayni satirda durur; kontor
+   Profil baglantisi ile mesaj dugmesi ayni satirda durur; kredi
    uyarisi hemen altinda, alici neden hemen yanit gelmeyebilecegini
-   bilsin diye. Kontoru sunucu hizmet verenden tahsil eder. */
+   bilsin diye. Krediyi sunucu hizmet verenden tahsil eder. */
 .offerActions{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:2px 0 6px}
 .offerActions .profileLink{margin:0}
 .messageButton{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:8px 13px;border:1px solid var(--violet-200);border-radius:var(--r-sm);color:var(--blue-700);background:var(--violet-50);font:700 13px var(--font-inter);cursor:pointer;transition:background .2s,opacity .2s}

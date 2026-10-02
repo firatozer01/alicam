@@ -1,7 +1,7 @@
 # alıcam.net
 
 Talep bazlı iki taraflı pazaryeri. Alıcı ihtiyacını ücretsiz paylaşır; uygun
-hizmet verenler kategori bazlı kontör harcayarak talebi açar ve teklif gönderir.
+hizmet verenler kategori bazlı kredi harcayarak talebi açar ve teklif gönderir.
 
 ## Proje yapısı
 
@@ -41,7 +41,7 @@ alındığında `SESSION_SECURE_COOKIE=true` yapılmalıdır.
 - Sahibinden benzeri filtreli ve sıralanabilir canlı talep pazaryeri ana sayfası
 - Statik prototiplerle aynı aurora, kayan kategori, sayaç, grafik ve görünürlük animasyonları
 - Rol bazlı giriş yönlendirmesi: müşteri, hizmet veren ve yönetici kendi çalışma alanına gider
-- Puanı yüksek ve kontörle sponsorlu hizmet veren vitrini
+- Puanı yüksek ve krediyle sponsorlu hizmet veren vitrini
 - Dört adımlı, dinamik kategori sorulu talep oluşturma deneyimi
 - Laravel Sanctum çerez tabanlı üyelik, giriş ve çıkış akışı
 - Hash saklamalı e-posta/telefon doğrulama kodu altyapısı
@@ -55,18 +55,18 @@ alındığında `SESSION_SECURE_COOKIE=true` yapılmalıdır.
 - Yönetici sayfalarında Next.js sunucu tarafı oturum/rol koruması ve Laravel yetki kontrolü
 - Onaylı satıcılar için kategori + ilçe kesişimli talep eşleştirmesi
 - Kilitli talepte PII maskeleme, güvenli anonim özet ve özel alan gizleme
-- Transaction güvenli kontör cüzdanı, hareket defteri ve maliyet snapshot'ı
+- Transaction güvenli kredi cüzdanı, hareket defteri ve maliyet snapshot'ı
 - Aynı talebi ikinci kez ücretsiz gösteren benzersiz kilit açma kaydı
-- Kontörlü teklif oluşturma/güncelleme ve alıcı kabul/red yaşam döngüsü
+- Kredili teklif oluşturma/güncelleme ve alıcı kabul/red yaşam döngüsü
 - Hizmet veren katalog yönetimi: hizmet ekleme, düzenleme, yayından kaldırma
-- Kontörle 7, 14 veya 30 günlük ana sayfa öne çıkarma paketleri
+- Krediyle 7, 14 veya 30 günlük ana sayfa öne çıkarma paketleri
 - Tamamlanan işlerde gerçek alıcı puanı ve değerlendirme akışı
 - Dört paketli PayTR iframe siparişi, imzalı/idempotent callback ve bonus yükleme
 - Gelişmiş müşteri paneli: `http://localhost:3000/musteri-panel`
 - Responsive hizmet veren paneli: `http://localhost:3000/satici-paneli`
-- PayTR kontör sayfası: `http://localhost:3000/kontor-yukle`
+- PayTR kredi sayfası: `http://localhost:3000/kredi-yukle`
 - Operasyon özetli admin paneli: `http://localhost:3000/admin`
-- Kategori, teklif kontör bedeli ve dinamik talep formu yönetimi: `http://localhost:3000/admin/kategoriler`
+- Kategori, teklif kredi bedeli ve dinamik talep formu yönetimi: `http://localhost:3000/admin/kategoriler`
 - Kullanım koşulları ve gizlilik bilgilendirme sayfaları
 - Kimlikten ödeme ve teklife uzanan API test paketi
 - Sağlayıcı bağımsız Ubuntu/Docker çalışma yapısı
@@ -107,7 +107,7 @@ PayTR bildirim URL'i aşağıdaki dışarıdan erişilebilir HTTPS adresine ayar
 https://alan-adiniz.example/api/payments/paytr/callback
 ```
 
-Tarayıcının başarı sayfası ödeme kanıtı sayılmaz. Kontör yalnızca PayTR'nin
+Tarayıcının başarı sayfası ödeme kanıtı sayılmaz. Kredi yalnızca PayTR'nin
 imzalı sunucu bildirimi doğrulandıktan sonra, aynı sipariş için bir kez yüklenir.
 
 ## Konum verisi

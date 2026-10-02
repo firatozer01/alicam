@@ -94,7 +94,7 @@ function rememberVertical(vertical?: string) {
  *
  * Gorunum yeni tasarimdan gelir; davranis eskisi gibi oturuma duyarlidir:
  * oturum acmis kullanici avatarini, hesap menusunu, okunmamis rozetini ve
- * kontor sayacini gormeye devam eder. Tasarimla birebir ortusen yalnizca
+ * kredi sayacini gormeye devam eder. Tasarimla birebir ortusen yalnizca
  * oturumsuz hal.
  */
 export function SiteHeader({
@@ -198,7 +198,7 @@ export function SiteHeader({
             eylem dugmesi basilip cevap gelince kaldiriliyor, yerine hesap
             menusu geliyordu -- telefonda gozle gorulur bir sicrama. */}
         <div className={uyeDuzeni ? `${styles.actions} ${styles.actionsAuthed}` : styles.actions}>
-          {typeof credits === "number" && <Link className={styles.credit} href="/kontor-yukle">⚡ {credits} kontör</Link>}
+          {typeof credits === "number" && <Link className={styles.credit} href="/kredi-yukle">⚡ {credits} kredi</Link>}
           {/* Favori talepler yalnizca hizmet vereni ilgilendirir. */}
           {ready && isSeller && (
             <Link aria-label="Favori talepler" className={styles.fav} href="/favorilerim" title="Favori talepler">★</Link>

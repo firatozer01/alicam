@@ -1,12 +1,12 @@
 <?php
 
 return [
-    // Hizmet veren bir konusmayi acmak icin bir kez bu kadar kontor oder.
+    // Hizmet veren bir konusmayi acmak icin bir kez bu kadar kredi oder.
     // Acilan konusmada hem gelen mesajlari okur hem de sinirsiz yanit yazar.
     // Alici hicbir zaman odemez.
     'unlock_cost' => (int) env('MESSAGING_UNLOCK_COST', 1),
 
-    // Satici bir talebi kontorle actiysa, AYNI talebe bagli konusmayi da
+    // Satici bir talebi krediyle actiysa, AYNI talebe bagli konusmayi da
     // bedelsiz acsin mi.
     //
     // false (varsayilan): acmaz, ayrica oder. Site sahibinin karari —
@@ -18,7 +18,7 @@ return [
     'free_when_request_unlocked' => (bool) env('MESSAGING_FREE_WHEN_REQUEST_UNLOCKED', false),
 
     // Konusma acilmadan alicinin ust uste yazabilecegi mesaj sayisi. Amac
-    // hizmet vereni duvar metinle kontor odemeye zorlamayi engellemek.
+    // hizmet vereni duvar metinle kredi odemeye zorlamayi engellemek.
     'locked_message_limit' => (int) env('MESSAGING_LOCKED_MESSAGE_LIMIT', 3),
 
     // Okunmamis mesaj e-postasi bu kadar dakika sonra gonderilir. Karsi taraf

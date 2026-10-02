@@ -22,11 +22,11 @@ const TRUST = [
   { emoji: "⚖️", title: "Tek ekranda karşılaştır", hint: "Fiyat, puan, yorum yan yana" },
 ];
 
-const KONTOR = [
+const KREDI = [
   { step: "1", title: "Talep özetini gör", hint: "Kategori, ilçe, bütçe ve kısa açıklama", tag: "Ücretsiz", free: true },
-  { step: "2", title: "Detayı aç", hint: "Maliyet, açmadan önce gösterilir", tag: "Kontör", free: false },
+  { step: "2", title: "Detayı aç", hint: "Maliyet, açmadan önce gösterilir", tag: "Kredi", free: false },
   { step: "3", title: "Teklif gönder, güncelle", hint: "Aynı talebi tekrar açmak da ücretsiz", tag: "Ücretsiz", free: true },
-  { step: "★", title: "Öne çık (isteğe bağlı)", hint: "7, 14 veya 30 gün vitrinde yer al", tag: "Kontör", free: false },
+  { step: "★", title: "Öne çık (isteğe bağlı)", hint: "7, 14 veya 30 gün vitrinde yer al", tag: "Kredi", free: false },
 ];
 
 /**
@@ -235,7 +235,7 @@ export function MarketplaceHome() {
               <ol className={styles.howSteps}>
                 <li><b>1</b><div><strong>Ücretsiz profil oluştur</strong><p>Usta, emlakçı, galeri ya da mağaza; ne sattığını ve nerede çalıştığını seç.</p></div></li>
                 <li><b>2</b><div><strong>Uygun talepleri gör</strong><p>Yalnızca kategorine ve bölgene uyan talepler önüne düşer. Özetler ücretsiz.</p></div></li>
-                <li><b>3</b><div><strong>Detayı aç, teklif ver</strong><p>İlgilendiğin talebin detayını kontörle aç. Teklif göndermek ek ücret istemez.</p></div></li>
+                <li><b>3</b><div><strong>Detayı aç, teklif ver</strong><p>İlgilendiğin talebin detayını krediyle aç. Teklif göndermek ek ücret istemez.</p></div></li>
               </ol>
               <Link className={`${styles.btn} ${styles.btnWhite}`} href={sellerHref}>{sellerLabel} →</Link>
             </article>
@@ -290,13 +290,13 @@ export function MarketplaceHome() {
               <Link className={`${styles.btn} ${styles.btnCta} ${styles.btnLg}`} href={sellerHref}>
                 {isSeller ? "Gelen taleplere git" : "Ücretsiz teklif veren ol"} →
               </Link>
-              <a className={`${styles.btn} ${styles.btnGhostLight} ${styles.btnLg}`} href="#sss">Kontör nasıl işler?</a>
+              <a className={`${styles.btn} ${styles.btnGhostLight} ${styles.btnLg}`} href="#sss">Kredi nasıl işler?</a>
             </div>
           </div>
 
-          <div className={styles.kontor}>
-            <div className={styles.kontorHead}><strong>Ne zaman ödersin?</strong><span>Sadece ilgilendiğinde.</span></div>
-            {KONTOR.map((row) => (
+          <div className={styles.kredi}>
+            <div className={styles.krediHead}><strong>Ne zaman ödersin?</strong><span>Sadece ilgilendiğinde.</span></div>
+            {KREDI.map((row) => (
               <div className={styles.kRow} key={row.title}>
                 <i>{row.step}</i>
                 <div><strong>{row.title}</strong><small>{row.hint}</small></div>

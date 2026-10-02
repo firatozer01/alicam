@@ -41,7 +41,7 @@ return new class extends Migration
             $table->string('dedupe_key', 80)->nullable();
 
             // Baslik degiskenleri ve sayaclar; bildirim silinmeden yeniden
-            // uretilebilsin diye tutulur (fiyat, kontor, mesaj sayisi).
+            // uretilebilsin diye tutulur (fiyat, kredi, mesaj sayisi).
             $table->jsonb('data')->nullable();
 
             $table->timestamp('read_at')->nullable();

@@ -118,7 +118,7 @@ class SellerCreditService
             );
 
             // Ornek talep bedelsiz acilir: hizmet verenin sahte bir
-            // ilan icin gercek kontor odemesi kabul edilemez.
+            // ilan icin gercek kredi odemesi kabul edilemez.
             $cost = $lockedRequest->is_demo
                 ? 0
                 : (int) ($lockedRequest->category->creditCost?->unlock_cost ?? 0);

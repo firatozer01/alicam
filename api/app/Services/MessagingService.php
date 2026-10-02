@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Log;
  * Birebir mesajlasma.
  *
  * Kural: alici bir hizmet verene her zaman UCRETSIZ yazar. Hizmet veren o
- * konusmayi OKUMAK ve YANITLAMAK icin bir kez kontor oder; odedikten sonra
+ * konusmayi OKUMAK ve YANITLAMAK icin bir kez kredi oder; odedikten sonra
  * ayni konusmada sinirsiz yazisir. Odemeden once mesajin govdesini goremez,
  * yalnizca kimden ve ne zaman geldigini gorur.
  *
@@ -72,7 +72,7 @@ class MessagingService
             return 0;
         }
 
-        // Konusma bir talebe bagli ve satici o talebi zaten kontorle
+        // Konusma bir talebe bagli ve satici o talebi zaten krediyle
         // acmis olabilir. Bunun bedelsiz sayilip sayilmayacagi bir is
         // karari, kod karari degil: varsayilan ODEMELI, cunku teklif
         // vermek ile alicinin ozel yazismasi ayri iki sey.
@@ -95,10 +95,10 @@ class MessagingService
     }
 
     /**
-     * Hizmet veren konusmayi acar: kontor duser ve damgayi atar.
+     * Hizmet veren konusmayi acar: kredi duser ve damgayi atar.
      *
      * Ayni anda iki istek gelirse satir kilitlenip yeniden okundugu icin
-     * kontor yalnizca bir kez duser; ikinci istek "zaten acik" doner.
+     * kredi yalnizca bir kez duser; ikinci istek "zaten acik" doner.
      *
      * @return array{conversation: Conversation, already_unlocked: bool, credit_spent: int, balance: int|null}
      *
@@ -158,7 +158,7 @@ class MessagingService
                 }
 
                 // Alici kilitli konusmada sinirsiz yazamaz: aksi halde hizmet
-                // vereni duvar metinle kontor odemeye zorlamak mumkun olurdu.
+                // vereni duvar metinle kredi odemeye zorlamak mumkun olurdu.
                 $limit = max(1, (int) config('messaging.locked_message_limit', 3));
 
                 if ($locked->locked_message_count >= $limit) {
@@ -267,7 +267,7 @@ class MessagingService
                 : 'Yeni bir mesajın var',
             body: $okuyabilir
                 ? mb_substr(trim($message->body), 0, 120)
-                : "Okumak ve yanıtlamak için {$bedel} kontör gerekiyor.",
+                : "Okumak ve yanıtlamak için {$bedel} kredi gerekiyor.",
             link: '/mesajlar?konusma='.$conversation->id,
             dedupeKey: 'message:'.$conversation->id,
             data: ['conversation_id' => $conversation->id, 'locked' => ! $okuyabilir],
@@ -276,7 +276,7 @@ class MessagingService
         );
     }
 
-    /** Kontoru duser ve kalan bakiyeyi doner. */
+    /** Krediyi duser ve kalan bakiyeyi doner. */
     private function charge(User $seller, Conversation $conversation, int $cost): int
     {
         SellerCredit::query()->firstOrCreate(['user_id' => $seller->id], ['balance' => 0]);

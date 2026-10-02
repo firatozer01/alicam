@@ -18,7 +18,7 @@ class Text
      *
      * Talep basligi ve aciklamasi alicinin yazdigi metindir ve oraya
      * telefon, e-posta ya da bir baglanti yazilabiliyor. Bu metin iki
-     * yerde disari cikiyor: kontor odemis saticiya ve HERKESE ACIK
+     * yerde disari cikiyor: kredi odemis saticiya ve HERKESE ACIK
      * pazaryeri akisina. Ikisinde de ayni temizlikten gecmeli; aksi
      * halde satici odeyip gizlenmis halini gorurken ayni numara
      * anasayfada yayinda olur.

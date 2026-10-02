@@ -335,7 +335,7 @@ h1, h2, h3, p{ margin-top: 0; }
 
 /* Teklif, alıcı{ position: relative; padding: 0; border: 0; color: #653fa6; background: transparent; font: 750 10px var(--font-inter); cursor: pointer; }.offer-status{ padding: 6px 9px; border-radius: 20px; font: 7px var(--font-plex); }.offer-status.pending{ color: #91641a; background: #fff1d7; }.offer-status.accepted{ color: var(--blue); background: #eae6f1; }.offer-status.rejected{ color: #9d4848; background: #fff0f0; }
 
-/* Kontor ve odeme ekranlari. Sayfa zemini, ust cubuk ve kenar boslugu artik
+/* Kredi ve odeme ekranlari. Sayfa zemini, ust cubuk ve kenar boslugu artik
    PageShell'in isi; buradaki kurallar yalnizca IC yerlesimi kuruyor. Bu
    yuzden kapsayici genisligi degil, yalnizca max-width veriliyor: gutter'i
    kabugun .wrap'i zaten ayirdi, ikinci kez ayirmak sayfayi iceri kaydirir. */
@@ -580,7 +580,7 @@ select.control.control.controlLg{ padding-right: 40px; }
 }
 
 /* ==========================================================
-   Hizmet veren basvurusu (.seller-*), kontor (.credit-*) ve
+   Hizmet veren basvurusu (.seller-*), kredi (.credit-*) ve
    odeme (.payment-*) ekranlari: telefon denetimi duzeltmeleri
    Yukaridaki eski blok bu uc ekranin butun yazi olculerini 6-11px
    araliginda birakiyor; telefonda okunmuyor. Olcu hatasi her

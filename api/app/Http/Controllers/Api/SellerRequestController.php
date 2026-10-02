@@ -257,7 +257,7 @@ class SellerRequestController extends Controller
 
         return response()->json([
             'message' => $result['already_unlocked']
-                ? 'Bu talebin detayları daha önce açılmıştı; kontör düşülmedi.'
+                ? 'Bu talebin detayları daha önce açılmıştı; kredi düşülmedi.'
                 : 'Talep detayları açıldı.',
             'data' => new SellerRequestResource($unlockedItem),
             'balance' => $result['balance'],

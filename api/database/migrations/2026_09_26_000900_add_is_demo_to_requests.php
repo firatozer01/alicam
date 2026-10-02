@@ -13,7 +13,7 @@ return new class extends Migration
             // Vitrini canli gostermek icin uretilmis ornek talep.
             //
             // Isaretlenmesinin sebebi para: hizmet veren bir talebin
-            // detayini acarken GERCEK kontor oduyor. Ornek bir talep icin
+            // detayini acarken GERCEK kredi oduyor. Ornek bir talep icin
             // odeme yapmasi kabul edilemez, bu yuzden demo talepler
             // bedelsiz acilir ve arayuzde acikca etiketlenir.
             $table->boolean('is_demo')->default(false)->after('status');

@@ -341,7 +341,7 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
             <h3>Teklif verenler</h3>
             <Link href="/satici-ol">Teklif veren ol</Link>
             <Link href="/#teklif-ver">Nasıl kazanırım?</Link>
-            <Link href="/kontor-yukle">Kontör paketleri</Link>
+            <Link href="/kredi-yukle">Kredi paketleri</Link>
             <Link href="/#son-talepler">Açık talepler</Link>
           </nav>
 

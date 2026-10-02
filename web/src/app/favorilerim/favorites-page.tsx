@@ -40,7 +40,7 @@ const gecenSure = (value: string) => {
  * Hizmet verenin favorilediği talepler.
  *
  * Panelin icindeki "Favorilerim" gorunumuyle ayni veriyi kullanir; buradaki
- * fark, ust cubuktan tek tiklamayla ulasilan kendi adresi olmasi. Kontorle
+ * fark, ust cubuktan tek tiklamayla ulasilan kendi adresi olmasi. Krediyle
  * acma ve teklif verme panelde kaldi: burasi isaretlenenleri toplu gormek
  * ve aralarindan secmek icin.
  */

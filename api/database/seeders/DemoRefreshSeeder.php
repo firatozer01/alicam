@@ -149,7 +149,7 @@ class DemoRefreshSeeder extends Seeder
                         .'Fotoğraf ve detaylı bilgi paylaşan satıcılarla ilerlemek isterim.',
                     'budget_min' => $min,
                     'budget_max' => $max,
-                    'full_address' => 'Kadıköy, İstanbul — açık adres yalnızca kontörle açılır.',
+                    'full_address' => 'Kadıköy, İstanbul — açık adres yalnızca krediyle açılır.',
                     'status' => 'open',
                 ],
             );

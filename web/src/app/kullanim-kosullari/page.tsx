@@ -5,7 +5,7 @@ import { LegalShell, type LegalTocItem } from "../legal-shell";
 
 export const metadata: Metadata = {
   title: "Kullanım koşulları — alıcam.net",
-  description: "alıcam.net talep pazaryerinin temel kullanım kuralları: platformun rolü, hesap güvenliği, talep, teklif ve kontör.",
+  description: "alıcam.net talep pazaryerinin temel kullanım kuralları: platformun rolü, hesap güvenliği, talep, teklif ve kredi.",
 };
 
 // Icindekiler sirasi makaledeki bolum sirasiyla ayni.
@@ -13,7 +13,7 @@ const TOC: LegalTocItem[] = [
   { id: "rol", label: "Platformun rolü" },
   { id: "hesap", label: "Hesap ve güvenlik" },
   { id: "talep", label: "Talep oluşturma" },
-  { id: "kontor", label: "Teklif ve kontör" },
+  { id: "kredi", label: "Teklif ve kredi" },
   { id: "uygun", label: "Uygun kullanım" },
   { id: "iletisim", label: "İletişim" },
 ];
@@ -46,7 +46,7 @@ export default function TermsPage() {
       <strong>Kısaca</strong>
       <ul>
         <li>Talep oluşturmak ücretsizdir; teklifler seni hiçbir şekilde bağlamaz.</li>
-        <li>Teklif verenler yalnızca talep detayını açarken kontör öder; maliyet önceden gösterilir.</li>
+        <li>Teklif verenler yalnızca talep detayını açarken kredi öder; maliyet önceden gösterilir.</li>
         <li>Anlaşmanın kapsamı, fiyatı ve teslimi taraflar arasındadır.</li>
       </ul>
     </div>
@@ -67,10 +67,10 @@ export default function TermsPage() {
       <p>Talep oluşturmak ve teklif almak ücretsizdir. Talepler gerçek bir ihtiyacı yansıtmalı; yanıltıcı fiyat, konum veya içerik barındırmamalıdır. Talebin, seçtiğin kategori ve bölgedeki onaylı teklif verenlere gösterilir.</p>
     </section>
 
-    <section id="kontor">
-      <h2><small>04</small>Teklif ve kontör</h2>
-      <p>Teklif verenler talep özetlerini ücretsiz görür. Talep detayını açmak ve platformun belirlediği görünürlük işlemleri (ör. vitrinde öne çıkma) kontörle ücretlendirilebilir; işlem öncesinde maliyet gösterilir.</p>
-      <p>Teklif göndermek, güncellemek ve daha önce açılmış bir talebi tekrar görüntülemek ek kontör gerektirmez.</p>
+    <section id="kredi">
+      <h2><small>04</small>Teklif ve kredi</h2>
+      <p>Teklif verenler talep özetlerini ücretsiz görür. Talep detayını açmak ve platformun belirlediği görünürlük işlemleri (ör. vitrinde öne çıkma) krediyle ücretlendirilebilir; işlem öncesinde maliyet gösterilir.</p>
+      <p>Teklif göndermek, güncellemek ve daha önce açılmış bir talebi tekrar görüntülemek ek kredi gerektirmez.</p>
     </section>
 
     <section id="uygun">

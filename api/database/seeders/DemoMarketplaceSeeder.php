@@ -196,7 +196,7 @@ class DemoMarketplaceSeeder extends Seeder
                     'description' => 'İşin kapsamını yerinde değerlendirebilecek, iletişimi güçlü ve takvime sadık bir profesyonelden ayrıntılı teklif bekliyorum.',
                     'budget_min' => $budgetMin + ($number * 150),
                     'budget_max' => $budgetMax + ($number * 250),
-                    'full_address' => 'Kadıköy, İstanbul — açık adres yalnızca kontörle açılır.',
+                    'full_address' => 'Kadıköy, İstanbul — açık adres yalnızca krediyle açılır.',
                     'attributes' => $this->attributes($slug),
                     'attribute_schema_snapshot' => $category->attributes->map(fn ($attribute) => [
                         'key' => $attribute->key,

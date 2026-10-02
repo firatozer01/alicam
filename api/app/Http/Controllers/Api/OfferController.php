@@ -148,7 +148,7 @@ class OfferController extends Controller
 
         return response()->json([
             'message' => $unlock['already_unlocked']
-                ? 'Teklifiniz gönderildi; talep daha önce açıldığı için kontör düşülmedi.'
+                ? 'Teklifiniz gönderildi; talep daha önce açıldığı için kredi düşülmedi.'
                 : 'Teklifiniz gönderildi ve talep açma bedeli bakiyenizden düşüldü.',
             'data' => new OfferResource($offer->load(['seller.sellerProfile', 'listing.images'])),
             'balance' => $unlock['balance'],
@@ -177,7 +177,7 @@ class OfferController extends Controller
         $offer->update($data);
 
         return response()->json([
-            'message' => 'Teklifiniz güncellendi; ek kontör düşülmedi.',
+            'message' => 'Teklifiniz güncellendi; ek kredi düşülmedi.',
             'data' => new OfferResource($offer->load(['seller.sellerProfile', 'listing.images'])),
         ]);
     }

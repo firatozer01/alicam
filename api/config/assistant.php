@@ -39,7 +39,7 @@ return [
         ['key' => 'talep-ac', 'title' => 'Talep aç, teklif topla'],
         ['key' => 'teklif-iletisim', 'title' => 'Gelen teklifler ve iletişim'],
         ['key' => 'hizmet-veren', 'title' => 'Hizmet veren olarak iş al'],
-        ['key' => 'kontor', 'title' => 'Kontör, ücret ve ödeme'],
+        ['key' => 'kredi', 'title' => 'Kredi, ücret ve ödeme'],
         ['key' => 'hesap', 'title' => 'Hesabın ve çalışma alanların'],
     ],
 
@@ -125,19 +125,19 @@ return [
             'summary' => 'Telefonun ve adresin ne zaman açılır',
             'keywords' => ['gizlilik', 'telefon', 'numara', 'iletişim', 'güvenli', 'adres'],
             'answer' => "Telefon, e-posta ve açık adres talep özetinde gösterilmez. Hizmet veren talebin detayını "
-                ."kontör harcayarak açtığında ya da teklifini kabul ettiğinde açılır.\n\n"
+                ."kredi harcayarak açtığında ya da teklifini kabul ettiğinde açılır.\n\n"
                 .'Talep listesinde yalnızca kategori, bütçe aralığı, ilçe ve senin yazdığın kısa özet görünür.',
         ],
         [
-            'key' => 'kontor',
-            'title' => 'Kontör nedir, kim öder?',
+            'key' => 'kredi',
+            'title' => 'Kredi nedir, kim öder?',
             'audience' => 'all',
-            'group' => 'kontor',
+            'group' => 'kredi',
             'icon' => '⚡',
-            'summary' => 'Alıcıya ücretsiz; kontörü satıcı öder',
-            'keywords' => ['kontör', 'kontor', 'jeton', 'ücret', 'para', 'ödeme', 'fiyat'],
+            'summary' => 'Alıcıya ücretsiz; krediyi satıcı öder',
+            'keywords' => ['kredi', 'kontör', 'kontor', 'jeton', 'ücret', 'para', 'ödeme', 'fiyat'],
             'answer' => "Alıcı için her şey ücretsiz: talep açmak da teklif almak da para istemez.\n\n"
-                .'Kontörü hizmet verenler kullanır; bir talebin detayını açmak ve teklif göndermek için kategoriye göre değişen bir kontör bedeli öderler.',
+                .'Krediyi hizmet verenler kullanır; bir talebin detayını açmak ve teklif göndermek için kategoriye göre değişen bir kredi bedeli öderler.',
         ],
         [
             'key' => 'satici-ol',
@@ -214,28 +214,46 @@ return [
                 .'Karşı taraf o sırada sitede değilse mesajın birkaç dakika içinde okunmazsa e-posta olarak da haber verilir.',
         ],
         [
-            'key' => 'mesaj-kontor',
-            'title' => 'Mesajlaşma kontör düşürür mü?',
+            'key' => 'mesaj-kredi',
+            'title' => 'Mesajlaşma kredi düşürür mü?',
             'audience' => 'all',
-            'group' => 'kontor',
+            'group' => 'kredi',
             'icon' => '🪙',
-            'summary' => 'İlk mesaj kontör düşer, sonrası ücretsiz',
-            'keywords' => ['mesaj kontör', 'mesaj ücret', 'ilk mesaj', 'yazışma ücret', 'mesaj jeton'],
+            'summary' => 'İlk mesaj kredi düşer, sonrası ücretsiz',
+            'keywords' => ['mesaj kredi', 'mesaj kontör', 'mesaj ücret', 'ilk mesaj', 'yazışma ücret', 'mesaj jeton'],
             'answer' => "Alıcı için mesajlaşma tamamen ücretsizdir.
 
 "
-                ."Hizmet veren, bir konuşmadaki ilk mesajı için kontör öder; aynı konuşmadaki sonraki "
+                ."Hizmet veren, bir konuşmadaki ilk mesajı için kredi öder; aynı konuşmadaki sonraki "
                 .'mesajların tamamı ücretsizdir. Yani başlattığın bir yazışmayı sürdürmek için tekrar ödeme yapmazsın.',
         ],
         [
-            'key' => 'kontor-yukle',
-            'title' => 'Kontörü nasıl yüklerim?',
+            'key' => 'kredi-yukle',
+            'title' => 'Krediyi nasıl yüklerim?',
             'audience' => 'user',
-            'group' => 'kontor',
+            'group' => 'kredi',
             'icon' => '💳',
             'summary' => 'Paketi seç, kartla öde, bakiye anında',
-            'keywords' => ['kontör yükle', 'kontor yukle', 'bakiye', 'satın al', 'paket', 'kredi kartı', 'yükle'],
-            'answer' => "Satıcı panelindeki “Kontör” bölümünden yükleme sayfasına geçiyorsun. Orada hazır "
+            // 'kart' ve 'yükl' burada ZORUNLU.
+            //
+            // Urun adi "kredi" olunca ustteki GENEL konunun anahtar listesine
+            // de 'kredi' girdi ve o liste artik neredeyse her kredi sorusuyla
+            // eslesiyor. search() kazanani "$score > $bestScore" ile seciyor,
+            // yani esitlikte dizide ONCE gelen -- genel konu -- kazaniyor.
+            // "kredi kartiyla odeyebilir miyim" ve "krediyi nasil yuklerim"
+            // sorulari boylece 3-3 berabere kalip yukleme sayfasi yerine
+            // "Kredi nedir" cevabini donduruyordu.
+            //
+            // Iki DAR anahtar esitligi bozuyor: 'kart' odeme araci gecen
+            // sorulari, 'krediyi' ise "krediyi nasil yuklerim" gibi cekimli
+            // sorulari yakalar. Ikisi de bilerek dar: once 'yükl' koklu bir
+            // anahtar denendi ve "profil fotografi yuklemek", "portfoye
+            // calisma yukleme" gibi yuklemeyle ilgisi olmayan sorulari da
+            // bu konuya cekti. 'krediyi' yalnizca kredi cumlelerinde geciyor
+            // ve tek basina genel konuyu gecemiyor: ikisinin birlikte
+            // eslesmesi gerekiyor.
+            'keywords' => ['kredi yükle', 'kredi yukle', 'kontör yükle', 'kontor yukle', 'bakiye', 'satın al', 'paket', 'kredi kartı', 'kart', 'krediyi', 'yükle'],
+            'answer' => "Satıcı panelindeki “Kredi” bölümünden yükleme sayfasına geçiyorsun. Orada hazır "
                 ."paketlerden birini seçip kredi kartıyla ödüyorsun.
 
 "
@@ -277,9 +295,9 @@ return [
             'audience' => 'user',
             'group' => 'hizmet-veren',
             'icon' => '📤',
-            'summary' => 'Talebi kontörle aç, sonra teklifini yaz',
+            'summary' => 'Talebi krediyle aç, sonra teklifini yaz',
             'keywords' => ['teklif ver', 'teklif gönder', 'talebi aç', 'kilidi aç', 'detayı aç', 'fiyat ver', 'teklifimi güncelle', 'teklif düzenle'],
-            'answer' => "Satıcı panelindeki “Gelen talepler” listesinde kategorine ve hizmet bölgene düşen açık talepler var. Kartta kategori, rekabet yoğunluğu, başlık, konum, gelen teklif sayısı ve tahmini bütçe görünür; açıklama ve iletişim bilgisi kapalıdır.\n\n1. Kartın altındaki “Aç · N ⚡” düğmesiyle detayı kontörle açıyorsun. Bedel kategoriye göre değişir; açıldığında talebin tüm açıklaması, kategoriye özel alanları, alıcının iletişim bilgisi ve alıcı girdiyse açık adresi gelir.\n2. Sonra “Teklif ver” deyip fiyatını ve en az 20 karakterlik teklif notunu yazıyorsun. Talep zaten açıldığı için teklif göndermek ek kontör düşürmez.\n\nGönderdiğin teklifler “Tekliflerim” bölümünde toplanır. Alıcı yanıtlamadığı sürece “Teklifi düzenle” ile fiyatını ve notunu güncelleyebilirsin; güncelleme de kontör düşürmez.\n\nListeyi kategori, şehir ve bütçeye göre filtreleyebilir; en yeni, bütçe, en az rekabet ya da en çok teklif alan sıralamalarını kullanabilirsin.",
+            'answer' => "Satıcı panelindeki “Gelen talepler” listesinde kategorine ve hizmet bölgene düşen açık talepler var. Kartta kategori, rekabet yoğunluğu, başlık, konum, gelen teklif sayısı ve tahmini bütçe görünür; açıklama ve iletişim bilgisi kapalıdır.\n\n1. Kartın altındaki “Aç · N ⚡” düğmesiyle detayı krediyle açıyorsun. Bedel kategoriye göre değişir; açıldığında talebin tüm açıklaması, kategoriye özel alanları, alıcının iletişim bilgisi ve alıcı girdiyse açık adresi gelir.\n2. Sonra “Teklif ver” deyip fiyatını ve en az 20 karakterlik teklif notunu yazıyorsun. Talep zaten açıldığı için teklif göndermek ek kredi düşürmez.\n\nGönderdiğin teklifler “Tekliflerim” bölümünde toplanır. Alıcı yanıtlamadığı sürece “Teklifi düzenle” ile fiyatını ve notunu güncelleyebilirsin; güncelleme de kredi düşürmez.\n\nListeyi kategori, şehir ve bütçeye göre filtreleyebilir; en yeni, bütçe, en az rekabet ya da en çok teklif alan sıralamalarını kullanabilirsin.",
         ],
         [
             'key' => 'talep-favori',
@@ -289,7 +307,7 @@ return [
             'icon' => '🔖',
             'summary' => 'Yıldızla işaretle, Favorilerim\'de bul',
             'keywords' => ['favori', 'favorilerim', 'yıldız', 'işaretle', 'kaydet', 'takip', 'sonra bakarım'],
-            'answer' => "Satıcı panelinde talep kartının üstündeki yıldıza (☆) basmak talebi favorilerine ekler. Bunun için kontör harcamazsın; detayı açmadan önce ilgini çekenleri bir kenara ayırman için var.\n\nListenin üstündeki “Görünüm” seçiminden ya da Talepler menüsündeki “Favorilerim” başlığından yalnızca işaretlediklerini görebilirsin.\n\nYıldıza tekrar basarsan favorilerden çıkar.",
+            'answer' => "Satıcı panelinde talep kartının üstündeki yıldıza (☆) basmak talebi favorilerine ekler. Bunun için kredi harcamazsın; detayı açmadan önce ilgini çekenleri bir kenara ayırman için var.\n\nListenin üstündeki “Görünüm” seçiminden ya da Talepler menüsündeki “Favorilerim” başlığından yalnızca işaretlediklerini görebilirsin.\n\nYıldıza tekrar basarsan favorilerden çıkar.",
         ],
         [
             'key' => 'one-cik',
@@ -297,9 +315,9 @@ return [
             'audience' => 'user',
             'group' => 'hizmet-veren',
             'icon' => '✨',
-            'summary' => 'Kontörle ana sayfa vitrinine gir',
+            'summary' => 'Krediyle ana sayfa vitrinine gir',
             'keywords' => ['öne çık', 'öne çıkmak', 'öne çıkar', 'öne çıkan', 'vitrin paketi', 'görünürlük', 'tanıtım', 'reklam', 'paket', 'üst sıra'],
-            'answer' => "Satıcı panelinde Firma menüsündeki “Öne çık” bölümünde kontörle alınan vitrin paketleri var: 7, 14 ve 30 günlük. Her paketin kontör bedeli kendi kartında yazar.\n\nPaketi etkinleştirdiğinde bedel bakiyenden düşer ve profilin ana sayfadaki öne çıkan hizmet verenler bölümünde “★ ÖNE ÇIKAN” rozetiyle görünür; hizmet verenler listesinde de öne çıkanlar sıralamasında üst sıralara gelir.\n\nSüren dolmadan yeni paket alırsan gün sayısı mevcut sürenin üzerine eklenir; sayfanın üstündeki rozette vitrinde kalacağın son tarih yazar.\n\nBakiyen pakete yetmiyorsa düğme “Bakiye yetersiz” der; aynı sayfadaki bağlantıdan kontör yükleyebilirsin.",
+            'answer' => "Satıcı panelinde Firma menüsündeki “Öne çık” bölümünde krediyle alınan vitrin paketleri var: 7, 14 ve 30 günlük. Her paketin kredi bedeli kendi kartında yazar.\n\nPaketi etkinleştirdiğinde bedel bakiyenden düşer ve profilin ana sayfadaki öne çıkan hizmet verenler bölümünde “★ ÖNE ÇIKAN” rozetiyle görünür; hizmet verenler listesinde de öne çıkanlar sıralamasında üst sıralara gelir.\n\nSüren dolmadan yeni paket alırsan gün sayısı mevcut sürenin üzerine eklenir; sayfanın üstündeki rozette vitrinde kalacağın son tarih yazar.\n\nBakiyen pakete yetmiyorsa düğme “Bakiye yetersiz” der; aynı sayfadaki bağlantıdan kredi yükleyebilirsin.",
         ],
         [
             'key' => 'hizmet-veren-bul',
