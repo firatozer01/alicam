@@ -223,10 +223,18 @@
 /* ---------- 5) Alt cizgi ---------- */
 .bottom {
   position: relative; display: flex; justify-content: space-between; align-items: center;
-  flex-wrap: wrap; gap: 12px 24px; padding-top: 22px; padding-bottom: 26px;
+  flex-wrap: wrap; gap: 12px 18px; padding-top: 22px; padding-bottom: 26px;
   border-top: 1px solid rgb(255 255 255 / .1); font-size: 14px;
 }
-.bottom nav { display: flex; gap: 20px; flex-wrap: wrap; }
+/* Telif + rozetler + yasal baglantilar + yukari dugmesi masaustunde TEK
+   satir. Dort parca birlikte ~1200px istiyor; sigdigi genislikten itibaren
+   satir sarmasi kapatiliyor, altinda dogal olarak alt alta diziliyorlar. */
+@media (min-width: 1240px) {
+  .bottom { flex-wrap: nowrap; }
+  .bottom > span { flex: none; }
+  .bottom nav { flex: none; }
+}
+.bottom nav { display: flex; gap: 14px; flex-wrap: wrap; }
 .bottom a { color: inherit; text-decoration: none; }
 .bottom a:hover { color: #fff; }
 
@@ -235,18 +243,12 @@
    3D Secure ile dogrulaniyor. Serit alt cizginin USTUNDE, hem tam hem
    kisa alt bilgide duruyor: odeme guvenligi isareti pazarlama bolumu
    degil, her sayfada gorunmesi gereken bir bilgi. */
-.odeme {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px;
-  padding-top: 20px; padding-bottom: 2px;
-  border-top: 1px solid rgb(255 255 255 / .1);
-}
-.odeme > small {
-  margin-right: 4px; color: rgb(255 255 255 / .55);
-  font-size: 12.5px; letter-spacing: .04em;
-}
+/* Satirin sagina yaslanir: telif solda, yasal baglantilar ortada,
+   odeme rozetleri sagda. */
+.odeme { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
 .odemeRozet {
   display: inline-flex; align-items: center; justify-content: center;
-  height: 30px; min-width: 50px; padding: 0 10px;
+  height: 28px; min-width: 46px; padding: 0 9px;
   border: 1px solid rgb(255 255 255 / .16); border-radius: 7px;
   background: rgb(255 255 255 / .96);
 }

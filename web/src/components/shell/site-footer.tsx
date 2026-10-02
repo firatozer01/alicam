@@ -439,13 +439,9 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
       ><span>alıcam<em>.net</em></span></div>
     </>}
 
-    {/* 5) Odeme seridi — tam ve kisa alt bilgide ayni */}
-    <div className={`${styles.wrap} ${styles.odeme}`}>
-      <small>GÜVENLİ ÖDEME</small>
-      {ODEME_MARKALARI.map((marka) => <OdemeRozeti ad={marka.ad} dosya={marka.dosya} key={marka.ad} />)}
-    </div>
-
-    {/* 6) Alt cizgi */}
+    {/* 5) Alt cizgi: telif, odeme rozetleri ve yasal baglantilar TEK satirda.
+           Rozetler once ayri bir serit olarak duruyordu ve alt bilgi masaustunde
+           iki satira cikiyordu. */}
     <div className={`${styles.wrap} ${styles.bottom}`}>
       <span>© 2026 alıcam.net · SMN LIFE İnş. Tic. Ltd. Şti. Her hakkı saklıdır.</span>
       <nav>
@@ -453,6 +449,9 @@ export function SiteFooter({ compact = false }: { compact?: boolean } = {}) {
         <Link href="/gizlilik">Gizlilik politikası</Link>
         <a href="mailto:destek@alicam.net">destek@alicam.net</a>
       </nav>
+      <div className={styles.odeme}>
+        {ODEME_MARKALARI.map((marka) => <OdemeRozeti ad={marka.ad} dosya={marka.dosya} key={marka.ad} />)}
+      </div>
       <button
         aria-label="Sayfanın başına dön"
         className={styles.toTop}
