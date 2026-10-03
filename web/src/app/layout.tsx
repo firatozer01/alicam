@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Mono, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { MessagesDock } from "@/components/messages/messages-dock";
@@ -9,6 +10,13 @@ const fraunces = Fraunces({ subsets: ["latin", "latin-ext"], variable: "--font-f
 const plexMono = IBM_Plex_Mono({ weight: ["500", "600"], subsets: ["latin", "latin-ext"], variable: "--font-plex" });
 // Yeni tasarimin baslik yazi tipi; govde Inter olarak kaliyor.
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin", "latin-ext"], variable: "--font-jakarta" });
+
+/**
+ * Google Analytics 4 olcum kimligi. Gizli bir deger DEGIL: sayfa
+ * kaynaginda zaten herkese gorunur, bu yuzden ortam degiskenine
+ * tasinmadi -- sunucuda ayrica bir adim gerektirmesin.
+ */
+const GA_KIMLIK = "G-RNYFZVXJT7";
 
 export const metadata: Metadata = {
   title: "alıcam.net — Talebini yaz, teklifler sana gelsin",
@@ -59,7 +67,30 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           admin-standard.css de buradan kalkti: admin renk kurallari her
           genel sayfaya yukleniyordu, artik yalnizca admin sayfalari
           kendileri iceri aliyor. */}
-      <body>{children}<MessagesDock /><AssistantWidget /></body>
+      <body>
+        {children}
+        <MessagesDock />
+        <AssistantWidget />
+
+        {/* Google Analytics.
+            next/script ile veriliyor: Next'in kendi belgesi analitigi
+            "afterInteractive" icin ornek gosteriyor (02-components/script.md).
+            Duz <script> olarak <head>'e yazilsaydi ilk boyamayi bekletirdi;
+            bu haliyle sayfa cizildikten sonra yukleniyor ve olcum ayni
+            sekilde calisiyor.
+
+            YALNIZCA uretimde: yoksa her yerel gelistirme sayfasi gercek
+            raporlara dusup sayilari kirletir. */}
+        {process.env.NODE_ENV === "production" && <>
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_KIMLIK}`} strategy="afterInteractive" />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_KIMLIK}');`}
+          </Script>
+        </>}
+      </body>
     </html>
   );
 }
